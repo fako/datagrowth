@@ -1,2 +1,0 @@
-__NOTOC__
-Last updated: {% now "H:i j M Y" %} ([{{ absolute_uri | safe }} force refresh])
