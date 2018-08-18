@@ -1,3 +1,0 @@
-from .category_similarity import WikipediaCategorySimularityCommunity
-from .multi_term import CrossCombineTermSearchCommunity
-from .sources import WebTextResource
