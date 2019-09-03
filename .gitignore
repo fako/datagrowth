@@ -8,5 +8,6 @@ datagrowth.iml
 db-dump.*.json
 *.sql
 *.pkl
+datagrowth.egg-info
 
 venv/
