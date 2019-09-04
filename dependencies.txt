@@ -1,6 +1,7 @@
 # This file intends to pin down dependencies to their minimal version
 # Lower dependencies may work, but is not actively tested against
 Django==1.11.23
+djangorestframework==3.10.2
 jsonschema==2.6.0
 beautifulsoup4==4.4.0
 urlobject==2.4.3
