@@ -4,7 +4,7 @@ from collections import Iterator, Iterable
 from django.apps import apps
 from django.db import models
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.utils import ibatch, reach

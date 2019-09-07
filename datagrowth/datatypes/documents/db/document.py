@@ -6,7 +6,7 @@ from jsonschema.exceptions import ValidationError as SchemaValidationError
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.postgres import fields as postgres_fields
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import json_field
 
 from datagrowth.utils import reach
