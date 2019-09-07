@@ -1,4 +1,5 @@
 # First the dependencies
+Django==1.11.23
 -r dependencies.txt
 
 # Development packages

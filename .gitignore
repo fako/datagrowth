@@ -11,3 +11,4 @@ db-dump.*.json
 datagrowth.egg-info
 
 venv/
+.tox

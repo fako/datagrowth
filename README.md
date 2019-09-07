@@ -25,3 +25,8 @@ You can run these tests by running this inside that directory:
 python manage.py test
 ```  
 
+Alternatively you can execute the tests against multiple Django versions by running:
+
+```bash
+tox
+```
