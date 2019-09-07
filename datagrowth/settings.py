@@ -2,13 +2,15 @@ import os
 
 from django.conf import settings
 
+from datagrowth.version import VERSION
+
 
 ######################################
 # PLAIN SETTINGS
 ######################################
 
 
-DATAGROWTH_VERSION = "0.0.1"
+DATAGROWTH_VERSION = VERSION
 
 DATAGROWTH_DATETIME_FORMAT = getattr(settings, "DATAGROWTH_DATETIME_FORMAT", "%Y%m%d%H%M%S%f")
 

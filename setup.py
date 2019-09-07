@@ -1,9 +1,11 @@
 import setuptools
 
-VERSION = "0.15.0"
+from datagrowth.version import VERSION
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
 
 setuptools.setup(
     name="datagrowth",

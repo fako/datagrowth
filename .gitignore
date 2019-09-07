@@ -12,3 +12,5 @@ datagrowth.egg-info
 
 venv/
 .tox
+
+docs/_build

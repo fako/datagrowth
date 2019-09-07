@@ -14,19 +14,22 @@
 
 import sys
 import os
-import json
 
 import sphinx_rtd_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join('..', 'datagrowth')))
+sys.path.insert(0, os.path.abspath(os.path.join('..')))
 
 # setup django settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'datascope.settings'
-with open('../../package.json') as json_file:
-    package_info = json.load(json_file)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.project.settings'
+
+from datagrowth.version import VERSION
+package_info = {
+    "version": VERSION
+}
 import django
 django.setup()
 
