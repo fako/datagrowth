@@ -25,6 +25,7 @@ Contents
 
    resources/index
    configuration/index
+   utils/index
    reference
 
 
