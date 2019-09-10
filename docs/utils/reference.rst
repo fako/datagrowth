@@ -19,7 +19,7 @@ Input/Output
 ************
 
 .. automodule:: datagrowth.utils.io
-    :members: get_model_path, get_media_path, get_dumps_path, object_to_disk, queryset_to_disk, objects_from_disk
+    :members: get_model_path, get_media_path
 
 
 Data

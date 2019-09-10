@@ -8,10 +8,31 @@ from datagrowth.utils.iterators import ibatch
 
 
 def get_model_path(app_label, model_type=""):
+    """
+    Returns a path to a directory inside the global data directory specified by ``DATAGROWTH_DATA_DIR``.
+    The idea is to store computer models inside this directory.
+    The path will contain the app_label to make sure that related models are stored together.
+    It optionally also includes a subdirectory for the model type in order to separate different computer models.
+
+    :param app_label: (str) the app label that is related to the computer model you're getting a path for
+    :param model_type: (str) an optional model type that can further group models within apps
+    :return: path to models directory without a trailing slash
+    """
     return os.path.join(datagrowth_settings.DATAGROWTH_DATA_DIR, app_label, model_type).rstrip(os.sep)
 
 
 def get_media_path(app_label, media_type="", absolute=True):
+    """
+    Returns a directory path for a particular app to store media in.
+    Optionally this path can include a media type to further separate media files in subdirectories.
+    By default the path is absolute and inside the ``DATAGROWTH_MEDIA_ROOT``,
+    but you can also return a path relative to the media root directory.
+
+    :param app_label: (str) the app label that you're getting a media path for
+    :param media_type: (str) an optional media type that can further group media within apps
+    :param absolute: (bool) whether to return an absolute or relative path
+    :return: path to media directory without a trailing slash
+    """
     if absolute:
         return os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, app_label, media_type).rstrip(os.sep)
     else:

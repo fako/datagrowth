@@ -6,7 +6,7 @@ from tqdm import tqdm
 from datagrowth.utils import ibatch
 
 
-class TestIbatch(TestCase):
+class TestIBatch(TestCase):
 
     def test_ibatch_with_list_no_progress(self):
         input = list(range(0, 100))
