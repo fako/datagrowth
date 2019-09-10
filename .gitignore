@@ -5,7 +5,6 @@ datagrowth.iml
 *.pyc
 *.db
 *.csv
-db-dump.*.json
 *.sql
 *.pkl
 datagrowth.egg-info
