@@ -1,4 +1,8 @@
-from datagrowth.exceptions import DGResourceException as DSResourceException
+from datagrowth.exceptions import (
+    DGResourceException as DSResourceException,
+    DGNoContent as DSNoContent,
+    DGInvalidResource as DSInvalidResource
+)
 
 
 class DSHttpError400NoToken(DSResourceException):
@@ -6,14 +10,6 @@ class DSHttpError400NoToken(DSResourceException):
 
 
 class DSHttpWarning300(DSResourceException):
-    pass
-
-
-class DSInvalidResource(DSResourceException):
-    pass
-
-
-class DSNoContent(Exception):
     pass
 
 

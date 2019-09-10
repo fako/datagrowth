@@ -17,9 +17,17 @@ class DGHttpError40X(DGResourceException):
     pass
 
 
-class DSHttpError403LimitExceeded(DGResourceException):
+class DGNoContent(Exception):
+    pass
+
+
+class DGHttpError403LimitExceeded(DGResourceException):
     pass
 
 
 class DGHttpWarning204(DGResourceException):
+    pass
+
+
+class DGInvalidResource(DGResourceException):
     pass
