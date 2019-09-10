@@ -79,11 +79,26 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    'postgres': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'datagrowth',
+        'USER': 'django',
+        'PASSWORD': 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK',
+        'HOST': '127.0.0.1',
+        'PORT': os.environ.get('PGPORT', '5432')
+    },
+    'mysql': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'datagrowth',
+        'USER': 'django',
+        'PASSWORD': 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK',
+        'HOST': '127.0.0.1',
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        }
     }
 }
+DATABASES['default'] = DATABASES[os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')]
 
 
 # Password validation

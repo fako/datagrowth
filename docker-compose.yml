@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:10.10
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+    environment:
+      POSTGRES_PASSWORD: czykMn28LiNaKox6U3RDRw23MEZbSxWk
+      POSTGRES_USER: postgres
+      POSTGRES_DB: datagrowth
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./tests/project/databases/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./tests/project/databases/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - postgres-datagrowth:/var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: czykMn28LiNaKox6U3RDRw23MEZbSxWk
+      MYSQL_USER: django
+      MYSQL_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
+      MYSQL_DATABASE: datagrowth
+    volumes:
+      - ./tests/project/databases/mysql/conf.d:/etc/mysql/conf.d
+      - ./tests/project/databases/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - mysql-datagrowth:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+volumes:
+  postgres-datagrowth:
+    driver: local
+  mysql-datagrowth:
+    driver: local
