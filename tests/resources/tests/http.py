@@ -1,7 +1,4 @@
-import six
-# noinspection PyUnresolvedReferences
-from six.moves.urllib.parse import urlencode
-
+from urllib.parse import urlencode
 import json
 from copy import deepcopy
 
@@ -9,9 +6,10 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
-from core.models.resources.http import HttpResource
-from core.tests.mocks.data import MOCK_DATA
-from core.tests.mocks.http import HttpResourceMock
+from datagrowth.resources import HttpResource
+
+from resources.models import HttpResourceMock
+from resources.mocks.data import MOCK_DATA
 
 
 class HttpResourceTestMixin(TestCase):
@@ -218,7 +216,7 @@ class HttpResourceTestMixin(TestCase):
         self.assertEqual(data_hash, "")
         # Give data
         data_hash = HttpResource.hash_from_data(self.test_data)
-        self.assertIsInstance(data_hash, six.string_types)
+        self.assertIsInstance(data_hash, str)
         # Compare with slightly altered data
         self.test_data["data"] = "tezt"
         data_hash2 = HttpResource.hash_from_data(self.test_data)

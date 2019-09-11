@@ -396,11 +396,14 @@ class TestCreateConfig(TestCase):
 class TestRegisterConfigDefaults(TestCase):
 
     def test_register_defaults(self):
+        # Overriding existing defaults
         self.assertFalse(DEFAULT_CONFIGURATION["global_purge_immediately"])
         register_defaults("global", {
             "purge_immediately": True
         })
         self.assertTrue(DEFAULT_CONFIGURATION["global_purge_immediately"])
+        DEFAULT_CONFIGURATION["global_purge_immediately"] = False
+        # Creating new defaults
         self.assertNotIn("mock_test", DEFAULT_CONFIGURATION)
         register_defaults("mock", {
             "test": "create"

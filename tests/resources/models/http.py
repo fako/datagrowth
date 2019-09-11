@@ -1,10 +1,10 @@
-from mock import Mock
+from unittest.mock import Mock
 
-from datascope.configuration import MOCK_CONFIGURATION
 from django.db.models import QuerySet
 
-from core.models.resources.http import HttpResource
-from core.tests.mocks.requests import MockRequests
+from datagrowth.resources.http import HttpResource
+
+from resources.mocks.requests import MockRequests
 
 
 MockErrorQuerySet = Mock(QuerySet)
@@ -67,7 +67,6 @@ class HttpResourceMock(HttpResource):
     }
 
     CONFIG_NAMESPACE = "mock"
-    CONFIG_DEFAULTS = MOCK_CONFIGURATION
 
     def __init__(self, *args, **kwargs):
         super(HttpResourceMock, self).__init__(*args, **kwargs)
