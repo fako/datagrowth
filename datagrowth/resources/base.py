@@ -16,9 +16,7 @@ class Resource(models.Model):
     status = models.PositiveIntegerField(default=0)
 
     # Configuration
-    config = configuration.ConfigurationField(
-        config_defaults=configuration.DEFAULT_CONFIGURATION,
-    )
+    config = configuration.ConfigurationField()
 
     # Archiving fields
     created_at = models.DateTimeField(auto_now_add=True)

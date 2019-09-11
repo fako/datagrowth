@@ -1,11 +1,19 @@
 from unittest.mock import patch
 from collections import Iterator
+from copy import deepcopy
 
 from django.test import TestCase
 
 from datagrowth.configuration import (ConfigurationType, ConfigurationNotFoundError, ConfigurationProperty, load_config,
-                                      get_standardized_configuration, MOCK_CONFIGURATION, DEFAULT_CONFIGURATION,
+                                      get_standardized_configuration, DATAGROWTH_DEFAULT_CONFIGURATION,
                                       create_config, register_defaults)
+
+
+MOCK_CONFIGURATION = deepcopy(DATAGROWTH_DEFAULT_CONFIGURATION)
+MOCK_CONFIGURATION.update({
+    "name_namespace_configuration": "namespace configuration",
+    "global_global_configuration": "global configuration",
+})
 
 
 class TestConfigurationType(TestCase):
@@ -22,7 +30,7 @@ class TestConfigurationType(TestCase):
 
     def test_init(self):
         # Implicit init without defaults
-        # Notice that apps can manipulate the DEFAULT_CONFIGURATION upon app.ready
+        # Notice that apps can manipulate the DATAGROWTH_DEFAULT_CONFIGURATION upon app.ready
         # Therefor defaults are not loaded until first access
         instance = ConfigurationType()
         self.assertEqual(instance._defaults, None)
@@ -30,7 +38,7 @@ class TestConfigurationType(TestCase):
         self.assertEqual(instance._private, ConfigurationType._private_defaults)
         purge_immediately = instance.purge_immediately  # this loads the defaults
         self.assertFalse(purge_immediately)
-        self.assertEqual(instance._defaults, DEFAULT_CONFIGURATION)
+        self.assertEqual(instance._defaults, DATAGROWTH_DEFAULT_CONFIGURATION)
         # Implicit init with defaults
         instance = ConfigurationType(defaults=MOCK_CONFIGURATION)
         self.assertEqual(instance._defaults, MOCK_CONFIGURATION)
@@ -390,22 +398,22 @@ class TestCreateConfig(TestCase):
         self.assertIsInstance(test_config, ConfigurationType)
         self.assertEqual(test_config._namespace, "name")
         self.assertEqual(test_config.test4, "namespaced default")
-        self.assertEqual(test_config._defaults, DEFAULT_CONFIGURATION)
+        self.assertEqual(test_config._defaults, DATAGROWTH_DEFAULT_CONFIGURATION)
 
 
 class TestRegisterConfigDefaults(TestCase):
 
     def test_register_defaults(self):
         # Overriding existing defaults
-        self.assertFalse(DEFAULT_CONFIGURATION["global_purge_immediately"])
+        self.assertFalse(DATAGROWTH_DEFAULT_CONFIGURATION["global_purge_immediately"])
         register_defaults("global", {
             "purge_immediately": True
         })
-        self.assertTrue(DEFAULT_CONFIGURATION["global_purge_immediately"])
-        DEFAULT_CONFIGURATION["global_purge_immediately"] = False
+        self.assertTrue(DATAGROWTH_DEFAULT_CONFIGURATION["global_purge_immediately"])
+        DATAGROWTH_DEFAULT_CONFIGURATION["global_purge_immediately"] = False
         # Creating new defaults
-        self.assertNotIn("mock_test", DEFAULT_CONFIGURATION)
+        self.assertNotIn("mock_test", DATAGROWTH_DEFAULT_CONFIGURATION)
         register_defaults("mock", {
             "test": "create"
         })
-        self.assertEqual(DEFAULT_CONFIGURATION["mock_test"], "create")
+        self.assertEqual(DATAGROWTH_DEFAULT_CONFIGURATION["mock_test"], "create")
