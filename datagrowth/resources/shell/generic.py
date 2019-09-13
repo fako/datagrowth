@@ -91,7 +91,7 @@ class ShellResource(Resource):
         """
         Returns True if exit code is within success range
         """
-        return self.status == 0 and self.stdout
+        return self.status == 0 and bool(self.stdout)
 
     @property
     def content(self):
