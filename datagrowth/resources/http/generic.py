@@ -24,14 +24,18 @@ from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 
 
 class HttpResource(Resource):
-    # TODO: make sphinx friendly and doc all methods
     """
-    A representation of how to fetch/submit data from/to a HTTP resource.
+    You can extend from this base class to declare a ``Resource`` that gathers data from a HTTP(S) source.
+    For instance websites and (REST)API's
 
-    Stores the headers, body and status of responses. It acts as a wrapper around requests library and provides:
-    - responses from database when retrieved before
-    - hooks to work with continuation URL's in responses
-    - hooks to work with authentication
+    The HttpResource is a wrapper around the requests library and provides:
+
+    * easy follow up of continuation URL's in responses
+    * handle authentication through Datagrowth configs
+    * cached responses when retrieving data a second time
+
+    Response headers, body and status get stored in the database as well as an abstraction of the request.
+    Any authentication data gets stripped before storage in the database.
     """
 
     # Identification
