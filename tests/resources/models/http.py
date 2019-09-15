@@ -97,10 +97,6 @@ class HttpResourceMock(HttpResource):
             return {}
         return {"next": nxt}
 
-    @property
-    def meta(self):
-        return self.variables()["meta"]
-
     def data(self, **kwargs):
         return {
             "test": kwargs.get("query")

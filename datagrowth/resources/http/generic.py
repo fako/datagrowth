@@ -150,14 +150,6 @@ class HttpResource(Resource):
                 return content_type, None
         return None, None
 
-    @property
-    def meta(self):
-        """
-
-        :return: None
-        """
-        return None
-
     def close(self):
         self.clean()
         self.save()

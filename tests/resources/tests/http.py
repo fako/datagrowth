@@ -638,12 +638,6 @@ class TestHttpResourceMock(HttpResourceTestMixin, ConfigurationFieldTestMixin):
         self.instance.clean()
         self.assertIsNotNone(self.instance.purge_at)
 
-    def test_meta(self):
-        instance = self.model()
-        self.assertIsNone(instance.meta)
-        instance.get("new")
-        self.assertEqual(instance.meta, "new")
-
     def test_user_agent(self):
         instance = self.model(config={"user_agent": "DataScope (custom)"}).get("agent")
         self.assertTrue(instance.session.send.called)
