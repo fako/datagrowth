@@ -20,3 +20,4 @@ Affected exceptions: ``DSNoContent``, ``DSHttpError403LimitExceeded`` and ``DSIn
 Add it yourself by appending to default_fields or use the collection-content endpoint.
 * A google_cx config value is no longer provided by default.
 It should come from the GOOGLE_CX setting in your settings file.
+* The register_config_defaults alias is no longer available. Use register_defaults directly.
