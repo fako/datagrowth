@@ -56,7 +56,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "wikipedia_wiki_show_categories": "!hidden",
 
     "google_api_key": getattr(settings, 'GOOGLE_API_KEY', ''),
-    "google_cx": "004613812033868156538:5pcwbuudj1m",
+    "google_cx": getattr(settings, 'GOOGLE_CX', ''),
 
     "indico_api_key": getattr(settings, 'INDICO_API_KEY', ''),
     "wizenoze_api_key": getattr(settings, 'WIZENOZE_API_KEY', ''),

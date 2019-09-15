@@ -18,3 +18,5 @@ Affected exceptions: ``DSNoContent``, ``DSHttpError403LimitExceeded`` and ``DSIn
 * Reach no longer excepts paths not starting with ``$``
 * Collection serializers do not include their content by default any more. 
 Add it yourself by appending to default_fields or use the collection-content endpoint.
+* A google_cx config value is no longer provided by default.
+It should come from the GOOGLE_CX setting in your settings file.
