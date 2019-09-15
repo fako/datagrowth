@@ -4,16 +4,16 @@ import inspect
 from django.apps import AppConfig, apps
 
 
-class CoreConfig(AppConfig):
+class DatagrowthConfig(AppConfig):
 
-    name = "core"
+    name = "datagrowth"
     processors = {}
 
     def ready(self):
         self.load_processors()
 
     def load_processors(self):
-        from core.processors.base import Processor
+        from datagrowth.processors.base import Processor
         self.processors = {}
         for app_config in apps.get_app_configs():
             try:

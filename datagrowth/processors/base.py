@@ -56,8 +56,8 @@ class Processor(object):
 
     @staticmethod
     def get_processor_class(processor_name):
-        core_config = apps.get_app_config("core")
-        return core_config.get_processor_class(processor_name)
+        datagrowth_config = apps.get_app_config("datagrowth")
+        return datagrowth_config.get_processor_class(processor_name)
 
 
 class QuerySetProcessor(Processor):
