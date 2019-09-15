@@ -8,8 +8,8 @@ from django.core.exceptions import ValidationError
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.resources import HttpResource
 
+from project.mocks.data import MOCK_DATA
 from resources.models import HttpResourceMock
-from resources.mocks.data import MOCK_DATA
 
 
 class HttpResourceTestMixin(TestCase):

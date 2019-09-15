@@ -6,7 +6,7 @@ from requests.structures import CaseInsensitiveDict
 
 from unittest.mock import Mock, NonCallableMock
 
-from resources.mocks.data import MOCK_DATA
+from project.mocks.data import MOCK_DATA
 
 
 ok_response = NonCallableMock(spec=Response)

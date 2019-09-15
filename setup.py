@@ -20,6 +20,7 @@ setuptools.setup(
     install_requires=[
         "Django>=1.11",
         "jsonschema",
+        "html5lib",
         "beautifulsoup4",
         "urlobject",
         "requests",

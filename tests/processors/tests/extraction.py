@@ -1,14 +1,12 @@
-from __future__ import unicode_literals, absolute_import, print_function, division
-
 from bs4 import BeautifulSoup
-from mock import Mock
+from unittest.mock import Mock
 from types import GeneratorType
 
 from django.test import TestCase
 
-from core.processors.extraction import ExtractProcessor
-from core.tests.mocks.data import (MOCK_HTML, MOCK_SCRAPE_DATA, MOCK_DATA_WITH_RECORDS, MOCK_JSON_DATA,
-                                   MOCK_DATA_WITH_KEYS)
+from datagrowth.processors import ExtractProcessor
+from project.mocks.data import (MOCK_HTML, MOCK_SCRAPE_DATA, MOCK_DATA_WITH_RECORDS, MOCK_JSON_DATA,
+                                MOCK_DATA_WITH_KEYS)
 
 
 class TestExtractProcessor(TestCase):
@@ -89,6 +87,9 @@ class TestExtractProcessor(TestCase):
         rsl = self.html_prc.text_html(self.soup)
         self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+
+    def test_xml_text(self):
+        self.skipTest("not tested")
 
     def test_application_json_records(self):
         rsl = self.json_prc.application_json(self.json_records)

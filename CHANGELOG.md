@@ -23,3 +23,4 @@ It should come from the ``GOOGLE_CX`` setting in your settings file.
 * The ``register_config_defaults`` alias is no longer available. Use ``register_defaults`` directly.
 * The ``MOCK_CONFIGURATION`` alias is no longer available.
 Omit the configuration altogether and use ``register_defaults``.
+* ``ExtractProcessor`` now raises ``DGNoContent``.

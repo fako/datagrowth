@@ -2,7 +2,7 @@ from copy import copy
 
 from datagrowth.configuration import ConfigurationProperty
 from datagrowth.utils import reach
-from core.processors.base import Processor
+from datagrowth.processors.base import Processor
 from datagrowth.exceptions import DGNoContent
 
 
