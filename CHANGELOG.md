@@ -16,3 +16,5 @@ Affected exceptions: ``DSNoContent``, ``DSHttpError403LimitExceeded`` and ``DSIn
 * Batchize used to be a function that returned batches and possibly a leftover batch.
  Now ibatch creates batches internally.
 * Reach no longer excepts paths not starting with ``$``
+* Collection serializers do not include their content by default any more. 
+Add it yourself by appending to default_fields or use the collection-content endpoint.

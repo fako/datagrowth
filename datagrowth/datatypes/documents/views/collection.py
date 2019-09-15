@@ -10,7 +10,7 @@ from .content import ContentView, ContentPagination
 class CollectionBaseSerializer(serializers.ModelSerializer):
 
     schema = serializers.SerializerMethodField()
-    default_fields = ("id", "name", "created_at", "modified_at", "schema", "referee", "identifier", "content",)
+    default_fields = ("id", "name", "created_at", "modified_at", "schema", "referee", "identifier",)
 
     def get_schema(self, collective):
         return collective.schema
