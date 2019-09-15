@@ -1,21 +1,16 @@
-import logging
 from copy import copy
 
-from datascope.configuration import DEFAULT_CONFIGURATION
+from datagrowth.configuration import ConfigurationProperty
+from datagrowth.utils import reach
 from core.processors.base import Processor
-from core.exceptions import DSNoContent
-from core.utils.configuration import ConfigurationProperty
-from core.utils.data import reach
-
-
-log = logging.getLogger("datascope")
+from datagrowth.exceptions import DGNoContent
 
 
 class ExtractProcessor(Processor):
 
     config = ConfigurationProperty(
         storage_attribute="_config",
-        defaults=DEFAULT_CONFIGURATION,
+        defaults=None,  # This will now lookup defaults at package level. Use register_defaults to set defaults.
         private=["_objective"],
         namespace="extract_processor"
     )
@@ -72,7 +67,7 @@ class ExtractProcessor(Processor):
             nodes = nodes.values()
 
         if nodes is None:
-            raise DSNoContent("Found no nodes at {}".format(self._at))
+            raise DGNoContent("Found no nodes at {}".format(self._at))
 
         for node in nodes:
             result = copy(context)

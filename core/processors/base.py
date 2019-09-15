@@ -1,7 +1,6 @@
 from django.apps import apps
 
-from core.utils.configuration import ConfigurationProperty
-from datascope.configuration import DEFAULT_CONFIGURATION
+from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 
 
 class ArgumentsTypes:
@@ -16,14 +15,14 @@ class Processor(object):
     ARGS_BATCH_METHODS = []
 
     config = ConfigurationProperty(
-            storage_attribute="_config",
-            defaults=DEFAULT_CONFIGURATION,
-            private=[],
-            namespace='global'
+        storage_attribute="_config",
+        defaults=None,  # This will now lookup defaults at package level. Use register_defaults to set defaults.
+        private=[],
+        namespace='global'
     )
 
     def __init__(self, config):
-        assert isinstance(config, dict), "Processor expects to always get a configuration."
+        assert isinstance(config, (dict, ConfigurationType)), "Processor expects to get a configuration."
         self.config = config
 
     @staticmethod
