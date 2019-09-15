@@ -99,7 +99,7 @@ class HttpResource(Resource):
                 resource.delete()
             resource = self
 
-        if resource.success:
+        if resource.success or self.config.cache_only:
             return resource
 
         resource.request = resource.request_with_auth()

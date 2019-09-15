@@ -417,6 +417,9 @@ class TestHttpResourceMock(HttpResourceTestMixin, ConfigurationFieldTestMixin):
         except ValidationError:
             pass
 
+    def test_get_cache_only(self):
+        self.skipTest("not tested")
+
     def test_post_new(self):
         # Make a new request and store it.
         instance = self.model().post(query="new")
@@ -490,6 +493,9 @@ class TestHttpResourceMock(HttpResourceTestMixin, ConfigurationFieldTestMixin):
             self.fail("Post did not raise a validation exception when confronted with an invalid preset request.")
         except ValidationError:
             pass
+
+    def test_post_cache_only(self):
+        self.skipTest("not tested")
 
     def test_request_with_auth(self):
         self.instance.request = self.test_post_request

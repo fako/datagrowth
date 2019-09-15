@@ -41,7 +41,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "global_token": "",
     "global_purge_immediately": False,  # by default keep resources around
     "global_sample_size": 0,
-    "global_fetch_only": False,  # TODO: implement for Resource, cache_only is a better name, pol-harvester dependency
+    "global_cache_only": False,
 
     "http_resource_batch_size": 0,
     "http_resource_continuation_limit": 1,

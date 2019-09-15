@@ -79,7 +79,7 @@ class ShellResource(Resource):
                 resource.delete()
             resource = self
 
-        if resource.success:
+        if resource.success or self.config.cache_only:
             return resource
 
         resource._run()

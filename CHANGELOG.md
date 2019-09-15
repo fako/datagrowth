@@ -24,3 +24,4 @@ It should come from the ``GOOGLE_CX`` setting in your settings file.
 * The ``MOCK_CONFIGURATION`` alias is no longer available.
 Omit the configuration altogether and use ``register_defaults``.
 * ``ExtractProcessor`` now raises ``DGNoContent``.
+* ``fetch_only`` renamed to ``cache_only``
