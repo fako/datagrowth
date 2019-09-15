@@ -1,3 +1,4 @@
+import warnings
 import argparse
 import hashlib
 from urllib.parse import parse_qsl
@@ -13,6 +14,12 @@ def load_config(defaults):
     :param defaults: (dict) which should be used as default for inserted configuration.
     :return: ConfigurationType
     """
+    if defaults is not None:
+        warnings.warn(
+            "Specifying defaults for load_config has been deprecated. "
+            "Use register_defaults to set configuration defaults at runtime",
+            DeprecationWarning
+        )
 
     def wrap(func):
         def config_func(*args, **kwargs):

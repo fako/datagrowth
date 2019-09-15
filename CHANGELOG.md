@@ -7,8 +7,8 @@ but this file keeps track of breaking changes in the Datagrowth package.
 Under each version number you'll find a section, 
 which indicates breakages that you may expect when upgrading from lower versions.
 
-v0.15.0
--------
+v0.15
+-----
 
 * Renamed exceptions that are prefixed with DS to names prefixed with DG.
 This migrates Datascope exceptions to Datagrowth exceptions.
@@ -23,5 +23,6 @@ It should come from the ``GOOGLE_CX`` setting in your settings file.
 * The ``register_config_defaults`` alias is no longer available. Use ``register_defaults`` directly.
 * The ``MOCK_CONFIGURATION`` alias is no longer available.
 Omit the configuration altogether and use ``register_defaults``.
+* Passing a default configuration to load_config is deprecated. Use ``register_defaults`` instead.
 * ``ExtractProcessor`` now raises ``DGNoContent``.
 * ``fetch_only`` renamed to ``cache_only``
