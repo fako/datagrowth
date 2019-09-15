@@ -1,30 +1,25 @@
 language: python
 install:
   - pip install tox
-matrix:
-  include:
-    - name: "Django 1.11 (Python 3.5)"
-      python: 3.5
-      env:
-       - TOX_ENV=django111
-    - name: "Django 2.2 (Python 3.5)"
-      python: 3.5
-      env:
-       - TOX_ENV=django22
-    - name: "Django 1.11 (Python 3.6)"
-      python: 3.6
-      env:
-       - TOX_ENV=django111
-    - name: "Django 2.2 (Python 3.6)"
-      python: 3.6
-      env:
-       - TOX_ENV=django22
-    - name: "Django 1.11 (Python 3.7)"
-      python: 3.7
-      env:
-       - TOX_ENV=django111
-    - name: "Django 2.2 (Python 3.7)"
-      python: 3.7
-      env:
-       - TOX_ENV=django22
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
 script: tox -e $TOX_ENV
+services:
+  - mysql
+addons:
+  postgresql: "10"
+  apt:
+    packages:
+    - postgresql-10
+    - postgresql-client-10
+env:
+  global:
+  - DJANGO_POSTGRES_USER=postgres
+  - DJANGO_MYSQL_USER=root
+  matrix:
+  - TOX_ENV=django111 DJANGO_DEFAULT_DATABASE=postgres
+  - TOX_ENV=django111 DJANGO_DEFAULT_DATABASE=mysql
+  - TOX_ENV=django22 DJANGO_DEFAULT_DATABASE=postgres
+  - TOX_ENV=django22 DJANGO_DEFAULT_DATABASE=mysql

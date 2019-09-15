@@ -79,27 +79,34 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
+POSTGRES_USER = os.environ.get('DJANGO_POSTGRES_USER', 'django')
+POSTGRES_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK' if POSTGRES_USER != "postgres" else None
+MYSQL_USER = os.environ.get('DJANGO_MYSQL_USER', 'django')
+MYSQL_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK' if MYSQL_USER != "root" else None
+
+DATABASES_MATRIX = {
     'postgres': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'datagrowth',
-        'USER': 'django',
-        'PASSWORD': 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK',
+        'USER': POSTGRES_USER,
+        'PASSWORD': POSTGRES_PASSWORD,
         'HOST': '127.0.0.1',
         'PORT': os.environ.get('PGPORT', '5432')
     },
     'mysql': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'datagrowth',
-        'USER': 'django',
-        'PASSWORD': 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK',
-        'HOST': '127.0.0.1',
+        'USER': MYSQL_USER,
+        'PASSWORD': MYSQL_PASSWORD,
+        'HOST': 'localhost',
         'OPTIONS': {
             'charset': 'utf8mb4'
         }
     }
 }
-DATABASES['default'] = DATABASES[os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')]
+DATABASES = {
+    'default': DATABASES_MATRIX[os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')]
+}
 
 
 # Password validation
