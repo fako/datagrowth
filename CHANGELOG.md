@@ -12,10 +12,11 @@ v0.15
 
 * Renamed exceptions that are prefixed with DS to names prefixed with DG.
 This migrates Datascope exceptions to Datagrowth exceptions.
-Affected exceptions: ``DSNoContent``, ``DSHttpError403LimitExceeded`` and ``DSInvalidResource``
-* Batchize used to be a function that returned batches and possibly a leftover batch.
- Now ibatch creates batches internally.
-* Reach no longer excepts paths not starting with ``$``
+Affected exceptions: ``DSNoContent``, ``DSHttpError403LimitExceeded``, ``DSHttpError400NoToken``, ``DSHttpWarning300``
+and ``DSInvalidResource``.
+* ``batchize`` used to be a function that returned batches and possibly a leftover batch.
+ Now ``ibatch`` creates batches internally.
+* ``reach`` no longer excepts paths not starting with ``$``
 * Collection serializers do not include their content by default any more. 
 Add it yourself by appending to default_fields or use the collection-content endpoint.
 * A ``google_cx`` config value is no longer provided by default.
@@ -26,4 +27,4 @@ Omit the configuration altogether and use ``register_defaults``.
 * Passing a default configuration to load_config is deprecated. Use ``register_defaults`` instead.
 * ``ExtractProcessor`` now raises ``DGNoContent``.
 * ``fetch_only`` renamed to ``cache_only``.
-* ``meta`` property is removed from ``Resource`` use variables method instead.
+* ``meta`` property is removed from ``Resource`` use ``variables`` method instead.

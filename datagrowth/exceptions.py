@@ -31,3 +31,11 @@ class DGHttpWarning204(DGResourceException):
 
 class DGInvalidResource(DGResourceException):
     pass
+
+
+class DGHttpError400NoToken(DGResourceException):
+    pass
+
+
+class DGHttpWarning300(DGResourceException):
+    pass

@@ -6,7 +6,7 @@ from urllib.parse import parse_qsl
 from .types import ConfigurationType
 
 
-def load_config(defaults):
+def load_config(defaults=None):
     """
     This decorator will turn the value of any keyword arguments named "config" into a ConfigurationType.
     The decorated function will get the configuration as its first argument.
