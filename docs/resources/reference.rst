@@ -1,6 +1,14 @@
 Resources
 ---------
 
+
+Resource (base class)
+*********************
+
+.. automodule:: datagrowth.resources.base
+    :members: Resource
+
+
 Http
 ****
 

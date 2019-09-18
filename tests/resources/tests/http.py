@@ -10,6 +10,7 @@ from datagrowth.resources import HttpResource
 
 from project.mocks.data import MOCK_DATA
 from resources.models import HttpResourceMock
+from resources.tests.base import ResourceTestMixin
 
 
 class HttpResourceTestMixin(TestCase):
@@ -259,7 +260,7 @@ class ConfigurationFieldTestMixin(TestCase):
         self.assertEqual(new.config.test, "loaded")
 
 
-class TestHttpResourceMock(HttpResourceTestMixin, ConfigurationFieldTestMixin):
+class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, ConfigurationFieldTestMixin):
 
     fixtures = ["test-http-resource-mock"]
 
@@ -620,23 +621,6 @@ class TestHttpResourceMock(HttpResourceTestMixin, ConfigurationFieldTestMixin):
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
         self.assertEqual(self.instance.data_hash, "31ead60c9066eefb8011f3f68aed25d004d60957")
         self.assertIsNone(self.instance.purge_at)
-
-    def test_clean_long_uri(self):
-        self.instance.request = self.test_get_request
-        self.instance.clean()
-        self.instance.uri += "*" * 255
-        self.instance.clean()
-        self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test" + "*" * 230)
-
-    def test_clean_immediate_purge(self):
-        self.instance.request = self.test_get_request
-        self.instance.config = {"purge_immediately": True}
-        self.instance.id = 1
-        self.instance.clean()
-        self.assertIsNone(self.instance.purge_at)
-        self.instance.id = None
-        self.instance.clean()
-        self.assertIsNotNone(self.instance.purge_at)
 
     def test_user_agent(self):
         instance = self.model(config={"user_agent": "DataScope (custom)"}).get("agent")

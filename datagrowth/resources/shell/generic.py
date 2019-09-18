@@ -197,7 +197,6 @@ class ShellResource(Resource):
             "Cmd should be a list that can be passed on to subprocess.run"
         if validate_input:
             self._validate_input(
-
                 *command.get("args", tuple()),
                 **command.get("kwargs", {})
             )
@@ -242,17 +241,6 @@ class ShellResource(Resource):
             class_name = self.__class__.__name__
             message = "{} > {} \n\n {}".format(class_name, self.status, self.stderr)
             raise DGShellError(message, resource=self)
-
-    #######################################################
-    # DJANGO MODEL
-    #######################################################
-    # Methods and properties to tweak Django
-
-    def clean(self):
-        if len(self.uri):
-            self.uri = self.uri[:255]
-        if not self.id and self.config.purge_immediately:
-            self.purge_at = datetime.now()
 
     #######################################################
     # CONVENIENCE

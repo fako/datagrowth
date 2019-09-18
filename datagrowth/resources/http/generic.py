@@ -150,10 +150,6 @@ class HttpResource(Resource):
                 return content_type, None
         return None, None
 
-    def close(self):
-        self.clean()
-        self.save()
-
     #######################################################
     # CREATE REQUEST
     #######################################################
@@ -379,8 +375,6 @@ class HttpResource(Resource):
     def _update_from_response(self, response):
         self.head = dict(response.headers.lower_items())
         self.status = response.status_code
-        # TODO: check what to do with responses that contain invalid character bytes
-        # TODO: check why sometimes we get strings and sometimes bytes in response.body
         self.body = response.content if isinstance(response.content, str) else \
             response.content.decode("utf-8", "replace")
 
@@ -415,10 +409,7 @@ class HttpResource(Resource):
         if self.request and not self.data_hash:
             uri_request = self.request_without_auth()
             self.data_hash = HttpResource.hash_from_data(uri_request.get("data"))
-        if len(self.uri):
-            self.uri = self.uri[:255]
-        if not self.id and self.config.purge_immediately:
-            self.purge_at = datetime.now()
+        super().clean()
 
     #######################################################
     # CONVENIENCE
