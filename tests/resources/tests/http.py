@@ -634,7 +634,35 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assert_agent_header(preq, "DataScope (custom)")
 
     def test_get_data_key(self):
-        self.skipTest("not tested")
+        # Post request
+        post_request = self.test_post_request
+        data_key = self.instance._get_data_key(post_request)
+        self.assertEqual(data_key, "data")
+        data = post_request.pop("data")
+        post_request["json"] = data
+        data_key = self.instance._get_data_key(post_request)
+        self.assertEqual(data_key, "json")
+        # Get request
+        get_request = self.test_get_request
+        data_key = self.instance._get_data_key(get_request)
+        self.assertEqual(data_key, "data")
+        data = get_request.pop("data")
+        get_request["json"] = data
+        data_key = self.instance._get_data_key(get_request)
+        self.assertEqual(data_key, "json")
+        # Through headers
+        content_header = {
+            "Accept": "application/json",
+            "Content-Length": "9",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Connection": "keep-alive",
+            "Accept-Encoding": "gzip, deflate"
+        }
+        data_key = self.instance._get_data_key({}, content_header)
+        self.assertEqual(data_key, "data")
+        content_header["Content-Type"] = "application/json"
+        data_key = self.instance._get_data_key({}, content_header)
+        self.assertEqual(data_key, "json")
 
     def test_parse_content_type(self):
         self.skipTest("not tested")
