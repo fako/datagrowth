@@ -28,7 +28,7 @@ class HttpResource(Resource):
     You can extend from this base class to declare a ``Resource`` that gathers data from a HTTP(S) source.
     For instance websites and (REST)API's
 
-    The HttpResource is a wrapper around the requests library and provides:
+    This class is a wrapper around the requests library and provides:
 
     * easy follow up of continuation URL's in responses
     * handle authentication through Datagrowth configs
@@ -68,13 +68,27 @@ class HttpResource(Resource):
     #######################################################
     # The get and post methods are the ways to interact
     # with the external resource.
-    # Success and data are convenient to handle the results
+    # Success and content are convenient to handle the results
 
     def send(self, method, *args, **kwargs):
         """
+        This method handles the gathering of data and updating the model based on the resource configuration.
+        If the data has been retrieved before it will load the data from cache instead.
+        Specify ``cache_only`` in your config if you want to prevent any HTTP requests.
+        The data might be missing in that case.
 
-        :param args:
-        :param kwargs:
+        You must specify the method that the resource will be using to get the data.
+        Currently this can be the "get" and "post" HTTP verbs.
+
+        Any arguments will be passed to ``URI_TEMPLATE`` to format it.
+        Any keyword arguments will be passed as a data dict to the request.
+        If a keyword is listed in the ``FILE_DATA_KEYS`` attribute on a HttpResource,
+        then the value of that argument is expected to be a file path relative to the ``DATAGROWTH_MEDIA_ROOT``.
+        The value of that keyword will be replaced with the file before making the request.
+
+        :param method: "get" or "post" depending on which request you want your resource to execute
+        :param args: arguments that will get merged into the ``URI_TEMPLATE``
+        :param kwargs: keywords arguments that will get send as data
         :return: HttpResource
         """
         if not self.request:
@@ -109,18 +123,20 @@ class HttpResource(Resource):
 
     def get(self, *args, **kwargs):
         """
+        This method calls ``send`` with "get" as a method. See the ``send`` method for more information.
 
-        :param args:
-        :param kwargs:
-        :return:
+        :param args: arguments that will get merged into the URI_TEMPLATE
+        :param kwargs: keywords arguments that will get send as data
+        :return: HttpResource
         """
         return self.send("get", *args, **kwargs)
 
     def post(self, *args, **kwargs):
         """
+        This method calls ``send`` with "post" as a method. See the ``send`` method for more information.
 
-        :param args:
-        :param kwargs:
+        :param args: arguments that will get merged into the URI_TEMPLATE
+        :param kwargs: keywords arguments that will get send as data
         :return: HttpResource
         """
         return self.send("post", *args, **kwargs)
@@ -129,12 +145,22 @@ class HttpResource(Resource):
     def success(self):
         """
         Returns True if status is within HTTP success range
+
+        :return: Boolean
         """
         return self.status is not None and 200 <= self.status < 209
 
     @property
     def content(self):
         """
+        After a successful ``get`` or ``post`` call this method reads the ContentType header from the HTTP response.
+        Depending on the MIME type it will return the content type and the parsed data.
+
+        * For a ContentType of application/json data will be a python structure
+        * For a ContentType of text/html or text/xml data will be a BeautifulSoup instance
+
+        Any other ContentType will result in None.
+        You are encouraged to overextend ``HttpResource`` to handle your own data types.
 
         :return: content_type, data
         """
@@ -185,21 +211,32 @@ class HttpResource(Resource):
 
     def headers(self):
         """
+        Returns the dictionary that should be used as headers for the request the resource will make.
+        By default this is the dictionary from the ``HEADERS`` attribute.
 
-        :return:
+        :return: (dict) a dictionary representing HTTP headers
         """
         return self.HEADERS
 
     def parameters(self, **kwargs):
         """
+        Returns the dictionary that should be used as HTTP query parameters for the request the resource will make.
+        By default this is the dictionary from the ``PARAMETERS`` attribute.
 
-        :return: dict
+        You may need to override this method. It will receive the return value of the variables method as kwargs.
+
+        :param kwargs: variables returned by the variables method (ignored by default)
+        :return: (dict) a dictionary representing HTTP query parameters
         """
         return self.PARAMETERS
 
     def data(self, **kwargs):
         """
+        Returns the dictionary that will be used as HTTP body for the request the resource will make.
+        By default this is the dictionary from the ``DATA`` attribute
+        updated with the kwargs from the input from the ``send`` method.
 
+        :param kwargs: keyword arguments from the input
         :return:
         """
         data = dict(self.DATA)
@@ -208,25 +245,32 @@ class HttpResource(Resource):
 
     def variables(self, *args):
         """
+        Parsers the input variables and returns a dictionary with a "url" key.
+        This key contains a list of variables that will be used to format the ``URI_TEMPLATE``.
 
-        :return:
+        :return: (dict) a dictionary where the input variables are available under names
         """
         return {
             "url": args
         }
 
-    def create_request_from_url(self, url):
-        raise NotImplementedError()
-
     def validate_request(self, request, validate_input=True):
+        """
+        Validates a dictionary that represents a request that the resource will make.
+        Currently it mostly checks the method, which should be "get" or "post".
+        Apart from that it validates input which should adhere to
+        the JSON schema defined in the GET_SCHEMA or POST_SCHEMA attributes
+
+        :param request: (dict) the request dictionary
+        :param validate_input: (bool) whether to validate input
+        :return:
+        """
         if self.purge_at is not None and self.purge_at <= datetime.now():
             raise ValidationError("Resource is no longer valid and will get purged")
         # Internal asserts about the request
-        assert isinstance(request, dict), \
-            "Request should be a dictionary."
+        assert isinstance(request, dict), "Request should be a dictionary."
         method = request.get("method")
-        assert method, \
-            "Method should not be falsy."
+        assert method, "Method should not be falsy."
         assert method in ["get", "post"], \
             "{} is not a supported resource method.".format(request.get("method"))  # FEATURE: allow all methods
         if validate_input:
@@ -239,7 +283,15 @@ class HttpResource(Resource):
         return request
 
     def _validate_input(self, method, *args, **kwargs):
-        # Validations of external influence
+        """
+        Will validate the args and kwargs against the JSON schema set on ``GET_SCHEMA`` or ``POST_SCHEMA``,
+        depending on the HTTP method used.
+
+        :param method: the HTTP method to validate
+        :param args: arguments to validate
+        :param kwargs: keyword arguments to validate
+        :return:
+        """
         schemas = self.GET_SCHEMA if method == "get" else self.POST_SCHEMA  # FEATURE: allow all methods
         args_schema = schemas.get("args")
         kwargs_schema = schemas.get("kwargs")
@@ -263,6 +315,13 @@ class HttpResource(Resource):
                 )
 
     def _format_data(self, data):
+        """
+        Will replace any keys that are present in data and the ``FILE_DATA_KEYS`` class attribute with file descriptors.
+        The values of these keys is presumed to be a path to a file relative to the ``DATAGROWTH_MEDIA_ROOT``.
+
+        :param data: (dict) data where some file paths may need to be replaced with actual files
+        :return: (dict) the formatted data
+        """
         if data is None:
             return None, None
         files = {}
