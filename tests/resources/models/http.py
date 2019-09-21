@@ -102,6 +102,12 @@ class HttpResourceMock(HttpResource):
             "test": kwargs.get("query")
         }
 
+    def parameters(self, **kwargs):
+        params = super().parameters()
+        params.update(**kwargs)
+        params.pop("url", None)
+        return params
+
     def variables(self, *args):
         args = args or (self.request["args"] if self.request else tuple())
         return {

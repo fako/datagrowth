@@ -233,9 +233,6 @@ class HttpResourceTestMixin(TestCase):
         self.assertEqual(self.instance.body, "")
         self.assertEqual(self.instance.status, 0)
 
-    def test_close(self):
-        self.skipTest("not tested")
-
 
 class ConfigurationFieldTestMixin(TestCase):
 
@@ -304,7 +301,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertGreater(len(platform_agent), 0)
 
     def assert_call_args_get(self, call_args, term):
-        expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1".format(term)
+        expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1&meta={}".format(term, term)
         args, kwargs = call_args
         preq = args[0]
         self.assertTrue(preq.url.startswith("http://localhost:8000/en/?"))
@@ -312,6 +309,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertIn("key=oehhh", preq.url)
         self.assertIn("auth=1", preq.url)
         self.assertIn("param=1", preq.url)
+        self.assertIn("meta={}".format(term), preq.url)
         self.assertEqual(len(expected_url), len(preq.url))
         self.assert_agent_header(preq, "DataGrowth (test)")
         self.assertEqual(preq.headers, {
@@ -321,7 +319,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         })
 
     def assert_call_args_post(self, call_args, term):
-        expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1".format(term)
+        expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1&meta={}".format(term, term)
         expected_body = "test={}".format(term)
         expected_length = len(expected_body)
         args, kwargs = call_args
@@ -331,6 +329,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertIn("key=oehhh", preq.url)
         self.assertIn("auth=1", preq.url)
         self.assertIn("param=1", preq.url)
+        self.assertIn("meta={}".format(term), preq.url)
         self.assertEqual(len(expected_url), len(preq.url))
         self.assert_agent_header(preq, "DataGrowth (test)")
         self.assertEqual(preq.headers, {
