@@ -28,3 +28,4 @@ Omit the configuration altogether and use ``register_defaults``.
 * ``ExtractProcessor`` now raises ``DGNoContent``.
 * ``fetch_only`` renamed to ``cache_only``.
 * ``meta`` property is removed from ``Resource`` use ``variables`` method instead.
+* All data hashes will be invalidated, because hasher now sorts keys.

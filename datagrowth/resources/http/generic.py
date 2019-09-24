@@ -505,7 +505,8 @@ class HttpResource(Resource):
         if not data:
             return ""
         hsh = hashlib.sha1()
-        hash_data = json.dumps(data).encode("utf-8")
+        data_tuple = sorted(data.items(), key=lambda item: item[0])
+        hash_data = json.dumps(data_tuple).encode("utf-8")
         hsh.update(hash_data)
         return hsh.hexdigest()
 

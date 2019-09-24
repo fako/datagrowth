@@ -618,7 +618,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.instance.request = self.test_post_request
         self.instance.clean()
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
-        self.assertEqual(self.instance.data_hash, "31ead60c9066eefb8011f3f68aed25d004d60957")
+        self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")
         self.assertIsNone(self.instance.purge_at)
 
     def test_user_agent(self):
