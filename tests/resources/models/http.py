@@ -20,6 +20,7 @@ class HttpResourceMock(HttpResource):
     HEADERS = {
         "Accept": "application/json"
     }
+    FILE_DATA_KEYS = ["file"]
     GET_SCHEMA = {
         "args": {
             "title": "resource mock arguments",
@@ -60,7 +61,8 @@ class HttpResourceMock(HttpResource):
             "title": "resource mock keyword arguments",
             "type": "object",
             "properties": {
-                "query": {"type": "string"}
+                "query": {"type": "string"},
+                "file": {"type": "string"}
             },
             "required": ["query"]
         }
@@ -98,9 +100,8 @@ class HttpResourceMock(HttpResource):
         return {"next": nxt}
 
     def data(self, **kwargs):
-        return {
-            "test": kwargs.get("query")
-        }
+        kwargs["test"] = kwargs.pop("query", None)
+        return kwargs
 
     def parameters(self, **kwargs):
         params = super().parameters()

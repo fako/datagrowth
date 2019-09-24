@@ -300,6 +300,16 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertEqual(datascope_agent, expected_agent)
         self.assertGreater(len(platform_agent), 0)
 
+    def assert_form_content_type(self, prepared_request):
+        content_type = prepared_request.headers.pop("Content-Type")
+        content_type_partial, boundary = content_type.split("=")
+        self.assertEqual(content_type_partial, "multipart/form-data; boundary")
+        return boundary
+
+    def assert_content_type(self, prepared_request):
+        content_type = prepared_request.headers.pop("Content-Type")
+        self.assertEqual(content_type, "application/x-www-form-urlencoded")
+
     def assert_call_args_get(self, call_args, term):
         expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1&meta={}".format(term, term)
         args, kwargs = call_args
@@ -318,10 +328,8 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
             "Accept-Encoding": "gzip, deflate"
         })
 
-    def assert_call_args_post(self, call_args, term):
+    def assert_call_args_post(self, call_args, term, is_form=False):
         expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1&meta={}".format(term, term)
-        expected_body = "test={}".format(term)
-        expected_length = len(expected_body)
         args, kwargs = call_args
         preq = args[0]
         self.assertTrue(preq.url.startswith("http://localhost:8000/en/?"))
@@ -332,9 +340,22 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertIn("meta={}".format(term), preq.url)
         self.assertEqual(len(expected_url), len(preq.url))
         self.assert_agent_header(preq, "DataGrowth (test)")
+        if is_form:
+            boundary = self.assert_form_content_type(preq)
+            expected_body = bytes(
+                '--{boundary}\r\nContent-Disposition: form-data; name="test"\r\n\r\n{term}\r\n'
+                '--{boundary}\r\nContent-Disposition: form-data; name="file"; '
+                'filename="text-file.txt"\r\n\r\na test text file\n\r\n'
+                '--{boundary}--\r\n'.format(term=term, boundary=boundary),
+                encoding="utf-8"
+            )
+            expected_length = len(expected_body)
+        else:
+            self.assert_content_type(preq)
+            expected_body = "test={}".format(term)
+            expected_length = len(expected_body)
         self.assertEqual(preq.headers, {
             "Content-Length": str(expected_length),
-            "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "application/json",
             "Connection": "keep-alive",
             "Accept-Encoding": "gzip, deflate"
@@ -347,9 +368,10 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         mock = HttpResourceMock(timeout=20)
         self.assertEqual(mock.timeout, 20)
 
-    def test_get_new(self):
+    def test_send_get_request(self):
         # Make a new request and store it.
         instance = self.model().get("new")
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
         self.assert_call_args_get(instance.session.send.call_args, "new")
         self.assertEqual(instance.head, self.content_type_header)
@@ -360,6 +382,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         # Make a new request from an existing request dictionary
         request = self.model().get("new2").request
         instance = self.model(request=request).get()
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
         self.assert_call_args_get(instance.session.send.call_args, "new2")
         self.assertEqual(instance.head, self.content_type_header)
@@ -420,9 +443,10 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
     def test_get_cache_only(self):
         self.skipTest("not tested")
 
-    def test_post_new(self):
+    def test_send_post_request(self):
         # Make a new request and store it.
         instance = self.model().post(query="new")
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
         self.assert_call_args_post(instance.session.send.call_args, "new")
         self.assertEqual(instance.head, self.content_type_header)
@@ -432,9 +456,31 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertTrue(instance.data_hash)
         # Make a new request from an existing request dictionary
         request = self.model().post(query="new2").request
-        instance = self.model(request=request).get()
+        instance = self.model(request=request).post()
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
         self.assert_call_args_post(instance.session.send.call_args, "new2")
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        # Make a new request containing a file and store it.
+        instance = self.model().post(query="new3", file="text-file.txt")
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
+        instance.save()
+        self.assert_call_args_post(instance.session.send.call_args, "new3", is_form=True)
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        # Make a new request from an existing request dictionary and a file
+        request = self.model().post(query="new4", file="text-file.txt").request
+        instance = self.model(request=request).post()
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
+        instance.save()
+        self.assert_call_args_post(instance.session.send.call_args, "new4", is_form=True)
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
@@ -444,7 +490,8 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
     def test_post_success(self):
         # Load an existing request
         instance = self.model().post(query="success")
-        self.assertFalse(instance.session.send.called)
+        self.assertFalse(instance.session.send.called, "HttpResource called requests.send when expected to use cache")
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertJSONEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
@@ -453,7 +500,27 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         # Load an existing resource from its request
         request = instance.request
         instance = self.model(request=request).post()
-        self.assertFalse(instance.session.send.called)
+        self.assertFalse(instance.session.send.called, "HttpResource called requests.send when expected to use cache")
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertJSONEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        # Load an existing request with a file attachment
+        instance = self.model().post(query="success", file="text-file.txt")
+        self.assertFalse(instance.session.send.called, "HttpResource called requests.send when expected to use cache")
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertJSONEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        # Load an existing resource from its request with a file attachment
+        request = instance.request
+        instance = self.model(request=request).post()
+        self.assertFalse(instance.session.send.called, "HttpResource called requests.send when expected to use cache")
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertJSONEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
@@ -463,6 +530,7 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
     def test_post_retry(self):
         # Load and retry an existing request
         instance = self.model().post(query="fail")
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
         self.assert_call_args_post(instance.session.send.call_args, "fail")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -472,7 +540,27 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         # Load an existing resource from its request
         request = instance.request
         instance = self.model(request=request).post()
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
         self.assert_call_args_post(instance.session.send.call_args, "fail")
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        # Load and retry an existing request with a file
+        instance = self.model().post(query="fail", file="text-file.txt")
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assert_call_args_post(instance.session.send.call_args, "fail", is_form=True)
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        # Load an existing resource from its request with a file
+        request = instance.request
+        instance = self.model(request=request).post()
+        self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assert_call_args_post(instance.session.send.call_args, "fail", is_form=True)
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
@@ -531,11 +619,19 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertIsNotNone(request)
         self.assertIn("next=1", request["url"])
         self.assertNotIn("auth=1", instance.request["url"], "create_next_request should not alter existing request")
+        instance = self.model().post(query="next", file="text-file.txt")
+        request = instance.create_next_request()
+        self.assertIsNotNone(request)
+        self.assertIn("next=1", request["url"])
+        self.assertNotIn("auth=1", instance.request["url"], "create_next_request should not alter existing request")
         # Test that None is returned when there is no continuation
         instance = self.model().get("success")
         request = instance.create_next_request()
         self.assertIsNone(request)
         instance = self.model().post(query="success")
+        request = instance.create_next_request()
+        self.assertIsNone(request)
+        instance = self.model().post(query="success", file="text-file.txt")
         request = instance.create_next_request()
         self.assertIsNone(request)
 
