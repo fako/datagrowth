@@ -39,3 +39,7 @@ class DGHttpError400NoToken(DGResourceException):
 
 class DGHttpWarning300(DGResourceException):
     pass
+
+
+class DGResourceDoesNotExist(DGResourceException):
+    pass

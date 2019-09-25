@@ -26,6 +26,7 @@ It should come from the ``GOOGLE_CX`` setting in your settings file.
 Omit the configuration altogether and use ``register_defaults``.
 * Passing a default configuration to load_config is deprecated. Use ``register_defaults`` instead.
 * ``ExtractProcessor`` now raises ``DGNoContent``.
-* ``fetch_only`` renamed to ``cache_only``.
+* ``fetch_only`` renamed to ``cache_only``
+* Non-existing resources will now raise a ``DGResourceDoesNotExist`` if ``cache_only`` is True
 * ``meta`` property is removed from ``Resource`` use ``variables`` method instead.
 * All data hashes will be invalidated, because hasher now sorts keys.

@@ -20,7 +20,7 @@ import json_field
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
-from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
+from datagrowth.exceptions import DGHttpError50X, DGHttpError40X, DGResourceDoesNotExist
 
 
 class HttpResource(Resource):
@@ -101,19 +101,24 @@ class HttpResource(Resource):
             self.validate_request(self.request)
 
         self.clean()  # sets self.uri and self.data_hash based on request
-        resource = None
+
         try:
-            resource = self.__class__.objects.get(
-                uri=self.uri,
-                data_hash=self.data_hash
-            )
-            self.validate_request(resource.request)
-        except (self.DoesNotExist, ValidationError):
-            if resource is not None:
-                resource.delete()
+            resource = self.__class__.objects.get(uri=self.uri, data_hash=self.data_hash)
+        except self.DoesNotExist:
+            if self.config.cache_only:
+                raise DGResourceDoesNotExist("Could not retrieve resource from cache", resource=self)
             resource = self
 
-        if resource.success or self.config.cache_only:
+        if self.config.cache_only:
+            return resource
+
+        try:
+            self.validate_request(resource.request)
+        except ValidationError:
+            resource.delete()
+            resource = self
+
+        if resource.success:
             return resource
 
         resource.request = resource.request_with_auth()

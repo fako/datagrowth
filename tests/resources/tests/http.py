@@ -5,7 +5,7 @@ from copy import deepcopy
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
+from datagrowth.exceptions import DGHttpError50X, DGHttpError40X, DGResourceDoesNotExist
 from datagrowth.resources import HttpResource
 
 from project.mocks.data import MOCK_DATA
@@ -441,7 +441,28 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
             pass
 
     def test_get_cache_only(self):
-        self.skipTest("not tested")
+        # Load an existing resource from cache
+        instance = self.model(config={"cache_only": True}).get("success")
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        # Load an existing resource from cache by its request
+        request = instance.request
+        instance = self.model(request=request, config={"cache_only": True}).get()
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        # Load a failed resource from cache
+        instance = self.model(config={"cache_only": True}).get("fail")
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 502)
+        self.assertTrue(instance.id)
+        # Fail to load from cache
+        try:
+            self.model(config={"cache_only": True}).get("new")
+            self.fail("Missing resource in cache did not raise an exception")
+        except DGResourceDoesNotExist:
+            pass
 
     def test_send_post_request(self):
         # Make a new request and store it.
@@ -583,7 +604,46 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
             pass
 
     def test_post_cache_only(self):
-        self.skipTest("not tested")
+        # Load an existing resource from cache
+        instance = self.model(config={"cache_only": True}).post(query="success")
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        file_instance = self.model(config={"cache_only": True}).post(query="success", file="text-file.txt")
+        self.assertFalse(file_instance.session.send.called)
+        self.assertEqual(file_instance.status, 200)
+        self.assertTrue(file_instance.id)
+        # Load an existing resource from cache by its request
+        request = instance.request
+        instance = self.model(request=request, config={"cache_only": True}).post()
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        request = file_instance.request
+        instance = self.model(request=request, config={"cache_only": True}).post()
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        # Load a failed resource from cache
+        instance = self.model(config={"cache_only": True}).post(query="fail", file="text-file.txt")
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 502)
+        self.assertTrue(instance.id)
+        instance = self.model(config={"cache_only": True}).post(query="fail", file="text-file.txt")
+        self.assertFalse(instance.session.send.called)
+        self.assertEqual(instance.status, 502)
+        self.assertTrue(instance.id)
+        # Fail to load from cache
+        try:
+            self.model(config={"cache_only": True}).post(query="new")
+            self.fail("Missing resource in cache did not raise an exception")
+        except DGResourceDoesNotExist:
+            pass
+        try:
+            self.model(config={"cache_only": True}).post(query="new", file="text-file.txt")
+            self.fail("Missing resource (with file) in cache did not raise an exception")
+        except DGResourceDoesNotExist:
+            pass
 
     def test_request_with_auth(self):
         self.instance.request = self.test_post_request
