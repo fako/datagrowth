@@ -255,6 +255,7 @@ class HttpResource(Resource):
 
         :return: (dict) a dictionary where the input variables are available under names
         """
+        args = args or self.request.get("args")
         return {
             "url": args
         }
