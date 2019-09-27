@@ -61,3 +61,44 @@ If you need more control over parameters, headers or data,
 then you can override the ``parameters``, ``headers`` and ``data`` methods.
 These methods by default return the ``PARAMETERS``, ``HEADERS`` and ``DATA`` attributes.
 The ``data`` method will also merge in any keyword arguments coming from the call to ``post`` if applicable.
+
+
+Continuation requests
+*********************
+
+Usually a response also contains some information on how to get more data from the same source.
+The ``HttpResource`` provides a mechanism to easily follow up on requests made by the resource.
+You'll have to override the ``next_parameters`` method to indicate which data to use for continuation requests. ::
+
+    from datagrowth.resources import HttpResource
+
+
+    class MyHTTPDataSource(HttpResource):
+
+        URI_TEMPLATE = "https://example.com?query={}"
+
+        def next_parameters(self):
+            """
+            This method looks if there is a "next" key in the response data.
+            If there is none it simply returns an empty dict.
+            If there is one it returns the value under a "page" key.
+            """
+            params = super().next_parameters()
+            content_type, data = self.content
+            if data is None:
+                return params
+            page = data.get("next", None)
+            if page is None:
+                return params
+            params["page"] = page
+            return params
+
+
+    data_source = MyHTTPDataSource()
+    # The call below will make a request to https://example.com?query=my-query-terms
+    data_source.get("my-query-terms")
+    next_request = data_source.create_next_request()
+    follow_up = MyHTTPDataSource(request=next_request)
+    # The call below will make a request to https://example.com?query=my-query-terms&page=1
+    # Provided that the response data contains a "next" key with value 1
+    follow_up.get()

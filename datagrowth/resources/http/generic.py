@@ -379,9 +379,25 @@ class HttpResource(Resource):
     # Override next_parameters to provide auto continuation
 
     def next_parameters(self):
+        """
+        Returns the dictionary that should be used as HTTP query parameters
+        for the continuation request a resource can make.
+        By default this is an empty dictionary.
+        Override this method and return the correct parameters based on the ``content`` of the resource.
+
+        :return: (dict) a dictionary representing HTTP continuation query parameters
+        """
         return {}
 
     def create_next_request(self):
+        """
+        Creates and returns a dictionary that represents a continuation request.
+        Often a source will indicate how to continue gather more data.
+        By overriding the ``next_parameters`` developers can indicate how continuation requests can be made.
+        Calling this method will build a new request using these parameters.
+
+        :return: (dict) a dictionary representing a continuation request to be made
+        """
         if not self.success or not self.next_parameters():
             return None
         url = URLObject(self.request.get("url"))
