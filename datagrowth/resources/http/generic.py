@@ -347,12 +347,32 @@ class HttpResource(Resource):
     # Override auth_parameters to provide authentication.
 
     def auth_headers(self):
+        """
+        Returns the dictionary that should be used as authentication headers for the request the resource will make.
+        Override this method in your own class to add authentication.
+        By default this method returns an empty dictionary meaning there are no authentication headers.
+
+        :return: (dict) dictionary with headers to add to requests
+        """
         return {}
 
     def auth_parameters(self):
+        """
+        Returns the dictionary that should be used as authentication parameters for the request the resource will make.
+        Override this method in your own class to add authentication.
+        By default this method returns an empty dictionary meaning there are no authentication parameters.
+
+        :return: (dict) dictionary with parameters to add to requests
+        """
         return {}
 
     def request_with_auth(self):
+        """
+        Get the ``request`` that this resource will make with authentication headers and parameters added.
+        Override ``auth_headers`` and/or ``auth_parameters`` to provide the headers and/or parameters.
+
+        :return: (dict) a copy of the ``request`` dictionary with authentication added
+        """
         url = URLObject(self.request.get("url"))
         params = url.query.dict
         params.update(self.auth_parameters())
@@ -363,6 +383,12 @@ class HttpResource(Resource):
         return request
 
     def request_without_auth(self):
+        """
+        Get the ``request`` that this resource will make with authentication headers and parameters from
+        ``auth_headers`` and ``auth_parameters`` removed.
+
+        :return: (dict) a copy of the ``request`` dictionary with authentication removed
+        """
         url = URLObject(self.request.get("url"))
         url = url.del_query_params(self.auth_parameters())
         request = deepcopy(self.request)
