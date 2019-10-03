@@ -580,3 +580,12 @@ class HttpResource(Resource):
 
     class Meta:
         abstract = True
+
+
+class URLResource(HttpResource):  # TODO: document and test
+
+    def _create_url(self, *args):
+        return args[0]
+
+    class Meta:
+        abstract = True
