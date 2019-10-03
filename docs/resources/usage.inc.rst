@@ -36,3 +36,14 @@ These methods kick-off the data collection for their derived classes. ::
     content_type, data = resource.content
     if data is not None:
         # handle the data ...
+
+    # When making the exact same "grow" call again.
+    # This time the data will come from the database as it has been stored before.
+    resource.grow(
+        "some", "input",
+        session=session
+    )
+
+Retrieving the data from the database instead of the actual source is very convenient
+when dealing with large data sources.
+It allows for retries without starting over, it keeps resource use low and makes consequent runs much faster.

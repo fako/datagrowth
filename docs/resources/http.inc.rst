@@ -8,8 +8,73 @@ The ``HttpResource`` retrieves data from any HTTP source. Typically these source
 Basic usage
 ***********
 
-In most cases it is sufficient to declare how you want a ``HttpResource`` to fetch data.
-There are a few class attributes that you need to specify to make that work::
+The most basic usage for fetching data from a HTTP source is inheriting from ``URLResource``,
+which in turn inherits from ``HttpResource``. ::
+
+    from collections import Count
+
+    from datagrowth.resources import URLResource
+
+
+    class MyHTTPDataSource(URLResource):
+        pass
+
+
+    data_source = MyHTTPDataSource()
+    data_source.get("https://example.com")
+    # data_source now contains the response from example.com
+
+    # The URLResource is nothing but a thin Django wrapper around the requests library
+    # You can check if the request succeeded and get the data.
+    # It will return Python objects for JSON responses or BeautifulSoup instances for HTML and XML
+    if data_source.success:
+        content_type, data = data_source.content
+
+    # Resource objects are actually Django models which can be closed to save them to the database
+    data_source.close()
+    # Using the Django ORM it is easy to query how requests did
+    statuses = Counter(
+        MyHTTPDataSource.objects.exclude(status=200).values_list("status", flat=True)
+    )
+    # And as explained above the database has other advantages like storing data already retrieved.
+    # The below does not make a request, but fetches results from the database.
+    # It does this because above we saved a resource to the exact same request
+    data_source_cache = MyHTTPDataSource().get("https://example.com")
+
+    # Apart from GET you can also do POST.
+    # Any keyword arguments will be send as the body of the POST request.
+    data_source_post = MyHTTPDataSource().post("https://example.com", example=True)
+
+
+Downloading files
+*****************
+
+Usually data is available under the ``content`` property.
+It is also possible to save responses to disk in files. This can be convenient to save images.
+To do this you use the ``HttpImageResource``::
+
+    from datagrowth.resources import HttpImageResource
+
+
+    class MyHTTPImageSource(URLResource):
+        pass
+
+    image_source = MyHTTPImageSource()
+    image_source.get("https://example.com/image.jpg")
+
+    # The content property will now return the image file instead of data
+    if image_source.success:
+        content_type, image_file = image_source.content
+
+It's also possible to save other types of files.
+This can be done by using ``HttpFileResource`` instead of ``HttpImageResource``.
+
+
+Customize requests
+******************
+
+In most cases it isn't sufficient to simply pass URL's to ``URLResource`` or ``HttpImageResource``.
+By setting some attributes you can customize how any ``HttpResource`` fetches data::
 
     from datagrowth.resources import HttpResource
 
@@ -25,8 +90,7 @@ There are a few class attributes that you need to specify to make that work::
     print(data_source.request)  # outputs the request being made
 
 The ``URI_TEMPLATE`` is the most basic way to declare how resources should be fetched.
-However most resources need more configuration.
-This is an example using ``post``, but most attributes work for ``get`` and ``post``::
+A more complete example is below. The example is using ``post``, but most attributes also work for ``get``::
 
     from datagrowth.resources import HttpResource
 
@@ -102,3 +166,30 @@ You'll have to override the ``next_parameters`` method to indicate which data to
     # The call below will make a request to https://example.com?query=my-query-terms&page=1
     # Provided that the response data contains a "next" key with value 1
     follow_up.get()
+
+
+Authenticating requests
+***********************
+
+Authenticating requests is very similar to other customization of a ``HttpResource``.
+You need to override the ``auth_headers`` or ``auth_parameters`` methods.
+The headers and/or parameters returned by these methods in a dictionary get added to the request,
+but only when a request is made. This sensitive information is not getting stored in the database.
+Inside the methods it's possible to use for instance the ``config`` to provide credentials.
+
+.. warning::
+    Beware that non-default values for ``config`` get stored in plain text in the database.
+    So credentials shouldn't get passed to a config directly use ``register_defaults`` instead
+    (see: `register defaults example </configuration/index.html#getting-started>`_)
+
+::
+
+    from datagrowth.resources import HttpResource
+
+
+    class MyHTTPDataSource(HttpResource):
+
+        def auth_headers(self):
+            return {
+                "Authorization": "Bearer {}".format(self.config.api_token)
+            }
