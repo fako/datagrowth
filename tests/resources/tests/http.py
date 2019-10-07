@@ -376,7 +376,8 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertEqual(preq.headers, {
             "Connection": "keep-alive",
             "Accept": "application/json",
-            "Accept-Encoding": "gzip, deflate"
+            "Accept-Encoding": "gzip, deflate",
+            "Authorization": "Bearer oehhh"
         })
 
     def assert_call_args_post(self, call_args, term, is_form=False):
@@ -409,7 +410,8 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
             "Content-Length": str(expected_length),
             "Accept": "application/json",
             "Connection": "keep-alive",
-            "Accept-Encoding": "gzip, deflate"
+            "Accept-Encoding": "gzip, deflate",
+            "Authorization": "Bearer oehhh"
         })
         self.assertEqual(preq.body, expected_body)
 
@@ -703,19 +705,30 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
         self.assertNotIn("auth=1", self.instance.request["url"], "request_with_auth should not alter existing request")
         self.assertIn("key=oehhh", request["url"])
         self.assertNotIn("key=oehhh", self.instance.request["url"], "request_with_auth should not alter existing request")
+        self.assertEqual({"Accept": "application/json", "Authorization": "Bearer oehhh"}, request["headers"])
+        self.assertNotIn("Authorization", self.instance.request["headers"],
+                         "request_without_auth should not alter existing request")
         self.assertEqual(request["data"], self.test_post_request["data"])
-        self.skipTest("test the auth with headers")
 
     def test_request_without_auth(self):
         self.instance.request = deepcopy(self.test_post_request)
         self.instance.request["url"] = self.test_post_request["url"] + "&auth=1&key=ahhh"
+        self.instance.request["headers"].update({"Authorization": "Token ahhh"})
         request = self.instance.request_without_auth()
         self.assertNotIn("auth=1", request["url"])
         self.assertIn("auth=1", self.instance.request["url"], "request_without_auth should not alter existing request")
         self.assertNotIn("key=oehhh", request["url"])
-        self.assertIn("key=ahhh", self.instance.request["url"], "request_without_auth should not alter existing request")
+        self.assertIn("key=ahhh", self.instance.request["url"],
+                      "request_without_auth should not alter existing request")
+        self.assertIn("key=ahhh", self.instance.request["url"],
+                      "request_without_auth should not alter existing request")
+        self.assertEqual({"Accept": "application/json"}, request["headers"])
+        self.assertEqual(
+            {"Accept": "application/json", "Authorization": "Token ahhh"},
+            self.instance.request["headers"],
+            "request_without_auth should not alter existing request"
+        )
         self.assertEqual(request["data"], self.test_post_request["data"])
-        self.skipTest("test the auth with headers")
 
     def test_create_next_request(self):
         # Test with get

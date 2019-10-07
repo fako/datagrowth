@@ -93,6 +93,11 @@ class HttpResourceMock(HttpResource):
             "key": self.config.secret
         }
 
+    def auth_headers(self):
+        return {
+            "Authorization": "Bearer " + self.config.secret
+        }
+
     def next_parameters(self):
         content_type, data = self.content
         try:
