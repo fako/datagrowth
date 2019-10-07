@@ -62,6 +62,29 @@ MOCK_HTML = """
 
 </html>
 """
+MOCK_XML = """
+<xml>
+    <meta>
+        <title>Test</title>
+    </meta>
+
+    <results>
+        <result>
+            <label>test</label>
+            <url>/test</url>
+        </result>
+        <result>
+            <label>test 2</label>
+            <url>/test2</url>
+        </result>
+        <result>
+            <label>test 3</label>
+            <url>/test3</url>
+        </result>
+    </results>
+
+</xml>
+"""
 MOCK_SCRAPE_DATA = [
     {'text': 'test', 'link': '/test', 'page': 'Test'},
     {'text': u'test 2', 'link': '/test2', 'page': 'Test'},

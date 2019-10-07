@@ -5,7 +5,7 @@ from types import GeneratorType
 from django.test import TestCase
 
 from datagrowth.processors import ExtractProcessor
-from project.mocks.data import (MOCK_HTML, MOCK_SCRAPE_DATA, MOCK_DATA_WITH_RECORDS, MOCK_JSON_DATA,
+from project.mocks.data import (MOCK_HTML, MOCK_XML, MOCK_SCRAPE_DATA, MOCK_DATA_WITH_RECORDS, MOCK_JSON_DATA,
                                 MOCK_DATA_WITH_KEYS)
 
 
@@ -13,7 +13,9 @@ class TestExtractProcessor(TestCase):
 
     def setUp(self):
         super(TestCase, self).setUp()
-        self.content_types = ["text/html", "application/json", "nothing/quantum"]
+
+        self.content_types = ["text/html", "text/xml", "application/json", "nothing/quantum"]
+
         self.html_obj = {
             "@": "soup.find_all('a')",
             "text": "el.text",
@@ -22,6 +24,16 @@ class TestExtractProcessor(TestCase):
         }
         self.html_prc = ExtractProcessor(config={"objective": self.html_obj})
         self.soup = BeautifulSoup(MOCK_HTML, "html5lib")
+
+        self.xml_obj = {
+            "@": "soup.find_all('result')",
+            "text": "el.find('label').text",
+            "link": "el.find('url').text",
+            "#page": "soup.find('title').text",
+        }
+        self.xml_prc = ExtractProcessor(config={"objective": self.xml_obj})
+        self.xml = BeautifulSoup(MOCK_XML, "lxml")
+
         self.json_obj = {
             "@": "$.records",
             "#unicode": "$.unicode.0",
@@ -33,14 +45,14 @@ class TestExtractProcessor(TestCase):
         self.json_records = MOCK_DATA_WITH_RECORDS
         self.json_dict = MOCK_DATA_WITH_KEYS
 
-        self.test_resources_data = [self.soup, self.json_records, None]
-        self.test_resources_extractions = [MOCK_SCRAPE_DATA, MOCK_JSON_DATA, None]
+        self.test_resources_data = [self.soup, self.xml, self.json_records, None]
+        self.test_resources_extractions = [MOCK_SCRAPE_DATA, MOCK_SCRAPE_DATA, MOCK_JSON_DATA, None]
         self.test_resources = [
             (Mock(content=(content_type, data)), processor,)
             for content_type, data, processor in zip(
                 self.content_types,
                 self.test_resources_data,
-                [self.html_prc, self.json_prc, self.html_prc]
+                [self.html_prc, self.xml_prc, self.json_prc, self.html_prc]
             )
         ]
 
@@ -51,6 +63,7 @@ class TestExtractProcessor(TestCase):
 
     def test_extract(self):
         self.html_prc.text_html = Mock()
+        self.html_prc.text_xml = Mock()
         self.html_prc.application_json = Mock()
         for content_type in self.content_types:
             try:
@@ -61,7 +74,9 @@ class TestExtractProcessor(TestCase):
                     "nothing/quantum", "{} does not exist as a method on ExtractProcessor.".format(content_type)
                 )
         self.assertTrue(self.html_prc.text_html.called)
+        self.assertTrue(self.html_prc.text_xml.called)
         self.assertTrue(self.html_prc.application_json.called)
+        self.assertEquals(self.html_prc.extract(None, None), [])
 
     def test_extract_from_resource(self):
         data = []
@@ -89,7 +104,9 @@ class TestExtractProcessor(TestCase):
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
 
     def test_xml_text(self):
-        self.skipTest("not tested")
+        rsl = self.xml_prc.text_xml(self.xml)
+        self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
 
     def test_application_json_records(self):
         rsl = self.json_prc.application_json(self.json_records)
@@ -102,6 +119,3 @@ class TestExtractProcessor(TestCase):
         rsl = keys_processor.application_json(self.json_dict)
         self.assertEqual(list(rsl), MOCK_JSON_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
-
-    def test_content_type_none(self):
-        self.skipTest("not tested")

@@ -21,6 +21,7 @@ setuptools.setup(
         "Django>=1.11",
         "jsonschema",
         "html5lib",
+        "lxml",
         "beautifulsoup4",
         "urlobject",
         "requests",
