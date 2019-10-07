@@ -571,7 +571,7 @@ class HttpResource(Resource):
         """
         if not data:
             return ""
-        hsh = hashlib.sha1()
+
         payload = []
         for key, value in data.items():
             if not isinstance(value, dict):
@@ -581,11 +581,21 @@ class HttpResource(Resource):
 
         payload.sort(key=lambda item: item[0])
         hash_payload = json.dumps(payload).encode("utf-8")
+
+        hsh = hashlib.sha1()
         hsh.update(hash_payload)
         return hsh.hexdigest()
 
     @staticmethod
     def parse_content_type(content_type, default_encoding="utf-8"):
+        """
+        Given a HTTP ContentType header will return the mime type and the encoding.
+        If no encoding is found the default encoding gets returned.
+
+        :param content_type: (str) the HTTP ContentType header
+        :param default_encoding: (str) the default encoding when
+        :return: mime_type, encoding
+        """
         match = re.match(
             "(?P<mime_type>[A-Za-z]+/[A-Za-z]+);? ?(charset=(?P<encoding>[A-Za-z0-9\-]+))?",
             content_type
