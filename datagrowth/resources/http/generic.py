@@ -472,11 +472,11 @@ class HttpResource(Resource):
         except requests.exceptions.SSLError:
             self.set_error(496, connection_error=True)
             return
-        except (requests.ConnectionError, IOError):
-            self.set_error(502, connection_error=True)
-            return
         except requests.Timeout:
             self.set_error(504, connection_error=True)
+            return
+        except (requests.ConnectionError, IOError):
+            self.set_error(502, connection_error=True)
             return
         except UnicodeDecodeError:
             self.set_error(600, connection_error=True)

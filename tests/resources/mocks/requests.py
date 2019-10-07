@@ -55,3 +55,11 @@ MockRequestsWithAgent = NonCallableMock(spec=requests)
 MockRequestsSendWithAgent = Mock(return_value=agent_response)
 MockRequestsWithAgent.send = MockRequestsSendWithAgent
 MockRequestsWithAgent.prepare_request = Mock(side_effect=prepare_request)
+
+
+def get_erroneous_requests_mock(prepared_exception):
+    MockRequests = NonCallableMock(spec=requests)
+    MockRequestsSend = Mock(side_effect=prepared_exception)
+    MockRequests.send = MockRequestsSend
+    MockRequests.prepare_request = Mock(side_effect=prepare_request)
+    return MockRequests

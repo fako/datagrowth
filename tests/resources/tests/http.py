@@ -1,6 +1,8 @@
 from urllib.parse import urlencode
 import json
 from copy import deepcopy
+from requests.exceptions import SSLError, ConnectionError, Timeout
+from unittest.mock import Mock
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -11,6 +13,7 @@ from datagrowth.resources import HttpResource
 from project.mocks.data import MOCK_DATA
 from resources.models import HttpResourceMock
 from resources.tests.base import ResourceTestMixin
+from resources.mocks.requests import get_erroneous_requests_mock
 
 
 class HttpResourceTestMixin(TestCase):
@@ -25,7 +28,7 @@ class HttpResourceTestMixin(TestCase):
             del self.instance.HEADERS["Content-Type"]
 
     @staticmethod
-    def get_test_instance():
+    def get_test_instance(session=None):
         raise NotImplementedError()
 
     def test_content(self):
@@ -170,8 +173,45 @@ class HttpResourceTestMixin(TestCase):
         except AssertionError:
             pass
 
-    def test_send_request_connection_error(self):
-        self.skipTest("not tested")
+    def test_get_request_connection_error(self):
+        exceptions_with_status = {
+            SSLError: 496,
+            ConnectionError: 502,
+            IOError: 502,
+            Timeout: 504,
+            UnicodeDecodeError("utf-8", b"abc", 0, 1, "message"): 600
+        }
+        for exception, exception_status in exceptions_with_status.items():
+            error_session = get_erroneous_requests_mock(exception)
+            instance = self.get_test_instance(session=error_session)
+            try:
+                instance.get("error-get")
+                self.fail("Connection error did not raise for GET exception: {}".format(exception))
+            except (DGHttpError40X, DGHttpError50X):
+                pass
+            self.assertEquals(instance.status, exception_status)
+            self.assertEqual(instance.head, {})
+            self.assertEqual(instance.body, "")
+
+    def test_post_request_connection_error(self):
+        exceptions_with_status = {
+            SSLError: 496,
+            ConnectionError: 502,
+            IOError: 502,
+            Timeout: 504,
+            UnicodeDecodeError("utf-8", b"abc", 0, 1, "message"): 600
+        }
+        for exception, exception_status in exceptions_with_status.items():
+            error_session = get_erroneous_requests_mock(exception)
+            instance = self.get_test_instance(session=error_session)
+            try:
+                instance.post(query="error-get")
+                self.fail("Connection error did not raise for POST exception: {}".format(exception))
+            except (DGHttpError40X, DGHttpError50X):
+                pass
+            self.assertEquals(instance.status, exception_status)
+            self.assertEqual(instance.head, {})
+            self.assertEqual(instance.body, "")
 
     def test_create_request_post(self):
         request = self.instance._create_request("post", "en", "test", query="test")
@@ -270,8 +310,8 @@ class TestHttpResourceMock(ResourceTestMixin, HttpResourceTestMixin, Configurati
     fixtures = ["test-http-resource-mock"]
 
     @staticmethod
-    def get_test_instance():
-        return HttpResourceMock()
+    def get_test_instance(session=None):
+        return HttpResourceMock(session=session)
 
     def fill_test_instance(self):
         self.instance.uri = "uri"

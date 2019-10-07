@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, NonCallableMock
 
 from django.db.models import QuerySet
 
@@ -72,8 +72,10 @@ class HttpResourceMock(HttpResource):
 
     def __init__(self, *args, **kwargs):
         super(HttpResourceMock, self).__init__(*args, **kwargs)
-        self.session = MockRequests
-        self.session.send.reset_mock()
+        if not isinstance(self.session, NonCallableMock):
+            self.session = MockRequests
+        if isinstance(self.session.send, Mock):
+            self.session.send.reset_mock()
 
     def send(self, method, *args, **kwargs):
         if method == "post":
