@@ -21,7 +21,7 @@ class HttpResourceTestMixin(TestCase):
     def setUp(self):
         super(HttpResourceTestMixin, self).setUp()
         self.instance = self.get_test_instance()
-        self.test_data = {"data": "test"}
+        self.test_data = {"data": "test", "atad": {"test": "test", "tset": "test"}}
 
     def tearDown(self):
         if "Content-Type" in self.instance.HEADERS:
@@ -256,8 +256,8 @@ class HttpResourceTestMixin(TestCase):
     def test_uri_from_url(self):
         uri = HttpResource.uri_from_url("http://localhost:8000/?z=z&a=a")
         self.assertEqual(uri, "localhost:8000/?a=a&z=z")
-        uri = HttpResource.uri_from_url("https://localhost:8000/?a=a&z=z")
-        self.assertEqual(uri, "localhost:8000/?a=a&z=z")
+        uri = HttpResource.uri_from_url("https://localhost:8000/?a=z&z=a")
+        self.assertEqual(uri, "localhost:8000/?a=z&z=a")
 
     def test_hash_from_data(self):
         # Give no data
@@ -265,7 +265,10 @@ class HttpResourceTestMixin(TestCase):
         self.assertEqual(data_hash, "")
         # Give data
         data_hash = HttpResource.hash_from_data(self.test_data)
-        self.assertIsInstance(data_hash, str)
+        self.assertEquals(
+            data_hash, "22678875db79b37d27f3a7ae598e65c72eb55c36",
+            "Data hashes do not match, perhaps keys were not sorted before JSON dump?"
+        )
         # Compare with slightly altered data
         self.test_data["data"] = "tezt"
         data_hash2 = HttpResource.hash_from_data(self.test_data)

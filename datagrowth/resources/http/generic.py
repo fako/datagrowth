@@ -547,6 +547,13 @@ class HttpResource(Resource):
 
     @staticmethod
     def uri_from_url(url):
+        """
+        Given a URL this method will strip the protocol and sort the parameters.
+        That way a database lookup for a URL will always return URL's that logically match that URL.
+
+        :param url: the URL to normalize to URI
+        :return: a normalized URI suitable for lookups
+        """
         url = URLObject(url)
         params = sorted(url.query.dict.items(), key=lambda item: item[0])
         url = url.with_query(urlencode(params))
@@ -554,12 +561,27 @@ class HttpResource(Resource):
 
     @staticmethod
     def hash_from_data(data):
+        """
+        Given a dictionary will recursively sort and JSON dump the keys and values of that dictionary.
+        The end result is given to SHA-1 to create a hash, that is unique for that data.
+        This hash can be used for a database lookup to find earlier requests that send the same data.
+
+        :param data: (dict) a dictionary of the data to be hashed
+        :return: the hash of the data
+        """
         if not data:
             return ""
         hsh = hashlib.sha1()
-        data_tuple = sorted(data.items(), key=lambda item: item[0])
-        hash_data = json.dumps(data_tuple).encode("utf-8")
-        hsh.update(hash_data)
+        payload = []
+        for key, value in data.items():
+            if not isinstance(value, dict):
+                payload.append((key, value))
+            else:
+                payload.append((key, HttpResource.hash_from_data(value)))
+
+        payload.sort(key=lambda item: item[0])
+        hash_payload = json.dumps(payload).encode("utf-8")
+        hsh.update(hash_payload)
         return hsh.hexdigest()
 
     @staticmethod
@@ -573,6 +595,14 @@ class HttpResource(Resource):
         return match.group("mime_type"), match.group("encoding") or default_encoding
 
     def set_error(self, status, connection_error=False):
+        """
+        Sets the given status on the HttpResource.
+        When dealing with connection_errors it sets valid defaults.
+
+        :param status: (int) the error status from the response
+        :param connection_error: (bool) whether the error occurred during a connection error
+        :return:
+        """
         if connection_error:
             self.head = {}
             self.body = ""
