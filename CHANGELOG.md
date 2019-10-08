@@ -33,3 +33,4 @@ Omit the configuration altogether and use ``register_defaults``.
 * ``schema`` is allowed to be empty on ``DataStorage``, which means there will be no validation by default.
 This is recommended, but requires migrations for some projects.
 * ``_handle_errors`` has been renamed to ``handle_errors`` and is an explicit candidate for overriding.
+* ``_update_from_response`` has been renamed to ``_update_from_results`` for more consistent Resource api.
