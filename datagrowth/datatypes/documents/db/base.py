@@ -5,7 +5,7 @@ import json_field
 
 class DataStorage(models.Model):
 
-    schema = json_field.JSONField(default=None, null=False, blank=False)  # BUG: schema does not throw IntegrityError on None
+    schema = json_field.JSONField(default=dict, null=False, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
