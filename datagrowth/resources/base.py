@@ -110,17 +110,6 @@ class Resource(models.Model):
         """
         raise NotImplementedError("Missing implementation for content property on {}".format(self.__class__.__name__))
 
-    def update_from_results(self, results):
-        """
-        This method typically gets overwritten for different resource types.
-        It maps the results of data gathering to the Django model.
-
-        :param results: data from the resource
-        """
-        raise NotImplementedError(
-            "Missing implementation for update_from_results method on {}".format(self.__class__.__name__)
-        )
-
     #######################################################
     # RESOURCE ABSTRACTION
     #######################################################

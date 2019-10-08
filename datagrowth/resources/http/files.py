@@ -106,7 +106,7 @@ class HttpFileResource(HttpResource):  # TODO: write tests
         file_name = default_storage.save(os.path.join(file_path, file_name), file)
         return file_name
 
-    def _update_from_response(self, response):
+    def _update_from_results(self, response):
         file_name = self._save_file(self.request["url"], response.content)
         self.head = dict(response.headers)
         self.status = response.status_code

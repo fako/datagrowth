@@ -481,9 +481,9 @@ class HttpResource(Resource):
         except UnicodeDecodeError:
             self.set_error(600, connection_error=True)
             return
-        self._update_from_response(response)
+        self._update_from_results(response)
 
-    def _update_from_response(self, response):
+    def _update_from_results(self, response):
         self.head = dict(response.headers.lower_items())
         self.status = response.status_code
         self.body = response.content if isinstance(response.content, str) else \
