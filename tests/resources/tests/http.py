@@ -228,13 +228,13 @@ class HttpResourceTestMixin(TestCase):
             else:
                 self.assertFalse(self.instance.success, "Success property is not False with status={}".format(status))
 
-    def test_handle_error(self):
+    def test_handle_errors(self):
         statuses_50x = range(500, 505)
         statuses_40x = range(400, 410)
         for status in statuses_50x:
             self.instance.status = status
             try:
-                self.instance._handle_errors()
+                self.instance.handle_errors()
                 self.fail("Handle error doesn't handle status {}".format(status))
             except DGHttpError50X as exc:
                 self.assertIsInstance(exc.resource, HttpResource)
@@ -244,7 +244,7 @@ class HttpResourceTestMixin(TestCase):
         for status in statuses_40x:
             self.instance.status = status
             try:
-                self.instance._handle_errors()
+                self.instance.handle_errors()
                 self.fail("Handle error doesn't handle status {}".format(status))
             except DGHttpError40X as exc:
                 self.assertIsInstance(exc.resource, HttpResource)

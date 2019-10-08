@@ -123,7 +123,7 @@ class HttpResource(Resource):
 
         resource.request = resource.request_with_auth()
         resource._send()
-        resource._handle_errors()
+        resource.handle_errors()
         return resource
 
     def get(self, *args, **kwargs):
@@ -489,7 +489,7 @@ class HttpResource(Resource):
         self.body = response.content if isinstance(response.content, str) else \
             response.content.decode("utf-8", "replace")
 
-    def _handle_errors(self):
+    def handle_errors(self):
         """
         Raises exceptions upon error statuses
         """

@@ -32,3 +32,4 @@ Omit the configuration altogether and use ``register_defaults``.
 * All data hashes will be invalidated, because hasher now sorts keys.
 * ``schema`` is allowed to be empty on ``DataStorage``, which means there will be no validation by default.
 This is recommended, but requires migrations for some projects.
+* ``_handle_errors`` has been renamed to ``handle_errors`` and is an explicit candidate for overriding.

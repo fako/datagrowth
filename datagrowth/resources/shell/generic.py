@@ -83,7 +83,7 @@ class ShellResource(Resource):
             return resource
 
         resource._run()
-        resource._handle_errors()
+        resource.handle_errors()
         return resource
 
     @property
@@ -236,7 +236,7 @@ class ShellResource(Resource):
         self.stdout = self.clean_stdout(results.stdout)
         self.stderr = self.clean_stderr(results.stderr)
 
-    def _handle_errors(self):
+    def handle_errors(self):
         if not self.success:
             class_name = self.__class__.__name__
             message = "{} > {} \n\n {}".format(class_name, self.status, self.stderr)
