@@ -43,9 +43,9 @@ def get_dumps_path(model):
     return os.path.join(datagrowth_settings.DATAGROWTH_DATA_DIR, model._meta.app_label, "dumps", model.get_name())
 
 
-def queryset_to_disk(queryset, dump_file, batch_size=100):
+def queryset_to_disk(queryset, dump_file, batch_size=100, progress_bar=True):
     count = queryset.all().count()
-    batch_iterator = ibatch(queryset.iterator(), batch_size=batch_size, progress_bar=True, total=count)
+    batch_iterator = ibatch(queryset.iterator(), batch_size=batch_size, progress_bar=progress_bar, total=count)
     for batch in batch_iterator:
         batch_data = serialize("json", batch, use_natural_foreign_keys=True)
         dump_file.writelines([batch_data + "\n"])
@@ -56,10 +56,10 @@ def object_to_disk(object, dump_file):
     dump_file.write(batch_data + "\n")
 
 
-def objects_from_disk(dump_file):
+def objects_from_disk(dump_file, progress_bar=True):
     batch_count = 0
     for _ in dump_file.readlines():
         batch_count += 1
     dump_file.seek(0)
-    for line in tqdm(dump_file, total=batch_count):
+    for line in tqdm(dump_file, total=batch_count, disable=not progress_bar):
         yield [wrapper.object for wrapper in deserialize("json", line)]

@@ -2,7 +2,6 @@ from urllib.parse import urlencode
 import json
 from copy import deepcopy
 from requests.exceptions import SSLError, ConnectionError, Timeout
-from unittest.mock import Mock
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
