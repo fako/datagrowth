@@ -118,6 +118,7 @@ class TestHttpResource(ResourceTestMixin):
         }
         self.instance._send()
         # See if request was made properly
+        self.assertEquals(self.instance.session.send.call_count, 1)
         args, kwargs = self.instance.session.send.call_args
         preq = args[0]
         user_agent_header = preq.headers.pop("User-Agent", None)
@@ -150,6 +151,7 @@ class TestHttpResource(ResourceTestMixin):
         }
         self.instance._send()
         # See if request was made properly
+        self.assertEquals(self.instance.session.send.call_count, 1)
         args, kwargs = self.instance.session.send.call_args
         preq = args[0]
         user_agent_header = preq.headers.pop("User-Agent", None)
@@ -183,6 +185,7 @@ class TestHttpResource(ResourceTestMixin):
         }
         self.instance._send()
         # See if request was made properly
+        self.assertEquals(self.instance.session.send.call_count, 1)
         args, kwargs = self.instance.session.send.call_args
         preq = args[0]
         user_agent_header = preq.headers.pop("User-Agent", None)
@@ -481,6 +484,7 @@ class TestHttpResource(ResourceTestMixin):
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertFalse(instance.data_hash)
+        self.assertEquals(instance.session.send.call_count, 1)
         args, kwargs = instance.session.send.call_args
         preq = args[0]
         self.assert_agent_header(preq, "DataScope (custom)")

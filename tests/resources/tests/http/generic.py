@@ -121,6 +121,7 @@ class TestHttpResourceInterface(TestCase):
         instance = self.model().get("new")
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "new")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -132,6 +133,7 @@ class TestHttpResourceInterface(TestCase):
         instance = self.model(request=request).get()
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "new2")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -159,6 +161,7 @@ class TestHttpResourceInterface(TestCase):
     def test_get_retry(self):
         # Load and retry an existing request
         instance = self.model().get("fail")
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "fail")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -167,6 +170,7 @@ class TestHttpResourceInterface(TestCase):
         # Load an existing resource from its request
         request = instance.request
         instance = self.model(request=request).get()
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "fail")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -217,6 +221,7 @@ class TestHttpResourceInterface(TestCase):
         instance = self.model().post(query="new")
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_post(instance.session.send.call_args, "new")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -228,6 +233,7 @@ class TestHttpResourceInterface(TestCase):
         instance = self.model(request=request).post()
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_post(instance.session.send.call_args, "new2")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -300,6 +306,7 @@ class TestHttpResourceInterface(TestCase):
         # Load and retry an existing request
         instance = self.model().post(query="fail")
         self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_post(instance.session.send.call_args, "fail")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -310,6 +317,7 @@ class TestHttpResourceInterface(TestCase):
         request = instance.request
         instance = self.model(request=request).post()
         self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_post(instance.session.send.call_args, "fail")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -319,6 +327,7 @@ class TestHttpResourceInterface(TestCase):
         # Load and retry an existing request with a file
         instance = self.model().post(query="fail", file="text-file.txt")
         self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_post(instance.session.send.call_args, "fail", is_form=True)
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
@@ -329,6 +338,7 @@ class TestHttpResourceInterface(TestCase):
         request = instance.request
         instance = self.model(request=request).post()
         self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
+        self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_post(instance.session.send.call_args, "fail", is_form=True)
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
