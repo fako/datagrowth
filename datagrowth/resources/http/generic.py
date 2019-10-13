@@ -622,9 +622,51 @@ class HttpResource(Resource):
         abstract = True
 
 
-class URLResource(HttpResource):  # TODO: document and test
+class URLResource(HttpResource):
+    """
+    Sometimes you don't want to build a URI through the ``URI_TEMPLATE``,
+    because you have a URL, where data should be retrieved from immediately.
+    For this use case the ``URLResource`` is very suitable.
+    Just pass the URL as a first argument to either ``get`` or ``post`` and the request will be made.
+
+    Only full URL's with protocol are excepted as an argument.
+    And note that it is not possible to adjust the parameters through the ``parameters`` method,
+    because it is assumed that all parameters are part of the URL given to ``get`` or ``post``.
+    """
+
+    PARAMETERS = None
+
+    GET_SCHEMA = {
+        "args": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string",
+                    "pattern": "^http"
+                }
+            ],
+            "minItems": 1,
+            "additionalItems": False
+        }
+    }
+    POST_SCHEMA = {
+        "args": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string",
+                    "pattern": "^http"
+                }
+            ],
+            "minItems": 1,
+            "additionalItems": False
+        },
+        "kwargs": {}
+    }
 
     def _create_url(self, *args):
+        parameters = self.parameters()
+        assert parameters is None, "Parameters got specified for the URLResource, but these get ignored"
         return args[0]
 
     class Meta:
