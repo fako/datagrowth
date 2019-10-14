@@ -13,7 +13,7 @@ Http
 ****
 
 .. automodule:: datagrowth.resources.http
-    :members: HttpResource, HttpFileResource, HttpImageResource
+    :members: HttpResource, URLResource, HttpFileResource, HttpImageResource, file_resource_delete_handler
 
 
 Shell

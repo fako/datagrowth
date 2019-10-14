@@ -16,6 +16,24 @@ from datagrowth.resources.http.generic import URLResource
 
 
 class HttpFileResource(URLResource):
+    """
+    Sometimes you want to download a file instead of storing the content in the database.
+    For this use case the ``HttpFileResource`` is very suitable.
+    Just pass the URL as a first argument to ``get`` and the URL will be downloaded as a file,
+    storing it in your ``MEDIA_ROOT``.
+
+    The file path of the downloaded file will get stored in the ``body`` field.
+    This path will be relative to the ``MEDIA_ROOT``.
+    The path will include a downloads folder and a subfolder that is the ``app_name`` of the concrete class.
+    Under that directory there are many possible subdirectories in the form of "x/yz/".
+    Where x, y and z will be hexidecimal characters.
+    Creating these subdirectories is necessary to prevent huge download directories, that would hamper performance.
+
+    Only full URL's with protocol will get downloaded.
+    Any URL's without a protocol will get stored as a failure with a 404 (Not Found) error code.
+    Please note that with this class it is not possible to adjust the parameters through the ``parameters`` method,
+    because it is assumed that all parameters are part of the URL given to ``get``.
+    """
 
     GET_SCHEMA = {
         "args": {
@@ -65,6 +83,15 @@ class HttpFileResource(URLResource):
 
     @staticmethod
     def get_file_name(original, now):
+        """
+        Override this method to change the file naming convention.
+        By default it will take the filename from the URL
+        and prefix it with a datetime string of the date and time at downloading.
+
+        :param original: (str) the URL file name
+        :param now: (datetime) a datetime object to use as prefix input
+        :return:
+        """
         return "{}.{}".format(
             now.strftime(datagrowth_settings.DATAGROWTH_DATETIME_FORMAT),
             original
@@ -113,10 +140,23 @@ class HttpFileResource(URLResource):
         self.body = file_name.replace(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, "").lstrip(os.sep)
 
     def transform(self, file):
+        """
+        By default the ``content`` property will return the file wrapped in a Django ``File`` class.
+        It may be convenient to wrap it in some other way.
+        Override this method and return the file in a different format to change the content return value.
+
+        :param file: (File) the file read from storage
+        :return: (any) file in correct format
+        """
         return file
 
     @property
     def content(self):
+        """
+        Opens the file stored at the file path in ``body`` and returns that file together with the content type.
+
+        :return: content_type, file
+        """
         if self.success:
             content_type = self.head.get("content-type", "unknown/unknown").split(';')[0]
             file_path = os.path.join(default_storage.location, self.body)
@@ -139,6 +179,9 @@ class HttpFileResource(URLResource):
 
 
 class HttpImageResource(HttpFileResource):
+    """
+    This class acts like the HttpFileResource with the only difference that it will return content as Pillow images.
+    """
 
     def _get_file_class(self):
         return ImageFile
@@ -151,5 +194,13 @@ class HttpImageResource(HttpFileResource):
 
 
 def file_resource_delete_handler(sender, instance, **kwargs):
+    """
+    A Django signal handler that can be bound to a ``post_delete`` signal
+    to free disk space when file resources get deleted.
+
+    :param sender: receives the class that is sending the signal
+    :param instance: the object under deletion
+    :param kwargs: ignored, for compatibility only
+    """
     if instance.body and default_storage.exists(instance.body):
         default_storage.delete(instance.body)
