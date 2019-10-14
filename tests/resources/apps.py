@@ -12,3 +12,12 @@ class ResourcesConfig(AppConfig):
             "source_language": "en"
         })
         register_defaults("mock", {"secret": "oehhh"})
+        register_defaults("micro_service", {
+            "connections": {
+                "service_mock": {
+                    "protocol": "http",
+                    "host": "localhost:8000",
+                    "path": "/service"
+                }
+            }
+        })

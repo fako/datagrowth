@@ -1,11 +1,13 @@
 from unittest.mock import Mock, NonCallableMock
 
-from datagrowth.resources import URLResource
+from datagrowth.resources import MicroServiceResource
 
 from resources.mocks.requests import MockRequests
 
 
-class URLResourceMock(URLResource):
+class MicroServiceResourceMock(MicroServiceResource):
+
+    MICRO_SERVICE = "service_mock"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

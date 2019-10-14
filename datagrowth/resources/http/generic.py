@@ -672,3 +672,34 @@ class URLResource(HttpResource):
 
     class Meta:
         abstract = True
+
+
+class MicroServiceResource(HttpResource):
+
+    CONFIG_NAMESPACE = "micro_service"
+
+    MICRO_SERVICE = None
+
+    URI_TEMPLATE = "{}://{}{}"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assert self.MICRO_SERVICE is not None, \
+            "You should specify a micro service name under the MICRO_SERVICE attribute"
+        self.connection = self.config.connections.get(self.MICRO_SERVICE, None)
+        assert self.connection is not None, \
+            '"{}" is an unknown micro service in the "connections" configuration. ' \
+            'Is it added through register_defaults?'.format(self.MICRO_SERVICE)
+
+    def send(self, method, *args, **kwargs):
+        protocol = self.connection.get("protocol", None)
+        host = self.connection.get("host", None)
+        path = self.connection.get("path", None)
+        assert protocol, "A protocol should be specified in the micro service configuration."
+        assert host, "A host should be specified in the micro service configuration"
+        assert path, "A path should be specified in the micro service configuration"
+        args = (protocol, host, path) + args
+        return super().send(method, *args, **kwargs)
+
+    class Meta:
+        abstract = True
