@@ -14,7 +14,7 @@ from django.core.files.storage import default_storage
 from django.core.exceptions import ValidationError
 
 from datagrowth import settings as datagrowth_settings
-from datagrowth.resources import HttpResource, HttpFileResource
+from datagrowth.resources import HttpResource, HttpFileResource, file_resource_delete_handler
 from datagrowth.exceptions import DGResourceDoesNotExist, DGHttpError40X
 
 from resources.models import HttpImageResourceMock
@@ -250,3 +250,22 @@ class TestHttpImageResourceInterface(TestCase):
         now = datetime(1970, 1, 1)
         name = HttpFileResource.get_file_name("test", now)
         self.assertEquals(name, "19700101000000000000.test")
+
+
+class TestFileResourceDeleteHandler(TestCase):
+
+    @patch("datagrowth.resources.http.files.default_storage.delete", return_value=None)
+    def test_file_resource_delete_handler(self, storage_delete_mock):
+        # Delete content
+        instance = HttpImageResourceMock.objects.get(id=3)  # success with actual content
+        file_resource_delete_handler(HttpImageResourceMock, instance, extra="ignored")
+        self.assertEquals(storage_delete_mock.call_count, 1)
+        # Ignore if no content at all
+        storage_delete_mock.reset_mock()
+        instance.body = ""
+        file_resource_delete_handler(HttpImageResourceMock, instance, extra="ignored")
+        self.assertEquals(storage_delete_mock.call_count, 0)
+        # Ignore if file does not exist
+        instance.body = "does-not-exist.png"
+        file_resource_delete_handler(HttpImageResourceMock, instance, extra="ignored")
+        self.assertEquals(storage_delete_mock.call_count, 0)

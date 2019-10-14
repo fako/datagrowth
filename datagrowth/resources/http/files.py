@@ -150,6 +150,6 @@ class HttpImageResource(HttpFileResource):
         abstract = True
 
 
-def file_resource_delete_handler(sender, instance, **kwargs):  # TODO: write tests
-    if instance.body:
+def file_resource_delete_handler(sender, instance, **kwargs):
+    if instance.body and default_storage.exists(instance.body):
         default_storage.delete(instance.body)
