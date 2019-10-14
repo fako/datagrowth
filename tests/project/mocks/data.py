@@ -1,7 +1,7 @@
-# coding=utf-8
-from __future__ import unicode_literals, absolute_import, print_function, division
-
+import os
 from copy import deepcopy
+
+from datagrowth import settings as datagrowth_settings
 
 
 MOCK_DATA = {
@@ -90,3 +90,6 @@ MOCK_SCRAPE_DATA = [
     {'text': u'test 2', 'link': '/test2', 'page': 'Test'},
     {'text': u'test 3', 'link': '/test3', 'page': 'Test'}
 ]
+
+with open(os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, "image-file.png"), "rb") as img:
+    MOCK_FILE_DATA = img.read()

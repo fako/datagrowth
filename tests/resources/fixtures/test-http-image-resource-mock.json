@@ -1,0 +1,50 @@
+[
+{
+    "fields": {
+        "body": "resources/downloads/2/60/success.html",
+        "status": 200,
+        "head": "{\"content-type\":\"image/png\"}",
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": "{\"args\": [\"http://localhost:8000/success\"], \"kwargs\": {}, \"headers\": {\"User-Agent\": \"DataGrowth (test); python-requests/2.20.0\", \"Accept\": \"*/*\", \"Accept-Encoding\": \"gzip, deflate\", \"Connection\": \"keep-alive\"}, \"method\": \"get\", \"url\": \"http://localhost:8000/success\", \"data\": null, \"cancel\": false}",
+        "uri": "localhost:8000/success",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpimageresourcemock",
+    "pk": 1
+},
+{
+    "fields": {
+        "body": "",
+        "status": 502,
+        "head": "{\"content-type\":\"image/png\"}",
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": "{\"headers\": {\"User-Agent\": \"DataGrowth (test); python-requests/2.20.0\", \"Connection\": \"keep-alive\", \"Accept-Encoding\": \"gzip, deflate\", \"Accept\": \"*/*\"}, \"data\": null, \"kwargs\": {}, \"url\": \"http://localhost:8000/fail\", \"args\": [\"http://localhost:8000/fail\"], \"method\": \"get\", \"cancel\": false}",
+        "uri": "localhost:8000/fail",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpimageresourcemock",
+    "pk": 2
+},
+{
+    "fields": {
+        "body": "image-file.png",
+        "status": 200,
+        "head": "{\"content-type\":\"image/png\"}",
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": "{\"headers\": {\"User-Agent\": \"DataGrowth (test); python-requests/2.20.0\", \"Connection\": \"keep-alive\", \"Accept-Encoding\": \"gzip, deflate\", \"Accept\": \"*/*\"}, \"data\": null, \"kwargs\": {}, \"url\": \"http://localhost:8000/content\", \"args\": [\"http://localhost:8000/content\"], \"method\": \"get\", \"cancel\": false}",
+        "uri": "localhost:8000/content",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpimageresourcemock",
+    "pk": 3
+}
+]

@@ -115,7 +115,8 @@ class HttpResource(Resource):
         try:
             self.validate_request(resource.request)
         except ValidationError:
-            resource.delete()
+            if resource.id:
+                resource.delete()
             resource = self
 
         if resource.success:

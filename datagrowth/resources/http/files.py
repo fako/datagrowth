@@ -4,6 +4,7 @@ import hashlib
 from PIL import Image
 from urlobject import URLObject
 from datetime import datetime
+import requests
 
 from django.core.exceptions import ValidationError
 from django.core.files.storage import default_storage
@@ -11,10 +12,10 @@ from django.core.files import File
 from django.core.files.images import ImageFile
 
 from datagrowth import settings as datagrowth_settings
-from datagrowth.resources.http.generic import HttpResource
+from datagrowth.resources.http.generic import URLResource
 
 
-class HttpFileResource(HttpResource):  # TODO: write tests
+class HttpFileResource(URLResource):
 
     GET_SCHEMA = {
         "args": {
@@ -30,12 +31,6 @@ class HttpFileResource(HttpResource):  # TODO: write tests
         }
     }
 
-    def variables(self, *args):
-        args = args or self.request.get("args")
-        return {
-            "url": args[0]
-        }
-
     def _send(self):
         if self.request["cancel"]:
             return
@@ -43,27 +38,37 @@ class HttpFileResource(HttpResource):  # TODO: write tests
 
     def _create_request(self, method, *args, **kwargs):
         cancel_request = False
-        variables = self.variables(*args)
         try:
             self._validate_input("get", *args, **kwargs)
         except ValidationError as exc:
-            if variables["url"] is None or variables["url"].startswith("http"):
+            url = args[0] if len(args) else None
+            if url is None or url.startswith("http"):
                 raise exc
             # Wrong protocol given, like: x-raw-image://
             self.set_error(404)
             cancel_request = True
+        headers = requests.utils.default_headers()
+        headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
+        headers.update(self.headers())
         return self.validate_request({
             "args": args,
             "kwargs": kwargs,
             "method": "get",
-            "url": variables["url"],
-            "headers": {},
+            "url": self._create_url(*args),
+            "headers": dict(headers),
             "data": None,
             "cancel": cancel_request
         }, validate_input=False)
 
     def _get_file_class(self):
         return File
+
+    @staticmethod
+    def get_file_name(original, now):
+        return "{}.{}".format(
+            now.strftime(datagrowth_settings.DATAGROWTH_DATETIME_FORMAT),
+            original
+        )
 
     def _get_file_info(self, url):
         # Getting the file name and extension from url
@@ -75,10 +80,7 @@ class HttpFileResource(HttpResource):  # TODO: write tests
         if not extension:
             extension = ".html"
         now = datetime.utcnow()
-        file_name = "{}.{}".format(
-            now.strftime(datagrowth_settings.DATAGROWTH_DATETIME_FORMAT),
-            name
-        )
+        file_name = self.get_file_name(name, now)
         # Hashing the file name
         hasher = hashlib.md5()
         hasher.update(file_name.encode('utf-8'))
@@ -101,8 +103,6 @@ class HttpFileResource(HttpResource):  # TODO: write tests
             file_name = file_name[:155]
         FileClass = self._get_file_class()
         file = FileClass(BytesIO(content))
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
         file_name = default_storage.save(os.path.join(file_path, file_name), file)
         return file_name
 
@@ -128,7 +128,7 @@ class HttpFileResource(HttpResource):  # TODO: write tests
         return None, None
 
     def post(self, *args, **kwargs):
-        raise NotImplementedError("You can't download an image over POST")
+        raise NotImplementedError("You can't download a file over POST")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -138,7 +138,7 @@ class HttpFileResource(HttpResource):  # TODO: write tests
         abstract = True
 
 
-class HttpImageResource(HttpFileResource):  # TODO: write tests
+class HttpImageResource(HttpFileResource):
 
     def _get_file_class(self):
         return ImageFile

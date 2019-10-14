@@ -6,7 +6,7 @@ from requests.structures import CaseInsensitiveDict
 
 from unittest.mock import Mock, NonCallableMock
 
-from project.mocks.data import MOCK_DATA
+from project.mocks.data import MOCK_DATA, MOCK_FILE_DATA
 
 
 ok_response = NonCallableMock(spec=Response)
@@ -32,6 +32,11 @@ error_response.headers = CaseInsensitiveDict(data={"content-type": "application/
 error_response.content = json.dumps({"error": "internal error"})
 error_response.status_code = 500
 
+ok_file_response = NonCallableMock(spec=Response)
+ok_file_response.headers = CaseInsensitiveDict(data={"content-type": "image/png"})
+ok_file_response.content = MOCK_FILE_DATA
+ok_file_response.status_code = 200
+
 
 def prepare_request(request):
     return requests.Session().prepare_request(request)
@@ -55,6 +60,11 @@ MockRequestsWithAgent = NonCallableMock(spec=requests)
 MockRequestsSendWithAgent = Mock(return_value=agent_response)
 MockRequestsWithAgent.send = MockRequestsSendWithAgent
 MockRequestsWithAgent.prepare_request = Mock(side_effect=prepare_request)
+
+MockFileRequests = NonCallableMock(spec=requests)
+MockFileRequestsSend = Mock(return_value=ok_file_response)
+MockFileRequests.send = MockFileRequestsSend
+MockFileRequests.prepare_request = Mock(side_effect=prepare_request)
 
 
 def get_erroneous_requests_mock(prepared_exception):

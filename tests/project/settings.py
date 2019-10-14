@@ -150,4 +150,4 @@ STATIC_URL = '/static/'
 
 # Datagrowth settings
 
-DATAGROWTH_MEDIA_ROOT = os.path.join(BASE_DIR, "data", "media")
+DATAGROWTH_MEDIA_ROOT = MEDIA_ROOT = os.path.join(BASE_DIR, "data", "media")
