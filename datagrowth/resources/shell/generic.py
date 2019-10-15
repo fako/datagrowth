@@ -95,6 +95,8 @@ class ShellResource(Resource):
 
     @property
     def content(self):
+        if not self.success:
+            return None, None
         return self.CONTENT_TYPE, self.transform(self.stdout)
 
     def transform(self, stdout):
