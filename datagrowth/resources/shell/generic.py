@@ -154,7 +154,7 @@ class ShellResource(Resource):
         if flags_index is not None:
             for key, value in kwargs.items():
                 if key in self.FLAGS:
-                    flags += " " + self.FLAGS[key] + value
+                    flags += " " + self.FLAGS[key] + str(value)
             flags = flags.lstrip()
             cmd[flags_index] = flags
 
