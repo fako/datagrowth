@@ -5,3 +5,4 @@ from .http.files import TestHttpImageResourceInterface
 from .http.micro import TestMicroServiceResourceInterface
 
 from .shell.core import TestShellResource
+from .shell.generic import TestShellResourceInterface

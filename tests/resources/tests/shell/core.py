@@ -108,7 +108,7 @@ class TestShellResource(ResourceTestMixin):
         self.assertEquals(variables["dir"], ".")
 
     @patch("datagrowth.resources.shell.generic.subprocess.run", return_value=SubprocessResult(0, b"out", b"err"))
-    def test_run_command(self, subprocess_mock):
+    def test_run_command_core(self, subprocess_mock):
         test_command = ["grep", "-R", "--context=5", "test", "."]
         self.instance.command = {
             "args": ("test", ".",),
@@ -132,7 +132,7 @@ class TestShellResource(ResourceTestMixin):
         self.assertEqual(self.instance.stderr, "err")
         self.assertEqual(self.instance.status, 0)
 
-    def test_run_command_wrong(self):
+    def test_run_command_core_wrong(self):
         self.instance.command = None
         try:
             self.instance._run()
