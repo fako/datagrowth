@@ -218,6 +218,10 @@ class ShellResource(Resource):
     # Currently it wraps subprocess
 
     def _run(self):
+
+        assert self.command and isinstance(self.command, dict), \
+            "Trying to run command before having a valid command dictionary."
+
         cmd = self.command.get("cmd")
         cwd = None
         env = self.environment(*self.command.get("args"), **self.command.get("kwargs"))

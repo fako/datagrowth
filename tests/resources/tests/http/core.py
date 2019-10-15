@@ -215,6 +215,12 @@ class TestHttpResource(ResourceTestMixin):
             self.fail("_send should fail when self.request is not set.")
         except AssertionError:
             pass
+        self.instance.request = "http://localhost:8000/success"
+        try:
+            self.instance._send()
+            self.fail("_send should fail when self.request is not a dictionary.")
+        except AssertionError:
+            pass
 
     def test_get_request_connection_error(self):
         exceptions_with_status = {
