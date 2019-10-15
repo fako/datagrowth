@@ -11,7 +11,7 @@ import json_field
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
-from datagrowth.exceptions import DGShellError
+from datagrowth.exceptions import DGShellError, DGResourceDoesNotExist
 
 
 class ShellResource(Resource):
@@ -69,17 +69,23 @@ class ShellResource(Resource):
         self.clean()  # sets self.uri
         resource = None
         try:
-            resource = self.__class__.objects.get(
-                uri=self.uri,
-                stdin=self.stdin
-            )
+            resource = self.__class__.objects.get(uri=self.uri, stdin=self.stdin)
+        except self.DoesNotExist:
+            if self.config.cache_only:
+                raise DGResourceDoesNotExist("Could not retrieve resource from cache", resource=self)
+            resource = self
+
+        if self.config.cache_only:
+            return resource
+
+        try:
             self.validate_command(resource.command)
-        except (self.DoesNotExist, ValidationError):
-            if resource is not None:
+        except ValidationError:
+            if resource.id:
                 resource.delete()
             resource = self
 
-        if resource.success or self.config.cache_only:
+        if resource.success:
             return resource
 
         resource._run()
@@ -247,6 +253,16 @@ class ShellResource(Resource):
             class_name = self.__class__.__name__
             message = "{} > {} \n\n {}".format(class_name, self.status, self.stderr)
             raise DGShellError(message, resource=self)
+
+    #######################################################
+    # DJANGO MODEL
+    #######################################################
+    # Methods and properties to tweak Django
+
+    def clean(self):
+        if self.command and not self.uri:
+            self.uri = ShellResource.uri_from_cmd(self.command.get("cmd"))
+        super().clean()
 
     #######################################################
     # CONVENIENCE
