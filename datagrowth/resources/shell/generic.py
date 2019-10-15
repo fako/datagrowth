@@ -124,7 +124,7 @@ class ShellResource(Resource):
     # The values inside are passed to the subprocess library
 
     def variables(self, *args):
-        args = args or self.command.get("args")
+        args = args or (self.command["args"] if self.command else tuple())
         return {
             "input": args
         }

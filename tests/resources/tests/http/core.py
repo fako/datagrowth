@@ -79,12 +79,21 @@ class TestHttpResource(ResourceTestMixin):
         self.assertIsInstance(self.instance.parameters(), dict)
 
     def test_variables(self):
+        # Variables with explicit input
         variables = self.instance.variables("arg1", "arg2")
         self.assertIsInstance(variables, dict)
         self.assertIn("url", variables)
         self.assertIn("meta", variables)
         self.assertEquals(variables["url"], ("arg1", "arg2"))
         self.assertEquals(variables["meta"], "arg2")
+        # Variables without input
+        variables = self.instance.variables()
+        self.assertIsInstance(variables, dict)
+        self.assertIn("url", variables)
+        self.assertIn("meta", variables)
+        self.assertEquals(variables["url"], tuple())
+        self.assertIsNone(variables["meta"])
+        # Variables with input through get
         self.instance.get("success")
         variables = self.instance.variables()
         self.assertIn("url", variables)
