@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/fako/datagrowth.svg?branch=master)](https://travis-ci.com/fako/datagrowth)
+
 DATAGROWTH
 ==========
 
@@ -11,8 +13,22 @@ Installation
 You can install Datagrowth with your Django application by running
 
 ```bash
-pip install git+https://github.com/fako/datagrowth.git
+pip install datagrowth
 ```
+
+
+Getting started
+---------------
+
+Currently there are two major use cases.
+The **Resources** provide a way to uniformly gather data from very different sources.
+**Configurations** are a way to store and transfer key-value pairs,
+which your code can use to act on different contexts.
+
+Follow these guides to get an idea how you can use Datagrowth:
+
+* [Resources](https://data-scope.com/datagrowth/resources/)
+* [Configurations](https://data-scope.com/datagrowth/configuration/)
 
 
 Running the tests
