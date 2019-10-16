@@ -264,9 +264,10 @@ class HttpResource(Resource):
     def validate_request(self, request, validate_input=True):
         """
         Validates a dictionary that represents a request that the resource will make.
-        Currently it mostly checks the method, which should be "get" or "post".
+        Currently it checks the method, which should be "get" or "post"
+        and whether the current data (if any) is still valid or has expired.
         Apart from that it validates input which should adhere to
-        the JSON schema defined in the GET_SCHEMA or POST_SCHEMA attributes
+        the JSON schema defined in the ``GET_SCHEMA`` or ``POST_SCHEMA`` attributes
 
         :param request: (dict) the request dictionary
         :param validate_input: (bool) whether to validate input
@@ -442,7 +443,7 @@ class HttpResource(Resource):
 
     def _send(self):
         """
-        Does a get on the computed link
+        Does a get or post on the computed link
         Will set storage fields to returned values
         """
         assert self.request and isinstance(self.request, dict), \
@@ -493,6 +494,8 @@ class HttpResource(Resource):
     def handle_errors(self):
         """
         Raises exceptions upon error statuses
+        Override this method to raise exceptions for your own error states.
+        By default it raises the ``DGHttpError40X`` and ``DGHttpError50X`` exceptions for statuses.
         """
         class_name = self.__class__.__name__
         if self.status >= 500:
