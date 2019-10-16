@@ -8,6 +8,8 @@ datagrowth.iml
 *.sql
 *.pkl
 datagrowth.egg-info
+build
+dist
 
 venv/
 .tox
