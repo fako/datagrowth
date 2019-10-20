@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/fako/datagrowth.svg?branch=master)](https://travis-ci.com/fako/datagrowth)
+[![Build Status](https://travis-ci.com/fako/datagrowth.svg?branch=master)](https://travis-ci.com/fako/datagrowth) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/datagrowth.svg)](https://pypi.python.org/pypi/datagrowth/)
 
 DATAGROWTH
 ==========

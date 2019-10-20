@@ -12,11 +12,17 @@ setuptools.setup(
     version=VERSION,
     author="Fako Berkers",
     author_email="email@fakoberkers.nl",
-    description="A data mash up framework",
+    description="Data engineering tools to create data mash ups using Django",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/fako/datagrowth",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(
+        exclude=[
+            "core", "core.*",
+            "docs", "docs.*",
+            "sources", "sources.*"
+        ]
+    ),
     install_requires=[
         "Django>=1.11",
         "jsonschema",
@@ -33,7 +39,11 @@ setuptools.setup(
     python_requires="~=3.5",
     include_package_data=True,
     classifiers=(
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Framework :: Django :: 1.11",
+        "Framework :: Django :: 2.2",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ),
