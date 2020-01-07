@@ -60,9 +60,9 @@ class ExtractProcessor(Processor):
     def application_json(self, data):
         context = {}
         for name, objective in self._context.items():
-            context[name] = reach(objective, data)
+            context[name] = reach(objective, data) if not callable(objective) else objective(data)
 
-        nodes = reach(self._at, data)
+        nodes = reach(self._at, data) if not callable(self._at) else self._at(data)
         if isinstance(nodes, dict):
             nodes = nodes.values()
 
@@ -72,11 +72,13 @@ class ExtractProcessor(Processor):
         for node in nodes:
             result = copy(context)
             for name, objective in self._objective.items():
-                result[name] = reach(objective, node)
+                result[name] = reach(objective, node) if not callable(objective) else objective(node)
             yield result
 
     @staticmethod
     def _eval_extraction(name, objective, soup, el=None):
+        if callable(objective):
+            return objective(soup) if el is None else objective(soup, el)
         try:
             return eval(objective) if objective else None
         except Exception as exc:

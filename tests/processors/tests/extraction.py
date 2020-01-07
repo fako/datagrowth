@@ -9,39 +9,98 @@ from project.mocks.data import (MOCK_HTML, MOCK_XML, MOCK_SCRAPE_DATA, MOCK_DATA
                                 MOCK_DATA_WITH_KEYS)
 
 
+class ExtractTextImplementation(object):
+
+    @classmethod
+    def get_html_elements(self, soup):
+        return soup.find_all('a')
+
+    @classmethod
+    def get_xml_elements(self, soup):
+        return soup.find_all('result')
+
+    @classmethod
+    def get_page_text(cls, soup):
+        return soup.find('title').text
+
+    @classmethod
+    def get_html_link(cls, soup, el):
+        return el['href']
+
+    @classmethod
+    def get_xml_link(cls, soup, el):
+        return el.find('url').text
+
+
+class ExtractJSONImplementation(object):
+
+    @classmethod
+    def get_nodes(cls, root):
+        return root.get("records", [])
+
+    @classmethod
+    def get_keys_nodes(cls, root):
+        return root.get("keys", [])
+
+    @classmethod
+    def get_json_unicode(cls, root):
+        unicode = root.get("unicode", None)
+        return unicode[0] if unicode else None
+
+    @classmethod
+    def get_json_id(cls, node):
+        return node.get("id", None)
+
+
 class TestExtractProcessor(TestCase):
+
+    def get_html_processor(self, callables=False):
+        at = "soup.find_all('a')" if not callables else ExtractTextImplementation.get_html_elements
+        link = "el['href']" if not callables else ExtractTextImplementation.get_html_link
+        page = "soup.find('title').text" if not callables else ExtractTextImplementation.get_page_text
+        objective = {
+            "@": at,
+            "text": "el.text",
+            "link": link,
+            "#page": page,
+        }
+        return ExtractProcessor(config={"objective": objective})
+
+    def get_xml_processor(self, callables=False):
+        at = "soup.find_all('result')" if not callables else ExtractTextImplementation.get_xml_elements
+        link = "el.find('url').text" if not callables else ExtractTextImplementation.get_xml_link
+        page = "soup.find('title').text" if not callables else ExtractTextImplementation.get_page_text
+        objective = {
+            "@": at,
+            "text": "el.find('label').text",
+            "link": link,
+            "#page": page,
+        }
+        return ExtractProcessor(config={"objective": objective})
+
+    def get_json_processor(self, callables=False, keys=False):
+        if not keys:
+            at = "$.records" if not callables else ExtractJSONImplementation.get_nodes
+        else:
+            at = "$.keys" if not callables else ExtractJSONImplementation.get_keys_nodes
+        unicode = "$.unicode.0" if not callables else ExtractJSONImplementation.get_json_unicode
+        id = "$.id" if not callables else ExtractJSONImplementation.get_json_id
+        objective = {
+            "@": at,
+            "#unicode": unicode,
+            "#goal": "$.dict.dict.test",
+            "id": id,
+            "record": "$.record"
+        }
+        return ExtractProcessor(config={"objective": objective})
 
     def setUp(self):
         super(TestCase, self).setUp()
 
         self.content_types = ["text/html", "text/xml", "application/json", "nothing/quantum"]
 
-        self.html_obj = {
-            "@": "soup.find_all('a')",
-            "text": "el.text",
-            "link": "el['href']",
-            "#page": "soup.find('title').text",
-        }
-        self.html_prc = ExtractProcessor(config={"objective": self.html_obj})
         self.soup = BeautifulSoup(MOCK_HTML, "html5lib")
-
-        self.xml_obj = {
-            "@": "soup.find_all('result')",
-            "text": "el.find('label').text",
-            "link": "el.find('url').text",
-            "#page": "soup.find('title').text",
-        }
-        self.xml_prc = ExtractProcessor(config={"objective": self.xml_obj})
         self.xml = BeautifulSoup(MOCK_XML, "lxml")
-
-        self.json_obj = {
-            "@": "$.records",
-            "#unicode": "$.unicode.0",
-            "#goal": "$.dict.dict.test",
-            "id": "$.id",
-            "record": "$.record"
-        }
-        self.json_prc = ExtractProcessor(config={"objective": self.json_obj})
         self.json_records = MOCK_DATA_WITH_RECORDS
         self.json_dict = MOCK_DATA_WITH_KEYS
 
@@ -52,31 +111,42 @@ class TestExtractProcessor(TestCase):
             for content_type, data, processor in zip(
                 self.content_types,
                 self.test_resources_data,
-                [self.html_prc, self.xml_prc, self.json_prc, self.html_prc]
+                [
+                    self.get_html_processor(),
+                    self.get_xml_processor(callables=True),
+                    self.get_json_processor(),
+                    self.get_html_processor()
+                ]
             )
         ]
 
     def test_init_and_load_objective(self):
-        self.assertEqual(self.html_prc._at, "soup.find_all('a')")
-        self.assertEqual(self.html_prc._context, {"page": "soup.find('title').text"})
-        self.assertEqual(self.html_prc._objective, {"text": "el.text", "link": "el['href']"})
+        html_prc_eval = self.get_html_processor()
+        self.assertEqual(html_prc_eval._at, "soup.find_all('a')")
+        self.assertEqual(html_prc_eval._context, {"page": "soup.find('title').text"})
+        self.assertEqual(html_prc_eval._objective, {"text": "el.text", "link": "el['href']"})
+        html_prc = self.get_html_processor(callables=True)
+        self.assertEqual(html_prc._at, ExtractTextImplementation.get_html_elements)
+        self.assertEqual(html_prc._context, {"page": ExtractTextImplementation.get_page_text})
+        self.assertEqual(html_prc._objective, {"text": "el.text", "link": ExtractTextImplementation.get_html_link})
 
     def test_extract(self):
-        self.html_prc.text_html = Mock()
-        self.html_prc.text_xml = Mock()
-        self.html_prc.application_json = Mock()
+        html_prc = self.get_html_processor(callables=True)
+        html_prc.text_html = Mock()
+        html_prc.text_xml = Mock()
+        html_prc.application_json = Mock()
         for content_type in self.content_types:
             try:
-                self.html_prc.extract(content_type, {"test": "test"})
+                html_prc.extract(content_type, {"test": "test"})
             except TypeError:
                 self.assertEqual(
                     content_type,
                     "nothing/quantum", "{} does not exist as a method on ExtractProcessor.".format(content_type)
                 )
-        self.assertTrue(self.html_prc.text_html.called)
-        self.assertTrue(self.html_prc.text_xml.called)
-        self.assertTrue(self.html_prc.application_json.called)
-        self.assertEquals(self.html_prc.extract(None, None), [])
+        self.assertTrue(html_prc.text_html.called)
+        self.assertTrue(html_prc.text_xml.called)
+        self.assertTrue(html_prc.application_json.called)
+        self.assertEquals(html_prc.extract(None, None), [])
 
     def test_extract_from_resource(self):
         data = []
@@ -99,23 +169,41 @@ class TestExtractProcessor(TestCase):
             self.assertIs(data, expected_data)
 
     def test_html_text(self):
-        rsl = self.html_prc.text_html(self.soup)
+        html_prc_eval = self.get_html_processor()
+        rsl = html_prc_eval.text_html(self.soup)
+        self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+        html_prc = self.get_html_processor(callables=True)
+        rsl = html_prc.text_html(self.soup)
         self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
 
     def test_xml_text(self):
-        rsl = self.xml_prc.text_xml(self.xml)
+        xml_prc_eval = self.get_xml_processor()
+        rsl = xml_prc_eval.text_xml(self.xml)
+        self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+        xml_prc = self.get_xml_processor(callables=True)
+        rsl = xml_prc.text_xml(self.xml)
         self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
 
     def test_application_json_records(self):
-        rsl = self.json_prc.application_json(self.json_records)
+        json_prc_eval = self.get_json_processor()
+        rsl = json_prc_eval.application_json(self.json_records)
+        self.assertEqual(list(rsl), MOCK_JSON_DATA)
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+        json_prc = self.get_json_processor(callables=True)
+        rsl = json_prc.application_json(self.json_records)
         self.assertEqual(list(rsl), MOCK_JSON_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
 
     def test_application_json_dict(self):
-        self.json_obj["@"] = "$.keys"
-        keys_processor = ExtractProcessor(config={"objective": self.json_obj})
+        keys_processor_eval = self.get_json_processor(keys=True)
+        rsl = keys_processor_eval.application_json(self.json_dict)
+        self.assertEqual(list(rsl), MOCK_JSON_DATA)
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+        keys_processor = self.get_json_processor(callables=True, keys=True)
         rsl = keys_processor.application_json(self.json_dict)
         self.assertEqual(list(rsl), MOCK_JSON_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
