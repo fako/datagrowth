@@ -25,6 +25,7 @@ setuptools.setup(
     ),
     install_requires=[
         "Django>=1.11",
+        "celery",
         "jsonschema",
         "html5lib",
         "lxml",

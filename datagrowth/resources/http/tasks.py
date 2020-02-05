@@ -1,13 +1,13 @@
 import logging
 from time import sleep
 
+from django.apps import apps
 from celery import current_app as app
 
-from datascope.configuration import DEFAULT_CONFIGURATION
-from core.processors.base import Processor
-from core.utils.configuration import ConfigurationType, load_config
-from core.utils.helpers import get_any_model
-from core.exceptions import DSResourceException
+from datagrowth.processors.base import Processor
+from datagrowth.configuration import ConfigurationType, load_config
+
+from datagrowth.exceptions import DGResourceException
 
 
 log = logging.getLogger("datascope")
@@ -42,7 +42,7 @@ def load_session():  # TODO: test to unlock
 def get_resource_link(config, session=None):
     assert isinstance(config, ConfigurationType), \
         "get_resource_link expects a fully prepared ConfigurationType for config"
-    Resource = get_any_model(config.resource)
+    Resource = apps.get_model(config.resource)
     link = Resource(config=config.to_dict(protected=True))
 
     if session is not None:
@@ -55,8 +55,8 @@ def get_resource_link(config, session=None):
     return link
 
 
-@app.task(name="core.send")
-@load_config(defaults=DEFAULT_CONFIGURATION)
+@app.task(name="http_resource.send")
+@load_config()
 @load_session()
 def send(config, *args, **kwargs):
     # Set vars
@@ -77,11 +77,10 @@ def send(config, *args, **kwargs):
             link = link.send(method, *args, **kwargs)
             link.close()
             success.append(link.id)
-        except DSResourceException as exc:
+        except DGResourceException as exc:
             log.debug(exc)
             link = exc.resource
-            link.clean()
-            link.save()
+            link.close()
             errors.append(link.id)
         # Prepare next request
         has_next_request = current_request = link.create_next_request()
@@ -94,8 +93,8 @@ def send(config, *args, **kwargs):
     return [success, errors]
 
 
-@app.task(name="core.send_serie")
-@load_config(defaults=DEFAULT_CONFIGURATION)
+@app.task(name="http_resource.send_serie")
+@load_config()
 @load_session()
 def send_serie(config, args_list, kwargs_list, session=None, method=None):  # TODO: test to unlock
     success = []
@@ -112,8 +111,8 @@ def send_serie(config, args_list, kwargs_list, session=None, method=None):  # TO
     return [success, errors]
 
 
-@app.task(name="core.send_mass")
-@load_config(defaults=DEFAULT_CONFIGURATION)
+@app.task(name="http_resource.send_mass")
+@load_config()
 @load_session()
 def send_mass(config, args_list, kwargs_list, session=None, method=None):
     # FEATURE: chain "batches" of send_mass if configured through batch_size
