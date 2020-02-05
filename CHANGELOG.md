@@ -43,5 +43,6 @@ v0.16
 * Adding support for ``Python 3.8``.
 * Updating ``psycopg2-binary`` to ``2.8.4``.
 * HTTP tasks no longer use ``core`` as a prefix, but ``http_resource`` instead.
-* HTTP task configurations require an app label prefix for any ``Resource``.
+* Shell tasks no longer use ``core`` as a prefix, but ``shell_resource`` instead.
+* HTTP task and shell task configurations require an app label prefix for any ``Resource``.
 * load_session decorator now excepts None as a session and will create a requests.Session.

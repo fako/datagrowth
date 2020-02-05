@@ -1,43 +1,40 @@
 import logging
 
+from django.apps import apps
 from celery import current_app as app
 
-from datascope.configuration import DEFAULT_CONFIGURATION
-from core.utils.configuration import load_config
-from core.utils.helpers import get_any_model
-from core.exceptions import DSResourceException
+from datagrowth.configuration import load_config
+from datagrowth.exceptions import DGResourceException
 
 
 log = logging.getLogger("datascope")
 
 
-@app.task(name="core.run")
-@load_config(defaults=DEFAULT_CONFIGURATION)
+@app.task(name="shell_resource.run")
+@load_config()
 def run(config, *args, **kwargs):
     # Set vars
     success = []
     errors = []
-    Resource = get_any_model(config.resource)
+    Resource = apps.get_model(config.resource)
     cmd = Resource(config=config.to_dict(protected=True))
     # Run the command
     try:
         cmd = cmd.run(*args, **kwargs)
-        cmd.clean()
-        cmd.save()
+        cmd.close()
         success.append(cmd.id)
-    except DSResourceException as exc:
+    except DGResourceException as exc:
         log.debug(exc)
         cmd = exc.resource
-        cmd.clean()
-        cmd.save()
+        cmd.close()
         errors.append(cmd.id)
 
     # Output results in simple type for json serialization
     return [success, errors]
 
 
-@app.task(name="core.run_serie")
-@load_config(defaults=DEFAULT_CONFIGURATION)
+@app.task(name="shell_resource.run_serie")
+@load_config()
 def run_serie(config, args_list, kwargs_list):
     success = []
     errors = []
