@@ -35,3 +35,10 @@ This is recommended, but requires migrations for some projects.
 * ``_handle_errors`` has been renamed to ``handle_errors`` and is an explicit candidate for overriding.
 * ``_update_from_response`` has been renamed to ``_update_from_results`` for more consistent Resource api.
 * Dumps KaldiNL results into an output folder instead of KaldiNL root
+
+
+v0.16
+-----
+
+* Adding support for ``Python 3.8``
+* Updating ``psycopg2-binary`` to 2.8.4
