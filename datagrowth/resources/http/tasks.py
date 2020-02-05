@@ -1,5 +1,6 @@
 import logging
 from time import sleep
+import requests
 
 from django.apps import apps
 from celery import current_app as app
@@ -29,7 +30,7 @@ def load_session():  # TODO: test to unlock
                 "load_session expects a fully prepared ConfigurationType for config"
             session_injection = kwargs.pop("session", None)
             if not session_injection:
-                raise TypeError("load_session decorator expects a session kwarg.")
+                session_injection = requests.Session()
             if not isinstance(session_injection, str):
                 return func(config, session=session_injection, *args, **kwargs)
             session_provider = Processor.get_processor_class(session_injection)
