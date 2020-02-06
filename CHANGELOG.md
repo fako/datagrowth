@@ -45,4 +45,5 @@ v0.16
 * HTTP tasks no longer use ``core`` as a prefix, but ``http_resource`` instead.
 * Shell tasks no longer use ``core`` as a prefix, but ``shell_resource`` instead.
 * HTTP task and shell task configurations require an app label prefix for any ``Resource``.
-* load_session decorator now excepts None as a session and will create a requests.Session.
+* ``load_session`` decorator now excepts None as a session and will create a requests.Session when it does.
+* The ``update`` method has been removed from the ``DataStorage`` base class
