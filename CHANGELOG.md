@@ -40,7 +40,7 @@ This is recommended, but requires migrations for some projects.
 v0.16
 -----
 
-* Adding support for ``Python 3.8``.
+* Adding support for ``Python 3.8`` and removing support for ``Python 3.5``.
 * Updating ``psycopg2-binary`` to ``2.8.4``.
 * HTTP tasks no longer use ``core`` as a prefix, but ``http_resource`` instead.
 * Shell tasks no longer use ``core`` as a prefix, but ``shell_resource`` instead.
