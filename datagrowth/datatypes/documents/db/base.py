@@ -14,9 +14,6 @@ class DataStorage(models.Model):
     def validate(data, schema):
         raise NotImplementedError()
 
-    def update(self, data, validate=True):
-        raise NotImplementedError()
-
     @property
     def content(self):
         raise NotImplementedError()
