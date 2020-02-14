@@ -10,10 +10,10 @@ class DatasetBaseSerializer(serializers.ModelSerializer):
     content = serializers.SerializerMethodField()
     annotations = serializers.SerializerMethodField()
 
-    default_fields = ("id", "signature", "created_at", "modified_at", "content", "annotations")
+    default_fields = ("id", "signature", "state", "created_at", "modified_at", "content", "annotations")
 
     def get_content(self, dataset):
-        return dataset.kernel.url
+        return dataset.kernel.url if dataset.kernel else None
 
     def get_annotations(self, dataset):
         if dataset.state != DatasetState.READY or not dataset.ANNOTATIONS:
