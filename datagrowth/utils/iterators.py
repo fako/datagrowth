@@ -15,6 +15,7 @@ def ibatch(iterable, batch_size, progress_bar=False, total=None):
     :param total: (int) the size of the iterator (only used for the progress bar)
     :return: Iterator
     """
+    progress_bar = progress_bar or None
 
     # Setup a progress bar if requested
     if progress_bar and not total:
@@ -31,9 +32,9 @@ def ibatch(iterable, batch_size, progress_bar=False, total=None):
     while True:
         batch = list(islice(it, batch_size))
         if not batch:
-            if progress_bar:
+            if progress_bar is not None:
                 progress_bar.close()
             return
-        if progress_bar:
+        if progress_bar is not None:
             progress_bar.update(1)
         yield batch
