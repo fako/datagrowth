@@ -47,3 +47,4 @@ v0.16
 * HTTP task and shell task configurations require an app label prefix for any ``Resource``.
 * ``load_session`` decorator now excepts None as a session and will create a requests.Session when it does.
 * The ``update`` method has been removed from the ``DataStorage`` base class
+* The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)
