@@ -39,7 +39,7 @@ class HttpResource(Resource):
     """
 
     # Identification
-    data_hash = models.CharField(max_length=255, db_index=True, default="")
+    data_hash = models.CharField(max_length=255, db_index=True, default="", blank=True)
 
     # Getting data
     request = json_field.JSONField(default=None)

@@ -34,4 +34,17 @@ Omit the configuration altogether and use ``register_defaults``.
 This is recommended, but requires migrations for some projects.
 * ``_handle_errors`` has been renamed to ``handle_errors`` and is an explicit candidate for overriding.
 * ``_update_from_response`` has been renamed to ``_update_from_results`` for more consistent Resource api.
-* Dumps KaldiNL results into an output folder instead of KaldiNL root
+* Dumps KaldiNL results into an output folder instead of KaldiNL root.
+
+
+v0.16
+-----
+
+* Adding support for ``Python 3.8`` and removing support for ``Python 3.5``.
+* Updating ``psycopg2-binary`` to ``2.8.4``.
+* HTTP tasks no longer use ``core`` as a prefix, but ``http_resource`` instead.
+* Shell tasks no longer use ``core`` as a prefix, but ``shell_resource`` instead.
+* HTTP task and shell task configurations require an app label prefix for any ``Resource``.
+* ``load_session`` decorator now excepts None as a session and will create a requests.Session when it does.
+* The ``update`` method has been removed from the ``DataStorage`` base class
+* The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)

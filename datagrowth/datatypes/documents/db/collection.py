@@ -73,14 +73,14 @@ class CollectionBase(DataStorage):
         :return: A list of updated or created instances.
         """
         collection = collection or self
-        Document = self.get_document_model()
+        Document = collection.get_document_model()
         assert isinstance(data, (Iterator, list, tuple, dict, Document)), \
-            "Collection.update expects data to be formatted as iteratable, dict or Document not {}".format(type(data))
+            f"Collection.add expects data to be formatted as iteratable, dict or {type(Document)} not {type(data)}"
 
         if reset:
             self.documents.all().delete()
 
-        def prepare_updates(data):
+        def prepare_additions(data):
 
             prepared = []
             if isinstance(data, dict):
@@ -97,12 +97,12 @@ class CollectionBase(DataStorage):
                 prepared.append(data)
             else:  # type is list
                 for instance in data:
-                    prepared += prepare_updates(instance)
+                    prepared += prepare_additions(instance)
             return prepared
 
         count = 0
         for updates in ibatch(data, batch_size=batch_size):
-            updates = prepare_updates(updates)
+            updates = prepare_additions(updates)
             count += len(updates)
             Document.objects.bulk_create(updates, batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE)
 
