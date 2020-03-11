@@ -7,4 +7,5 @@ Reference
 
     resources/reference
     configuration/reference
+    processors/reference
     utils/reference
