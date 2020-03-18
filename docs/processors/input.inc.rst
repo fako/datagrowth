@@ -3,21 +3,21 @@ Input
 -----
 
 Very often when gathering data you're only interested in part of the data and can discard the rest.
-The ``ExtractionProcessor`` is a processor that helps you to extract data from common formats like JSON, HTML and XML.
+The ``ExtractProcessor`` is a processor that helps you to extract data from common formats like JSON, HTML and XML.
 
 Let's imagine a scenario where you want to get the ``name`` and ``description`` of objects in a JSON response
 that are stored under the ``results`` key. Together with this you want to store the source of these objects,
 which is stored under the ``source`` inside a ``metadata`` object.
 It can be useful to store metadata such as a source together with the actual data for later processing.
 
-In order to handle the scenario described above with the ``ExtractionProcessor``.
+In order to handle the scenario described above with the ``ExtractProcessor``.
 You would have to write a configuration as follows ::
 
     from datagrowth.config import create_config
-    from datagrowth.processors import ExtractionProcessor
+    from datagrowth.processors import ExtractProcessor
 
 
-    config = create_config("extraction_processor", {
+    config = create_config("extract_processor", {
 
         # Objectives indicate what data you want to retrieve from a source
         "objective": {
@@ -33,7 +33,7 @@ You would have to write a configuration as follows ::
 
     }
 
-    extractor = ExtractionProcessor(config=config)
+    extractor = ExtractProcessor(config=config)
     results = extractor.extract("application/json", """{
         "metadata": {"source": "data tooling" ... more keys you don't need }
         "results": [
@@ -54,15 +54,15 @@ Let's imagine a scenario where we want to get data from an unsorted HTML list.
 The title of each item we want to store as ``name`` and the content as ``description``.
 Lastly the ``source`` will come from the title element of the page.
 
-For that the ``ExtractionProcessor`` configuration looks like this ::
+For that the ``ExtractProcessor`` configuration looks like this ::
 
     from bs4 import BeautifulSoup
 
     from datagrowth.config import create_config
-    from datagrowth.processors import ExtractionProcessor
+    from datagrowth.processors import ExtractProcessor
 
 
-    config = create_config("extraction_processor", {
+    config = create_config("extract_processor", {
 
         # Objectives indicate what data you want to retrieve from a source
         "objective": {
@@ -81,7 +81,7 @@ For that the ``ExtractionProcessor`` configuration looks like this ::
 
     }
 
-    extractor = ExtractionProcessor(config=config)
+    extractor = ExtractProcessor(config=config)
     soup = BeautifulSoup("""
         <html>
             <head><title>data tooling</title></head>
