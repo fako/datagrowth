@@ -122,3 +122,6 @@ class HttpResourceMock(HttpResource):
             "url": args,
             "meta": args[1] if len(args) > 1 else None
         }
+
+    class Meta:
+        ordering = ("id",)

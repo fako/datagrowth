@@ -1,16 +1,16 @@
 from datetime import datetime
 
-from mock import patch
+from unittest.mock import patch
 import requests
 
 from django.test import TestCase
 from django.utils import six
 
-from datascope.configuration import MOCK_CONFIGURATION
-from core.tasks.http import send, send_serie, send_mass, get_resource_link, load_session
-from core.utils.configuration import ConfigurationType
-from core.tests.mocks.requests import MockRequestsWithAgent, MockRequests
-from core.tests.mocks.http import HttpResourceMock
+from datagrowth.configuration import ConfigurationType
+from datagrowth.resources.http.tasks import send, send_serie, send_mass, get_resource_link, load_session
+
+from resources.mocks.requests import MockRequestsWithAgent, MockRequests
+from resources.models import HttpResourceMock
 
 
 class TestHTTPTasksBase(TestCase):
@@ -23,10 +23,9 @@ class TestHTTPTasksBase(TestCase):
         self.config = ConfigurationType(
             namespace="http_resource",
             private=["_resource", "_continuation_limit"],
-            defaults=MOCK_CONFIGURATION
         )
         self.config.update({
-            "resource": "HttpResourceMock",
+            "resource": "resources.HttpResourceMock",
         })
         self.session = MockRequests
 
@@ -100,7 +99,7 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
         self.check_results(scc, 3)
         self.check_results(err, 1)
 
-    @patch("core.tasks.http.send_serie", return_value=([], [],))
+    @patch("datagrowth.resources.http.tasks.send_serie", return_value=([], [],))
     def test_send_mass_concat_arguments(self, send_serie):
         self.config.concat_args_size = 3
         self.config.concat_args_symbol = "|"
