@@ -36,7 +36,7 @@ class TikaResource(ShellResource):
     CMD_TEMPLATE = [
         "java",
         "-jar",
-        "tika-app-1.19.1.jar",
+        "tika-app-1.24.1.jar",
         "-J",
         "-t",
         "{}"
