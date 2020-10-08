@@ -11,7 +11,8 @@ Sphinx==2.4.4
 sphinx-rtd-theme==0.1.8
 wheel==0.33.6
 setuptools==41.4.0
-celery==4.3.0
+celery==4.4.0
+docker-compose==1.27.4
 
 # Add the current project as a package
 -e .
