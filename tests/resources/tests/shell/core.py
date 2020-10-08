@@ -224,9 +224,9 @@ class TestShellResource(ResourceTestMixin):
         self.assertEqual(err, "err")
         # Cleaning with some challanging bytes
         out = self.instance.clean_stdout(b"out\x00")
-        self.assertEqual(out, "out\uFFFD")
+        self.assertEqual(out, "out")
         err = self.instance.clean_stdout(b"err\x00")
-        self.assertEqual(err, "err\uFFFD")
+        self.assertEqual(err, "err")
         # Cleaned results should always be able to save a Resource
         self.instance.uri = "test-clean-results"
         self.instance.stdout = out

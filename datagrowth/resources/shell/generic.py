@@ -268,7 +268,7 @@ class ShellResource(Resource):
         :param stdout: (bytes) stdout from the command
         :return: (str) cleaned decoded output
         """
-        return stdout.decode("utf-8").replace("\x00", "\uFFFD")
+        return stdout.decode("utf-8").replace("\x00", "")
 
     def clean_stderr(self, stderr):
         """
@@ -278,7 +278,7 @@ class ShellResource(Resource):
         :param stderr: (bytes) stderr from the command
         :return: (str) cleaned decoded output
         """
-        return stderr.decode("utf-8").replace("\x00", "\uFFFD")
+        return stderr.decode("utf-8").replace("\x00", "")
 
     #######################################################
     # PROTECTED METHODS
