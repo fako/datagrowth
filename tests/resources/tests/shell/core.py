@@ -217,7 +217,18 @@ class TestShellResource(ResourceTestMixin):
             self.fail("validate_command invalidated with a schema without restrictions.")
 
     def test_clean_results(self):
+        # Simple cleaning
         out = self.instance.clean_stdout(b"out")
         self.assertEqual(out, "out")
-        out = self.instance.clean_stdout(b"err")
-        self.assertEqual(out, "err")
+        err = self.instance.clean_stdout(b"err")
+        self.assertEqual(err, "err")
+        # Cleaning with some challanging bytes
+        out = self.instance.clean_stdout(b"out\x00")
+        self.assertEqual(out, "out\uFFFD")
+        err = self.instance.clean_stdout(b"err\x00")
+        self.assertEqual(err, "err\uFFFD")
+        # Cleaned results should always be able to save a Resource
+        self.instance.uri = "test-clean-results"
+        self.instance.stdout = out
+        self.instance.stderr = err
+        self.instance.save()
