@@ -4,6 +4,7 @@ Some core functionality shared by all derived classes of HttpResource gets teste
 """
 
 import json
+from unittest.mock import patch, call
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -116,9 +117,10 @@ class TestHttpResourceInterface(TestCase):
         })
         self.assertEqual(preq.body, expected_body)
 
-    def test_send_get_request(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_send_get_request(self, sleep_mock):
         # Make a new request and store it.
-        instance = self.model().get("new")
+        instance = self.model(interval_duration=1000).get("new")
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
         self.assertEquals(instance.session.send.call_count, 1)
@@ -128,7 +130,9 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertFalse(instance.data_hash)
+        self.assertEqual(sleep_mock.call_args_list, [call(1)])
         # Make a new request from an existing request dictionary
+        sleep_mock.reset_mock()
         request = self.model().get("new2").request
         instance = self.model(request=request).get()
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
@@ -140,15 +144,19 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertFalse(instance.data_hash)
+        self.assertFalse(sleep_mock.called)
 
-    def test_get_success(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_get_success(self, sleep_mock):
         # Load an existing request
-        instance = self.model().get("success")
+        instance = self.model(interval_duration=1000).get("success")
         self.assertFalse(instance.session.send.called)
         self.assertEqual(instance.head, self.content_type_header)
         self.assertJSONEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
+        self.assertFalse(sleep_mock.called,
+                         "When using cache the interval_duration is never necessary and should be ignored")
         # Load an existing resource from its request
         request = instance.request
         instance = self.model(request=request).get()
@@ -157,17 +165,22 @@ class TestHttpResourceInterface(TestCase):
         self.assertJSONEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
+        self.assertFalse(sleep_mock.called,
+                         "When using cache the interval_duration is never necessary and should be ignored")
 
-    def test_get_retry(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_get_retry(self, sleep_mock):
         # Load and retry an existing request
-        instance = self.model().get("fail")
+        instance = self.model(interval_duration=1000).get("fail")
         self.assertEquals(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "fail")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
+        self.assertEqual(sleep_mock.call_args_list, [call(1)])
         # Load an existing resource from its request
+        sleep_mock.reset_mock()
         request = instance.request
         instance = self.model(request=request).get()
         self.assertEquals(instance.session.send.call_count, 1)
@@ -176,6 +189,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
+        self.assertFalse(sleep_mock.called)
 
     def test_get_invalid(self):
         # Invalid invoke of get
@@ -192,23 +206,30 @@ class TestHttpResourceInterface(TestCase):
         except ValidationError:
             pass
 
-    def test_get_cache_only(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_get_cache_only(self, sleep_mock):
         # Load an existing resource from cache
-        instance = self.model(config={"cache_only": True}).get("success")
+        instance = self.model(config={"cache_only": True}, interval_duration=1000).get("success")
         self.assertFalse(instance.session.send.called)
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
+        self.assertFalse(sleep_mock.called,
+                         "When using cache the interval_duration is never necessary and should be ignored")
         # Load an existing resource from cache by its request
         request = instance.request
         instance = self.model(request=request, config={"cache_only": True}).get()
         self.assertFalse(instance.session.send.called)
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
+        self.assertFalse(sleep_mock.called,
+                         "When using cache the interval_duration is never necessary and should be ignored")
         # Load a failed resource from cache
-        instance = self.model(config={"cache_only": True}).get("fail")
+        instance = self.model(config={"cache_only": True}, interval_duration=1000).get("fail")
         self.assertFalse(instance.session.send.called)
         self.assertEqual(instance.status, 502)
         self.assertTrue(instance.id)
+        self.assertFalse(sleep_mock.called,
+                         "When using cache the interval_duration is never necessary and should be ignored")
         # Fail to load from cache
         try:
             self.model(config={"cache_only": True}).get("new")

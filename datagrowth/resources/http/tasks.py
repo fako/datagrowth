@@ -1,5 +1,4 @@
 import logging
-from time import sleep
 import requests
 
 from django.apps import apps
@@ -74,6 +73,7 @@ def send(config, *args, **kwargs):
         # Get payload
         link = get_resource_link(config, session)
         link.request = current_request
+        link.interval_duration = config.interval_duration
         try:
             link = link.send(method, *args, **kwargs)
             link.close()
@@ -86,10 +86,6 @@ def send(config, *args, **kwargs):
         # Prepare next request
         has_next_request = current_request = link.create_next_request()
         count += 1
-        # Take a break for scraping if configured
-        interval_duration = config.interval_duration / 1000
-        if has_next_request and interval_duration:
-            sleep(interval_duration)
     # Output results in simple type for json serialization
     return [success, errors]
 
@@ -105,10 +101,6 @@ def send_serie(config, args_list, kwargs_list, session=None, method=None):  # TO
         scc, err = send(method=method, config=config, session=session, *args, **kwargs)
         success += scc
         errors += err
-        # Take a break for scraping if configured
-        interval_duration = config.interval_duration / 1000
-        if interval_duration:
-            sleep(interval_duration)
     return [success, errors]
 
 

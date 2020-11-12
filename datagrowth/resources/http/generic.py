@@ -1,11 +1,11 @@
-from urllib.parse import urlencode
-
 import os
 import re
 import hashlib
 import json
 from copy import copy, deepcopy
 from datetime import datetime
+from urllib.parse import urlencode
+from time import sleep
 
 import requests
 import jsonschema
@@ -125,6 +125,8 @@ class HttpResource(Resource):
         resource.request = resource.request_with_auth()
         resource._send()
         resource.handle_errors()
+        if self.interval_duration:
+            sleep(self.interval_duration / 1000)
         return resource
 
     def get(self, *args, **kwargs):
@@ -533,6 +535,7 @@ class HttpResource(Resource):
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session", requests.Session())
         self.timeout = kwargs.pop("timeout", 30)
+        self.interval_duration = kwargs.pop("interval_duration", 0)
         super(HttpResource, self).__init__(*args, **kwargs)
 
     def clean(self):

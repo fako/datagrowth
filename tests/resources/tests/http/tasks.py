@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from unittest.mock import patch
+from unittest.mock import patch, call
 import requests
 
 from django.test import TestCase
@@ -65,16 +65,23 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
         self.check_results(scc, 2)
         self.check_results(err, 1)
 
-    def test_send_mass_intervals(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_send_mass_intervals(self, sleep_mock):
+        # First with an interval
         self.config.interval_duration = 250  # 0.25 secs
         args_list = self.get_args_list(["test", "test2"])
         kwargs_list = self.get_kwargs_list(["test", "test2"])
-        start = datetime.now()
         scc, err = send_mass(args_list, kwargs_list, method=self.method, config=self.config, session=MockRequests)
-        end = datetime.now()
-        duration = (end - start).total_seconds()
-        self.assertGreater(duration, 0.5)
-        self.assertLess(duration, 1)
+        self.assertEqual(sleep_mock.call_args_list, [call(0.25), call(0.25)])
+        self.check_results(scc, 2)
+        self.check_results(err, 0)
+        # Now without an interval
+        sleep_mock.reset_mock()
+        self.config.interval_duration = 0
+        args_list = self.get_args_list(["test", "test2"])
+        kwargs_list = self.get_kwargs_list(["test", "test2"])
+        scc, err = send_mass(args_list, kwargs_list, method=self.method, config=self.config, session=MockRequests)
+        self.assertFalse(sleep_mock.called)
         self.check_results(scc, 2)
         self.check_results(err, 0)
 

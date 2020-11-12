@@ -342,8 +342,11 @@ class TestHttpResource(ResourceTestMixin):
     def test_init(self):
         mock = HttpResourceMock()
         self.assertEqual(mock.timeout, 30)
+        self.assertEqual(mock.interval_duration, 0)
         mock = HttpResourceMock(timeout=20)
         self.assertEqual(mock.timeout, 20)
+        mock = HttpResourceMock(interval_duration=1000)
+        self.assertEqual(mock.interval_duration, 1000)
 
     def test_request_with_auth(self):
         self.instance.request = self.test_post_request

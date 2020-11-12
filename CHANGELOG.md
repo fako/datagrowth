@@ -4,7 +4,7 @@ CHANGELOG
 We try to be backwards compatible as much as we can,
 but this file keeps track of breaking changes in the Datagrowth package.
 
-Under each version number you'll find a section, 
+Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 v0.15
@@ -17,7 +17,7 @@ and ``DSInvalidResource``.
 * ``batchize`` used to be a function that returned batches and possibly a leftover batch.
  Now ``ibatch`` creates batches internally.
 * ``reach`` no longer excepts paths not starting with ``$``
-* Collection serializers do not include their content by default any more. 
+* Collection serializers do not include their content by default any more.
 Add it yourself by appending to default_fields or use the collection-content endpoint.
 * A ``google_cx`` config value is no longer provided by default.
 It should come from the ``GOOGLE_CX`` setting in your settings file.
@@ -48,3 +48,4 @@ v0.16
 * ``load_session`` decorator now excepts None as a session and will create a requests.Session when it does.
 * The ``update`` method has been removed from the ``DataStorage`` base class
 * The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)
+* The sleep dictated by ``interval_duration`` is executed by ``HttpResource`` not the http tasks
