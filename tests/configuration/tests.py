@@ -20,18 +20,20 @@ class TestConfigurationType(TestCase):
 
     def setUp(self):
         super().setUp()
+        self.empty = ConfigurationType(namespace="name", private=["_test3"], defaults=MOCK_CONFIGURATION)
         self.config = ConfigurationType(namespace="name", private=["_test3"], defaults=MOCK_CONFIGURATION)
         self.config.update({
             "test": "public",
             "_test2": "protected",
             "_test3": "private",
-            "$test4": "variable"  # variable config is not recommended
+            "$test4": "variable",  # variable config is not recommended
+            "async": False  # should map to "asynchronous" property for Python 3.7+
         })
 
     def test_init(self):
         # Implicit init without defaults
         # Notice that apps can manipulate the DATAGROWTH_DEFAULT_CONFIGURATION upon app.ready
-        # Therefor defaults are not loaded until first access
+        # Therefore defaults are not loaded until first access
         instance = ConfigurationType()
         self.assertEqual(instance._defaults, None)
         self.assertEqual(instance._namespace, ConfigurationType._global_prefix)
@@ -60,6 +62,7 @@ class TestConfigurationType(TestCase):
         self.assertEqual(self.config._test2, "protected")
         self.assertEqual(self.config._test3, "private")
         self.assertEqual(self.config.test4, "variable")
+        self.assertEqual(self.config.asynchronous, False)
         # Not found error
         try:
             self.test = self.config.test5
@@ -99,6 +102,9 @@ class TestConfigurationType(TestCase):
         self.config.update({"private_also": "private"})
         self.assertEqual(self.config.private_also, "private")
         self.assertEqual(self.config._private_also, "private")
+        # Test override of async by asynchronous
+        self.config.update({"asynchronous": True})
+        self.assertTrue(self.config.asynchronous)
 
     def test_to_dict(self):
         # Get all different possibilities
@@ -110,10 +116,12 @@ class TestConfigurationType(TestCase):
         self.assertIn("_test3", private)
         self.assertIn("test", private)
         self.assertIn("$test4", private)
+        self.assertIn("asynchronous", private)
         self.assertNotIn("_test2", private)
         self.assertIn("_test2", protected)
         self.assertIn("test", protected)
         self.assertIn("$test4", protected)
+        self.assertIn("asynchronous", protected)
         self.assertNotIn("_test3", protected)
         self.assertIn("test", public)
         self.assertIn("$test4", public)
@@ -123,20 +131,26 @@ class TestConfigurationType(TestCase):
         self.assertIn("_test2", everything)
         self.assertIn("_test3", everything)
         self.assertIn("$test4", everything)
+        self.assertIn("asynchronous", everything)
         # Make sure that all private keys are there
         # But the defaults key should not be passed down
         self.assertEqual(len(self.config._private) - 1 + len(public), len(private))
 
     def test_from_dict(self):
-        # Call with correct dict
+        test_dict = self.config.to_dict(private=True, protected=True)
+        # Make sure that the legacy async key works
+        test_dict.pop("asynchronous")
+        test_dict["async"] = False
+        # Make actual call
         type_instance = ConfigurationType.from_dict(
-            self.config.to_dict(private=True, protected=True),
+            test_dict,
             MOCK_CONFIGURATION
         )
         self.assertEqual(type_instance.test, "public")
         self.assertEqual(type_instance.test2, "protected")
         self.assertEqual(type_instance.test3, "private")
         self.assertEqual(type_instance.test4, "variable")
+        self.assertEqual(type_instance.asynchronous, False)
         self.assertEqual(type_instance.global_configuration, "global configuration")
         self.assertEqual(type_instance.namespace_configuration, "namespace configuration")
         self.assertEqual(type_instance._private, self.config._private)
@@ -159,21 +173,32 @@ class TestConfigurationType(TestCase):
         self.assertTrue("_test2" in self.config)
         self.assertTrue("_test3" in self.config)
         self.assertTrue("test4" in self.config)
+        self.assertTrue("async" in self.config)
+        self.assertTrue("asynchronous" in self.config)
         self.assertFalse("test5" in self.config)
 
     @patch("datagrowth.configuration.types.ConfigurationType.update")
     def test_supplement(self, update_method):
-        self.config.supplement({"test": "public 2"})
+        self.config.supplement({"test": "public 2", "asynchronous": True})
         self.assertEqual(self.config.test, "public")
+        self.assertFalse(self.config.asynchronous)
         update_method.assert_not_called()
-        self.config.supplement({"_test2": "protected 2", "_test3": "private 2", "$test4": "variable 2"})
+        self.config.supplement({
+            "_test2": "protected 2",
+            "_test3": "private 2",
+            "$test4": "variable 2"
+        })
         self.assertEqual(self.config.test, "public")
         self.assertEqual(self.config.test2, "protected")
         self.assertEqual(self.config.test3, "private")
         self.assertEqual(self.config.test4, "variable")
+        self.assertFalse(self.config.asynchronous)
         update_method.assert_not_called()
         self.config.supplement({"new": "new", "_new2": "new 2", "$new3": "new 3"})
         update_method.assert_called_once_with({"new": "new", "_new2": "new 2", "$new3": "new 3"})
+        # Make sure that legacy async keys get set properly
+        self.empty.supplement({"async": False})
+        self.assertFalse(self.config.asynchronous)
 
     def test_items(self):
         # Get all different possibilities
@@ -195,10 +220,12 @@ class TestConfigurationType(TestCase):
         self.assertIn("_test3", private)
         self.assertIn("test", private)
         self.assertIn("$test4", private)
+        self.assertIn("asynchronous", private)
         self.assertNotIn("_test2", private)
         self.assertIn("_test2", protected)
         self.assertIn("test", protected)
         self.assertIn("$test4", protected)
+        self.assertIn("asynchronous", protected)
         self.assertNotIn("_test3", protected)
         self.assertIn("test", public)
         self.assertIn("$test4", public)
@@ -208,6 +235,7 @@ class TestConfigurationType(TestCase):
         self.assertIn("_test2", everything)
         self.assertIn("_test3", everything)
         self.assertIn("$test4", everything)
+        self.assertIn("asynchronous", everything)
         # Make sure that all private keys are there
         # But the defaults key should not be passed down
         self.assertEqual(len(self.config._private) - 1 + len(public), len(private))
@@ -227,10 +255,15 @@ class TestConfigurationType(TestCase):
         self.assertEqual(self.config.get("_test2", None), "protected")
         self.assertEqual(self.config.get("_test3", None), "private")
         self.assertEqual(self.config.get("test4", None), "variable")
+        self.assertEqual(self.config.get("async", None), False)
+        self.assertEqual(self.config.get("asynchronous", None), False)
         # Default fallback
         self.assertEqual(self.config.get("test5", "does-not-exist"), "does-not-exist")
         self.assertEqual(self.config.get("test5", 0), 0)
         self.assertEqual(self.config.get("test5", None), None)
+        # Test fallbacks of legacy async configurations
+        self.assertEqual(self.empty.get("asynchronous", None), True)  # global default should exist
+        self.assertEqual(self.empty.get("async", None), True)
         # Namespace configuration (with a list default)
         self.assertNotIn("namespace_configuration", self.config.__dict__)
         self.assertEqual(self.config.get("namespace_configuration", None), "namespace configuration")

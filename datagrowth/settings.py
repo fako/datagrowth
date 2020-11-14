@@ -36,7 +36,8 @@ DATAGROWTH_KALDI_NL_BASE_PATH = getattr(settings, "DATAGROWTH_KALDI_NL_BASE_PATH
 
 
 DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGURATION", {
-    "global_async": True,  # by default offload to celery where possible
+    "global_asynchronous": True,  # by default offload to celery where possible
+    "global_async": True,  # legacy "asynchronous" configuration for Python <= 3.6
     "global_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
     "global_token": "",
     "global_purge_immediately": False,  # by default keep resources around

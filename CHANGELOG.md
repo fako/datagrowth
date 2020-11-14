@@ -49,3 +49,4 @@ v0.16
 * The ``update`` method has been removed from the ``DataStorage`` base class
 * The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)
 * The sleep dictated by ``interval_duration`` is executed by ``HttpResource`` not the http tasks
+* ``ConfigurationType`` still works with the "async" property, but migrates internally to "asynchronous"

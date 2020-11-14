@@ -106,6 +106,8 @@ class ConfigurationType(object):
             return self.__dict__[shielded_key]
         elif variable_key in self.__dict__:
             return self.__dict__[variable_key]
+        elif config == "asynchronous" and "async" in self.__dict__:  # migration for Python 3.7+
+            return self.__dict__["async"]
 
         # Lazy load the default configuration from settings to allow apps to register their own defaults
         if self._defaults is None:
@@ -193,6 +195,8 @@ class ConfigurationType(object):
         for key, value in self.__dict__.items():
             if key == '_defaults':
                 continue
+            if key == 'async':
+                key = 'asynchronous'
             if key.startswith('_'):
                 if (private and key in self._private) or (protected and key not in self._private):
                     yield key, value
