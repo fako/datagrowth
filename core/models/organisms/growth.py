@@ -2,6 +2,7 @@ import logging
 from operator import xor
 from collections import Iterator
 
+from django.apps import apps
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, ContentType
 from django.core.exceptions import ValidationError
@@ -11,7 +12,6 @@ from datascope.configuration import PROCESS_CHOICE_LIST, DEFAULT_CONFIGURATION
 from core.processors.base import ArgumentsTypes
 from core.processors.mixins import ProcessorMixin
 from core.utils.configuration import ConfigurationField
-from core.utils.helpers import get_any_model
 from core.exceptions import DSProcessError, DSNoContent
 from core.models.organisms import Individual, Collective
 
@@ -231,7 +231,7 @@ class Growth(models.Model, ProcessorMixin):
 
     @property
     def resources(self):
-        Resource = get_any_model(self.config.resource)
+        Resource = apps.get_model(self.config.resource)
         Type = ContentType.objects.get_for_model(self)
         return Resource.objects.filter(retainer_type__pk=Type.id, retainer_id=self.id)
 
