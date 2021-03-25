@@ -50,3 +50,4 @@ v0.16
 * The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)
 * The sleep dictated by ``interval_duration`` is executed by ``HttpResource`` not the http tasks
 * ``ConfigurationType`` still works with the "async" property, but migrates internally to "asynchronous"
+* Modern mime types like application/vnd.api+json get processed by ExtractProcessor as application/json
