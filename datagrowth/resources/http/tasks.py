@@ -93,7 +93,7 @@ def send(config, *args, **kwargs):
 @app.task(name="http_resource.send_serie")
 @load_config()
 @load_session()
-def send_serie(config, args_list, kwargs_list, session=None, method=None):  # TODO: test to unlock
+def send_serie(config, args_list, kwargs_list, session=None, method=None):
     success = []
     errors = []
     for args, kwargs in zip(args_list, kwargs_list):

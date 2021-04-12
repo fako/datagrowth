@@ -4,10 +4,9 @@ from unittest.mock import patch, call
 import requests
 
 from django.test import TestCase
-from django.utils import six
 
 from datagrowth.configuration import ConfigurationType
-from datagrowth.resources.http.tasks import send, send_serie, send_mass, get_resource_link, load_session
+from datagrowth.resources.http.tasks import send, send_mass, get_resource_link, load_session
 
 from resources.mocks.requests import MockRequestsWithAgent, MockRequests
 from resources.models import HttpResourceMock
@@ -19,7 +18,7 @@ class TestHTTPTasksBase(TestCase):
     method = ""
 
     def setUp(self):
-        super(TestHTTPTasksBase, self).setUp()
+        super().setUp()
         self.config = ConfigurationType(
             namespace="http_resource",
             private=["_resource", "_continuation_limit"],
@@ -48,11 +47,14 @@ class TestHTTPTasksBase(TestCase):
     def check_results(self, results, expected_length):
         self.assertEqual(len(results), expected_length)
         for pk in results:
-            self.assertIsInstance(pk, six.integer_types)
+            self.assertIsInstance(pk, int)
             self.assertGreater(pk, 0)
 
 
 class TestSendMassTaskBase(TestHTTPTasksBase):
+    """
+    This test case also covers send_serie as that is the main implementation of send_mass
+    """
 
     def test_send_mass(self):
         args_list = self.get_args_list(["test", "test2", "404"])
@@ -110,7 +112,7 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
     def test_send_mass_concat_arguments(self, send_serie):
         self.config.concat_args_size = 3
         self.config.concat_args_symbol = "|"
-        scc, err = send_mass(
+        send_mass(
             [[1], [2], [3], [4], [5, 5], [6], [7]],
             [{}, {}, {}, {}, {}, {}, {}],
             method=self.method,
@@ -124,8 +126,14 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
             session=MockRequests
         )
 
-    def test_send_inserted_session_provider(self):
-        self.skipTest("not tested")
+    @patch("datagrowth.resources.http.tasks.send_serie", return_value=([], [],))
+    def test_send_inserted_session_provider(self, send_serie):
+        send_mass([1], [{}], method=self.method, config=self.config, session="ProcessorMock")
+        args, kwargs = send_serie.call_args
+        self.assertEqual(args, ([1], [{}],))
+        self.assertEqual(kwargs["method"], self.method)
+        self.assertEqual(kwargs["config"], self.config)
+        self.assertTrue(kwargs["session"].from_provider)
 
 
 class TestSendMassTaskGet(TestSendMassTaskBase):
@@ -175,8 +183,12 @@ class TestSendTaskGet(TestHTTPTasksBase):
         link = HttpResourceMock.objects.get(id=scc[0])
         self.assertIn("user-agent", link.head)
 
-    def test_send_inserted_session_provider(self):
-        self.skipTest("not tested")
+    @patch("datagrowth.resources.http.tasks.get_resource_link")
+    def test_send_inserted_session_provider(self, get_resource_link_mock):
+        send("test", method=self.method, config=self.config, session="ProcessorMock")
+        args, kwargs = get_resource_link_mock.call_args
+        config, session = args
+        self.assertTrue(session.from_provider)
 
 
 class TestSendTaskPost(TestHTTPTasksBase):
@@ -218,31 +230,12 @@ class TestSendTaskPost(TestHTTPTasksBase):
         link = HttpResourceMock.objects.get(id=scc[0])
         self.assertIn("user-agent", link.head)
 
-    def test_send_inserted_session_provider(self):
-        self.skipTest("not tested")
-
-
-class TestSendSerieTaskGet(TestHTTPTasksBase):
-
-    def test_case(self):
-        # TODO: very similar to TestSendMassTaskGet, refactor?
-        self.skipTest("not tested")
-
-    def test_send_inserted_session_provider(self):
-        self.skipTest("not tested")
-
-    def test_send_serie_intervals(self):
-        self.skipTest("not tested")
-
-
-class TestSendSerieTaskPost(TestHTTPTasksBase):
-
-    def test_case(self):
-        # TODO: very similar to TestSendMassTaskPost, refactor?
-        self.skipTest("not tested")
-
-    def test_send_inserted_session_provider(self):
-        self.skipTest("not tested")
+    @patch("datagrowth.resources.http.tasks.get_resource_link")
+    def test_send_inserted_session_provider(self, get_resource_link_mock):
+        send("test", method=self.method, config=self.config, session="ProcessorMock")
+        args, kwargs = get_resource_link_mock.call_args
+        config, session = args
+        self.assertTrue(session.from_provider)
 
 
 class TestGetResourceLink(TestHTTPTasksBase):
@@ -260,10 +253,24 @@ class TestGetResourceLink(TestHTTPTasksBase):
         self.assertEqual(link.session.cookies, {"test": "test"})
 
 
+@load_session()
+def load_session_function(config, session):
+    return config, session
+
+
 class TestLoadSession(TestCase):
 
-    def test_load_session(self):
-        self.skipTest("not tested")
+    def setUp(self):
+        super().setUp()
+        self.config = ConfigurationType(namespace="test",)
 
-    def test_preload_session(self):
-        self.skipTest("not tested")
+    def test_load_session(self):
+        config, session = load_session_function(self.config)
+        self.assertIsInstance(session, requests.Session)
+        preload_session = requests.Session()
+        preload_session.preload = True
+        config, session = load_session_function(self.config, session=preload_session)
+        self.assertIsInstance(session, requests.Session)
+        self.assertTrue(session.preload)
+        config, session = load_session_function(self.config, session="ProcessorMock")
+        self.assertTrue(session.from_provider)
