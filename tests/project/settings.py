@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'configuration',
     'utils',
     'resources',
+    'processors',
 ]
 
 MIDDLEWARE = [
