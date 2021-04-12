@@ -1,4 +1,8 @@
+import re
 import copy
+
+
+JSON_MIMETYPE_PATTERN = re.compile("application/(.*)json")
 
 
 def reach(path, data):
@@ -71,3 +75,7 @@ def override_dict(parent, child):
     assert isinstance(parent, dict), "The parent is not a dictionary."
     assert isinstance(child, dict), "The child is not a dictionary"
     return dict(parent.copy(), **child)
+
+
+def is_json_mimetype(mimetype):
+    return JSON_MIMETYPE_PATTERN.match(mimetype)

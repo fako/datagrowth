@@ -1,13 +1,9 @@
-import re
 from copy import copy
 
 from datagrowth.configuration import ConfigurationProperty
-from datagrowth.utils import reach
+from datagrowth.utils import reach, is_json_mimetype
 from datagrowth.processors.base import Processor
 from datagrowth.exceptions import DGNoContent
-
-
-application_json_pattern = re.compile("application/(.*)json")
 
 
 class ExtractProcessor(Processor):
@@ -113,7 +109,7 @@ class ExtractProcessor(Processor):
             "ExtractProcessor.extract expects an objective to extract in the configuration."
         if content_type is None:
             return []
-        if application_json_pattern.match(content_type):
+        if is_json_mimetype(content_type):
             content_type = "application/json"
         content_type_method = content_type.replace("/", "_")
         method = getattr(self, content_type_method, None)

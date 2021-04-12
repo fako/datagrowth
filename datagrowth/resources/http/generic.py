@@ -21,6 +21,7 @@ import json_field
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X, DGResourceDoesNotExist
+from datagrowth.utils import is_json_mimetype
 
 
 class HttpResource(Resource):
@@ -174,7 +175,7 @@ class HttpResource(Resource):
         """
         if self.success:
             content_type = self.head.get("content-type", "unknown/unknown").split(';')[0]
-            if content_type == "application/json":
+            if is_json_mimetype(content_type):
                 return content_type, json.loads(self.body)
             elif content_type == "text/html":
                 return content_type, BeautifulSoup(self.body, "html5lib")

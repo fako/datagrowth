@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from datagrowth.utils import reach, override_dict
+from datagrowth.utils import reach, override_dict, is_json_mimetype
 
 
 class TestPythonReach(TestCase):
@@ -116,3 +116,12 @@ class TestOverrideDict(TestCase):
             }
         })
         self.assertIsNot(new_dict, self.parent)
+
+
+class TestIsJSONMimetype(TestCase):
+
+    def test_is_json_mimetype(self):
+        self.assertTrue(is_json_mimetype("application/json"))
+        self.assertTrue(is_json_mimetype("application/vnd.api+json"))
+        self.assertFalse(is_json_mimetype("application/pdf"))
+        self.assertFalse(is_json_mimetype("text/html"))
