@@ -108,6 +108,7 @@ DATABASES_MATRIX = {
 DATABASES = {
     'default': DATABASES_MATRIX[os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')]
 }
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # Password validation

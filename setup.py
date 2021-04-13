@@ -24,7 +24,7 @@ setuptools.setup(
         ]
     ),
     install_requires=[
-        "Django>=1.11",
+        "Django>=2.2",
         "celery",
         "jsonschema",
         "html5lib",
@@ -42,8 +42,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Framework :: Django :: 1.11",
+        "Programming Language :: Python :: 3.9",
         "Framework :: Django :: 2.2",
+        "Framework :: Django :: 3.2",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ),

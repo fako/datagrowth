@@ -5,6 +5,7 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
+  - "3.9"
 script: tox -e $TOX_ENV
 services:
   - mysql
@@ -19,7 +20,7 @@ env:
   - DJANGO_POSTGRES_USER=postgres
   - DJANGO_MYSQL_USER=root
   matrix:
-  - TOX_ENV=django111 DJANGO_DEFAULT_DATABASE=postgres
-  - TOX_ENV=django111 DJANGO_DEFAULT_DATABASE=mysql
   - TOX_ENV=django22 DJANGO_DEFAULT_DATABASE=postgres
   - TOX_ENV=django22 DJANGO_DEFAULT_DATABASE=mysql
+  - TOX_ENV=django32 DJANGO_DEFAULT_DATABASE=postgres
+  - TOX_ENV=django32 DJANGO_DEFAULT_DATABASE=mysql
