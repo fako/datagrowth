@@ -66,7 +66,7 @@ class ConfigurationField(fields.TextField):
         setattr(cls, name, configuration_property)
         super(ConfigurationField, self).contribute_to_class(cls, name)
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         return json.loads(value)
 
     def to_python(self, value):

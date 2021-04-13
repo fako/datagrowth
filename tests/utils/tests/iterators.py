@@ -71,7 +71,7 @@ class TestIBatch(TestCase):
         self.assertEqual(batches[0], list(range(0, 11)))
 
     def test_ibatch_with_list_progress_no_total(self):
-        progress_bar_mock = Mock(spec=tqdm(disable=True))
+        progress_bar_mock = Mock(spec=tqdm(disable=True, total=100))
         input = range(0, 100)
         with patch("datagrowth.utils.iterators.tqdm", return_value=progress_bar_mock) as tqdm_mock:
             # Neatly dividable batches
@@ -123,7 +123,7 @@ class TestIBatch(TestCase):
 
     def test_ibatch_with_list_progress_and_total(self):
         input = range(0, 100)
-        progress_bar_mock = Mock(spec=tqdm(disable=True))
+        progress_bar_mock = Mock(spec=tqdm(disable=True, total=100))
         with patch("datagrowth.utils.iterators.tqdm", return_value=progress_bar_mock) as tqdm_mock:
             # Neatly dividable batches
             iterator = ibatch(input, batch_size=20, progress_bar=True, total=100)
