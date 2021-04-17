@@ -5,7 +5,7 @@ from core.processors.base import Processor
 
 class ProcessorMixin(object):
 
-    def prepare_process(self, process, async=False, class_config=None, extra_config=None):
+    def prepare_process(self, process, asynchronous=False, class_config=None, extra_config=None):
         """
         Creates an instance of the processor based on requested process with a correct config set.
         Processors get loaded from core.processors
@@ -27,7 +27,7 @@ class ProcessorMixin(object):
         processor_name, method_name = Processor.get_processor_components(process)
         processor = Processor.create_processor(processor_name, self.config.to_dict(protected=True))
         method, args_type = processor.get_processor_method(method_name)
-        if async:
+        if asynchronous:
             method = getattr(method, "delay")
         if not callable(method):
             raise AssertionError("{} is not a callable property on {}.".format(method_name, processor))
