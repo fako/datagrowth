@@ -15,7 +15,6 @@ from datagrowth.configuration import ConfigurationField
 from core.models.organisms.states import CommunityState, COMMUNITY_STATE_CHOICES
 from core.models.organisms import Growth, Collective, Individual
 from core.models.organisms.managers.community import CommunityManager
-from core.models.resources.manifestation import Manifestation
 from core.processors.mixins import ProcessorMixin
 from core.processors.base import QuerySetProcessor
 from core.exceptions import DSProcessUnfinished, DSProcessError
@@ -33,11 +32,7 @@ class Community(models.Model, ProcessorMixin):
     config = ConfigurationField()
 
     growth_set = GenericRelation(Growth, content_type_field="community_type", object_id_field="community_id")
-    manifestation_set = GenericRelation(
-        Manifestation,
-        content_type_field="community_type",
-        object_id_field="community_id"
-    )
+
     collective_set = GenericRelation(Collective, content_type_field="community_type", object_id_field="community_id")
     individual_set = GenericRelation(Individual, content_type_field="community_type", object_id_field="community_id")
 
