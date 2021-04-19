@@ -1,8 +1,5 @@
-from datagrowth.datatypes import CollectionBase
+from datagrowth.datatypes import CollectionBase, DocumentCollectionMixin
 
 
-class Collection(CollectionBase):
-
-    @property
-    def documents(self):
-        return self.document_set
+class Collection(DocumentCollectionMixin, CollectionBase):
+    pass
