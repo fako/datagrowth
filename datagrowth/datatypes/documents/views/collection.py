@@ -9,16 +9,12 @@ from .content import ContentView, ContentPagination
 
 class CollectionBaseSerializer(serializers.ModelSerializer):
 
-    schema = serializers.SerializerMethodField()
-    default_fields = ("id", "name", "created_at", "modified_at", "schema", "referee", "identifier",)
-
-    def get_schema(self, collective):
-        return collective.schema
+    default_fields = ("id", "name", "created_at", "modified_at", "referee", "identifier",)
 
 
 class CollectionBaseContentView(ContentView):
     """
-    A Collection is a list of Documents that share the same JSON schema.
+    A Collection is a list of Documents
     """
     pagination_class = ContentPagination
 
