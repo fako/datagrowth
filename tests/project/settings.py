@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'utils',
     'resources',
     'processors',
+    'datatypes',
 ]
 
 MIDDLEWARE = [
