@@ -77,9 +77,6 @@ class DocumentBase(DataStorage):
 
         self.properties.update(data)
 
-        if validate:
-            self.validate(self.properties, self.schema)
-
         self.save()
         return self.content
 

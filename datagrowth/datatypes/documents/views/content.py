@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.shortcuts import Http404
 
 from rest_framework import serializers, pagination, generics
@@ -14,14 +13,6 @@ class ContentSerializer(serializers.Serializer):
             return instance
         else:
             assert True, "Received unexpected type {} as content.".format(type(instance))
-
-    def to_internal_value(self, data):
-        try:
-            content_class = self.context["content_class"]
-            data = content_class.validate(data, self.context["schema"])
-        except ValidationError as exc:
-            raise serializers.ValidationError(exc)
-        return data
 
     def update(self, instance, validated_data):
         instance.update(validated_data, validate=False, reset=False)
@@ -42,7 +33,6 @@ class ContentView(generics.RetrieveAPIView):
 
     def get_serializer(self, *args, **kwargs):
         serializer = super(ContentView, self).get_serializer(*args, **kwargs)
-        serializer.context["schema"] = serializer.context["request"].object.schema
         serializer.context["content_class"] = self.content_class
         return serializer
 

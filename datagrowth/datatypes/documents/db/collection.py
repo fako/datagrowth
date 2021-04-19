@@ -35,7 +35,6 @@ class CollectionBase(DataStorage):
         Document = self.get_document_model()
         return Document(
             collection=collection,
-            schema=self.schema,
             properties=data
         )
 
@@ -66,7 +65,7 @@ class CollectionBase(DataStorage):
         Add new data to the Collection in batches, possibly deleting all data before adding.
 
         :param data: The data to use for the update
-        :param validate: (optional) whether to validate data or not (yes by default)
+        :param validate: (deprecated) used to allow JSON schema validation before addition
         :param reset: (optional) whether to delete existing data or not (no by default)
         :param batch_size: (optional) how many instances to add in a single batch (default: 500)
         :param collection: (optional) a collection instance to add the data to (default: self)
@@ -84,14 +83,10 @@ class CollectionBase(DataStorage):
 
             prepared = []
             if isinstance(data, dict):
-                if validate:
-                    Document.validate(data, self.schema)
                 document = self.init_document(data, collection=collection)
                 document.clean()
                 prepared.append(document)
             elif isinstance(data, Document):
-                if validate:
-                    Document.validate(data, self.schema)
                 data = self.init_document(data.properties, collection=collection)
                 data.clean()
                 prepared.append(data)
