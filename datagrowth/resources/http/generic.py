@@ -15,8 +15,10 @@ from bs4 import BeautifulSoup
 
 from django.core.exceptions import ValidationError
 from django.db import models
-
-import json_field
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django.contrib.postgres.fields import JSONField
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
@@ -43,10 +45,10 @@ class HttpResource(Resource):
     data_hash = models.CharField(max_length=255, db_index=True, default="", blank=True)
 
     # Getting data
-    request = json_field.JSONField(default=None)
+    request = JSONField(default=None, null=True, blank=True)
 
     # Storing data
-    head = json_field.JSONField(default="{}")
+    head = JSONField(default=dict)
     body = models.TextField(default=None, null=True, blank=True)
 
     # Class constants that determine behavior
@@ -278,6 +280,10 @@ class HttpResource(Resource):
         """
         if self.purge_at is not None and self.purge_at <= datetime.now():
             raise ValidationError("Resource is no longer valid and will get purged")
+        # Legacy HttpResource instances may have a JSON string as request
+        # We parse that JSON to actual data here
+        if isinstance(request, str):
+            request = json.loads(request)
         # Internal asserts about the request
         assert isinstance(request, dict), "Request should be a dictionary."
         method = request.get("method")
@@ -540,6 +546,13 @@ class HttpResource(Resource):
         super(HttpResource, self).__init__(*args, **kwargs)
 
     def clean(self):
+        # Legacy HttpResource instances may have a JSON string as request and head
+        # We parse that JSON to actual data here
+        if isinstance(self.request, str):
+            self.request = json.loads(self.request)
+        if isinstance(self.head, str):
+            self.head = json.loads(self.head)
+        # Actual cleaning implementation
         if self.request and not self.uri:
             uri_request = self.request_without_auth()
             self.uri = HttpResource.uri_from_url(uri_request.get("url"))

@@ -1,5 +1,6 @@
 import subprocess
 import string
+import json
 import jsonschema
 from copy import copy
 from datetime import datetime
@@ -7,7 +8,10 @@ from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
-import json_field
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django.contrib.postgres.fields import JSONField
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
@@ -27,7 +31,7 @@ class ShellResource(Resource):
     """
 
     # Getting data
-    command = json_field.JSONField(default=None)
+    command = JSONField(default=None, null=True, blank=True)
     stdin = models.TextField(default=None, null=True, blank=True)
 
     # Storing data
@@ -241,12 +245,16 @@ class ShellResource(Resource):
         Apart from that it validates input which should adhere to
         the JSON schema defined in the ``SCHEMA`` attribute.
 
-        :param request: (dict) the command dictionary
+        :param command: (dict) the command dictionary
         :param validate_input: (bool) whether to validate input
         :return:
         """
         if self.purge_at is not None and self.purge_at <= datetime.now():
             raise ValidationError("Resource is no longer valid and will get purged")
+        # Legacy HttpResource instances may have a JSON string as command
+        # We parse that JSON to actual data here
+        if isinstance(command, str):
+            command = json.loads(command)
         # Internal asserts about the request
         assert isinstance(command, dict), \
             "Command should be a dictionary."
@@ -332,6 +340,10 @@ class ShellResource(Resource):
     # Methods and properties to tweak Django
 
     def clean(self):
+        # Legacy HttpResource instances may have a JSON string as command
+        # We parse that JSON to actual data here
+        if isinstance(self.command, str):
+            self.command = json.loads(self.command)
         if self.command and not self.uri:
             self.uri = ShellResource.uri_from_cmd(self.command.get("cmd"))
         super().clean()

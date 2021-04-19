@@ -1,38 +1,70 @@
 [
-{
-    "model": "resources.shellresourcemock",
-    "pk": 1,
-    "fields": {
-        "uri": "grep --context=5 -R . success",
-        "status": 0,
-        "config": "{\"_private\": [\"_private\", \"_defaults\", \"_namespace\"], \"_namespace\": \"global\"}",
-        "created_at": "2019-10-15T16:51:40.801Z",
-        "modified_at": "2019-10-15T16:51:40.801Z",
-        "purge_at": null,
-        "retainer_type": null,
-        "retainer_id": null,
-        "command": "\"{\\\"cmd\\\": [\\\"grep\\\", \\\"-R\\\", \\\"--context=5\\\", \\\"success\\\", \\\".\\\"], \\\"kwargs\\\": {\\\"context\\\": 5}, \\\"args\\\": [\\\"success\\\", \\\".\\\"], \\\"flags\\\": \\\"--context=5\\\"}\"",
-        "stdin": null,
-        "stdout": "out",
-        "stderr": ""
+    {
+        "model": "resources.shellresourcemock",
+        "pk": 1,
+        "fields": {
+            "uri": "grep --context=5 -R . success",
+            "status": 0,
+            "config": "{\"_private\": [\"_private\", \"_defaults\", \"_namespace\"], \"_namespace\": \"global\"}",
+            "created_at": "2019-10-15T16:51:40.801Z",
+            "modified_at": "2019-10-15T16:51:40.801Z",
+            "purge_at": null,
+            "retainer_type": null,
+            "retainer_id": null,
+            "command": {
+                "cmd": [
+                    "grep",
+                    "-R",
+                    "--context=5",
+                    "success",
+                    "."
+                ],
+                "kwargs": {
+                    "context": 5
+                },
+                "args": [
+                    "success",
+                    "."
+                ],
+                "flags": "--context=5"
+            },
+            "stdin": null,
+            "stdout": "out",
+            "stderr": ""
+        }
+    },
+    {
+        "model": "resources.shellresourcemock",
+        "pk": 2,
+        "fields": {
+            "uri": "grep --context=5 -R . fail",
+            "status": 1,
+            "config": "{\"_private\": [\"_private\", \"_defaults\", \"_namespace\"], \"_namespace\": \"global\"}",
+            "created_at": "2019-10-15T16:51:40.801Z",
+            "modified_at": "2019-10-15T16:51:40.801Z",
+            "purge_at": null,
+            "retainer_type": null,
+            "retainer_id": null,
+            "command": {
+                "cmd": [
+                    "grep",
+                    "-R",
+                    "--context=5",
+                    "fail",
+                    "."
+                ],
+                "kwargs": {
+                    "context": 5
+                },
+                "args": [
+                    "fail",
+                    "."
+                ],
+                "flags": "--context=5"
+            },
+            "stdin": null,
+            "stdout": "",
+            "stderr": "err"
+        }
     }
-},
-{
-    "model": "resources.shellresourcemock",
-    "pk": 2,
-    "fields": {
-        "uri": "grep --context=5 -R . fail",
-        "status": 1,
-        "config": "{\"_private\": [\"_private\", \"_defaults\", \"_namespace\"], \"_namespace\": \"global\"}",
-        "created_at": "2019-10-15T16:51:40.801Z",
-        "modified_at": "2019-10-15T16:51:40.801Z",
-        "purge_at": null,
-        "retainer_type": null,
-        "retainer_id": null,
-        "command": "\"{\\\"cmd\\\": [\\\"grep\\\", \\\"-R\\\", \\\"--context=5\\\", \\\"fail\\\", \\\".\\\"], \\\"kwargs\\\": {\\\"context\\\": 5}, \\\"args\\\": [\\\"fail\\\", \\\".\\\"], \\\"flags\\\": \\\"--context=5\\\"}\"",
-        "stdin": null,
-        "stdout": "",
-        "stderr": "err"
-    }
-}
 ]

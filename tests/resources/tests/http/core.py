@@ -417,6 +417,11 @@ class TestHttpResource(ResourceTestMixin):
             self.instance.validate_request(self.test_get_request)
         except ValidationError:
             self.fail("validate_request raised for a valid request.")
+        # Valid (JSON string)
+        try:
+            self.instance.validate_request(json.dumps(self.test_get_request))
+        except ValidationError:
+            self.fail("validate_request raised for a valid request using JSON string.")
         # Invalid
         invalid_request = deepcopy(self.test_get_request)
         invalid_request["args"] = ("en", "en", "test")
@@ -453,6 +458,11 @@ class TestHttpResource(ResourceTestMixin):
             self.instance.validate_request(self.test_post_request)
         except ValidationError:
             self.fail("validate_request raised for a valid request.")
+        # Valid (JSON string)
+        try:
+            self.instance.validate_request(json.dumps(self.test_post_request))
+        except ValidationError:
+            self.fail("validate_request raised for a valid request using JSON string.")
         # Invalid
         invalid_request = deepcopy(self.test_post_request)
         invalid_request["kwargs"] = {"query": 1}
@@ -482,14 +492,28 @@ class TestHttpResource(ResourceTestMixin):
             self.fail("validate_request invalidated with a schema without restrictions.")
 
     def test_clean_get(self):
+        # Request dict
         self.instance.request = self.test_get_request
+        self.instance.clean()
+        self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
+        self.assertEqual(self.instance.data_hash, "")
+        self.assertIsNone(self.instance.purge_at)
+        # Request JSON
+        self.instance.request = json.dumps(self.test_get_request)
         self.instance.clean()
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
         self.assertEqual(self.instance.data_hash, "")
         self.assertIsNone(self.instance.purge_at)
 
     def test_clean_post(self):
+        # Request dict
         self.instance.request = self.test_post_request
+        self.instance.clean()
+        self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
+        self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")
+        self.assertIsNone(self.instance.purge_at)
+        # Request JSON
+        self.instance.request = json.dumps(self.test_post_request)
         self.instance.clean()
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
         self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")
