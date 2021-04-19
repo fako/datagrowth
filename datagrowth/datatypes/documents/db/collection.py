@@ -38,13 +38,6 @@ class CollectionBase(DataStorage):
             properties=data
         )
 
-    @property
-    def url(self):  # TODO: move to base class
-        if not self.id:
-            raise ValueError("Can't get url for unsaved Collection")
-        view_name = "api-v1:{}:collection-content".format(self._meta.app_label.replace("_", "-"))
-        return reverse(view_name, args=[self.id])  # TODO: make version aware
-
     @classmethod
     def validate(cls, data, schema):
         """

@@ -14,11 +14,6 @@ class ContentSerializer(serializers.Serializer):
         else:
             assert True, "Received unexpected type {} as content.".format(type(instance))
 
-    def update(self, instance, validated_data):
-        instance.update(validated_data, validate=False, reset=False)
-        instance.save()
-        return instance
-
 
 class ContentView(generics.RetrieveAPIView):
     serializer_class = ContentSerializer

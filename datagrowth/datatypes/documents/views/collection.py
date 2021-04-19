@@ -1,7 +1,6 @@
-from django.core.exceptions import ValidationError
 from django.shortcuts import Http404
 
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.response import Response
 
 from .content import ContentView, ContentPagination
@@ -35,16 +34,3 @@ class CollectionBaseContentView(ContentView):
 
         serializer = self.get_serializer(request.object.content, many=True)
         return Response(serializer.data)
-
-    def post(self, request, pk):
-        try:
-            additions = self.request.object.add(request.data)
-        except ValidationError as exc:
-            schema = getattr(exc, "schema")
-            return Response({"detail":
-                {
-                    "message": exc.message,
-                    "schema": schema
-                }
-            }, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"detail": "Added {} documents".format(additions)}, status=status.HTTP_201_CREATED)

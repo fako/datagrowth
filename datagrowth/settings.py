@@ -11,6 +11,7 @@ from datagrowth.version import VERSION
 
 
 DATAGROWTH_VERSION = VERSION
+DATAGROWTH_API_VERSION = getattr(settings, "DATAGROWTH_API_VERSION", 1)
 
 DATAGROWTH_DATETIME_FORMAT = getattr(settings, "DATAGROWTH_DATETIME_FORMAT", "%Y%m%d%H%M%S%f")
 

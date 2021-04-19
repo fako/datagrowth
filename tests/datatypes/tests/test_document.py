@@ -34,7 +34,7 @@ class TestDocument(TestCase):
 
     def test_url(self):
         url = self.instance.url
-        self.assertEqual(url, '/data/v1/individual/1/content/')
+        self.assertEqual(url, '/api/v1/datatypes/data/document/1/content/')
         self.instance.id = None
         try:
             url = self.instance.url

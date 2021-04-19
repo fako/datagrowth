@@ -6,7 +6,6 @@ from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 try:
     from django.db.models import JSONField
 except ImportError:
@@ -30,13 +29,6 @@ class DocumentBase(DataStorage):
 
     def __setitem__(self, key, value):
         self.properties[key] = value
-
-    @property
-    def url(self):  # TODO: move to base class
-        if not self.id:
-            raise ValueError("Can't get url for unsaved Document")
-        view_name = "v1:{}:document-content".format(self._meta.app_label.replace("_", "-"))
-        return reverse(view_name, args=[self.id])  # TODO: make version aware
 
     @staticmethod
     def validate(data, schema):
