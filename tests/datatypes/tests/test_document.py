@@ -1,21 +1,18 @@
-from __future__ import unicode_literals, absolute_import, print_function, division
-
-from mock import patch
-from json import loads
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from core.models.organisms import Individual
+from datatypes.models import Document
 
 
-class TestIndividual(TestCase):
+class TestDocument(TestCase):
 
-    fixtures = ["test-organisms"]
+    fixtures = ["test-data-storage"]
 
     def setUp(self):
-        super(TestIndividual, self).setUp()
-        self.instance = Individual.objects.get(id=1)
+        super().setUp()
+        self.instance = Document.objects.get(id=1)
         self.value_outcome = "nested value 0"
         self.dict_outcome = {"value": "nested value 0"}
         self.expected_content = {
@@ -23,6 +20,17 @@ class TestIndividual(TestCase):
             'context': 'nested value'
         }
         self.expected_items = sorted([('context', 'nested value'), ('value', 'nested value 0')])
+        self.schema = {
+            "additionalProperties": False,
+            "required": ["value"],
+            "type": "object",
+            "properties": {
+                "word": {"type": "string"},
+                "value": {"type": "string"},
+                "language": {"type": "string"},
+                "country": {"type": "string"}
+            }
+        }
 
     def test_url(self):
         url = self.instance.url
@@ -36,7 +44,6 @@ class TestIndividual(TestCase):
 
     @patch("datagrowth.datatypes.DocumentBase.output_from_content")
     def test_output(self, output_from_content):
-        # Method is pending deprecation. We check whether replacement function is getting called correctly
         self.instance.output("$.value")
         output_from_content.assert_called_once_with(self.instance.content, "$.value")
 
@@ -65,17 +72,17 @@ class TestIndividual(TestCase):
 
     @patch("jsonschema.validate")
     def test_validate(self, jsonschema_validate):
-        Individual.validate(self.instance, self.instance.schema)
-        jsonschema_validate.assert_called_with(self.instance.properties, self.instance.schema)
+        Document.validate(self.instance, self.schema)
+        jsonschema_validate.assert_called_with(self.instance.properties, self.schema)
         jsonschema_validate.reset_mock()
-        Individual.validate(self.instance.properties, self.instance.schema)
-        jsonschema_validate.assert_called_with(self.instance.properties, self.instance.schema)
+        Document.validate(self.instance.properties, self.schema)
+        jsonschema_validate.assert_called_with(self.instance.properties, self.schema)
         jsonschema_validate.reset_mock()
-        Individual.validate(self.instance.content, self.instance.schema)
-        jsonschema_validate.assert_called_with(self.instance.properties, self.instance.schema)
+        Document.validate(self.instance.content, self.schema)
+        jsonschema_validate.assert_called_with(self.instance.properties, self.schema)
         jsonschema_validate.reset_mock()
         try:
-            Individual.validate([self.instance], self.instance.schema)
+            Document.validate([self.instance], self.schema)
         except ValidationError:
             jsonschema_validate.assert_not_called()
 
@@ -83,19 +90,19 @@ class TestIndividual(TestCase):
         wrong_content = self.instance.content
         wrong_content["wrong"] = True
         try:
-            Individual.validate(wrong_content, self.instance.schema)
-            self.fail("Individual.validate did not raise upon wrong content")
+            Document.validate(wrong_content, self.schema)
+            self.fail("Document.validate did not raise upon wrong content")
         except ValidationError:
             pass
-        Individual.validate(wrong_content, {"bullshit": "schema"})  # TODO: assert schema?
+        Document.validate(wrong_content, {"bullshit": "schema"})
 
-    @patch('core.models.organisms.collective.Collective.influence')
+    @patch('datatypes.models.Collection.influence')
     def test_clean_without_collective(self, influence_method):
-        self.instance.collective = None
+        self.instance.collection = None
         self.instance.clean()
         influence_method.assert_not_called()
 
-    @patch('core.models.organisms.collective.Collective.influence')
+    @patch('datatypes.models.Collection.influence')
     def test_clean_with_collective(self, influence_method):
         self.instance.clean()
         influence_method.assert_called_once_with(self.instance)
