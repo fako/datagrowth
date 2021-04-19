@@ -33,6 +33,7 @@ class TestDocument(TestCase):
         }
 
     def test_url(self):
+        # Testing standard URL's
         url = self.instance.url
         self.assertEqual(url, '/api/v1/datatypes/data/document/1/content/')
         self.instance.id = None
@@ -41,6 +42,15 @@ class TestDocument(TestCase):
             self.fail("url property did not raise when id is not known")
         except ValueError:
             pass
+        # Testing URL's with special class names
+        class DocumentTest(Document):
+            class Meta:
+                app_label = "testing_apps"
+        document_test = DocumentTest()
+        document_test.id = 1
+        with patch("datagrowth.datatypes.documents.db.base.reverse") as reverse_mock:
+            url = document_test.url
+            reverse_mock.assert_called_once_with("v1:testing-apps:document-test-content", args=[1])
 
     @patch("datagrowth.datatypes.DocumentBase.output_from_content")
     def test_output(self, output_from_content):

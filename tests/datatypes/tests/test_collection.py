@@ -41,6 +41,7 @@ class TestCollection(TransactionTestCase):
         }
 
     def test_url(self):
+        # Testing standard URL's
         url = self.instance.url
         self.assertEqual(url, '/api/v1/datatypes/data/collection/1/content/')
         self.instance.id = None
@@ -49,6 +50,15 @@ class TestCollection(TransactionTestCase):
             self.fail("url property did not raise when id is not known")
         except ValueError:
             pass
+        # Testing URL's with special class names
+        class CollectionTest(Collection):
+            class Meta:
+                app_label = "testing_apps"
+        collection_test = CollectionTest()
+        collection_test.id = 1
+        with patch("datagrowth.datatypes.documents.db.base.reverse") as reverse_mock:
+            url = collection_test.url
+            reverse_mock.assert_called_once_with("v1:testing-apps:collection-test-content", args=[1])
 
     @patch('datatypes.models.Document.validate')
     def test_validate_queryset(self, validate_method):
