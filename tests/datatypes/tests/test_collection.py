@@ -1,36 +1,48 @@
-from __future__ import unicode_literals, absolute_import, print_function, division
 
-from json import loads
-from mock import patch
+from unittest.mock import patch
 
 from django.test import TransactionTestCase
-from django.db.models.query import QuerySet
 
-from core.models.organisms import Collective, Individual
+from datatypes.models import Collection, Document
 
 
-class TestCollective(TransactionTestCase):
+class TestCollection(TransactionTestCase):
 
-    fixtures = ["test-organisms"]
+    fixtures = ["test-data-storage"]
 
     def setUp(self):
-        super(TestCollective, self).setUp()
-        self.instance = Collective.objects.get(id=1)
-        self.instance2 = Collective.objects.get(id=2)
-        self.individual = Individual.objects.get(id=4)
+        super().setUp()
+        self.instance = Collection.objects.get(id=1)
+        self.instance2 = Collection.objects.get(id=2)
+        self.document = Document.objects.get(id=4)
         self.value_outcome = ["nested value 0", "nested value 1", "nested value 2"]
         self.list_outcome = [["nested value 0"], ["nested value 1"], ["nested value 2"]]
-        self.double_list_outcome = [["nested value 0", "nested value 0"], ["nested value 1", "nested value 1"], ["nested value 2", "nested value 2"]]
+        self.double_list_outcome = [
+            ["nested value 0", "nested value 0"],
+            ["nested value 1", "nested value 1"],
+            ["nested value 2", "nested value 2"]
+        ]
         self.dict_outcome = [{"value": "nested value 0"}, {"value": "nested value 1"}, {"value": "nested value 2"}]
         self.expected_content = [
             {"context": "nested value", "value": "nested value 0"},
             {"context": "nested value", "value": "nested value 1"},
             {"context": "nested value", "value": "nested value 2"}
         ]
+        self.schema = {
+            "additionalProperties": False,
+            "required": ["value"],
+            "type": "object",
+            "properties": {
+                "word": {"type": "string"},
+                "value": {"type": "string"},
+                "language": {"type": "string"},
+                "country": {"type": "string"}
+            }
+        }
 
     def test_url(self):
         url = self.instance.url
-        self.assertEqual(url, '/data/v1/collective/1/content/')
+        self.assertEqual(url, '/data/v1/Collection/1/content/')
         self.instance.id = None
         try:
             url = self.instance.url
@@ -38,95 +50,88 @@ class TestCollective(TransactionTestCase):
         except ValueError:
             pass
 
-    @patch('core.models.organisms.individual.Individual.validate')
+    @patch('datatypes.models.Document.validate')
     def test_validate_queryset(self, validate_method):
-        self.instance.validate(self.instance.individual_set.all(), self.instance.schema)
-        for ind in self.instance.individual_set.all():
-            validate_method.assert_any_call(ind, self.instance.schema)
+        self.instance.validate(self.instance.document_set.all(), self.schema)
+        for doc in self.instance.document_set.all():
+            validate_method.assert_any_call(doc, self.schema)
 
-    @patch('core.models.organisms.individual.Individual.validate')
+    @patch('datatypes.models.Document.validate')
     def test_validate_content(self, validate_method):
-        self.instance.validate(self.instance.content, self.instance.schema)
-        for ind in self.instance.content:
-            validate_method.assert_any_call(ind, self.instance.schema)
+        self.instance.validate(self.instance.content, self.schema)
+        for doc in self.instance.content:
+            validate_method.assert_any_call(doc, self.schema)
 
     def get_docs_list_and_ids(self, value):
         docs = []
-        individual_ids = []
-        for index, individual in enumerate(self.instance2.individual_set.all()):
-            individual_ids.append(individual.id)
-            individual.properties["value"] = value
-            docs.append(individual) if index % 2 else docs.append(individual.properties)
-        return docs, individual_ids
+        doc_ids = []
+        for index, doc in enumerate(self.instance2.document_set.all()):
+            doc_ids.append(doc.id)
+            doc.properties["value"] = value
+            docs.append(doc) if index % 2 else docs.append(doc.properties)
+        return docs, doc_ids
 
-    @patch('core.models.organisms.individual.Individual.validate')
-    @patch('core.models.organisms.collective.Collective.influence')
-    def test_add(self, influence_method, validate_method):
-        docs, individual_ids = self.get_docs_list_and_ids(value="value 3")
-        with self.assertNumQueries(3):
-            # Query 1: reset
-            # Query 2: fetch community to set it for pure dicts becoming Individuals
-            # Query 3: insert individuals
-            self.instance2.add(docs, validate=False, reset=True)
-        validate_method.assert_not_called()
-        self.assertEqual(influence_method.call_count, 5)
-        self.assertEqual(self.instance2.individual_set.count(), 5)
-        for individual in self.instance2.individual_set.all():
-            self.assertEqual(individual.properties["value"], "value 3")
-            self.assertNotIn(individual.id, individual_ids)
-
-        influence_method.reset_mock()
-        docs, individual_ids = self.get_docs_list_and_ids(value="value 4")
+    @patch('datatypes.models.Collection.influence')
+    def test_add(self, influence_method):
+        docs, doc_ids = self.get_docs_list_and_ids(value="value 3")
         with self.assertNumQueries(2):
             # Query 1: reset
-            # NB: no need to fetch community as this has been done
-            # Query 2: insert individuals
-            self.instance2.add(docs, validate=True, reset=True)
-        self.assertEqual(validate_method.call_count, 5)
+            # Query 2: insert documents
+            self.instance2.add(docs, reset=True)
         self.assertEqual(influence_method.call_count, 5)
-        self.assertEqual(self.instance2.individual_set.count(), 5)
-        for individual in self.instance2.individual_set.all():
-            self.assertEqual(individual.properties["value"], "value 4")
-            self.assertNotIn(individual.id, individual_ids)
+        self.assertEqual(self.instance2.document_set.count(), 5)
+        for doc in self.instance2.document_set.all():
+            self.assertEqual(doc.properties["value"], "value 3")
+            self.assertNotIn(doc.id, doc_ids)
 
         influence_method.reset_mock()
-        docs, individual_ids = self.get_docs_list_and_ids(value="value 5")
+        docs, doc_ids = self.get_docs_list_and_ids(value="value 4")
+        with self.assertNumQueries(2):
+            # Query 1: reset
+            # Query 2: insert documents
+            self.instance2.add(docs, reset=True)
+        self.assertEqual(influence_method.call_count, 5)
+        self.assertEqual(self.instance2.document_set.count(), 5)
+        for doc in self.instance2.document_set.all():
+            self.assertEqual(doc.properties["value"], "value 4")
+            self.assertNotIn(doc.id, doc_ids)
+
+        influence_method.reset_mock()
+        docs, doc_ids = self.get_docs_list_and_ids(value="value 5")
         with self.assertNumQueries(1):  # query set cache is filled, -1 query
             # NB: no reset
-            # NB: no need to fetch community as this has been done
-            # Query 1: insert individuals
-            self.instance2.add(docs, validate=True, reset=False)
-        self.assertEqual(validate_method.call_count, 10)
+            # Query 1: insert documents
+            self.instance2.add(docs, reset=False)
         self.assertEqual(influence_method.call_count, 5)
-        self.assertEqual(self.instance2.individual_set.count(), 10)
+        self.assertEqual(self.instance2.document_set.count(), 10)
         new_ids = []
-        for individual in self.instance2.individual_set.all():
-            self.assertIn(individual.properties["value"], ["value 4", "value 5"])
-            new_ids.append(individual.id)
-        for id_value in individual_ids:
+        for doc in self.instance2.document_set.all():
+            self.assertIn(doc.properties["value"], ["value 4", "value 5"])
+            new_ids.append(doc.id)
+        for id_value in doc_ids:
             self.assertIn(id_value, new_ids)
 
     def test_add_batch(self):
-        docs = list(self.instance2.individual_set.all()) * 5
-        with self.assertNumQueries(4):
-            self.instance2.add(docs, validate=False, reset=True, batch_size=20)
-        self.assertEqual(self.instance2.individual_set.count(), 25)
+        docs = list(self.instance2.document_set.all()) * 5
+        with self.assertNumQueries(3):
+            self.instance2.add(docs, reset=True, batch_size=20)
+        self.assertEqual(self.instance2.document_set.count(), 25)
 
-    @patch('core.models.organisms.collective.Collective.influence')
+    @patch('datatypes.models.Collection.influence')
     def test_copy_add(self, influence_method):
         docs, original_ids = self.get_docs_list_and_ids("copy")
-        self.instance.add(docs, validate=False, reset=False)
-        self.assertEqual(self.instance.individual_set.count(), 8)
-        for ind in self.instance.individual_set.all():
+        self.instance.add(docs, reset=False)
+        self.assertEqual(self.instance.document_set.count(), 8)
+        for ind in self.instance.document_set.all():
             self.assertNotIn(ind.id, original_ids)
-        self.assertEqual(self.instance.individual_set.exclude(pk__in=[1, 2, 3]).count(), len(original_ids))
+        self.assertEqual(self.instance.document_set.exclude(pk__in=[1, 2, 3]).count(), len(original_ids))
         for args, kwargs in influence_method.call_args_list:
             self.assertEqual(len(args), 1)
-            self.assertIsInstance(args[0], Individual)
+            self.assertIsInstance(args[0], Document)
             self.assertEqual(kwargs, {})
         self.assertEqual(
             influence_method.call_count, len(original_ids),
-            "Collective should only influence new Individuals when updating"
+            "Collection should only influence new Documents when updating"
         )
 
     def test_output(self):
@@ -150,23 +155,23 @@ class TestCollective(TransactionTestCase):
 
     def test_group_by(self):
         groups = self.instance2.group_by("country")
-        for country, individuals in groups.items():
-            for individual in individuals:
-                self.assertEqual(individual.properties["country"], country)
+        for country, docs in groups.items():
+            for doc in docs:
+                self.assertEqual(doc.properties["country"], country)
 
     def test_influence(self):
-        self.individual.identity = None
-        self.instance2.influence(self.individual)
-        self.assertEqual(self.individual.identity, self.individual.properties["word"])
+        self.document.identity = None
+        self.instance2.influence(self.document)
+        self.assertEqual(self.document.identity, self.document.properties["word"])
         self.instance2.identifier = "country"
-        self.instance2.influence(self.individual)
-        self.assertEqual(self.individual.identity, self.individual.properties["country"])
+        self.instance2.influence(self.document)
+        self.assertEqual(self.document.identity, self.document.properties["country"])
         self.instance2.identifier = None
-        self.instance2.influence(self.individual)
-        self.assertEqual(self.individual.identity, self.individual.properties["country"])
+        self.instance2.influence(self.document)
+        self.assertEqual(self.document.identity, self.document.properties["country"])
         self.instance2.identifier = "does-not-exist"
-        self.instance2.influence(self.individual)
-        self.assertIsNone(self.individual.identity)
+        self.instance2.influence(self.document)
+        self.assertIsNone(self.document.identity)
 
     def test_to_file(self):
         self.skipTest("not tested")

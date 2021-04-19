@@ -2,8 +2,7 @@
 {
     "fields": {
         "created_at": "2015-06-04T11:31:27.940Z",
-        "modified_at": "2015-06-04T11:34:06.960Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}"
+        "modified_at": "2015-06-04T11:34:06.960Z"
     },
     "model": "datatypes.collection",
     "pk": 1
@@ -13,8 +12,7 @@
         "properties": {"context":"nested value","value":"nested value 0"},
         "collection": 1,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 1
@@ -24,8 +22,7 @@
         "properties": {"context":"nested value","value":"nested value 1"},
         "collection": 1,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 2
@@ -35,8 +32,7 @@
         "properties": {"context":"nested value","value":"nested value 2"},
         "collection": 1,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 3
@@ -45,7 +41,6 @@
     "fields": {
         "created_at": "2015-06-04T11:31:27.940Z",
         "modified_at": "2015-06-04T11:34:06.960Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"value\"],\"type\":\"object\",\"properties\":{\"word\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}}}",
         "identifier": "word"
     },
     "model": "datatypes.collection",
@@ -55,8 +50,7 @@
         "properties": {"word":"pensioen","country":"NL", "language":"nl", "value":"1"},
         "collection": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"value\"],\"type\":\"object\",\"properties\":{\"word\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 4
@@ -65,8 +59,7 @@
         "properties": {"word":"ouderdom","country":"NL", "language":"nl", "value":"2"},
         "collection": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"value\"],\"type\":\"object\",\"properties\":{\"word\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 5
@@ -75,8 +68,7 @@
         "properties": {"word":"pensioen","country":"BE", "language":"nl", "value":"1"},
         "collection": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"value\"],\"type\":\"object\",\"properties\":{\"word\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 6
@@ -85,8 +77,7 @@
         "properties": {"word":"pension","country":"GB", "language":"en", "value":"1"},
         "collection": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"value\"],\"type\":\"object\",\"properties\":{\"word\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 7
@@ -95,8 +86,7 @@
         "properties": {"word":"age","country":"GB", "language":"en", "value":"2"},
         "collection": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"value\"],\"type\":\"object\",\"properties\":{\"word\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"},\"language\":{\"type\":\"string\"},\"country\":{\"type\":\"string\"}}}"
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
     "model": "datatypes.document",
     "pk": 8

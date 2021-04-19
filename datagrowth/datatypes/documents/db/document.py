@@ -1,13 +1,17 @@
 from itertools import repeat
+import warnings
 
 import jsonschema
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.postgres import fields as postgres_fields
 from django.urls import reverse
-import json_field
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django.contrib.postgres.fields import JSONField
+
 
 from datagrowth.utils import reach
 from .base import DataStorage
@@ -15,13 +19,11 @@ from .base import DataStorage
 
 class DocumentBase(DataStorage):
 
+    properties = JSONField(default=dict)
+
     collection = models.ForeignKey("Collection", blank=True, null=True, on_delete=models.CASCADE)
     identity = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     reference = models.CharField(max_length=255, blank=True, null=True, db_index=True)
-
-    @property
-    def properties(self):
-        raise NotImplementedError("DocumentBase does not implement properties, use DocumentPostgres or DocumentMysql")
 
     def __getitem__(self, key):
         return self.properties[key]
@@ -140,7 +142,14 @@ class DocumentBase(DataStorage):
 
 class DocumentMysql(models.Model):
 
-    properties = json_field.JSONField(default={})
+    properties = JSONField(default=dict)
+
+    def __init_subclass__(cls, *args, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        warnings.warn(
+            "Subclassing the DocumentMySQL mixin is deprecated inherit from DocumentBase instead",
+            DeprecationWarning
+        )
 
     class Meta:
         abstract = True
@@ -150,7 +159,14 @@ class DocumentMysql(models.Model):
 
 class DocumentPostgres(models.Model):
 
-    properties = postgres_fields.JSONField(default=dict)
+    properties = JSONField(default=dict)
+
+    def __init_subclass__(cls, *args, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        warnings.warn(
+            "Subclassing the DocumentPostgres mixin is deprecated inherit from DocumentBase instead",
+            DeprecationWarning
+        )
 
     class Meta:
         abstract = True
