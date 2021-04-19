@@ -7,6 +7,7 @@ The tests of the actual interface to ShellResource and how a ShellResource shoul
 is present in the generic.py test module.
 """
 
+import json
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -187,7 +188,12 @@ class TestShellResource(ResourceTestMixin):
         try:
             self.instance.validate_command(self.test_command_dict)
         except ValidationError:
-            self.fail("validate_command raised for a valid request.")
+            self.fail("validate_command raised for a valid command.")
+        # Valid (JSON string)
+        try:
+            self.instance.validate_command(json.dumps(self.test_command_dict))
+        except ValidationError:
+            self.fail("validate_command raised for a valid command using JSON string.")
         # Invalid
         invalid_request = deepcopy(self.test_command_dict)
         invalid_request["args"] = (".", "test", "/")
@@ -232,3 +238,13 @@ class TestShellResource(ResourceTestMixin):
         self.instance.stdout = out
         self.instance.stderr = err
         self.instance.save()
+
+    def test_clean(self):
+        # Normal command
+        instance = ShellResourceMock(command=self.test_command_dict)
+        instance.clean()
+        self.assertEqual(instance.uri, "grep --context=5 -R . test")
+        # JSON command
+        instance = ShellResourceMock(command=json.dumps(self.test_command_dict))
+        instance.clean()
+        self.assertEqual(instance.uri, "grep --context=5 -R . test")
