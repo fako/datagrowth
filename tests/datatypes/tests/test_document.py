@@ -13,13 +13,9 @@ class TestDocument(TestCase):
     def setUp(self):
         super().setUp()
         self.instance = Document.objects.get(id=1)
-        self.value_outcome = "nested value 0"
-        self.dict_outcome = {"value": "nested value 0"}
-        self.expected_content = {
-            'value': 'nested value 0',
-            'context': 'nested value'
-        }
-        self.expected_items = sorted([('context', 'nested value'), ('value', 'nested value 0')])
+        self.value_outcome = "0"
+        self.dict_outcome = {"value": "0"}
+        self.expected_items = sorted([('context', 'nested value'), ('nested', 'nested value 0'), ('value', '0')])
         self.schema = {
             "additionalProperties": False,
             "required": ["value"],
@@ -77,15 +73,44 @@ class TestDocument(TestCase):
         results = self.instance.output_from_content(self.instance.content, {})
         self.assertEqual(results, {})
 
-    def test_update(self):
-        content = self.instance.update({"value": "nested value -1", "extra": "extra"})
-        self.assertEqual(content["value"], "nested value -1")
+    def test_update_using_dict(self):
+        # Using a dict
+        content = self.instance.update({"value": "-1", "extra": "extra"})
+        self.assertEqual(content["value"], "-1")
         self.assertEqual(content["context"], "nested value")
+        self.assertEqual(content["nested"], "nested value 0")
         self.assertEqual(content["extra"], "extra")
         instance = Document.objects.get(id=1)
-        self.assertEqual(instance.properties["value"], "nested value -1")
+        self.assertEqual(instance.properties["value"], "-1")
         self.assertEqual(instance.properties["context"], "nested value")
+        self.assertEqual(instance.properties["nested"], "nested value 0")
         self.assertEqual(instance.properties["extra"], "extra")
+
+    def test_update_using_doc(self):
+        doc = Document.objects.create(properties={"value": "-1", "extra": "extra"})
+        content = self.instance.update(doc)
+        self.assertEqual(content["value"], "-1")
+        self.assertEqual(content["context"], "nested value")
+        self.assertEqual(content["nested"], "nested value 0")
+        self.assertEqual(content["extra"], "extra")
+        instance = Document.objects.get(id=1)
+        self.assertEqual(instance.properties["value"], "-1")
+        self.assertEqual(instance.properties["context"], "nested value")
+        self.assertEqual(instance.properties["nested"], "nested value 0")
+        self.assertEqual(instance.properties["extra"], "extra")
+
+    def test_update_no_commit(self):
+        doc = Document.objects.create(properties={"value": "-1", "extra": "extra"})
+        content = self.instance.update(doc, commit=False)
+        self.assertEqual(content["value"], "-1")
+        self.assertEqual(content["context"], "nested value")
+        self.assertEqual(content["nested"], "nested value 0")
+        self.assertEqual(content["extra"], "extra")
+        instance = Document.objects.get(id=1)
+        self.assertEqual(instance.properties["value"], "0")
+        self.assertEqual(instance.properties["context"], "nested value")
+        self.assertEqual(instance.properties["nested"], "nested value 0")
+        self.assertNotIn("extra", instance.properties)
 
     @patch("jsonschema.validate")
     def test_validate(self, jsonschema_validate):
@@ -143,5 +168,6 @@ class TestDocument(TestCase):
 
     def test_values(self):
         expected_keys, expected_values = zip(*self.expected_items)
+        expected_values = tuple(sorted(expected_values))
         values = tuple(sorted(self.instance.values()))
         self.assertEqual(values, expected_values)
