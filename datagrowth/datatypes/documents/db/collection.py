@@ -152,7 +152,7 @@ class CollectionBase(DataStorage):
 
         :return: a generator yielding properties from Documents
         """
-        return (ind.content for ind in self.documents.iterator())
+        return (doc.content for doc in self.documents.iterator())
 
     @property
     def has_content(self):
@@ -189,7 +189,7 @@ class CollectionBase(DataStorage):
             return map(self.output, args)
         frm = args[0]
         if not frm:
-            return [frm for ind in range(0, self.documents.count())]
+            return [frm for doc in range(0, self.documents.count())]
         elif isinstance(frm, list):
             output = self.output(*frm)
             if len(frm) > 1:
@@ -198,7 +198,7 @@ class CollectionBase(DataStorage):
                 output = [[out] for out in output]
             return output
         else:
-            return [ind.output(frm) for ind in self.documents.iterator()]
+            return [doc.output(frm) for doc in self.documents.iterator()]
 
     def group_by(self, key):
         """
@@ -208,14 +208,14 @@ class CollectionBase(DataStorage):
         :return:
         """
         grouped = {}
-        for ind in self.documents.all():
-            assert key in ind.properties, \
+        for doc in self.documents.all():
+            assert key in doc.properties, \
                 "Can't group by {}, because it is missing from an document in collection {}".format(key, self.id)
-            value = ind.properties[key]
+            value = doc.properties[key]
             if value not in grouped:
-                grouped[value] = [ind]
+                grouped[value] = [doc]
             else:
-                grouped[value].append(ind)
+                grouped[value].append(doc)
         return grouped
 
     def influence(self, document):
