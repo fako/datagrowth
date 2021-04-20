@@ -1,8 +1,9 @@
 import os
 import json
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock, NonCallableMagicMock
 
 from django.test import TransactionTestCase
+from django.db.models import QuerySet
 
 from datatypes.models import Collection, Document
 
@@ -234,8 +235,88 @@ class TestCollection(TransactionTestCase):
         results = self.instance.output({})
         self.assertEqual(results, [{}, {}, {}])
 
+    def create_documents_mock(self, docs, total):
+        queryset = NonCallableMagicMock()
+        queryset.order_by = MagicMock(return_value=queryset)
+        queryset.iterator = MagicMock(return_value=iter(docs))
+        queryset.count = MagicMock(return_value=total)
+        return queryset
+
     def test_split_content(self):
-        self.skipTest("not tested")
+        # Standard version
+        documents_mock = self.create_documents_mock(self.instance2.documents.all(), 5)
+        with patch("datatypes.models.Collection.documents", documents_mock):
+            train, validate, test = self.instance2.split()
+            self.assertEqual(len(validate), 1)
+            self.assertIsInstance(validate[0], Document)
+            self.assertEqual(validate[0]["value"], "2")
+            self.assertEqual(len(test), 1)
+            self.assertIsInstance(test[0], Document)
+            self.assertEqual(test[0]["value"], "1")
+            for value in ["1", "3", "4"]:
+                train_doc = next(train)
+                self.assertIsInstance(train_doc, Document)
+                self.assertEqual(train_doc["value"], value)
+            try:
+                next(train)
+                self.fail("Training iterator had more content than expected")
+            except StopIteration:
+                pass
+        # No test set
+        documents_mock = self.create_documents_mock(self.instance2.documents.all(), 5)
+        with patch("datatypes.models.Collection.documents", documents_mock):
+            train, validate, test = self.instance2.split(train=0.6, validate=0.4, test=0)
+            self.assertEqual(len(validate), 2)
+            for ix, value in enumerate(["1", "2"]):
+                validate_doc = validate[ix]
+                self.assertIsInstance(validate_doc, Document)
+                self.assertEqual(validate_doc["value"], value)
+            for value in ["1", "3", "4"]:
+                train_doc = next(train)
+                self.assertIsInstance(train_doc, Document)
+                self.assertEqual(train_doc["value"], value)
+            try:
+                next(train)
+                self.fail("Training iterator had more content than expected")
+            except StopIteration:
+                pass
+        # As content
+        documents_mock = self.create_documents_mock(self.instance2.documents.all(), 5)
+        with patch("datatypes.models.Collection.documents", documents_mock):
+            train, validate, test = self.instance2.split()
+            self.assertEqual(len(validate), 1)
+            self.assertIsInstance(validate[0], Document)
+            self.assertEqual(validate[0]["value"], "2")
+            self.assertEqual(len(test), 1)
+            self.assertIsInstance(test[0], Document)
+            self.assertEqual(test[0]["value"], "1")
+            for value in ["1", "3", "4"]:
+                train_doc = next(train)
+                self.assertIsInstance(train_doc, Document)
+                self.assertEqual(train_doc["value"], value)
+            try:
+                next(train)
+                self.fail("Training iterator had more content than expected")
+            except StopIteration:
+                pass
+        # External queryset
+        documents_mock = self.create_documents_mock(self.instance2.documents.all(), 5)
+        train, validate, test = self.instance2.split(query_set=documents_mock)
+        self.assertEqual(len(validate), 1)
+        self.assertIsInstance(validate[0], Document)
+        self.assertEqual(validate[0]["value"], "2")
+        self.assertEqual(len(test), 1)
+        self.assertIsInstance(test[0], Document)
+        self.assertEqual(test[0]["value"], "1")
+        for value in ["1", "3", "4"]:
+            train_doc = next(train)
+            self.assertIsInstance(train_doc, Document)
+            self.assertEqual(train_doc["value"], value)
+        try:
+            next(train)
+            self.fail("Training iterator had more content than expected")
+        except StopIteration:
+            pass
 
     def test_group_by(self):
         groups = self.instance2.group_by("country")

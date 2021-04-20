@@ -1,5 +1,6 @@
 import json
 from collections import Iterator, Iterable, defaultdict
+from math import ceil
 
 from django.apps import apps
 from django.db import models
@@ -163,7 +164,7 @@ class CollectionBase(DataStorage):
         """
         return self.documents.exists()
 
-    def split(self, train=0.8, validate=0.1, test=0.1, query_set=None, as_content=False):  # TODO: test to unlock
+    def split(self, train=0.8, validate=0.1, test=0.1, query_set=None, as_content=False):
         assert train + validate + test == 1.0, "Expected sum of train, validate and test to be 1"
         assert train > 0, "Expected train set to be bigger than 0"
         assert validate > 0, "Expected validate set to be bigger than 0"
@@ -174,9 +175,9 @@ class CollectionBase(DataStorage):
         documents = query_set.order_by("?").iterator()
         test_set = []
         if test:
-            test_size = round(content_count * test)
+            test_size = ceil(content_count * test)
             test_set = [next(documents) for ix in range(0, test_size)]
-        validate_size = round(content_count * validate)
+        validate_size = ceil(content_count * validate)
         validate_set = [next(documents) for ix in range(0, validate_size)]
         return (
             (document.content if as_content else document for document in documents),
