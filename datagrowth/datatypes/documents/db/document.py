@@ -58,19 +58,15 @@ class DocumentBase(DataStorage):
             django_exception.schema = exc.schema
             raise django_exception
 
-    def update(self, data, validate=True):  # TODO: test to unlock
+    def update(self, data, validate=True):
         """
-        Update the properties and spirit with new data.
+        Update the properties with new data.
 
         :param data: The data to use for the update
-        :param validate: (optional) whether to validate data or not (yes by default)
+        :param validate: (deprecated) used to validate data using JSON schema
         :return: Updated content
         """
-        if isinstance(data, (list, tuple,)):
-            data = data[0]
-
         self.properties.update(data)
-
         self.save()
         return self.content
 

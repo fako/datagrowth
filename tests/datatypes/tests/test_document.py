@@ -78,7 +78,14 @@ class TestDocument(TestCase):
         self.assertEqual(results, {})
 
     def test_update(self):
-        self.skipTest("not tested")
+        content = self.instance.update({"value": "nested value -1", "extra": "extra"})
+        self.assertEqual(content["value"], "nested value -1")
+        self.assertEqual(content["context"], "nested value")
+        self.assertEqual(content["extra"], "extra")
+        instance = Document.objects.get(id=1)
+        self.assertEqual(instance.properties["value"], "nested value -1")
+        self.assertEqual(instance.properties["context"], "nested value")
+        self.assertEqual(instance.properties["extra"], "extra")
 
     @patch("jsonschema.validate")
     def test_validate(self, jsonschema_validate):
