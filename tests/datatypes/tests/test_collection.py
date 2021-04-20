@@ -1,4 +1,5 @@
-
+import os
+import json
 from unittest.mock import patch
 
 from django.test import TransactionTestCase
@@ -257,4 +258,8 @@ class TestCollection(TransactionTestCase):
         self.assertIsNone(self.document.identity)
 
     def test_to_file(self):
-        self.skipTest("not tested")
+        self.instance.to_file("test.json")
+        with open("test.json", "r") as json_file:
+            content = json.load(json_file)
+        self.assertEqual(list(self.instance.content), content)
+        os.remove("test.json")
