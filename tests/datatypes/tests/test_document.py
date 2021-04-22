@@ -1,7 +1,9 @@
 from unittest.mock import patch
+from datetime import datetime, date
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
+from django.utils.timezone import make_aware
 
 from datatypes.models import Document
 
@@ -74,8 +76,11 @@ class TestDocument(TestCase):
         self.assertEqual(results, {})
 
     def test_update_using_dict(self):
-        # Using a dict
+        created_at = self.instance.created_at
+        today = date.today()
         content = self.instance.update({"value": "-1", "extra": "extra"})
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertNotEqual(self.instance.modified_at.date, today)
         self.assertEqual(content["value"], "-1")
         self.assertEqual(content["context"], "nested value")
         self.assertEqual(content["nested"], "nested value 0")
@@ -87,8 +92,12 @@ class TestDocument(TestCase):
         self.assertEqual(instance.properties["extra"], "extra")
 
     def test_update_using_doc(self):
+        created_at = self.instance.created_at
+        today = date.today()
         doc = Document.objects.create(properties={"value": "-1", "extra": "extra"})
         content = self.instance.update(doc)
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertNotEqual(self.instance.modified_at.date, today)
         self.assertEqual(content["value"], "-1")
         self.assertEqual(content["context"], "nested value")
         self.assertEqual(content["nested"], "nested value 0")
@@ -100,8 +109,12 @@ class TestDocument(TestCase):
         self.assertEqual(instance.properties["extra"], "extra")
 
     def test_update_no_commit(self):
+        created_at = self.instance.created_at
+        today = date.today()
         doc = Document.objects.create(properties={"value": "-1", "extra": "extra"})
         content = self.instance.update(doc, commit=False)
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertNotEqual(self.instance.modified_at.date, today)
         self.assertEqual(content["value"], "-1")
         self.assertEqual(content["context"], "nested value")
         self.assertEqual(content["nested"], "nested value 0")

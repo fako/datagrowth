@@ -1,11 +1,13 @@
 from itertools import repeat
 import warnings
+from datetime import datetime
 
 import jsonschema
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.timezone import make_aware
 try:
     from django.db.models import JSONField
 except ImportError:
@@ -72,6 +74,8 @@ class DocumentBase(DataStorage):
         self.clean()
         if commit:
             self.save()
+        else:
+            self.modified_at = make_aware(datetime.now())
         return self.content
 
     @property
