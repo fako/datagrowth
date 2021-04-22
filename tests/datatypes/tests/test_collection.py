@@ -1,9 +1,9 @@
 import os
 import json
 from unittest.mock import patch, MagicMock, NonCallableMagicMock
+from datetime import date
 
 from django.test import TransactionTestCase
-from django.db.models import QuerySet
 
 from datatypes.models import Collection, Document
 
@@ -87,46 +87,49 @@ class TestCollection(TransactionTestCase):
     @patch('datatypes.models.Collection.influence')
     def test_add(self, influence_method):
         docs, doc_ids = self.get_docs_list_and_ids(value="value 3")
-        with self.assertNumQueries(2):
+        today = date.today()
+        created_at = self.instance2.created_at
+        with self.assertNumQueries(3):
             # Query 1: reset
             # Query 2: insert documents
+            # Query 3: update modified_at
             self.instance2.add(docs, reset=True)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance2.documents.count(), 5)
+        self.assertEqual(self.instance2.created_at, created_at)
+        self.assertEqual(self.instance2.modified_at.date(), today)
         for doc in self.instance2.documents.all():
             self.assertEqual(doc.properties["value"], "value 3")
+            self.assertIsNotNone(doc.created_at)
+            self.assertIsNotNone(doc.modified_at)
             self.assertNotIn(doc.id, doc_ids)
 
-        influence_method.reset_mock()
-        docs, doc_ids = self.get_docs_list_and_ids(value="value 4")
-        with self.assertNumQueries(2):
-            # Query 1: reset
-            # Query 2: insert documents
-            self.instance2.add(docs, reset=True)
-        self.assertEqual(influence_method.call_count, 5)
-        self.assertEqual(self.instance2.documents.count(), 5)
-        for doc in self.instance2.documents.all():
-            self.assertEqual(doc.properties["value"], "value 4")
-            self.assertNotIn(doc.id, doc_ids)
-
-        influence_method.reset_mock()
-        docs, doc_ids = self.get_docs_list_and_ids(value="value 5")
-        with self.assertNumQueries(1):  # query set cache is filled, -1 query
+    @patch('datatypes.models.Collection.influence')
+    def test_add_no_reset(self, influence_method):
+        docs, doc_ids = self.get_docs_list_and_ids(value="5")
+        today = date.today()
+        created_at = self.instance2.created_at
+        with self.assertNumQueries(2):  # query set cache is filled, -1 query
             # NB: no reset
             # Query 1: insert documents
+            # Query 2: update modified_at
             self.instance2.add(docs, reset=False)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance2.documents.count(), 10)
+        self.assertEqual(self.instance2.created_at, created_at)
+        self.assertEqual(self.instance2.modified_at.date(), today)
         new_ids = []
         for doc in self.instance2.documents.all():
-            self.assertIn(doc.properties["value"], ["value 4", "value 5"])
+            self.assertIn(doc.properties["value"], ["1", "2", "3", "4", "5"])
+            self.assertIsNotNone(doc.created_at)
+            self.assertIsNotNone(doc.modified_at)
             new_ids.append(doc.id)
         for id_value in doc_ids:
             self.assertIn(id_value, new_ids)
 
     def test_add_batch(self):
         docs = list(self.instance2.documents.all()) * 5
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             self.instance2.add(docs, reset=True, batch_size=20)
         self.assertEqual(self.instance2.documents.count(), 25)
 
@@ -135,8 +138,8 @@ class TestCollection(TransactionTestCase):
         docs, original_ids = self.get_docs_list_and_ids("copy")
         self.instance.add(docs, reset=False)
         self.assertEqual(self.instance.documents.count(), 8)
-        for ind in self.instance.documents.all():
-            self.assertNotIn(ind.id, original_ids)
+        for doc in self.instance.documents.all():
+            self.assertNotIn(doc.id, original_ids)
         self.assertEqual(self.instance.documents.exclude(pk__in=[1, 2, 3]).count(), len(original_ids))
         for args, kwargs in influence_method.call_args_list:
             self.assertEqual(len(args), 1)
@@ -150,22 +153,30 @@ class TestCollection(TransactionTestCase):
     @patch('datatypes.models.Collection.influence')
     def test_update(self, influence_method):
         docs, doc_ids = self.get_docs_list_and_ids()
-        with self.assertNumQueries(3):
+        today = date.today()
+        created_at = self.instance.created_at
+        with self.assertNumQueries(4):
             # Query 1: fetch targets
             # Query 2: update sources
             # Query 3: add sources
+            # Query 4: update modified_at
             self.instance.update(docs, "value")
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance.documents.count(), 5)
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertEqual(self.instance.modified_at.date(), today)
         for doc in self.instance.documents.all():
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
             elif doc.properties["value"] == "1":
                 expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] == "2":
                 expected_keys = tuple(sorted(["_id", "value", "nested", "context", "word", "country", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
                 expected_keys = tuple(sorted(["word", "country", "value", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             else:
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
             self.assertEqual(tuple(sorted(doc.keys())), expected_keys)
@@ -174,22 +185,30 @@ class TestCollection(TransactionTestCase):
     @patch('datatypes.models.Collection.influence')
     def test_update_batch(self, influence_method):
         docs, doc_ids = self.get_docs_list_and_ids()
-        with self.assertNumQueries(7):
+        today = date.today()
+        created_at = self.instance.created_at
+        with self.assertNumQueries(8):
             # Batch 1: select + update
             # Batch 2: select + update + insert
             # Batch 3: select + insert
+            # Query 8: update modified_at
             self.instance.update(docs, "value", batch_size=2)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance.documents.count(), 5)
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertEqual(self.instance.modified_at.date(), today)
         for doc in self.instance.documents.all():
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
             elif doc.properties["value"] == "1":
                 expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] == "2":
                 expected_keys = tuple(sorted(["_id", "value", "nested", "context", "word", "country", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
                 expected_keys = tuple(sorted(["word", "country", "value", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             else:
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
             self.assertEqual(tuple(sorted(doc.keys())), expected_keys)
@@ -198,22 +217,30 @@ class TestCollection(TransactionTestCase):
     @patch('datatypes.models.Collection.influence')
     def test_update_other_collection(self, influence_method):
         docs, doc_ids = self.get_docs_list_and_ids()
-        with self.assertNumQueries(3):
+        today = date.today()
+        created_at = self.instance.created_at
+        with self.assertNumQueries(4):
             # Query 1: fetch targets
             # Query 2: update sources
             # Query 3: add sources
+            # Query 4: update modified_at
             self.instance2.update(docs, "value", collection=self.instance)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance.documents.count(), 5)
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertEqual(self.instance.modified_at.date(), today)
         for doc in self.instance.documents.all():
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
             elif doc.properties["value"] == "1":
                 expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] == "2":
                 expected_keys = tuple(sorted(["_id", "value", "nested", "context", "word", "country", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
                 expected_keys = tuple(sorted(["word", "country", "value", "language"]))
+                self.assertEqual(doc.modified_at.date(), today)
             else:
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
             self.assertEqual(tuple(sorted(doc.keys())), expected_keys)

@@ -1,11 +1,13 @@
 import json
 from collections import Iterator, Iterable, defaultdict
 from math import ceil
+from datetime import datetime
 
 from django.apps import apps
 from django.db import models
 from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.timezone import make_aware
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.utils import ibatch, reach
@@ -54,18 +56,20 @@ class CollectionBase(DataStorage):
         for instance in data:
             Document.validate(instance, schema)
 
-    def add(self, data, validate=True, reset=False, batch_size=500, collection=None):
+    def add(self, data, reset=False, batch_size=500, collection=None, modified_at=None, validate=True):
         """
         Add new data to the Collection in batches, possibly deleting all data before adding.
 
         :param data: The data to use for the update
-        :param validate: (deprecated) used to allow JSON schema validation before addition
         :param reset: (optional) whether to delete existing data or not (no by default)
         :param batch_size: (optional) how many instances to add in a single batch (default: 500)
         :param collection: (optional) a collection instance to add the data to (default: self)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param validate: (deprecated) used to allow JSON schema validation before addition
         :return: A list of updated or created instances.
         """
         collection = collection or self
+        modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
         assert isinstance(data, (Iterator, list, tuple, dict, Document)), \
             f"Collection.add expects data to be formatted as iteratable, dict or {type(Document)} not {type(data)}"
@@ -90,14 +94,17 @@ class CollectionBase(DataStorage):
             return prepared
 
         count = 0
-        for updates in ibatch(data, batch_size=batch_size):
-            updates = prepare_additions(updates)
-            count += len(updates)
-            Document.objects.bulk_create(updates, batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE)
+        for additions in ibatch(data, batch_size=batch_size):
+            additions = prepare_additions(additions)
+            count += len(additions)
+            Document.objects.bulk_create(additions, batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE)
 
+        if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+            collection.modified_at = modified_at
+            collection.save()
         return count
 
-    def update(self, data, by_property, batch_size=32, collection=None, validate=True):
+    def update(self, data, by_property, batch_size=32, collection=None, modified_at=None, validate=True):
         """
         Update data to the Collection in batches, using a property value to identify which Documents to update.
 
@@ -105,10 +112,12 @@ class CollectionBase(DataStorage):
         :param by_property: The property to identify a Document with
         :param batch_size: (optional) how many instances to add in a single batch (default: 32)
         :param collection: (optional) a collection instance to update the data to (default: self)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
         :param validate: (deprecated) used to allow JSON schema validation before updates
         :return: A list of updated or created instances.
         """
         collection = collection or self
+        modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
         assert isinstance(data, (Iterator, list, tuple,)), \
             f"Collection.update expects data to be formatted as iteratable not {type(data)}"
@@ -119,7 +128,8 @@ class CollectionBase(DataStorage):
             # any update's "by_property" property value and then updating these source objects.
             # One update object can potentially target multiple sources
             # if multiple objects with the same value for the by_property property exist.
-            updated = {}
+            updated = set()
+            prepared = []
             sources_by_lookup = defaultdict(list)
             for update in updates:
                 sources_by_lookup[update[by_property]].append(update)
@@ -130,10 +140,11 @@ class CollectionBase(DataStorage):
                 for update_value in sources_by_lookup[target.properties[by_property]]:
                     target.update(update_value, commit=False)
                 count += 1
-                updated[target.properties[by_property]] = target
+                updated.add(target.properties[by_property])
+                prepared.append(target)
             Document.objects.bulk_update(
-                updated.values(),
-                ["properties", "identity", "reference"],
+                prepared,
+                ["properties", "identity", "reference", "modified_at"],
                 batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
             )
             # After all updates we add all data that hasn't been used in any update operation
@@ -142,8 +153,11 @@ class CollectionBase(DataStorage):
                 if lookup_value not in updated:
                     additions += sources
             if len(additions):
-                count += self.add(additions, batch_size=batch_size, collection=collection)
+                count += self.add(additions, batch_size=batch_size, collection=collection, modified_at=modified_at)
 
+        if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+            collection.modified_at = modified_at
+            collection.save()
         return count
 
     @property
