@@ -1,6 +1,9 @@
+from datetime import date, timedelta
 from unittest.mock import Mock
 
 from django.test import TestCase
+
+from datagrowth.configuration import create_config
 
 
 class ResourceTestMixin(TestCase):
@@ -58,3 +61,12 @@ class ResourceTestMixin(TestCase):
         instance = self.get_test_instance()
         name = instance.get_queue_name()
         self.assertEqual(name, "celery")
+
+    def test_purge_after(self):
+        instance = self.get_test_instance()
+        instance.config = create_config("global", {
+            "purge_after": {"days": 30}
+        })
+        instance.clean()
+        self.assertIsNotNone(instance.purge_at)
+        self.assertEqual(instance.purge_at.date() - date.today(), timedelta(days=30))

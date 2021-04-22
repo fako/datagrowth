@@ -40,6 +40,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "global_async": True,  # legacy "asynchronous" configuration for Python <= 3.6
     "global_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
     "global_token": "",
+    "global_purge_after": {},
     "global_purge_immediately": False,  # by default keep resources around
     "global_sample_size": 0,
     "global_cache_only": False,
