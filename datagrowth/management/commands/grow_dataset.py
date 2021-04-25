@@ -15,7 +15,7 @@ class Command(DatasetCommand):
         raise TypeError("It is impossible to grow multiple datasets at the same time.")
 
     def handle_dataset(self, dataset, *args, **options):
-        dataset.config = {"async": False}  # TODO: this is weird syntax as it is actually performing an update
+        dataset.config = {"asynchronous": False}  # TODO: this is weird syntax as it is actually performing an update
         dataset.save()
         dataset.grow(*args)
         log.info("Result: {}".format(dataset.kernel))
