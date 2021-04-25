@@ -5,7 +5,6 @@ from django.apps import apps
 from django.core.management.base import BaseCommand
 
 from datagrowth.configuration import DecodeConfigAction
-from datagrowth.datatypes import DatasetState
 
 
 log = logging.getLogger("datagrowth.command")
@@ -30,7 +29,7 @@ class DatasetCommand(BaseCommand):
         return dataset
 
     def get_datasets(self):
-        return self.model.objects.filter(state=DatasetState.READY).iterator()
+        return self.model.objects.filter(state="Ready").iterator()
 
     def handle(self, *args, **options):
         Dataset = apps.get_model(options.pop("dataset"))
