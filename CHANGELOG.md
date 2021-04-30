@@ -51,3 +51,8 @@ v0.16
 * The sleep dictated by ``interval_duration`` is executed by ``HttpResource`` not the http tasks
 * ``ConfigurationType`` still works with the "async" property, but migrates internally to "asynchronous"
 * Modern mime types like application/vnd.api+json get processed as application/json
+* You can now specify to what ``datetime`` the ``Resource.purge_after`` should get set when a ``Resource`` gets saved.
+The ``dict`` specified in the ``purge_after`` configuration are kwargs to a ``timedelta`` init.
+This ``timedelta`` gets added to ``datetime.now``.
+This means that using ``{"days": 30}`` as ``purge_after`` will set the ``Resource.purge_after``
+to 30 days into the future upon creation. The ``global_purge_after`` default configuration should be an empty ``dict``.
