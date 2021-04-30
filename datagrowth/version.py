@@ -1,7 +1,7 @@
 import json
 
 
-VERSION = "0.16.5"
+VERSION = "0.16.6"
 
 
 def create_package_json(file_path):
