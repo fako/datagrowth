@@ -108,7 +108,6 @@ def send_serie(config, args_list, kwargs_list, session=None, method=None):
 @load_config()
 @load_session()
 def send_mass(config, args_list, kwargs_list, session=None, method=None):
-    # FEATURE: chain "batches" of send_mass if configured through batch_size
 
     assert args_list and kwargs_list, "No args list and/or kwargs list given to send mass"
 

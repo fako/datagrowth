@@ -40,13 +40,11 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "global_asynchronous": True,  # by default offload to celery where possible
     "global_async": True,  # legacy "asynchronous" configuration for Python <= 3.6
     "global_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
-    "global_token": "",
     "global_purge_after": {},
     "global_purge_immediately": False,  # by default keep resources around
     "global_sample_size": 0,
     "global_cache_only": False,
 
-    "http_resource_batch_size": 0,
     "http_resource_continuation_limit": 1,
     "http_resource_interval_duration": 0,  # NB: milliseconds!
     "http_resource_concat_args_size": 0,
