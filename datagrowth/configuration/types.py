@@ -14,6 +14,15 @@ class ConfigurationType(object):
     So a configuration named `my_config` will be accessible with `config.my_config`.
 
     You can check if a configuration exists by using the `in` operator.
+    The defaults get returned when configurations are not explicitly set.
+    There are two types of defaults:
+
+        - Any configuration with a prefixes of `global` will be a default for all configuration properties
+        - Any configuration with a prefix equal to namespace will be a default for configuration properties that share the namespace
+
+    If you for example add `my_scoped_config` to the defaults.
+    Then configuration properties with the namespace set to `my` will
+    return the `my_scoped_config` value if `scoped_config` is not set.
 
     :param defaults: (dict) that should hold default configurations as items
         or None to load defaults from settings at runtime
@@ -253,41 +262,38 @@ class ConfigurationType(object):
 class ConfigurationProperty(object):
     """
     Initialize this class to place a configuration property upon another class.
-    The property will be of the ConfigurationType described below. Upon initialization you can specify defaults.
-    The defaults get returned when configurations are not explicitly set.
-    There are two types of defaults:
+    The property will be of the ConfigurationType described below.
 
-        - Any configuration with a prefixes of `global` will be a default for all configuration properties
-        - Any configuration with a prefix equal to namespace will be a default for configuration properties that share the namespace
+    By default an attribute named _config will get added to the owner class.
+    You can change this by passing a name to the storage_attribute parameter
+    All other parameters get passed to the ConfigurationType class.
 
-    If you for example add `my_scoped_config`. Then configuration properties with the namespace set to `my` will
-    return the `my_scoped_config` value if `scoped_config` is not set.
-
-    :param storage_attribute: (string) name of the attribute used to store configurations on the owner class
-    :param defaults: (dict) should hold default configurations as items
-        or None to load defaults from settings at runtime
     :param namespace: (string) prefix to search default configurations with
     :param private: (list) keys that are considered as private for this property
+    :param defaults: (dict) should hold default configurations as items
+        or None to load defaults from settings at runtime (the default)
+    :param storage_attribute: (string) name of the attribute used to store configurations on the owner class.
+        By default this is an attribute named _config
     :return: ConfigurationType
     """
 
-    def __init__(self, storage_attribute, defaults, namespace, private):
+    def __init__(self, namespace="global", private=None, defaults=None,
+                 storage_attribute=None):
         """
         Runs some checks to create a ConfigurationType successfully upon first access of the property.
 
-        :param storage_attribute: (string) name of the attribute used to store configurations on the owner class
-        :param defaults: (dict) should hold default configurations as items
-            or None to load defaults from settings at runtime
-        :param namespace: (string) prefix to search default configurations with
+        :param namespace: (string) prefix to search default configurations with (defaults to "global" namespace)
         :param private: (list) keys that are considered as private for this property
+        :param defaults: (dict) should hold default configurations as items
+            or None to load defaults from settings at runtime (the default)
+        :param storage_attribute: (string) name of the attribute used to store configurations on the owner class.
+            By default this is an attribute named _config
         :return: ConfigurationType
         """
-        assert storage_attribute, \
-            "Specify a storage_attribute to store the configuration in."
-        self._storage_attribute = storage_attribute
+        self._storage_attribute = storage_attribute or "_config"
         self._defaults = defaults
         self._namespace = namespace
-        self._private = private
+        self._private = private or []
 
     def __get__(self, obj, cls=None):
         if obj is None:  # happens with system checks
