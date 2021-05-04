@@ -1,17 +1,11 @@
-from core.utils.configuration import ConfigurationProperty
-from datascope.configuration import MOCK_CONFIGURATION
-from core.processors.base import Processor
+from datagrowth.configuration import ConfigurationProperty
+from datagrowth.processors import Processor
 from core.processors import RankProcessor, LegacyRankProcessor
 
 
 class MockProcessor(Processor):
 
-    config = ConfigurationProperty(
-        storage_attribute="_config",
-        defaults=MOCK_CONFIGURATION,
-        namespace="mock_processor",
-        private=[]
-    )
+    config = ConfigurationProperty(namespace="mock_processor")
 
 
 class MockNumberProcessor(MockProcessor):

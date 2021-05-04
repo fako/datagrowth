@@ -284,10 +284,10 @@ class TestConfigurationType(TestCase):
 
 class ConfigurationPropertyHolder(object):
     property = ConfigurationProperty(
-        "storage",
         namespace="name",
         private=["_test3"],
-        defaults=MOCK_CONFIGURATION
+        defaults=MOCK_CONFIGURATION,
+        storage_attribute="storage"
     )
 
 
@@ -297,10 +297,10 @@ class TestConfigurationProperty(TestCase):
     def setUpClass(cls):
         super(TestConfigurationProperty, cls).setUpClass()
         cls.property = ConfigurationProperty(
-            "storage",
             namespace="name",
             private=["_test3"],
-            defaults=MOCK_CONFIGURATION
+            defaults=MOCK_CONFIGURATION,
+            storage_attribute="storage"
         )
 
     def setUp(self):
