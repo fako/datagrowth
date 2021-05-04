@@ -7,6 +7,7 @@ but this file keeps track of breaking changes in the Datagrowth package.
 Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
+
 v0.15
 -----
 
@@ -56,3 +57,35 @@ The ``dict`` specified in the ``purge_after`` configuration are kwargs to a ``ti
 This ``timedelta`` gets added to ``datetime.now``.
 This means that using ``{"days": 30}`` as ``purge_after`` will set the ``Resource.purge_after``
 to 30 days into the future upon creation. The ``global_purge_after`` default configuration should be an empty ``dict``.
+
+
+v0.17
+-----
+
+* It's recommended to update to Django 3.2 before using Datagrowth 0.17.
+* Note that a Django migration is required to make Datagrowth 0.17 work.
+* Drops support for Django 1.11.
+* MySQL backends are no longer supported with Django versions below 3.2
+* Schemas on ``Document`` and ``Collection`` are removed as their usage is not recommended.
+Consider working schemaless when using these ``DataStorage`` derivative classes.
+* As schemas are no longer available for ``DataStorage`` derivative classes all write functionality
+from default ``DataStorage`` API views is removed.
+* ``DataStorage`` API URL patterns now require app labels as namespaces to prevent ambiguity.
+* The API version can be specified using the ``DATAGROWTH_API_VERSION`` setting.
+* ``DataStorage.update`` is reintroduced because of potential performance benefits.
+* ``Document.update`` no longer takes first values from iterators given to it.
+* ``Collection.update`` no longer excepts a single dict or Document for updating.
+It also works using lookups from ``JSONField`` instead of the inferior ``reference`` mechanic.
+* ``DataStorage.url`` now provides a generic way to build URLs for ``Collection`` and ``Document``.
+These URLs will expect URL patterns to exist with names in the format:
+*v<api-version>:<app-name>:<model-name>-content*.
+This replaces the old formats which were less flexible:
+*v1:<app-name>:collection-content* and *v1:<app-name>:document-content*.
+* ``HttpResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
+for ``request`` and ``head`` fields.
+* ``ShellResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
+for the ``command`` field.
+* The resources and datatypes modules now each have an admin module to import ``AdminModels`` easily.
+* ``ConfigurationProperty`` now uses a simpler constructor and allows defaults for all arguments.
+* Removes the unused ``global_token`` default configuration.
+* Removes the unused ``http_resource_batch_size`` default configuration.
