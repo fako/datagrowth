@@ -2,11 +2,11 @@ import subprocess
 import string
 import jsonschema
 from copy import copy
-from datetime import datetime
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 import json_field
 
 from datagrowth import settings as datagrowth_settings
@@ -245,7 +245,7 @@ class ShellResource(Resource):
         :param validate_input: (bool) whether to validate input
         :return:
         """
-        if self.purge_at is not None and self.purge_at <= datetime.now():
+        if self.purge_at is not None and self.purge_at <= now():
             raise ValidationError("Resource is no longer valid and will get purged")
         # Internal asserts about the request
         assert isinstance(command, dict), \

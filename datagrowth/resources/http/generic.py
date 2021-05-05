@@ -3,7 +3,6 @@ import re
 import hashlib
 import json
 from copy import copy, deepcopy
-from datetime import datetime
 from urllib.parse import urlencode
 from time import sleep
 
@@ -15,6 +14,7 @@ from bs4 import BeautifulSoup
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.timezone import now
 
 import json_field
 
@@ -276,7 +276,7 @@ class HttpResource(Resource):
         :param validate_input: (bool) whether to validate input
         :return:
         """
-        if self.purge_at is not None and self.purge_at <= datetime.now():
+        if self.purge_at is not None and self.purge_at <= now():
             raise ValidationError("Resource is no longer valid and will get purged")
         # Internal asserts about the request
         assert isinstance(request, dict), "Request should be a dictionary."

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, ContentType
-from django.utils.timezone import make_aware
+from django.utils.timezone import now
 
 from datagrowth import configuration
 
@@ -45,9 +45,9 @@ class Resource(models.Model):
         if self.uri and len(self.uri):
             self.uri = self.uri[:255]
         if not self.id and self.config.purge_immediately:
-            self.purge_at = make_aware(datetime.now())
+            self.purge_at = now()
         if not self.purge_at and self.config.purge_after:
-            self.purge_at = make_aware(datetime.now()) + timedelta(**self.config.purge_after)
+            self.purge_at = now() + timedelta(**self.config.purge_after)
 
     #######################################################
     # RESOURCE INTERFACE
