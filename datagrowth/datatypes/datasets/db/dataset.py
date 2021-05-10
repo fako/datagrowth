@@ -3,7 +3,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 from datagrowth.configuration import ConfigurationField
 from datagrowth.datatypes.datasets.constants import GrowthState
-from datagrowth.datatypes.datasets.db.version import DatasetVersion
 from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
 from datagrowth.version import VERSION
 
@@ -28,6 +27,27 @@ class DatasetBase(models.Model):
     @property
     def version(self):
         return VERSION
+
+    @classmethod
+    def get_name(cls):
+        if hasattr(cls, 'NAME'):
+            return cls.NAME
+        word_separator = '_'
+        class_name = cls.__name__
+        class_name = class_name.replace('Dataset', '')
+        if not class_name:
+            class_name = "Dataset"
+        name = ''
+        for index, char in enumerate(class_name):
+            if char.isupper():
+                name += word_separator + char.lower() if not index == 0 else char.lower()
+            else:
+                name += char
+        return name
+
+    @classmethod
+    def get_namespace(cls):
+        return cls._meta.app_label.replace("_", "-")
 
     def gather_seeds(self, *args):
         """
@@ -96,6 +116,9 @@ class DatasetBase(models.Model):
 
     def harvest(self):
         pass
+
+    def __str__(self):
+        return f"{self.signature} ({self.id})"
 
     class Meta:
         abstract = True

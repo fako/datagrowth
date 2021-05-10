@@ -346,32 +346,6 @@ class Community(models.Model, ProcessorMixin):
 
         return data if not isinstance(data, QuerySet) else data.iterator()
 
-    @classmethod
-    def get_name(cls):
-        if hasattr(cls, 'COMMUNITY_NAME'):
-            return cls.COMMUNITY_NAME
-        word_separator = '_'
-        class_name = cls.__name__
-        class_name = class_name.replace('Community', '')
-        name = ''
-        for index, char in enumerate(class_name):
-            if char.isupper():
-                name += word_separator + char.lower() if not index == 0 else char.lower()
-            else:
-                name += char
-        return name
-
-    @classmethod
-    def get_namespace(cls):
-        return cls._meta.app_label.replace("_", "-")
-
-    def __str__(self):
-        return "{} ({}, {})".format(
-            self.signature,
-            self.id,
-            self.state
-        )
-
     class Meta:
         abstract = True
         get_latest_by = "created_at"
