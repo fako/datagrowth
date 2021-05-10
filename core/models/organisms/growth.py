@@ -8,11 +8,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey, ContentType
 from django.core.exceptions import ValidationError
 
 from datagrowth.datatypes import DocumentBase, CollectionBase
-from datascope.configuration import PROCESS_CHOICE_LIST, DEFAULT_CONFIGURATION
-from core.processors.base import ArgumentsTypes
+from datagrowth.configuration import DEFAULT_CONFIGURATION
+from datagrowth.processors.base import ArgumentsTypes
 from core.processors.mixins import ProcessorMixin
-from core.utils.configuration import ConfigurationField
-from core.exceptions import DSProcessError, DSNoContent
+from datagrowth.configuration import ConfigurationField
+from core.exceptions import DSProcessError
+from datagrowth.exceptions import DGNoContent
 from core.models.organisms import Individual, Collective
 
 
@@ -43,10 +44,18 @@ CONTRIBUTE_TYPE_CHOICES = [
 ]
 
 
+PROCESS_CHOICE_LIST = [
+    ("HttpResourceProcessor.fetch", "Fetch content from HTTP resource"),
+    ("HttpResourceProcessor.fetch_mass", "Fetch content from multiple HTTP resources"),
+    ("ExtractProcessor.extract_from_resource", "Extract content from one or more resources"),
+    ("ExtractProcessor.pass_resource_through", "Take content 'as is' from one or more resources"),
+]
+
+
 class Growth(models.Model, ProcessorMixin):
 
     community = GenericForeignKey(ct_field="community_type", fk_field="community_id")
-    community_type = models.ForeignKey(ContentType, related_name="+")
+    community_type = models.ForeignKey(ContentType, related_name="+", on_delete=models.PROTECT)
     community_id = models.PositiveIntegerField()
 
     type = models.CharField(max_length=255)
@@ -61,10 +70,10 @@ class Growth(models.Model, ProcessorMixin):
     contribute_type = models.CharField(max_length=255, choices=CONTRIBUTE_TYPE_CHOICES, null=True, blank=True)
 
     input = GenericForeignKey(ct_field="input_type", fk_field="input_id")
-    input_type = models.ForeignKey(ContentType, related_name="+", null=True, blank=True)
+    input_type = models.ForeignKey(ContentType, related_name="+", null=True, blank=True, on_delete=models.PROTECT)
     input_id = models.PositiveIntegerField(null=True, blank=True)
     output = GenericForeignKey(ct_field="output_type", fk_field="output_id")
-    output_type = models.ForeignKey(ContentType, related_name="+", null=True, blank=True)
+    output_type = models.ForeignKey(ContentType, related_name="+", null=True, blank=True, on_delete=models.PROTECT)
     output_id = models.PositiveIntegerField(null=True, blank=True)
 
     result_id = models.CharField(max_length=255, null=True, blank=True)
@@ -84,7 +93,7 @@ class Growth(models.Model, ProcessorMixin):
 
         self.config = self.community.config.to_dict(protected=True)  # TODO: make this += operation instead
 
-        processor, method, args_type = self.prepare_process(self.process, async=self.config.async)
+        processor, method, args_type = self.prepare_process(self.process, asynchronous=self.config.asynchronous)
         assert args_type == ArgumentsTypes.NORMAL and isinstance(self.input, (Individual, DocumentBase)) or \
             args_type == ArgumentsTypes.BATCH and isinstance(self.input, (Collective, CollectionBase)), \
             "Unexpected arguments type '{}' for input of class {}".format(args_type, self.input.__class__.__name__)
@@ -99,7 +108,7 @@ class Growth(models.Model, ProcessorMixin):
         else:
             raise AssertionError("Growth.input is of unexpected type {}".format(type(self.input)))
 
-        if not self.config.async:
+        if not self.config.asynchronous:
             self.state = GrowthState.CONTRIBUTE
         else:
             self.state = GrowthState.PROCESSING
@@ -116,7 +125,7 @@ class Growth(models.Model, ProcessorMixin):
             GrowthState.PROCESSING, GrowthState.COMPLETE, GrowthState.PARTIAL, GrowthState.CONTRIBUTE
         ], "Can't finish a growth that is in state {}".format(self.state)
 
-        processor, method, args_type = self.prepare_process(self.process, async=self.config.async)
+        processor, method, args_type = self.prepare_process(self.process, asynchronous=self.config.asynchronous)
 
         if self.state == GrowthState.PROCESSING:
             try:
@@ -163,7 +172,7 @@ class Growth(models.Model, ProcessorMixin):
                 elif isinstance(contribution, Iterator):
                     for contrib in contribution:
                         yield contrib
-            except DSNoContent as exc:
+            except DGNoContent as exc:
                 log.debug("No content for {} with id {}: {}".format(
                     success_resource.__class__.__name__,
                     success_resource.id,

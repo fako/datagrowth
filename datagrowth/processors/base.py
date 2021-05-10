@@ -23,12 +23,7 @@ class Processor(object):
     ARGS_NORMAL_METHODS = []
     ARGS_BATCH_METHODS = []
 
-    config = ConfigurationProperty(
-        storage_attribute="_config",
-        defaults=None,  # This will now lookup defaults at package level. Use register_defaults to set defaults.
-        private=[],
-        namespace='global'
-    )
+    config = ConfigurationProperty()
 
     def __init__(self, config):
         assert isinstance(config, (dict, ConfigurationType)), "Processor expects to get a configuration."

@@ -21,6 +21,5 @@ env:
   - DJANGO_MYSQL_USER=root
   matrix:
   - TOX_ENV=django22 DJANGO_DEFAULT_DATABASE=postgres
-  - TOX_ENV=django22 DJANGO_DEFAULT_DATABASE=mysql
   - TOX_ENV=django32 DJANGO_DEFAULT_DATABASE=postgres
   - TOX_ENV=django32 DJANGO_DEFAULT_DATABASE=mysql

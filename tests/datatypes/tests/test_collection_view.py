@@ -1,48 +1,47 @@
-from __future__ import unicode_literals, absolute_import, print_function, division
-
 import json
 
 from django.test import TestCase, Client
 
 
-class TestIndividualView(TestCase):
+class TestCollectionView(TestCase):
 
-    fixtures = ["test-organisms"]
+    fixtures = ["test-data-storage"]
 
     def setUp(self):
-        super(TestIndividualView, self).setUp()
+        super().setUp()
         self.client = Client()
-        self.test_url = "/data/v1/individual/{}/"
+        self.test_url = "/api/v1/datatypes/data/collection/{}/"
 
     def test_get(self):
         response = self.client.get(self.test_url.format(1))
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf-8"))
         self.assertIsInstance(data, dict)
-        self.assertIn("properties", data)
-        response = self.client.get(self.test_url.format(9))
+        response = self.client.get(self.test_url.format(3))
         data = json.loads(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 404)
         self.assertIsInstance(data, dict)
         self.assertIn("detail", data)
 
 
-class TestIndividualContentView(TestCase):
+class TestCollectionContentView(TestCase):
 
-    fixtures = ["test-organisms"]
+    fixtures = ["test-data-storage"]
 
     def setUp(self):
-        super(TestIndividualContentView, self).setUp()
+        super().setUp()
         self.client = Client()
-        self.test_url = "/data/v1/individual/{}/content/"
+        self.test_url = "/api/v1/datatypes/data/collection/{}/content/"
 
-    def test_get(self):
+    def test_get_success(self):
         response = self.client.get(self.test_url.format(1))
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content.decode("utf-8"))
-        self.assertIsInstance(data, dict)
+        self.assertIsInstance(data, list)
         self.assertTrue(data)
-        response = self.client.get(self.test_url.format(9))
+
+    def test_get_not_found(self):
+        response = self.client.get(self.test_url.format(3))
         data = json.loads(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 404)
         self.assertIsInstance(data, dict)

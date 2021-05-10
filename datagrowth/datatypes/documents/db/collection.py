@@ -1,10 +1,13 @@
 import json
-from collections import Iterator, Iterable
+from collections import Iterator, Iterable, defaultdict
+from math import ceil
+from datetime import datetime
 
 from django.apps import apps
 from django.db import models
+from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
-from django.urls import reverse
+from django.utils.timezone import make_aware
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.utils import ibatch, reach
@@ -35,16 +38,8 @@ class CollectionBase(DataStorage):
         Document = self.get_document_model()
         return Document(
             collection=collection,
-            schema=self.schema,
             properties=data
         )
-
-    @property
-    def url(self):  # TODO: move to base class
-        if not self.id:
-            raise ValueError("Can't get url for unsaved Collection")
-        view_name = "api-v1:{}:collection-content".format(self._meta.app_label.replace("_", "-"))
-        return reverse(view_name, args=[self.id])  # TODO: make version aware
 
     @classmethod
     def validate(cls, data, schema):
@@ -61,18 +56,20 @@ class CollectionBase(DataStorage):
         for instance in data:
             Document.validate(instance, schema)
 
-    def add(self, data, validate=True, reset=False, batch_size=500, collection=None):
+    def add(self, data, reset=False, batch_size=500, collection=None, modified_at=None, validate=True):
         """
         Add new data to the Collection in batches, possibly deleting all data before adding.
 
         :param data: The data to use for the update
-        :param validate: (optional) whether to validate data or not (yes by default)
         :param reset: (optional) whether to delete existing data or not (no by default)
         :param batch_size: (optional) how many instances to add in a single batch (default: 500)
         :param collection: (optional) a collection instance to add the data to (default: self)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param validate: (deprecated) used to allow JSON schema validation before addition
         :return: A list of updated or created instances.
         """
         collection = collection or self
+        modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
         assert isinstance(data, (Iterator, list, tuple, dict, Document)), \
             f"Collection.add expects data to be formatted as iteratable, dict or {type(Document)} not {type(data)}"
@@ -84,14 +81,10 @@ class CollectionBase(DataStorage):
 
             prepared = []
             if isinstance(data, dict):
-                if validate:
-                    Document.validate(data, self.schema)
                 document = self.init_document(data, collection=collection)
                 document.clean()
                 prepared.append(document)
             elif isinstance(data, Document):
-                if validate:
-                    Document.validate(data, self.schema)
                 data = self.init_document(data.properties, collection=collection)
                 data.clean()
                 prepared.append(data)
@@ -101,11 +94,70 @@ class CollectionBase(DataStorage):
             return prepared
 
         count = 0
-        for updates in ibatch(data, batch_size=batch_size):
-            updates = prepare_additions(updates)
-            count += len(updates)
-            Document.objects.bulk_create(updates, batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE)
+        for additions in ibatch(data, batch_size=batch_size):
+            additions = prepare_additions(additions)
+            count += len(additions)
+            Document.objects.bulk_create(additions, batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE)
 
+        if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+            collection.modified_at = modified_at
+            collection.save()
+        return count
+
+    def update(self, data, by_property, batch_size=32, collection=None, modified_at=None, validate=True):
+        """
+        Update data to the Collection in batches, using a property value to identify which Documents to update.
+
+        :param data: The data to use for the update
+        :param by_property: The property to identify a Document with
+        :param batch_size: (optional) how many instances to add in a single batch (default: 32)
+        :param collection: (optional) a collection instance to update the data to (default: self)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param validate: (deprecated) used to allow JSON schema validation before updates
+        :return: A list of updated or created instances.
+        """
+        collection = collection or self
+        modified_at = modified_at or make_aware(datetime.now())
+        Document = collection.get_document_model()
+        assert isinstance(data, (Iterator, list, tuple,)), \
+            f"Collection.update expects data to be formatted as iteratable not {type(data)}"
+
+        count = 0
+        for updates in ibatch(data, batch_size=batch_size):
+            # We bulk update by getting all objects whose property matches
+            # any update's "by_property" property value and then updating these source objects.
+            # One update object can potentially target multiple sources
+            # if multiple objects with the same value for the by_property property exist.
+            updated = set()
+            prepared = []
+            sources_by_lookup = defaultdict(list)
+            for update in updates:
+                sources_by_lookup[update[by_property]].append(update)
+            target_filters = Q()
+            for lookup_value in sources_by_lookup.keys():
+                target_filters |= Q(**{f"properties__{by_property}": lookup_value})
+            for target in collection.documents.filter(target_filters):
+                for update_value in sources_by_lookup[target.properties[by_property]]:
+                    target.update(update_value, commit=False)
+                count += 1
+                updated.add(target.properties[by_property])
+                prepared.append(target)
+            Document.objects.bulk_update(
+                prepared,
+                ["properties", "identity", "reference", "modified_at"],
+                batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
+            )
+            # After all updates we add all data that hasn't been used in any update operation
+            additions = []
+            for lookup_value, sources in sources_by_lookup.items():
+                if lookup_value not in updated:
+                    additions += sources
+            if len(additions):
+                count += self.add(additions, batch_size=batch_size, collection=collection, modified_at=modified_at)
+
+        if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+            collection.modified_at = modified_at
+            collection.save()
         return count
 
     @property
@@ -115,7 +167,7 @@ class CollectionBase(DataStorage):
 
         :return: a generator yielding properties from Documents
         """
-        return (ind.content for ind in self.documents.iterator())
+        return (doc.content for doc in self.documents.iterator())
 
     @property
     def has_content(self):
@@ -126,7 +178,7 @@ class CollectionBase(DataStorage):
         """
         return self.documents.exists()
 
-    def split(self, train=0.8, validate=0.1, test=0.1, query_set=None, as_content=False):  # TODO: test to unlock
+    def split(self, train=0.8, validate=0.1, test=0.1, query_set=None, as_content=False):
         assert train + validate + test == 1.0, "Expected sum of train, validate and test to be 1"
         assert train > 0, "Expected train set to be bigger than 0"
         assert validate > 0, "Expected validate set to be bigger than 0"
@@ -137,9 +189,9 @@ class CollectionBase(DataStorage):
         documents = query_set.order_by("?").iterator()
         test_set = []
         if test:
-            test_size = round(content_count * test)
+            test_size = ceil(content_count * test)
             test_set = [next(documents) for ix in range(0, test_size)]
-        validate_size = round(content_count * validate)
+        validate_size = ceil(content_count * validate)
         validate_set = [next(documents) for ix in range(0, validate_size)]
         return (
             (document.content if as_content else document for document in documents),
@@ -152,7 +204,7 @@ class CollectionBase(DataStorage):
             return map(self.output, args)
         frm = args[0]
         if not frm:
-            return [frm for ind in range(0, self.documents.count())]
+            return [frm for doc in range(0, self.documents.count())]
         elif isinstance(frm, list):
             output = self.output(*frm)
             if len(frm) > 1:
@@ -161,7 +213,7 @@ class CollectionBase(DataStorage):
                 output = [[out] for out in output]
             return output
         else:
-            return [ind.output(frm) for ind in self.documents.iterator()]
+            return [doc.output(frm) for doc in self.documents.iterator()]
 
     def group_by(self, key):
         """
@@ -171,14 +223,14 @@ class CollectionBase(DataStorage):
         :return:
         """
         grouped = {}
-        for ind in self.documents.all():
-            assert key in ind.properties, \
+        for doc in self.documents.all():
+            assert key in doc.properties, \
                 "Can't group by {}, because it is missing from an document in collection {}".format(key, self.id)
-            value = ind.properties[key]
+            value = doc.properties[key]
             if value not in grouped:
-                grouped[value] = [ind]
+                grouped[value] = [doc]
             else:
-                grouped[value].append(ind)
+                grouped[value].append(doc)
         return grouped
 
     def influence(self, document):

@@ -1,13 +1,18 @@
 from itertools import repeat
+import warnings
+from datetime import datetime
 
 import jsonschema
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.postgres import fields as postgres_fields
-from django.urls import reverse
-import json_field
+from django.utils.timezone import make_aware
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django.contrib.postgres.fields import JSONField
+
 
 from datagrowth.utils import reach
 from .base import DataStorage
@@ -15,26 +20,17 @@ from .base import DataStorage
 
 class DocumentBase(DataStorage):
 
+    properties = JSONField(default=dict)
+
     collection = models.ForeignKey("Collection", blank=True, null=True, on_delete=models.CASCADE)
     identity = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     reference = models.CharField(max_length=255, blank=True, null=True, db_index=True)
-
-    @property
-    def properties(self):
-        raise NotImplementedError("DocumentBase does not implement properties, use DocumentPostgres or DocumentMysql")
 
     def __getitem__(self, key):
         return self.properties[key]
 
     def __setitem__(self, key, value):
         self.properties[key] = value
-
-    @property
-    def url(self):  # TODO: move to base class
-        if not self.id:
-            raise ValueError("Can't get url for unsaved Document")
-        view_name = "v1:{}:document-content".format(self._meta.app_label.replace("_", "-"))
-        return reverse(view_name, args=[self.id])  # TODO: make version aware
 
     @staticmethod
     def validate(data, schema):
@@ -64,23 +60,22 @@ class DocumentBase(DataStorage):
             django_exception.schema = exc.schema
             raise django_exception
 
-    def update(self, data, validate=True):  # TODO: test to unlock
+    def update(self, data, commit=True, validate=True):
         """
-        Update the properties and spirit with new data.
+        Update the properties with new data.
 
         :param data: The data to use for the update
-        :param validate: (optional) whether to validate data or not (yes by default)
+        :param commit: Whether to commit new values to the database or not
+        :param validate: (deprecated) used to validate data using JSON schema
         :return: Updated content
         """
-        if isinstance(data, (list, tuple,)):
-            data = data[0]
-
-        self.properties.update(data)
-
-        if validate:
-            self.validate(self.properties, self.schema)
-
-        self.save()
+        content = data.content if isinstance(data, DocumentBase) else data
+        self.properties.update(content)
+        self.clean()
+        if commit:
+            self.save()
+        else:
+            self.modified_at = make_aware(datetime.now())
         return self.content
 
     @property
@@ -143,7 +138,14 @@ class DocumentBase(DataStorage):
 
 class DocumentMysql(models.Model):
 
-    properties = json_field.JSONField(default={})
+    properties = JSONField(default=dict)
+
+    def __init_subclass__(cls, *args, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        warnings.warn(
+            "Subclassing the DocumentMySQL mixin is deprecated inherit from DocumentBase instead",
+            DeprecationWarning
+        )
 
     class Meta:
         abstract = True
@@ -153,7 +155,14 @@ class DocumentMysql(models.Model):
 
 class DocumentPostgres(models.Model):
 
-    properties = postgres_fields.JSONField(default=dict)
+    properties = JSONField(default=dict)
+
+    def __init_subclass__(cls, *args, **kwargs):
+        super().__init_subclass__(*args, **kwargs)
+        warnings.warn(
+            "Subclassing the DocumentPostgres mixin is deprecated inherit from DocumentBase instead",
+            DeprecationWarning
+        )
 
     class Meta:
         abstract = True

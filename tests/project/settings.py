@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 
     'datagrowth',
 
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'utils',
     'resources',
     'processors',
+    'datatypes',
 ]
 
 MIDDLEWARE = [
@@ -153,3 +155,4 @@ STATIC_URL = '/static/'
 # Datagrowth settings
 
 DATAGROWTH_MEDIA_ROOT = MEDIA_ROOT = os.path.join(BASE_DIR, "data", "media")
+DATAGROWTH_API_VERSION = 1
