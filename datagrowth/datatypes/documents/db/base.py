@@ -8,6 +8,8 @@ from datagrowth.settings import DATAGROWTH_API_VERSION
 
 class DataStorage(models.Model):
 
+    dataset_version = models.ForeignKey("DatasetVersion", null=True, blank=True, on_delete=models.CASCADE)
+
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
