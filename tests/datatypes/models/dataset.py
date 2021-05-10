@@ -1,9 +1,9 @@
 from collections import OrderedDict
 
-from core.models.organisms import Community, Individual
+from datagrowth.datatypes import DatasetBase
 
 
-class CommunityMock(Community):
+class CommunityMock(DatasetBase):
 
     COMMUNITY_SPIRIT = OrderedDict([
         ("phase1", {
