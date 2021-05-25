@@ -140,8 +140,8 @@ class CollectionBase(DataStorage):
         collection = collection or self
         modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
-        assert isinstance(data, (Iterator, list, tuple, dict, Document)), \
-            f"Collection.add expects data to be formatted as iteratable, dict or {type(Document)} not {type(data)}"
+        assert isinstance(data, (Iterator, list, tuple,)), \
+            f"Collection.add expects data to be formatted as sequential iterable not {type(data)}"
 
         if reset:
             self.documents.all().delete()
