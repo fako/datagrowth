@@ -8,7 +8,7 @@ from datagrowth.datatypes.datasets.constants import GrowthState
 class DatasetVersionManager(models.Manager):
 
     def get_latest_version(self):
-        return super().get_queryset().filter(is_current=True).latest()
+        return super().filter(is_current=True).last()
 
 
 class DatasetVersionBase(models.Model):
