@@ -19,6 +19,7 @@ class DatasetBase(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
     NAME = None
+    CONFIG = {}
 
     @property
     def pipelines(self):
@@ -63,20 +64,23 @@ class DatasetBase(models.Model):
     def filter_growth_configuration(self, **kwargs):
         # Calculate which keys are whitelisted
         growth_keys = set()
-        growth_processors = copy(self.pipelines.get("growth", []))
+        growth_configs = [processor.config for processor in self.pipelines.get("growth", [])]
+        growth_configs.append(self.CONFIG)
         seeder_processor = self.pipelines.get("seeder", None)
         if seeder_processor:
-            growth_processors.append(seeder_processor)
-        for processor in growth_processors:
-            growth_keys.update({key[1:] for key, value in processor.config.items() if key.startswith("$")})
+            growth_configs.append(seeder_processor.config)
+        for config in growth_configs:
+            growth_keys.update({key[1:] for key, value in config.items() if key.startswith("$")})
         # Actual filtering of input
         return {key: value for key, value in kwargs.items() if key.strip("$") in growth_keys}
 
     def filter_harvest_configuration(self, **kwargs):
         # Calculate which keys are whitelisted
         harvest_keys = set()
-        for processor in self.pipelines.get("harvest", []):
-            harvest_keys.update({key[1:] for key, value in processor.config.items() if key.startswith("$")})
+        harvest_configs = [processor.config for processor in self.pipelines.get("harvest", [])]
+        harvest_configs.append(self.CONFIG)
+        for config in harvest_configs:
+            harvest_keys.update({key[1:] for key, value in config.items() if key.startswith("$")})
         # Actual filtering of input
         return {key: value for key, value in kwargs.items() if key.strip("$") in harvest_keys}
 
