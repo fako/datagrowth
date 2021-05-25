@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
@@ -16,6 +18,8 @@ class DatasetBase(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
+    NAME = None
+
     @property
     def pipelines(self):
         return {
@@ -30,7 +34,7 @@ class DatasetBase(models.Model):
 
     @classmethod
     def get_name(cls):
-        if hasattr(cls, 'NAME'):
+        if cls.NAME:
             return cls.NAME
         word_separator = '_'
         class_name = cls.__name__
@@ -48,6 +52,33 @@ class DatasetBase(models.Model):
     @classmethod
     def get_namespace(cls):
         return cls._meta.app_label.replace("_", "-")
+
+    def get_signature_from_input(self, *args, **kwargs):
+        growth_configuration = self.filter_growth_configuration(**kwargs)
+        signature = list(args) + [f"{key}={value}" for key, value in growth_configuration.items()]
+        signature = list(filter(bool, signature))
+        signature.sort()
+        return "&".join(signature)
+
+    def filter_growth_configuration(self, **kwargs):
+        # Calculate which keys are whitelisted
+        growth_keys = set()
+        growth_processors = copy(self.pipelines.get("growth", []))
+        seeder_processor = self.pipelines.get("seeder", None)
+        if seeder_processor:
+            growth_processors.append(seeder_processor)
+        for processor in growth_processors:
+            growth_keys.update({key[1:] for key, value in processor.config.items() if key.startswith("$")})
+        # Actual filtering of input
+        return {key: value for key, value in kwargs.items() if key.strip("$") in growth_keys}
+
+    def filter_harvest_configuration(self, **kwargs):
+        # Calculate which keys are whitelisted
+        harvest_keys = set()
+        for processor in self.pipelines.get("harvest", []):
+            harvest_keys.update({key[1:] for key, value in processor.config.items() if key.startswith("$")})
+        # Actual filtering of input
+        return {key: value for key, value in kwargs.items() if key.strip("$") in harvest_keys}
 
     def gather_seeds(self, *args):
         """
