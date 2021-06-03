@@ -130,7 +130,8 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertFalse(instance.data_hash)
-        self.assertEqual(sleep_mock.call_args_list, [call(1)])
+        self.assertEqual(instance.request["backoff_delay"], 0)
+        self.assertEqual(sleep_mock.call_args_list, [call(0), call(1)])
         # Make a new request from an existing request dictionary
         sleep_mock.reset_mock()
         request = self.model().get("new2").request
@@ -144,7 +145,8 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertFalse(instance.data_hash)
-        self.assertFalse(sleep_mock.called)
+        self.assertEqual(instance.request["backoff_delay"], 0)
+        self.assertEqual(sleep_mock.call_args_list, [call(0), call(0)], "Expected a call to sleep before each request")
 
     @patch("datagrowth.resources.http.generic.sleep")
     def test_get_success(self, sleep_mock):
@@ -178,7 +180,8 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
-        self.assertEqual(sleep_mock.call_args_list, [call(1)])
+        self.assertEqual(instance.request["backoff_delay"], 0)
+        self.assertEqual(sleep_mock.call_args_list, [call(0), call(1)])
         # Load an existing resource from its request
         sleep_mock.reset_mock()
         request = instance.request
@@ -189,7 +192,8 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
-        self.assertFalse(sleep_mock.called)
+        self.assertEqual(instance.request["backoff_delay"], 0)
+        self.assertEqual(sleep_mock.call_args_list, [call(0)], "Expected a call to sleep before each request")
 
     def test_get_invalid(self):
         # Invalid invoke of get
@@ -249,6 +253,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Make a new request from an existing request dictionary
         request = self.model().post(query="new2").request
         instance = self.model(request=request).post()
@@ -261,6 +266,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Make a new request containing a file and store it.
         instance = self.model().post(query="new3", file="text-file.txt")
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
@@ -271,6 +277,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Make a new request from an existing request dictionary and a file
         request = self.model().post(query="new4", file="text-file.txt").request
         instance = self.model(request=request).post()
@@ -282,6 +289,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
 
     def test_post_success(self):
         # Load an existing request
@@ -293,6 +301,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Load an existing resource from its request
         request = instance.request
         instance = self.model(request=request).post()
@@ -303,6 +312,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Load an existing request with a file attachment
         instance = self.model().post(query="success", file="text-file.txt")
         self.assertFalse(instance.session.send.called, "HttpResource called requests.send when expected to use cache")
@@ -312,6 +322,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Load an existing resource from its request with a file attachment
         request = instance.request
         instance = self.model(request=request).post()
@@ -322,6 +333,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
 
     def test_post_retry(self):
         # Load and retry an existing request
@@ -334,6 +346,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Load an existing resource from its request
         request = instance.request
         instance = self.model(request=request).post()
@@ -345,6 +358,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Load and retry an existing request with a file
         instance = self.model().post(query="fail", file="text-file.txt")
         self.assertIsNotNone(instance.id, "HttpResource without id when expected to use cache")
@@ -355,6 +369,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
         # Load an existing resource from its request with a file
         request = instance.request
         instance = self.model(request=request).post()
@@ -366,6 +381,7 @@ class TestHttpResourceInterface(TestCase):
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
 
     def test_post_invalid(self):
         # Invalid invoke of post

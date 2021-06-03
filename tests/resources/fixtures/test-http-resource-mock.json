@@ -22,7 +22,8 @@
                 },
                 "method": "get",
                 "url": "http://localhost:8000/en/?param=1&q=success&meta=success",
-                "data": null
+                "data": null,
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=success&param=1&q=success",
             "data_hash": "",
@@ -55,7 +56,8 @@
                     "en",
                     "fail"
                 ],
-                "method": "get"
+                "method": "get",
+                "backoff_delay": 128
             },
             "uri": "localhost:8000/en/?meta=fail&param=1&q=fail",
             "data_hash": "",
@@ -88,7 +90,8 @@
                     "Accept": "application/json",
                     "Connection": "keep-alive"
                 },
-                "kwargs": {}
+                "kwargs": {},
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=next&param=1&q=next",
             "data_hash": "",
@@ -127,7 +130,8 @@
                 ],
                 "data": {
                     "test": "success"
-                }
+                },
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=success&param=1&q=success",
             "data_hash": "3e962f43d36058d30b49e69849ea34c308491809",
@@ -166,7 +170,8 @@
                     "Connection": "keep-alive",
                     "Accept-Encoding": "gzip, deflate",
                     "Accept": "application/json"
-                }
+                },
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=fail&param=1&q=fail",
             "data_hash": "2ec016e9d3ea67872019014f612ce1a848465cea",
@@ -203,7 +208,8 @@
                 },
                 "kwargs": {
                     "query": "next"
-                }
+                },
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=next&param=1&q=next",
             "data_hash": "b9818bf6ce7c1a3bf83b987b8a4289895d9c6341",
@@ -242,7 +248,8 @@
                     "Accept": "application/json",
                     "User-Agent": "DataGrowth (test); python-requests/2.20.0",
                     "Accept-Encoding": "gzip, deflate"
-                }
+                },
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=success&param=1&q=success",
             "data_hash": "01cf57ac8055c1f5730724270dc5e089f7036d02",
@@ -281,7 +288,8 @@
                     "Accept": "application/json",
                     "User-Agent": "DataGrowth (test); python-requests/2.20.0",
                     "Connection": "keep-alive"
-                }
+                },
+                "backoff_delay": 128
             },
             "uri": "localhost:8000/en/?meta=fail&param=1&q=fail",
             "data_hash": "f7ec00448981803a8767effb4eea4d30f717b3cc",
@@ -320,7 +328,8 @@
                 "kwargs": {
                     "query": "next",
                     "file": "text-file.txt"
-                }
+                },
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/en/?meta=next&param=1&q=next",
             "data_hash": "9ecfb38c8fb31b5fd2f812dd1c3f0c9e80fe0ca6",

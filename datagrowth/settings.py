@@ -49,6 +49,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "http_resource_interval_duration": 0,  # NB: milliseconds!
     "http_resource_concat_args_size": 0,
     "http_resource_concat_args_symbol": "|",
+    "global_backoff_delays": [8, 16, 32, 64, 128],
 
     "wikipedia_wiki_country": "en",
     "wikipedia_wiki_query_param": "titles",

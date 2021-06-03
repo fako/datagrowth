@@ -22,7 +22,8 @@
                 "method": "get",
                 "url": "http://localhost:8000/success",
                 "data": null,
-                "cancel": false
+                "cancel": false,
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/success",
             "data_hash": "",
@@ -55,7 +56,8 @@
                     "http://localhost:8000/fail"
                 ],
                 "method": "get",
-                "cancel": false
+                "cancel": false,
+                "backoff_delay": 128
             },
             "uri": "localhost:8000/fail",
             "data_hash": "",
@@ -88,7 +90,8 @@
                     "http://localhost:8000/content"
                 ],
                 "method": "get",
-                "cancel": false
+                "cancel": false,
+                "backoff_delay": 0
             },
             "uri": "localhost:8000/content",
             "data_hash": "",

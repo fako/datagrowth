@@ -74,7 +74,7 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
         args_list = self.get_args_list(["test", "test2"])
         kwargs_list = self.get_kwargs_list(["test", "test2"])
         scc, err = send_mass(args_list, kwargs_list, method=self.method, config=self.config, session=MockRequests)
-        self.assertEqual(sleep_mock.call_args_list, [call(0.25), call(0.25)])
+        self.assertEqual(sleep_mock.call_args_list, [call(0), call(0.25), call(0), call(0.25)])
         self.check_results(scc, 2)
         self.check_results(err, 0)
         # Now without an interval

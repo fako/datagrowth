@@ -89,3 +89,7 @@ for the ``command`` field.
 * ``ConfigurationProperty`` now uses a simpler constructor and allows defaults for all arguments.
 * Removes the unused ``global_token`` default configuration.
 * Removes the unused ``http_resource_batch_size`` default configuration.
+* HTTP errors 420, 429, 502, 503 and 504 will now trigger a backoff delay.
+When this happens the HttpResource will sleep for the amount of seconds
+specified in the ``global_backoff_delays`` setting.
+Set ``global_backoff_delays`` to an empty list to disable this behaviour.

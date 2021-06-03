@@ -60,3 +60,27 @@ This configuration is only useful for ``HttpResource`` and child classes. It use
     MyResource(config={
         "user_agent": "My custom crawler User Agent"
     })
+
+
+Backoff Delays configuration
+****************************
+
+This configuration is only useful for ``HttpResource`` and child classes.
+A ``HttpResource`` will sleep for some seconds when a 420, 429, 502, 503 or 504 HTTP error occurred.
+By default these sleep intervals which give the responding server some rest last 8, 16, 32, 64 and finally 128 seconds.
+After the final backoff delay interval the ``HttpResource`` will error
+and give up making the request if the server never responds.
+You can disable or modify this behaviour by setting the ``backoff_delays`` configuration
+It uses the "global" namespace ::
+
+    from example import MyResource
+
+    # This configuration will let the HttpResource wait 1m and then 2m instead of the default amount of seconds.
+    minutes_backoff_delay = MyResource(config={
+        "backoff_delays": [60, 120]
+    })
+
+    # You can also disable the backoff delay procedure.
+    no_backoff_delays = MyResource(config={
+        "backoff_delays": []
+    })

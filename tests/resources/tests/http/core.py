@@ -7,6 +7,7 @@ The tests of the actual interface to HttpResource and how a HttpResource should 
 is present in the generic.py test module.
 """
 
+from unittest.mock import patch, call
 from urllib.parse import urlencode
 import json
 from copy import deepcopy
@@ -29,8 +30,9 @@ class TestHttpResource(ResourceTestMixin):
     fixtures = ["test-http-resource-mock"]
 
     @staticmethod
-    def get_test_instance(session=None):
-        return HttpResourceMock(session=session)
+    def get_test_instance(session=None, config=None):
+        config = config or {}
+        return HttpResourceMock(session=session, config=config)
 
     def setUp(self):
         self.instance = self.get_test_instance()
@@ -222,7 +224,8 @@ class TestHttpResource(ResourceTestMixin):
         except AssertionError:
             pass
 
-    def test_get_request_connection_error(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_get_request_connection_error(self, sleep_mock):
         exceptions_with_status = {
             SSLError: 496,
             ConnectionError: 502,
@@ -241,8 +244,18 @@ class TestHttpResource(ResourceTestMixin):
             self.assertEquals(instance.status, exception_status)
             self.assertEqual(instance.head, {})
             self.assertEqual(instance.body, "")
+            if exception_status in [502, 504]:
+                self.assertEqual(instance.request["backoff_delay"], 128)
+            else:
+                self.assertEqual(instance.request["backoff_delay"], False)
+        self.assertEqual(
+            sleep_mock.call_count, 20,
+            "Expected three errors to call sleep six times during backoff procedure"
+        )
+        self.assertEqual(sleep_mock.call_args_list[0], call(0))
 
-    def test_post_request_connection_error(self):
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_post_request_connection_error(self, sleep_mock):
         exceptions_with_status = {
             SSLError: 496,
             ConnectionError: 502,
@@ -254,13 +267,56 @@ class TestHttpResource(ResourceTestMixin):
             error_session = get_erroneous_requests_mock(exception)
             instance = self.get_test_instance(session=error_session)
             try:
-                instance.post(query="error-get")
+                instance.post(query="error-post")
                 self.fail("Connection error did not raise for POST exception: {}".format(exception))
             except (DGHttpError40X, DGHttpError50X):
                 pass
             self.assertEquals(instance.status, exception_status)
             self.assertEqual(instance.head, {})
             self.assertEqual(instance.body, "")
+            if exception_status in [502, 504]:
+                self.assertEqual(instance.request["backoff_delay"], 128)
+            else:
+                self.assertEqual(instance.request["backoff_delay"], False)
+        self.assertEqual(
+            sleep_mock.call_count, 20,
+            "Expected three errors to call sleep six times during backoff procedure"
+        )
+        self.assertEqual(sleep_mock.call_args_list[0], call(0))
+
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_get_request_connection_error_no_backoff_delay(self, sleep_mock):
+        exceptions_with_status = {
+            SSLError: 496,
+            ConnectionError: 502
+        }
+        for exception, exception_status in exceptions_with_status.items():
+            error_session = get_erroneous_requests_mock(exception)
+            instance = self.get_test_instance(session=error_session, config={"backoff_delays": []})
+            try:
+                instance.get("error-get")
+                self.fail("Connection error did not raise for GET exception: {}".format(exception))
+            except (DGHttpError40X, DGHttpError50X):
+                pass
+            self.assertEqual(instance.request["backoff_delay"], False)
+        self.assertEqual(sleep_mock.call_args_list, [call(0), call(0)])
+
+    @patch("datagrowth.resources.http.generic.sleep")
+    def test_post_request_connection_error_no_backoff_delay(self, sleep_mock):
+        exceptions_with_status = {
+            SSLError: 496,
+            ConnectionError: 502
+        }
+        for exception, exception_status in exceptions_with_status.items():
+            error_session = get_erroneous_requests_mock(exception)
+            instance = self.get_test_instance(session=error_session, config={"backoff_delays": []})
+            try:
+                instance.get("error-get")
+                self.fail("Connection error did not raise for POST exception: {}".format(exception))
+            except (DGHttpError40X, DGHttpError50X):
+                pass
+            self.assertEqual(instance.request["backoff_delay"], False)
+        self.assertEqual(sleep_mock.call_args_list, [call(0), call(0)])
 
     def test_create_request_post(self):
         request = self.instance._create_request("post", "en", "test", query="test")

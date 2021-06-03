@@ -473,26 +473,29 @@ class HttpResource(Resource):
         )
         preq = self.session.prepare_request(request)
 
-        try:
-            response = self.session.send(
-                preq,
-                proxies=datagrowth_settings.DATAGROWTH_REQUESTS_PROXIES,
-                verify=datagrowth_settings.DATAGROWTH_REQUESTS_VERIFY,
-                timeout=self.timeout
-            )
-        except requests.exceptions.SSLError:
-            self.set_error(496, connection_error=True)
-            return
-        except requests.Timeout:
-            self.set_error(504, connection_error=True)
-            return
-        except (requests.ConnectionError, IOError):
-            self.set_error(502, connection_error=True)
-            return
-        except UnicodeDecodeError:
-            self.set_error(600, connection_error=True)
-            return
-        self._update_from_results(response)
+        for backoff_delay in [0] + self.config.backoff_delays:
+            sleep(backoff_delay)
+            try:
+                response = self.session.send(
+                    preq,
+                    proxies=datagrowth_settings.DATAGROWTH_REQUESTS_PROXIES,
+                    verify=datagrowth_settings.DATAGROWTH_REQUESTS_VERIFY,
+                    timeout=self.timeout
+                )
+                self._update_from_results(response)
+            except requests.exceptions.SSLError:
+                self.set_error(496, connection_error=True)
+            except requests.Timeout:
+                self.set_error(504, connection_error=True)
+            except (requests.ConnectionError, IOError):
+                self.set_error(502, connection_error=True)
+            except UnicodeDecodeError:
+                self.set_error(600, connection_error=True)
+            # Checks the status to see if we need to backoff from the server/connection or not
+            self.request["backoff_delay"] = backoff_delay if backoff_delay else False
+            if self.status not in [420, 429, 502, 503, 504]:
+                break
+
 
     def _update_from_results(self, response):
         self.head = dict(response.headers.lower_items())
