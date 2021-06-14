@@ -81,6 +81,7 @@ These URLs will expect URL patterns to exist with names in the format:
 *v<api-version>:<app-name>:<model-name>-content*.
 This replaces the old formats which were less flexible:
 *v1:<app-name>:collection-content* and *v1:<app-name>:document-content*.
+* Usage of the ``DocumentPostgres`` and ``MysqlDocument`` is deprecated. Remove these as base classes.
 * ``HttpResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
 for ``request`` and ``head`` fields.
 * ``ShellResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
