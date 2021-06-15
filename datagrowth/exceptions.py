@@ -43,3 +43,15 @@ class DGHttpWarning300(DGResourceException):
 
 class DGResourceDoesNotExist(DGResourceException):
     pass
+
+
+class DGPipelineException(Exception):
+    pass
+
+
+class DGGrowthUnfinished(DGPipelineException):
+    pass
+
+
+class DGPipelineError(DGPipelineException):
+    pass

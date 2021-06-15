@@ -1,260 +1,198 @@
 [
 {
     "fields": {
-        "kernel_type": null,
-
-        "kernel_id": null,
-        "created_at": "2015-06-05T16:17:54.436",
-        "modified_at": "2015-06-05T16:17:54.436",
-        "completed_at": null,
-        "state": "New",
-        "current_growth": null,
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
         "config": "{\"test_flag\": true}",
-        "purge_at": null,
         "signature": "setting1=const&test"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 1
 },
 {
     "fields": {
-        "kernel_type": null,
-
-        "kernel_id": null,
-        "created_at": "2015-06-05T16:17:54.436",
-        "modified_at": "2015-06-05T16:17:54.436",
-        "completed_at": null,
-        "state": "Asynchronous",
-        "current_growth": 1,
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "purge_at": null,
         "signature": "test"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 2
 },
 {
     "fields": {
-        "kernel_type": ["core", "collective"],
-
-        "kernel_id": 3,
-        "created_at": "2014-06-05T16:17:54.000",
-        "modified_at": "2014-06-05T16:17:54.000",
-        "completed_at": "2014-06-05T16:17:54.000",
-        "state": "Asynchronous",
-        "current_growth": 1,
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Growing",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 2
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 1
+},
+{
+    "fields": {
+        "created_at": "2014-06-05T16:17:54.000Z",
+        "modified_at": "2014-06-05T16:17:54.000Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"setting1\": \"const\"}",
-        "purge_at": null,
         "signature": "setting1=const&test-multiple"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 3
 },
 {
     "fields": {
-        "kernel_type": null,
-
-        "kernel_id": null,
-        "created_at": "2015-06-05T16:17:54.000",
-        "modified_at": "2015-06-05T16:17:54.000",
-        "completed_at": "2015-06-05T16:17:54.000",
-        "state": "Asynchronous",
-        "current_growth": 3,
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Complete",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 3
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 2
+},
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.000Z",
+        "modified_at": "2015-06-05T16:17:54.000Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"setting1\": \"const\"}",
-        "purge_at": null,
         "signature": "setting1=const&test-multiple"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 4
 },
 {
     "fields": {
-        "kernel_type": null,
-
-        "kernel_id": null,
-        "created_at": "2015-06-05T16:17:54.000",
-        "modified_at": "2015-06-05T16:17:54.000",
-        "completed_at": "2015-06-05T16:17:54.000",
-        "state": "Synchronous",
-        "current_growth": 3,
+        "created_at": "2015-06-05T16:17:54.000Z",
+        "modified_at": "2015-06-05T16:17:54.000Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "purge_at": null,
         "signature": "setting1=const&test-ready"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 5
 },
 {
     "fields": {
-        "kernel_type": ["core", "collective"],
-
-        "kernel_id": 1,
-        "created_at": "2016-06-05T16:17:54.000",
-        "modified_at": "2016-06-05T16:17:54.000",
-        "completed_at": "2016-06-05T16:17:54.000",
-        "state": "Ready",
-        "current_growth": 3,
+        "created_at": "2016-06-05T16:17:54.000Z",
+        "modified_at": "2016-06-05T16:17:54.000Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "purge_at": null,
         "signature": "setting1=const&test-empty"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 6
 },
 {
     "fields": {
-        "kernel_type": ["core", "collective"],
-
-        "kernel_id": 4,
-        "created_at": "2016-06-05T16:17:54.000",
-        "modified_at": "2016-06-05T16:17:54.000",
-        "completed_at": "2016-06-05T16:17:54.000",
-        "state": "Ready",
-        "current_growth": 3,
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Seeding",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 6
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 4
+},
+{
+    "fields": {
+        "created_at": "2016-06-05T16:17:54.000Z",
+        "modified_at": "2016-06-05T16:17:54.000Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"include_odd\": true, \"include_even\": false}",
-        "purge_at": null,
         "signature": "setting1=const&test-ready"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 7
 },
 {
     "fields": {
-        "kernel_type": ["core", "collective"],
-
-        "kernel_id": 4,
-        "created_at": "2017-06-05T16:17:54.000",
-        "modified_at": "2017-06-05T16:17:54.000",
-        "completed_at": "2017-06-05T16:17:54.000",
-        "state": "Ready",
-        "current_growth": 3,
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Complete",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 7
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 3
+},
+{
+    "fields": {
+        "created_at": "2017-06-05T16:17:54.000Z",
+        "modified_at": "2017-06-05T16:17:54.000Z",
         "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"include_odd\": true, \"include_even\": true}",
-        "purge_at": null,
         "signature": "setting1=const&test-ready"
     },
-    "model": "core.CommunityMock",
+    "model": "datatypes.Dataset",
     "pk": 8
 },
 {
     "fields": {
-        "output_id": 1,
-        "result_id": null,
-        "contribute": "ExtractProcessor.extract_from_resource",
-        "contribute_type": "Append",
-        "process": "HttpResourceProcessor.fetch",
-        "type": "phase1",
-        "state": "Complete",
-        "input_id": null,
-        "input_type": null,
-        "output_type": ["core", "collective"],
-        "is_finished": true,
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 2
+        "name": "test",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "dataset_version": 1
     },
-    "model": "core.growth",
+    "model": "datatypes.collection",
     "pk": 1
 },
 {
     "fields": {
-        "output_id": 2,
-        "result_id": null,
-        "contribute": "ExtractProcessor.extract_from_resource",
-        "contribute_type": "Append",
-        "process": "HttpResourceProcessor.fetch_mass",
-        "type": "phase2",
-        "state": "Processing",
-        "input_id": 1,
-        "input_type": ["core", "collective"],
-        "output_type": ["core", "collective"],
-        "is_finished": false,
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 2
+        "name": "test",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "dataset_version": 1
     },
-    "model": "core.growth",
+    "model": "datatypes.collection",
     "pk": 2
 },
 {
     "fields": {
-        "output_id": 2,
-        "result_id": null,
-        "contribute": "ExtractProcessor.extract_from_resource",
-        "contribute_type": "Append",
-        "process": "HttpResourceProcessor.fetch_mass",
-        "type": "phase1",
-        "state": "Complete",
-        "input_id": 1,
-        "input_type": ["core", "collective"],
-        "output_type": ["core", "collective"],
-        "is_finished": false,
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 4
+        "name": "setting1=const&test-multiple",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "dataset_version": 2
     },
-    "model": "core.growth",
+    "model": "datatypes.collection",
     "pk": 3
 },
 {
     "fields": {
-        "created_at": "2015-06-04T11:31:27.940",
-        "modified_at": "2015-06-04T11:34:06.960",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 2
+        "name": "setting1=const&test-ready",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "dataset_version": 3
     },
-    "model": "core.collective",
-    "pk": 1
-},
-{
-    "fields": {
-        "created_at": "2015-06-04T11:31:27.940",
-        "modified_at": "2015-06-04T11:34:06.960",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 2
-    },
-    "model": "core.collective",
-    "pk": 2
-},
-{
-    "fields": {
-        "created_at": "2015-06-04T11:31:27.940",
-        "modified_at": "2015-06-04T11:34:06.960",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 3
-    },
-    "model": "core.collective",
-    "pk": 3
-},
-{
-    "fields": {
-        "created_at": "2015-06-04T11:31:27.940",
-        "modified_at": "2015-06-04T11:34:06.960",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 7
-    },
-    "model": "core.collective",
+    "model": "datatypes.collection",
     "pk": 4
+},
+{
+    "fields": {
+        "name": "setting1=const&test-empty",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "dataset_version": 4
+    },
+    "model": "datatypes.collection",
+    "pk": 5
 },
 {
     "fields": {
         "body": "{\"error\": \"failure\"}",
         "status": 404,
         "head": "{\"content-type\":\"application/json\"}",
-        "modified_at": "2015-05-12T18:45:22.105",
-        "created_at": "2015-05-12T18:45:22.105",
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
         "request": "{\"url\":\"http://localhost:8000/en/?q=success3&param=1\",\"args\":[\"en\",\"success3\"],\"headers\":{\"Accept\":\"application/json\"},\"kwargs\":{},\"data\":{},\"method\":\"get\"}",
         "uri": "localhost:8000/en/?q=notfound&param=1",
         "data_hash": "",
         "config": "{}",
         "purge_at": null,
-        "retainer_type": ["core", "growth"],
-        "retainer_id": 3
+        "retainer_type": ["datatypes", "dataset"],
+        "retainer_id": 4
     },
-    "model": "core.httpresourcemock",
+    "model": "resources.httpresourcemock",
     "pk": 1
 },
 {
@@ -262,17 +200,17 @@
         "body": "{\"error\": \"failure\"}",
         "status": 502,
         "head": "{\"content-type\":\"application/json\"}",
-        "modified_at": "2015-05-12T18:45:22.105",
-        "created_at": "2015-05-12T18:45:22.105",
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
         "request": "{\"url\":\"http://localhost:8000/en/?q=fail&param=1\",\"args\":[\"en\",\"fail\"],\"headers\":{\"Accept\":\"application/json\"},\"kwargs\":{},\"data\":{},\"method\":\"get\"}",
         "uri": "localhost:8000/en/?q=fail&param=1",
         "data_hash": "",
         "config": "{}",
         "purge_at": null,
-        "retainer_type": ["core", "growth"],
-        "retainer_id": 3
+        "retainer_type": ["datatypes", "dataset"],
+        "retainer_id": 4
     },
-    "model": "core.httpresourcemock",
+    "model": "resources.httpresourcemock",
     "pk": 2
 },
 {
@@ -280,95 +218,77 @@
         "body": "{\"error\": \"failure\"}",
         "status": 502,
         "head": "{\"content-type\":\"application/json\"}",
-        "modified_at": "2015-05-12T18:45:22.105",
-        "created_at": "2015-05-12T18:45:22.105",
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
         "request": "{\"url\":\"http://localhost:8000/en/?q=fail2&param=1\",\"args\":[\"en\",\"fail2\"],\"headers\":{\"Accept\":\"application/json\"},\"kwargs\":{},\"data\":{},\"method\":\"get\"}",
         "uri": "localhost:8000/en/?q=fail2&param=1",
         "data_hash": "",
         "config": "{}",
         "purge_at": null,
-        "retainer_type": ["core", "growth"],
-        "retainer_id": 3
+        "retainer_type": ["datatypes", "dataset"],
+        "retainer_id": 4
     },
-    "model": "core.httpresourcemock",
+    "model": "resources.httpresourcemock",
     "pk": 3
 },
 {
     "fields": {
         "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
-        "collective": 3,
-        "modified_at": "2015-06-02T10:01:47.572",
-        "created_at": "2015-06-02T10:00:20.247",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 3
+        "collection": 3,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
-    "model": "core.individual",
+    "model": "datatypes.document",
     "pk": 1
 },
 {
     "fields": {
         "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
-        "collective": 3,
-        "modified_at": "2015-06-02T10:01:47.572",
-        "created_at": "2015-06-02T10:00:20.247",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 3
+        "collection": 3,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
-    "model": "core.individual",
+    "model": "datatypes.document",
     "pk": 2
 },
 {
     "fields": {
         "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
-        "collective": 3,
-        "modified_at": "2015-06-02T10:01:47.572",
-        "created_at": "2015-06-02T10:00:20.247",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 3
+        "collection": 3,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
-    "model": "core.individual",
+    "model": "datatypes.document",
     "pk": 3
 },
 {
     "fields": {
         "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
-        "collective": 4,
-        "modified_at": "2015-06-02T10:01:47.572",
-        "created_at": "2015-06-02T10:00:20.247",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 7
+        "collection": 4,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
-    "model": "core.individual",
+    "model": "datatypes.document",
     "pk": 4
 },
 {
     "fields": {
         "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
-        "collective": 4,
-        "modified_at": "2015-06-02T10:01:47.572",
-        "created_at": "2015-06-02T10:00:20.247",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 7
+        "collection": 4,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
-    "model": "core.individual",
+    "model": "datatypes.document",
     "pk": 5
 },
 {
     "fields": {
         "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
-        "collective": 4,
-        "modified_at": "2015-06-02T10:01:47.572",
-        "created_at": "2015-06-02T10:00:20.247",
-        "schema": "{\"additionalProperties\":false,\"required\":[\"context\",\"value\"],\"type\":\"object\",\"properties\":{\"context\":{\"type\":\"string\"},\"value\":{\"type\":\"string\"}}}",
-        "community_type": ["core", "communitymock"],
-        "community_id": 7
+        "collection": 4,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
     },
-    "model": "core.individual",
+    "model": "datatypes.document",
     "pk": 6
 }
 ]

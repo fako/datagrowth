@@ -1,25 +1,20 @@
 from collections import OrderedDict
 
-from datagrowth.datatypes import DatasetBase
+from datagrowth.datatypes import DatasetBase, DatasetVersionBase
+
+from datatypes.models import Document
+from datatypes.processors import DataProcessor
 
 
-class CommunityMock(DatasetBase):
+class DatasetVersion(DatasetVersionBase):
+    pass
+
+
+class Dataset(DatasetBase):
 
     COMMUNITY_SPIRIT = OrderedDict([
         ("phase1", {
             "process": "HttpResourceProcessor.fetch",
-            "config": {
-                "_args": ["$.test"],
-                "_kwargs": {},
-                "_resource": "HttpResourceMock",
-                "_objective": {
-                    "@": "$.dict.list",
-                    "value": "$",
-                    "#context": "$.dict.test"
-                },
-                "setting0": "private",
-                "$setting1": "const"
-            },
             "input": None,
             "contribute": "Append:ExtractProcessor.extract_from_resource",
             "errors": {
@@ -39,16 +34,6 @@ class CommunityMock(DatasetBase):
         }),
         ("phase2", {
             "process": "HttpResourceProcessor.fetch_mass",
-            "config": {
-                "_args": ["$.value"],
-                "_kwargs": {},
-                "_resource": "HttpResourceMock",
-                "_objective": {
-                    "@": "$.dict.list",
-                    "value": "$",
-                    "#context": "$.dict.test"
-                }
-            },
             "input": "@phase1",
             "contribute": "Append:ExtractProcessor.extract_from_resource",
             "errors": {},
@@ -65,11 +50,6 @@ class CommunityMock(DatasetBase):
         }),
         ("phase3", {
             "process": "HttpResourceProcessor.fetch_mass",
-            "config": {
-                "_args": ["$.value"],
-                "_kwargs": {},
-                "_resource": "HttpResourceMock",
-            },
             "input": "@phase2",
             "contribute": None,
             "errors": {},
@@ -85,20 +65,66 @@ class CommunityMock(DatasetBase):
         },
         {
             "name": "filter_individuals",
-            "process": "MockFilterProcessor.filter_individuals",
-            "config": {
-                "$setting2": "variable",
-                "$include_even": False
-            }
+            "process": "MockFilterProcessor.filter_individuals"
         },
     ]
 
-    def initial_input(self, *args):
-        return Individual.objects.create(
-            properties={"test": "test"},
-            schema={},
-            community=self
-        )
+    CONFIG = {
+        "setting3": "const",
+        "$setting4": "variable",
+        "document": "datatypes.Document"
+    }
+
+    @property
+    def version(self):
+        return "0.0.2"
+
+    @property
+    def pipelines(self):
+        return {
+            "seeder": None,
+            "growth": [
+                (DataProcessor, {
+                    "_args": ["$.test"],
+                    "_kwargs": {},
+                    "_resource": "HttpResourceMock",
+                    "_objective": {
+                        "@": "$.dict.list",
+                        "value": "$",
+                        "#context": "$.dict.test"
+                    },
+                    "setting0": "private",
+                    "$setting1": "const"
+                }),
+                (DataProcessor, {
+                    "_args": ["$.value"],
+                    "_kwargs": {},
+                    "_resource": "HttpResourceMock",
+                    "_objective": {
+                        "@": "$.dict.list",
+                        "value": "$",
+                        "#context": "$.dict.test"
+                    }
+                }),
+                (DataProcessor, {
+                    "_args": ["$.value"],
+                    "_kwargs": {},
+                    "_resource": "HttpResourceMock",
+                })
+            ],
+            "harvest": [
+                (DataProcessor, {}),
+                (DataProcessor, {
+                    "$setting2": "variable",
+                    "$include_even": False
+                })
+            ]
+        }
+
+    def gather_seeds(self, *args):
+        return [
+            Document.objects.create(properties={"test": "test", "input": args})
+        ]
 
     def begin_phase1(self, inp):
         return
@@ -118,3 +144,7 @@ class CommunityMock(DatasetBase):
     def set_kernel(self):
         self.kernel = self.growth_set.filter(type="phase3").last().output
         super(CommunityMock, self).set_kernel()
+
+
+class DatasetMock(DatasetBase):
+    pass
