@@ -93,8 +93,8 @@ class TestCollection(TestCase):
         docs, doc_ids = self.get_docs_list_and_ids(value="value 3")
         today = date.today()
         created_at = self.instance2.created_at
-        with self.assertNumQueries(3):
-            # Query 1: reset
+        with self.assertNumQueries(5):
+            # Query 1, 2, 3: reset
             # Query 2: insert documents
             # Query 3: update modified_at
             self.instance2.add(docs, reset=True)

@@ -1,9 +1,11 @@
 from copy import copy
+from collections import Iterator
 
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
 from datagrowth.configuration import ConfigurationField
+from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
 from datagrowth.datatypes.datasets.constants import GrowthState
 from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
 from datagrowth.version import VERSION
@@ -13,7 +15,12 @@ class DatasetBase(models.Model):
 
     signature = models.CharField(max_length=255, db_index=True)
     config = ConfigurationField()
-    versions = GenericRelation("DatasetVersion", content_type_field="dataset_type", object_id_field="dataset_id")
+    versions = GenericRelation(
+        "DatasetVersion",
+        content_type_field="dataset_type",
+        object_id_field="dataset_id",
+        related_query_name="datasets"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -64,7 +71,7 @@ class DatasetBase(models.Model):
     def filter_growth_configuration(self, **kwargs):
         # Calculate which keys are whitelisted
         growth_keys = set()
-        growth_configs = [processor.config for processor in self.pipelines.get("growth", [])]
+        growth_configs = [config for processor, config in self.pipelines.get("growth", [])]
         growth_configs.append(self.CONFIG)
         seeder_processor = self.pipelines.get("seeder", None)
         if seeder_processor:
@@ -77,7 +84,7 @@ class DatasetBase(models.Model):
     def filter_harvest_configuration(self, **kwargs):
         # Calculate which keys are whitelisted
         harvest_keys = set()
-        harvest_configs = [processor.config for processor in self.pipelines.get("harvest", [])]
+        harvest_configs = [config for processor, config in self.pipelines.get("harvest", [])]
         harvest_configs.append(self.CONFIG)
         for config in harvest_configs:
             harvest_keys.update({key[1:] for key, value in config.items() if key.startswith("$")})
@@ -114,28 +121,36 @@ class DatasetBase(models.Model):
         :param seeds: (list) Dicts or Documents that should become part of the new version
         :return:
         """
+        # Check input and distill class
+        DatasetVersion = current_version.__class__
+        assert issubclass(DatasetVersion, DatasetVersionBase), \
+            f"Expected current_version to be of type DatsetVersion not {type(current_version)}"
+        assert isinstance(seeds, (Iterator, list, tuple,)), "Expected seeds to be a sequential iterable"
         # If version is in seeding state we simply add to it
-        if current_version.state == GrowthState.SEEDING:
+        if GrowthState(current_version.state) is GrowthState.SEEDING:
             collection = current_version.collection_set.last()
             if not collection:
                 raise DGPipelineError("Was unable to add seeds to Collection of DatasetVersion")
             collection.add(seeds)
             return current_version
         # In any other scenario we create a new version to add the seeds to
-        new_version = current_version.objects.create(dataset=self, version=self.version, state=GrowthState.SEEDING)
+        new_version = DatasetVersion.objects.create(dataset=self, version=self.version, state=GrowthState.SEEDING)
         collection = new_version.collection_set.create(name=self.signature)
         collection.add(seeds)
         return new_version
 
-    def grow(self, *args, seeds=None):
-        # We do nothing if a growth has already started
-        current_version = self.versions.get_latest_version()
+    def grow(self, *args, seeds=None, asynchronous=True, grow_once=False):
+        # We do nothing if a growth has already started asynchronously
+        current_version = self.versions.filter(is_current=True).last()
+        current_state = GrowthState(current_version.state)
         if current_version is None:
             current_version = self.versions.create(dataset=self, version=self.version, is_current=True)
-        if current_version.state == GrowthState.GROWING:
+        if current_state is GrowthState.GROWING and asynchronous:
             raise DGGrowthUnfinished()
-        # Seeding a new DatasetVersion Checking input to make sure that there is something to do
-        if current_version.state != GrowthState.SEEDING:
+        elif current_state is GrowthState.COMPLETE and grow_once:
+            return True
+        # Seeding a new DatasetVersion if necessary
+        if current_state not in [GrowthState.SEEDING, GrowthState.GROWING]:
             seeds = seeds or []
             seeds += self.gather_seeds(*args)
             current_version = self.seed(current_version, seeds)
@@ -145,6 +160,9 @@ class DatasetBase(models.Model):
                 )
         current_version.state = GrowthState.GROWING
         current_version.save()
+        # Now we actually start the growing process
+        if asynchronous:
+            raise DGGrowthUnfinished()
 
     def harvest_sample(self):
         pass
