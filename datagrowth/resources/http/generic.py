@@ -96,8 +96,8 @@ class HttpResource(Resource):
         """
         if not self.request:
             self.request = self._create_request(method, *args, **kwargs)
-            self.uri = HttpResource.uri_from_url(self.request.get("url"))
-            self.data_hash = HttpResource.hash_from_data(
+            self.uri = self.uri_from_url(self.request.get("url"))
+            self.data_hash = self.hash_from_data(
                 self.request.get(HttpResource._get_data_key(self.request))
             )
         else:

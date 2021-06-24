@@ -94,3 +94,4 @@ for the ``command`` field.
 When this happens the HttpResource will sleep for the amount of seconds
 specified in the ``global_backoff_delays`` setting.
 Set ``global_backoff_delays`` to an empty list to disable this behaviour.
+* Allows override of ``HttpResource.uri_from_url`` and ``HttpResource.hash_from_data``
