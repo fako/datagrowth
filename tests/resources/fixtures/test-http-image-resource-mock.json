@@ -57,7 +57,7 @@
                 ],
                 "method": "get",
                 "cancel": false,
-                "backoff_delay": 128
+                "backoff_delay": 16
             },
             "uri": "localhost:8000/fail",
             "data_hash": "",

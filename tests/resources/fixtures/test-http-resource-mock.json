@@ -57,7 +57,7 @@
                     "fail"
                 ],
                 "method": "get",
-                "backoff_delay": 128
+                "backoff_delay": 16
             },
             "uri": "localhost:8000/en/?meta=fail&param=1&q=fail",
             "data_hash": "",
@@ -289,7 +289,7 @@
                     "User-Agent": "DataGrowth (test); python-requests/2.20.0",
                     "Connection": "keep-alive"
                 },
-                "backoff_delay": 128
+                "backoff_delay": 16
             },
             "uri": "localhost:8000/en/?meta=fail&param=1&q=fail",
             "data_hash": "f7ec00448981803a8767effb4eea4d30f717b3cc",

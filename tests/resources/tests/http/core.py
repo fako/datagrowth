@@ -245,12 +245,12 @@ class TestHttpResource(ResourceTestMixin):
             self.assertEqual(instance.head, {})
             self.assertEqual(instance.body, "")
             if exception_status in [502, 504]:
-                self.assertEqual(instance.request["backoff_delay"], 128)
+                self.assertEqual(instance.request["backoff_delay"], 16)
             else:
                 self.assertEqual(instance.request["backoff_delay"], False)
         self.assertEqual(
-            sleep_mock.call_count, 20,
-            "Expected three errors to call sleep six times during backoff procedure"
+            sleep_mock.call_count, 17,
+            "Expected three errors to call sleep five times during backoff procedure"
         )
         self.assertEqual(sleep_mock.call_args_list[0], call(0))
 
@@ -275,12 +275,12 @@ class TestHttpResource(ResourceTestMixin):
             self.assertEqual(instance.head, {})
             self.assertEqual(instance.body, "")
             if exception_status in [502, 504]:
-                self.assertEqual(instance.request["backoff_delay"], 128)
+                self.assertEqual(instance.request["backoff_delay"], 16)
             else:
                 self.assertEqual(instance.request["backoff_delay"], False)
         self.assertEqual(
-            sleep_mock.call_count, 20,
-            "Expected three errors to call sleep six times during backoff procedure"
+            sleep_mock.call_count, 17,
+            "Expected three errors to call sleep five times during backoff procedure"
         )
         self.assertEqual(sleep_mock.call_args_list[0], call(0))
 
