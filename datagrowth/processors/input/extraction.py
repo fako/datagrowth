@@ -124,11 +124,12 @@ class ExtractProcessor(Processor):
             context[name] = reach(objective, data) if not callable(objective) else objective(data)
 
         nodes = reach(self._at, data) if not callable(self._at) else self._at(data)
-        if isinstance(nodes, dict):
+        if isinstance(nodes, dict) and self.config.extract_from_object_values:
             nodes = nodes.values()
-
-        if nodes is None:
+        elif nodes is None:
             raise DGNoContent("Found no nodes at {}".format(self._at))
+        elif not isinstance(nodes, list):
+            nodes = [nodes]
 
         for node in nodes:
             result = copy(context)

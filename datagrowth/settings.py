@@ -66,6 +66,8 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "rank_processor_batch_size": 1000,
     "rank_processor_result_size": 20,
 
+    "extract_processor_extract_from_object_values": False,
+
     "micro_service_connections": {
         "image_recognition": {
             "protocol": "http",
