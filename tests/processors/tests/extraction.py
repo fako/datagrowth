@@ -39,6 +39,10 @@ class ExtractJSONImplementation(object):
         return root.get("records", [])
 
     @classmethod
+    def get_dict(cls, root):
+        return root.get("records")[0]
+
+    @classmethod
     def get_keys_nodes(cls, root):
         return root.get("keys", [])
 
@@ -78,10 +82,12 @@ class TestExtractProcessor(TestCase):
         }
         return ExtractProcessor(config={"objective": objective})
 
-    def get_json_processor(self, callables=False, keys=False):
-        if not keys:
+    def get_json_processor(self, callables=False, object_values=False, from_dict=False):
+        if not object_values and not from_dict:
             at = "$.records" if not callables else ExtractJSONImplementation.get_nodes
-        else:
+        elif from_dict:
+            at = "$.records.0" if not callables else ExtractJSONImplementation.get_dict
+        elif object_values:
             at = "$.keys" if not callables else ExtractJSONImplementation.get_keys_nodes
         unicode = "$.unicode.0" if not callables else ExtractJSONImplementation.get_json_unicode
         id = "$.id" if not callables else ExtractJSONImplementation.get_json_id
@@ -92,7 +98,7 @@ class TestExtractProcessor(TestCase):
             "id": id,
             "record": "$.record"
         }
-        return ExtractProcessor(config={"objective": objective})
+        return ExtractProcessor(config={"objective": objective, "extract_from_object_values": object_values})
 
     def setUp(self):
         super(TestCase, self).setUp()
@@ -200,12 +206,22 @@ class TestExtractProcessor(TestCase):
         self.assertEqual(list(rsl), MOCK_JSON_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
 
-    def test_application_json_dict(self):
-        keys_processor_eval = self.get_json_processor(keys=True)
+    def test_application_json_object_values(self):
+        keys_processor_eval = self.get_json_processor(object_values=True)
         rsl = keys_processor_eval.application_json(self.json_dict)
         self.assertEqual(list(rsl), MOCK_JSON_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
-        keys_processor = self.get_json_processor(callables=True, keys=True)
+        keys_processor = self.get_json_processor(callables=True, object_values=True)
         rsl = keys_processor.application_json(self.json_dict)
         self.assertEqual(list(rsl), MOCK_JSON_DATA)
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+
+    def test_application_json_dict(self):
+        keys_processor_eval = self.get_json_processor(from_dict=True)
+        rsl = keys_processor_eval.application_json(self.json_records)
+        self.assertEqual(list(rsl), [MOCK_JSON_DATA[0]])
+        self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+        keys_processor = self.get_json_processor(callables=True, from_dict=True)
+        rsl = keys_processor.application_json(self.json_records)
+        self.assertEqual(list(rsl), [MOCK_JSON_DATA[0]])
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
