@@ -569,7 +569,18 @@ class TestHttpResource(ResourceTestMixin):
         self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")
         self.assertIsNone(self.instance.purge_at)
         # Request JSON
+        self.instance.uri = None
+        self.instance.data_hash = None
         self.instance.request = json.dumps(self.test_post_request)
+        self.instance.clean()
+        self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
+        self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")
+        self.assertIsNone(self.instance.purge_at)
+        # Request dict, but using JSON as content type
+        self.instance.uri = None
+        self.instance.data_hash = None
+        self.instance.request = deepcopy(self.test_post_request)
+        self.instance.request["json"] = self.instance.request.pop("data")
         self.instance.clean()
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
         self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")

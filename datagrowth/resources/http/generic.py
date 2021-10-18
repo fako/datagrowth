@@ -558,10 +558,11 @@ class HttpResource(Resource):
         # Actual cleaning implementation
         if self.request and not self.uri:
             uri_request = self.request_without_auth()
-            self.uri = HttpResource.uri_from_url(uri_request.get("url"))
+            self.uri = self.uri_from_url(uri_request.get("url"))
         if self.request and not self.data_hash:
             uri_request = self.request_without_auth()
-            self.data_hash = HttpResource.hash_from_data(uri_request.get("data"))
+            data_key = HttpResource._get_data_key(uri_request)
+            self.data_hash = self.hash_from_data(uri_request.get(data_key))
         super().clean()
 
     #######################################################
