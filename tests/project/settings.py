@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 POSTGRES_USER = os.environ.get('DJANGO_POSTGRES_USER', 'django')
 POSTGRES_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK' if POSTGRES_USER != "postgres" else None
 MYSQL_USER = os.environ.get('DJANGO_MYSQL_USER', 'django')
-MYSQL_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK' if MYSQL_USER != "root" else None
+MYSQL_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 
 DATABASES_MATRIX = {
     'postgres': {
@@ -101,7 +101,7 @@ DATABASES_MATRIX = {
         'NAME': 'datagrowth',
         'USER': MYSQL_USER,
         'PASSWORD': MYSQL_PASSWORD,
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'OPTIONS': {
             'charset': 'utf8mb4'
         }
