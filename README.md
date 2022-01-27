@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/fako/datagrowth.svg?branch=master)](https://travis-ci.com/fako/datagrowth) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/datagrowth.svg)](https://pypi.python.org/pypi/datagrowth/) [![GPLv3 license](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://github.com/fako/datagrowth/blob/master/LICENSE)
+[![datagrowth workflow](https://github.com/fako/datagrowth/actions/workflows/tests.yml/badge.svg)](https://github.com/fako/datagrowth/actions) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/datagrowth.svg)](https://pypi.python.org/pypi/datagrowth/) [![GPLv3 license](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://github.com/fako/datagrowth/blob/master/LICENSE)
 
 DATAGROWTH
 ==========
@@ -39,7 +39,7 @@ You can run these tests by running this inside that directory:
 
 ```bash
 python manage.py test
-```  
+```
 
 Alternatively you can execute the tests against multiple Django versions by running:
 

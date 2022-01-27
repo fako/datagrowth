@@ -82,8 +82,8 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-POSTGRES_USER = os.environ.get('DJANGO_POSTGRES_USER', 'django')
-POSTGRES_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK' if POSTGRES_USER != "postgres" else None
+POSTGRES_USER = 'django'
+POSTGRES_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 MYSQL_USER = os.environ.get('DJANGO_MYSQL_USER', 'django')
 MYSQL_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 
