@@ -1,5 +1,6 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
+from time import sleep
 
 from django.conf import settings
 from django.db import models
@@ -40,6 +41,10 @@ class Resource(models.Model):
         abstract = True
         get_latest_by = "id"
         ordering = ("id",)
+
+    def __init__(self, *args, **kwargs):
+        self.interval_duration = kwargs.pop("interval_duration", 0)
+        super(Resource, self).__init__(*args, **kwargs)
 
     def clean(self):
         if self.uri and len(self.uri):

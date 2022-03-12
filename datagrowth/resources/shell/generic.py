@@ -4,6 +4,7 @@ import json
 import jsonschema
 from copy import copy
 from jsonschema.exceptions import ValidationError as SchemaValidationError
+from time import sleep
 
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -103,6 +104,8 @@ class ShellResource(Resource):
 
         resource._run()
         resource.handle_errors()
+        if self.interval_duration:
+            sleep(self.interval_duration / 1000)
         return resource
 
     @property

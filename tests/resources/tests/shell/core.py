@@ -31,6 +31,10 @@ class TestShellResource(ResourceTestMixin):
     def get_test_instance():
         return ShellResourceMock()
 
+    @staticmethod
+    def get_test_class():
+        return ShellResourceMock
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

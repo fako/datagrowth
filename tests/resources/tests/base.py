@@ -13,8 +13,19 @@ class ResourceTestMixin(TestCase):
         raise NotImplementedError()
 
     @staticmethod
+    def get_test_class():
+        raise NotImplementedError()
+
+    @staticmethod
     def fill_instance(instance):
         instance.uri = "uri"
+
+    def test_init(self):
+        Resource = self.get_test_class()
+        instance = Resource()
+        self.assertEqual(instance.interval_duration, 0)
+        instance = Resource(interval_duration=1000)
+        self.assertEqual(instance.interval_duration, 1000)
 
     def test_retain(self):
         retainer = self.get_test_instance()

@@ -34,6 +34,10 @@ class TestHttpResource(ResourceTestMixin):
         config = config or {}
         return HttpResourceMock(session=session, config=config)
 
+    @staticmethod
+    def get_test_class():
+        return HttpResourceMock
+
     def setUp(self):
         self.instance = self.get_test_instance()
         self.test_data = {"data": "test", "atad": {"test": "test", "tset": "test"}}
@@ -398,11 +402,8 @@ class TestHttpResource(ResourceTestMixin):
     def test_init(self):
         mock = HttpResourceMock()
         self.assertEqual(mock.timeout, 30)
-        self.assertEqual(mock.interval_duration, 0)
         mock = HttpResourceMock(timeout=20)
         self.assertEqual(mock.timeout, 20)
-        mock = HttpResourceMock(interval_duration=1000)
-        self.assertEqual(mock.interval_duration, 1000)
 
     def test_request_with_auth(self):
         self.instance.request = self.test_post_request

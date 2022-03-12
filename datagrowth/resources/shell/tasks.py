@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 
 from django.apps import apps
 from celery import current_app as app

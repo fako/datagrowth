@@ -545,7 +545,6 @@ class HttpResource(Resource):
     def __init__(self, *args, **kwargs):
         self.session = kwargs.pop("session", requests.Session())
         self.timeout = kwargs.pop("timeout", 30)
-        self.interval_duration = kwargs.pop("interval_duration", 0)
         super(HttpResource, self).__init__(*args, **kwargs)
 
     def clean(self):
