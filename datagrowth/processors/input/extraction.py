@@ -171,3 +171,7 @@ class ExtractProcessor(Processor):
     def text_xml(self, soup):
         for result in self._extract_soup(soup):
             yield result
+
+    def application_xml(self, soup):
+        for result in self._extract_soup(soup):
+            yield result

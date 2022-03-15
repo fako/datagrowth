@@ -181,7 +181,7 @@ class HttpResource(Resource):
                 return content_type, json.loads(self.body)
             elif content_type == "text/html":
                 return content_type, BeautifulSoup(self.body, "html5lib")
-            elif content_type == "text/xml":
+            elif content_type == "text/xml" or content_type == "application/xml":
                 return content_type, BeautifulSoup(self.body, "lxml")
             else:
                 return content_type, None

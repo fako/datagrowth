@@ -103,16 +103,18 @@ class TestExtractProcessor(TestCase):
     def setUp(self):
         super(TestCase, self).setUp()
 
-        self.content_types = ["text/html", "text/xml", "application/json", "application/vnd.api+json",
-                              "application/quantum"]
+        self.content_types = ["text/html", "text/xml", "application/xml", "application/json",
+                              "application/vnd.api+json", "application/quantum"]
 
         self.soup = BeautifulSoup(MOCK_HTML, "html5lib")
         self.xml = BeautifulSoup(MOCK_XML, "lxml")
         self.json_records = MOCK_DATA_WITH_RECORDS
         self.json_dict = MOCK_DATA_WITH_KEYS
 
-        self.test_resources_data = [self.soup, self.xml, self.json_records, self.json_records, None]
-        self.test_resources_extractions = [MOCK_SCRAPE_DATA, MOCK_SCRAPE_DATA, MOCK_JSON_DATA, MOCK_JSON_DATA, None]
+        self.test_resources_data = [self.soup, self.xml, self.xml, self.json_records, self.json_records, None]
+        self.test_resources_extractions = [
+            MOCK_SCRAPE_DATA, MOCK_SCRAPE_DATA, MOCK_SCRAPE_DATA, MOCK_JSON_DATA, MOCK_JSON_DATA, None
+        ]
         self.test_resources = [
             (Mock(content=(content_type, data)), processor,)
             for content_type, data, processor in zip(
@@ -120,6 +122,7 @@ class TestExtractProcessor(TestCase):
                 self.test_resources_data,
                 [
                     self.get_html_processor(),
+                    self.get_xml_processor(callables=True),
                     self.get_xml_processor(callables=True),
                     self.get_json_processor(),
                     self.get_json_processor(),
