@@ -99,3 +99,4 @@ Set ``global_backoff_delays`` to an empty list to disable this behaviour.
 The default is False and will result in extraction from the object directly.
 * ``ShellResource`` now implements ``interval_duration`` to allow the system to pause between runs.
 Useful when the command has some sort of rate limit.
+* ``ExtractProcessor`` now supports application/xml content type.
