@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import Mock, patch
-from collections import Iterator
+from collections.abc import Iterator
 from tqdm import tqdm
 
 from datagrowth.utils import ibatch

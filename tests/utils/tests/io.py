@@ -2,7 +2,7 @@ import os
 from unittest.mock import Mock, patch
 import json
 from tqdm import tqdm
-from collections import Iterator
+from collections.abc import Iterator
 
 from django.test import TestCase
 from django.core.serializers import serialize, deserialize

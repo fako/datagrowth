@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from collections import Iterator
+from collections.abc import Iterator
 from copy import deepcopy
 
 from django.test import TestCase

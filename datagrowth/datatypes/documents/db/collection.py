@@ -1,5 +1,6 @@
 import json
-from collections import Iterator, Iterable, defaultdict
+from collections import defaultdict
+from collections.abc import Iterator, Iterable
 from math import ceil
 from datetime import datetime
 
