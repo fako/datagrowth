@@ -106,7 +106,7 @@ class TestExtractProcessor(TestCase):
         self.content_types = ["text/html", "text/xml", "application/xml", "application/json",
                               "application/vnd.api+json", "application/quantum"]
 
-        self.soup = BeautifulSoup(MOCK_HTML, "html5lib")
+        self.soup = BeautifulSoup(MOCK_HTML, "html.parser")
         self.xml = BeautifulSoup(MOCK_XML, "lxml")
         self.json_records = MOCK_DATA_WITH_RECORDS
         self.json_dict = MOCK_DATA_WITH_KEYS

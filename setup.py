@@ -27,7 +27,6 @@ setuptools.setup(
         "Django>=2.2",
         "celery",
         "jsonschema",
-        "html5lib",
         "lxml",
         "beautifulsoup4",
         "urlobject",

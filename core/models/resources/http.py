@@ -36,7 +36,7 @@ class BrowserResource(HttpResource):  # TODO: write tests
         self.head = dict()
         self.status = 1
         self.body = response.page_source
-        self.soup = BeautifulSoup(self.body, "html5lib")
+        self.soup = BeautifulSoup(self.body, "html.parser")
 
     @property
     def success(self):
@@ -67,7 +67,7 @@ class BrowserResource(HttpResource):  # TODO: write tests
 
     def __init__(self, *args, **kwargs):
         super(HttpResource, self).__init__(*args, **kwargs)
-        self.soup = BeautifulSoup(self.body if self.body else "", "html5lib")
+        self.soup = BeautifulSoup(self.body if self.body else "", "html.parser")
 
     class Meta:
         abstract = True
