@@ -8,6 +8,71 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.17
+-----
+
+* It's recommended to update to Django 3.2 before using Datagrowth 0.17.
+* Note that a Django migration is required to make Datagrowth 0.17 work.
+* Drops support for Django 1.11.
+* MySQL backends are no longer supported with Django versions below 3.2
+* Schemas on ``Document`` and ``Collection`` are removed as their usage is not recommended.
+Consider working schemaless when using these ``DataStorage`` derivative classes.
+* As schemas are no longer available for ``DataStorage`` derivative classes all write functionality
+from default ``DataStorage`` API views is removed.
+* ``DataStorage`` API URL patterns now require app labels as namespaces to prevent ambiguity.
+* The API version can be specified using the ``DATAGROWTH_API_VERSION`` setting.
+* ``DataStorage.update`` is reintroduced because of potential performance benefits.
+* ``Document.update`` no longer takes first values from iterators given to it.
+* ``Collection.update`` no longer excepts a single dict or Document for updating.
+It also works using lookups from ``JSONField`` instead of the inferior ``reference`` mechanic.
+* ``Collection.add`` applies stricter type checking: ``dict`` and ``Document`` are no longer allowed.
+* ``DataStorage.url`` now provides a generic way to build URLs for ``Collection`` and ``Document``.
+These URLs will expect URL patterns to exist with names in the format:
+*v<api-version>:<app-name>:<model-name>-content*.
+This replaces the old formats which were less flexible:
+*v1:<app-name>:collection-content* and *v1:<app-name>:document-content*.
+* Usage of the ``DocumentPostgres`` and ``MysqlDocument`` is deprecated. Remove these as base classes.
+* ``HttpResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
+for ``request`` and ``head`` fields.
+* ``ShellResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
+for the ``command`` field.
+* The resources and datatypes modules now each have an admin module to import ``AdminModels`` easily.
+* ``ConfigurationProperty`` now uses a simpler constructor and allows defaults for all arguments.
+* Removes the unused ``global_token`` default configuration.
+* Removes the unused ``http_resource_batch_size`` default configuration.
+* HTTP errors 420, 429, 502, 503 and 504 will now trigger a backoff delay.
+When this happens the HttpResource will sleep for the amount of seconds
+specified in the ``global_backoff_delays`` setting.
+Set ``global_backoff_delays`` to an empty list to disable this behaviour.
+* Allows override of ``HttpResource.uri_from_url`` and ``HttpResource.hash_from_data``
+* To extract from object values you know need to set ``extract_processor_extract_from_object_values`` to True.
+The default is False and will result in extraction from the object directly.
+* ``ShellResource`` now implements ``interval_duration`` to allow the system to pause between runs.
+Useful when the command has some sort of rate limit.
+* ``ExtractProcessor`` now supports application/xml content type.
+
+
+v0.16
+-----
+
+* Adding support for ``Python 3.8`` and removing support for ``Python 3.5``.
+* Updating ``psycopg2-binary`` to ``2.8.4``.
+* HTTP tasks no longer use ``core`` as a prefix, but ``http_resource`` instead.
+* Shell tasks no longer use ``core`` as a prefix, but ``shell_resource`` instead.
+* HTTP task and shell task configurations require an app label prefix for any ``Resource``.
+* ``load_session`` decorator now excepts None as a session and will create a requests.Session when it does.
+* The ``update`` method has been removed from the ``DataStorage`` base class
+* The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)
+* The sleep dictated by ``interval_duration`` is executed by ``HttpResource`` not the http tasks
+* ``ConfigurationType`` still works with the "async" property, but migrates internally to "asynchronous"
+* Modern mime types like application/vnd.api+json get processed as application/json
+* You can now specify to what ``datetime`` the ``Resource.purge_after`` should get set when a ``Resource`` gets saved.
+The ``dict`` specified in the ``purge_after`` configuration are kwargs to a ``timedelta`` init.
+This ``timedelta`` gets added to ``datetime.now``.
+This means that using ``{"days": 30}`` as ``purge_after`` will set the ``Resource.purge_after``
+to 30 days into the future upon creation. The ``global_purge_after`` default configuration should be an empty ``dict``.
+
+
 v0.15
 -----
 
@@ -36,67 +101,3 @@ This is recommended, but requires migrations for some projects.
 * ``_handle_errors`` has been renamed to ``handle_errors`` and is an explicit candidate for overriding.
 * ``_update_from_response`` has been renamed to ``_update_from_results`` for more consistent Resource api.
 * Dumps KaldiNL results into an output folder instead of KaldiNL root.
-
-
-v0.16
------
-
-* Adding support for ``Python 3.8`` and removing support for ``Python 3.5``.
-* Updating ``psycopg2-binary`` to ``2.8.4``.
-* HTTP tasks no longer use ``core`` as a prefix, but ``http_resource`` instead.
-* Shell tasks no longer use ``core`` as a prefix, but ``shell_resource`` instead.
-* HTTP task and shell task configurations require an app label prefix for any ``Resource``.
-* ``load_session`` decorator now excepts None as a session and will create a requests.Session when it does.
-* The ``update`` method has been removed from the ``DataStorage`` base class
-* The ``data_hash`` field may now be empty in the admin on any ``Resource`` (requires a minor migration)
-* The sleep dictated by ``interval_duration`` is executed by ``HttpResource`` not the http tasks
-* ``ConfigurationType`` still works with the "async" property, but migrates internally to "asynchronous"
-* Modern mime types like application/vnd.api+json get processed as application/json
-* You can now specify to what ``datetime`` the ``Resource.purge_after`` should get set when a ``Resource`` gets saved.
-The ``dict`` specified in the ``purge_after`` configuration are kwargs to a ``timedelta`` init.
-This ``timedelta`` gets added to ``datetime.now``.
-This means that using ``{"days": 30}`` as ``purge_after`` will set the ``Resource.purge_after``
-to 30 days into the future upon creation. The ``global_purge_after`` default configuration should be an empty ``dict``.
-
-
-v0.17
------
-
-* It's recommended to update to Django 3.2 before using Datagrowth 0.17.
-* Note that a Django migration is required to make Datagrowth 0.17 work.
-* Drops support for Django 1.11.
-* MySQL backends are no longer supported with Django versions below 3.2
-* Schemas on ``Document`` and ``Collection`` are removed as their usage is not recommended.
-Consider working schemaless when using these ``DataStorage`` derivative classes.
-* As schemas are no longer available for ``DataStorage`` derivative classes all write functionality
-from default ``DataStorage`` API views is removed.
-* ``DataStorage`` API URL patterns now require app labels as namespaces to prevent ambiguity.
-* The API version can be specified using the ``DATAGROWTH_API_VERSION`` setting.
-* ``DataStorage.update`` is reintroduced because of potential performance benefits.
-* ``Document.update`` no longer takes first values from iterators given to it.
-* ``Collection.update`` no longer excepts a single dict or Document for updating.
-It also works using lookups from ``JSONField`` instead of the inferior ``reference`` mechanic.
-* ``DataStorage.url`` now provides a generic way to build URLs for ``Collection`` and ``Document``.
-These URLs will expect URL patterns to exist with names in the format:
-*v<api-version>:<app-name>:<model-name>-content*.
-This replaces the old formats which were less flexible:
-*v1:<app-name>:collection-content* and *v1:<app-name>:document-content*.
-* Usage of the ``DocumentPostgres`` and ``MysqlDocument`` is deprecated. Remove these as base classes.
-* ``HttpResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
-for ``request`` and ``head`` fields.
-* ``ShellResource`` will use ``django.contrib.postgres.fields.JSONField`` or ``django.db.models.JSONField``
-for the ``command`` field.
-* The resources and datatypes modules now each have an admin module to import ``AdminModels`` easily.
-* ``ConfigurationProperty`` now uses a simpler constructor and allows defaults for all arguments.
-* Removes the unused ``global_token`` default configuration.
-* Removes the unused ``http_resource_batch_size`` default configuration.
-* HTTP errors 420, 429, 502, 503 and 504 will now trigger a backoff delay.
-When this happens the HttpResource will sleep for the amount of seconds
-specified in the ``global_backoff_delays`` setting.
-Set ``global_backoff_delays`` to an empty list to disable this behaviour.
-* Allows override of ``HttpResource.uri_from_url`` and ``HttpResource.hash_from_data``
-* To extract from object values you know need to set ``extract_processor_extract_from_object_values`` to True.
-The default is False and will result in extraction from the object directly.
-* ``ShellResource`` now implements ``interval_duration`` to allow the system to pause between runs.
-Useful when the command has some sort of rate limit.
-* ``ExtractProcessor`` now supports application/xml content type.
