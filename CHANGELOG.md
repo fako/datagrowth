@@ -8,6 +8,13 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.18
+-----
+
+* Adds support for Python 3.10 and drops support for Python 3.6.
+* Uses the html.parser instead of html5lib parser when parsing HTML pages.
+
+
 v0.17
 -----
 
