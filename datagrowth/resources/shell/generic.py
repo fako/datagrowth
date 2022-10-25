@@ -81,10 +81,9 @@ class ShellResource(Resource):
             self.validate_command(self.command)
 
         self.clean()  # sets self.uri
-        resource = None
-        try:
-            resource = self.__class__.objects.get(uri=self.uri, stdin=self.stdin)
-        except self.DoesNotExist:
+
+        resource = self.__class__.objects.filter(uri=self.uri, stdin=self.stdin).last()
+        if resource is None:
             if self.config.cache_only:
                 raise DGResourceDoesNotExist("Could not retrieve resource from cache", resource=self)
             resource = self

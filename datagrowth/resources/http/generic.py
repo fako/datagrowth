@@ -105,9 +105,8 @@ class HttpResource(Resource):
 
         self.clean()  # sets self.uri and self.data_hash based on request
 
-        try:
-            resource = self.__class__.objects.get(uri=self.uri, data_hash=self.data_hash)
-        except self.DoesNotExist:
+        resource = self.__class__.objects.filter(uri=self.uri, data_hash=self.data_hash).last()
+        if resource is None:
             if self.config.cache_only:
                 raise DGResourceDoesNotExist("Could not retrieve resource from cache", resource=self)
             resource = self

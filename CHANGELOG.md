@@ -13,6 +13,8 @@ v0.18
 
 * Adds support for Python 3.10 and drops support for Python 3.6.
 * Uses the html.parser instead of html5lib parser when parsing HTML pages.
+* Fetches the last ``Resource`` when retrieving from cache to prevent ``MultipleObjectsReturned``
+exceptions in async environments
 
 
 v0.17
