@@ -1,5 +1,5 @@
 # First the dependencies
-Django==2.2.27
+Django==3.2.16
 -r dependencies.txt
 
 # Development packages

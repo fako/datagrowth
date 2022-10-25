@@ -51,5 +51,4 @@ jobs:
             - name: Tests
               run: |
                   DJANGO_DEFAULT_DATABASE=mysql DJANGO_MYSQL_USER=root tox -e django32
-                  DJANGO_DEFAULT_DATABASE=postgres tox -e django22
                   DJANGO_DEFAULT_DATABASE=postgres tox -e django32
