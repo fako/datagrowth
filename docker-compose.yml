@@ -2,7 +2,7 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:10.10
+    image: postgres:14.5
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
     environment:
       POSTGRES_PASSWORD: czykMn28LiNaKox6U3RDRw23MEZbSxWk
@@ -17,7 +17,7 @@ services:
       - 5432:5432
 
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: czykMn28LiNaKox6U3RDRw23MEZbSxWk
       MYSQL_USER: django
