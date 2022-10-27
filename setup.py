@@ -35,10 +35,9 @@ setuptools.setup(
         "tqdm",
         "django-json-field",
     ],
-    python_requires="~=3.7",
+    python_requires="~=3.8",
     include_package_data=True,
     classifiers=(
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
