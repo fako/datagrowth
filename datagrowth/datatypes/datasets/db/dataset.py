@@ -1,5 +1,5 @@
 from copy import copy
-from collections import Iterator
+from collections.abc import Iterator
 
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
