@@ -151,6 +151,16 @@ class HttpResource(Resource):
         """
         return self.send("post", *args, **kwargs)
 
+    def put(self, *args, **kwargs):
+        """
+        This method calls ``send`` with "put" as a method. See the ``send`` method for more information.
+
+        :param args: arguments that will get merged into the URI_TEMPLATE
+        :param kwargs: keywords arguments that will get send as data
+        :return: HttpResource
+        """
+        return self.send("put", *args, **kwargs)
+
     @property
     def success(self):
         """
@@ -287,7 +297,7 @@ class HttpResource(Resource):
         assert isinstance(request, dict), "Request should be a dictionary."
         method = request.get("method")
         assert method, "Method should not be falsy."
-        assert method in ["get", "post"], \
+        assert method in ["get", "post", "put"], \
             "{} is not a supported resource method.".format(request.get("method"))  # FEATURE: allow all methods
         if validate_input:
             self._validate_input(

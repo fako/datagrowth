@@ -15,6 +15,7 @@ v0.18
 * Uses the html.parser instead of html5lib parser when parsing HTML pages.
 * Fetches the last ``Resource`` when retrieving from cache to prevent ``MultipleObjectsReturned``
 exceptions in async environments
+* Allows PUT as a ``HttpResource`` send method
 
 
 v0.17
