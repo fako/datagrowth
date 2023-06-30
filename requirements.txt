@@ -9,7 +9,7 @@ ipython==8.10.0
 ipdb==0.13.9
 Sphinx==2.4.4
 sphinx-rtd-theme==0.1.8
-wheel==0.33.6
+wheel==0.38.1
 setuptools==65.5.1
 celery==4.4.0
 docker-compose==1.27.4
