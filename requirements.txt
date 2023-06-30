@@ -1,16 +1,16 @@
 # First the dependencies
-Django==3.2.16
+Django==3.2.19
 -r dependencies.txt
 
 # Development packages
 tox==3.24.5
 twine==1.11.0
-ipython==8.1.1
+ipython==8.10.0
 ipdb==0.13.9
 Sphinx==2.4.4
 sphinx-rtd-theme==0.1.8
 wheel==0.38.1
-setuptools==41.4.0
+setuptools==65.5.1
 celery==4.4.0
 docker-compose==1.27.4
 
