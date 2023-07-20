@@ -3,12 +3,12 @@ import json
 from unittest.mock import patch, MagicMock, NonCallableMagicMock
 from datetime import date
 
-from django.test import TransactionTestCase
+from django.test import TestCase
 
 from datatypes.models import Collection, Document
 
 
-class TestCollection(TransactionTestCase):
+class TestCollection(TestCase):
 
     fixtures = ["test-data-storage"]
 

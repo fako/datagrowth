@@ -1,12 +1,12 @@
 # This file intends to pin down dependencies to their minimal version
 # Lower dependencies may work, but is not actively tested against
-djangorestframework==3.12.4
+djangorestframework==3.14.0
 jsonschema==2.6.0
-lxml==4.8.0
+lxml==4.9.3
 beautifulsoup4==4.8.0
 urlobject==2.4.3
 requests==2.20.0
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.6
 mysqlclient==1.4.4
 Pillow==8.1.1
 tqdm==4.31.1
