@@ -57,6 +57,7 @@ class ConfigurationField(fields.TextField):
         self._defaults = config_defaults
 
     def contribute_to_class(self, cls, name, private_only=False, **kwargs):
+        super(ConfigurationField, self).contribute_to_class(cls, name)
         configuration_property = ConfigurationProperty(
             storage_attribute=name,
             defaults=getattr(cls, 'CONFIG_DEFAULTS', self._defaults),
@@ -64,7 +65,6 @@ class ConfigurationField(fields.TextField):
             private=getattr(cls, 'CONFIG_PRIVATE', self._private)
         )
         setattr(cls, name, configuration_property)
-        super(ConfigurationField, self).contribute_to_class(cls, name)
 
     def from_db_value(self, value, expression, connection):
         return json.loads(value)
