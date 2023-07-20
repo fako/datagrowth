@@ -10,7 +10,7 @@ jobs:
         strategy:
             max-parallel: 4
             matrix:
-                python-version: ["3.8", "3.9", "3.10"]
+                python-version: ["3.8", "3.9", "3.10", "3.11"]
 
         services:
             postgres:
@@ -50,5 +50,5 @@ jobs:
                   python -m pip install tox tox-gh-actions
             - name: Tests
               run: |
-                  DJANGO_DEFAULT_DATABASE=mysql DJANGO_MYSQL_USER=root tox -e django32
-                  DJANGO_DEFAULT_DATABASE=postgres tox -e django32
+                  DJANGO_DEFAULT_DATABASE=mysql DJANGO_MYSQL_USER=root tox
+                  DJANGO_DEFAULT_DATABASE=postgres tox
