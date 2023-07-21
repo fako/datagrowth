@@ -3,7 +3,7 @@ Django==3.2.20
 -r dependencies.txt
 
 # Development packages
-tox==3.24.5
+tox==4.6.4
 twine==1.11.0
 ipython==8.10.0
 ipdb==0.13.9
@@ -12,7 +12,7 @@ sphinx-rtd-theme==0.1.8
 wheel==0.38.1
 setuptools==65.5.1
 celery==5.2.2
-docker-compose==1.27.4
+docker-compose==1.29.2
 
 # Add the current project as a package
 -e .

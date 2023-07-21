@@ -5,9 +5,9 @@ jsonschema==2.6.0
 lxml==4.9.3
 beautifulsoup4==4.8.0
 urlobject==2.4.3
-requests==2.20.0
+requests==2.31.0
 psycopg2-binary==2.9.6
 mysqlclient==1.4.4
-Pillow==8.1.1
+Pillow==10.0.0
 tqdm==4.31.1
 git+https://github.com/fako/django-json-field.git@master#egg=django-json-field
