@@ -33,7 +33,6 @@ setuptools.setup(
         "requests",
         "Pillow>=8",
         "tqdm",
-        "django-json-field",
     ],
     python_requires="~=3.8",
     include_package_data=True,
