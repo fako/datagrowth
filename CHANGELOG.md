@@ -8,6 +8,14 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.19
+-----
+
+* Adds support for Python 3.11 and Django 4.2.
+* ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
+  before setting ``ConfigurationProperty`` upon the class.
+
+
 v0.18
 -----
 
