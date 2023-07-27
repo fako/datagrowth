@@ -12,6 +12,7 @@ v0.19
 -----
 
 * Adds support for Python 3.11 and Django 4.2.
+* Adds preliminary support for Python 3.12.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
 
