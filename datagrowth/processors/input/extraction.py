@@ -1,3 +1,4 @@
+from types import GeneratorType
 from copy import copy
 
 from datagrowth.configuration import ConfigurationProperty
@@ -128,7 +129,7 @@ class ExtractProcessor(Processor):
             nodes = nodes.values()
         elif nodes is None:
             raise DGNoContent("Found no nodes at {}".format(self._at))
-        elif not isinstance(nodes, list):
+        elif not isinstance(nodes, (list, GeneratorType,)):
             nodes = [nodes]
 
         for node in nodes:
