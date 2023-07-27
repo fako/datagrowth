@@ -1,42 +1,14 @@
 import logging
-import requests
 
 from django.apps import apps
 from celery import current_app as app
 
-from datagrowth.processors.base import Processor
 from datagrowth.configuration import ConfigurationType, load_config
-
-from datagrowth.exceptions import DGResourceException
+from datagrowth.resources.http import load_session
+from datagrowth.resources.http import send_iterator
 
 
 log = logging.getLogger("datascope")
-
-
-def load_session():  # TODO: test to unlock
-    """
-    This decorator will try to fetch a session object based on the "session" keyword argument.
-    If the argument is a string it is assumed to be the name of a processor that implements the get_session method.
-    Whatever this method returns gets injected under the "session" keyword argument for the decorated function.
-    If the argument is not a string it gets returned as being a valid session for the resource.
-
-    :param defaults: (mixed) Name of the session provider or the session object.
-    :return:
-    """
-    def wrap(func):
-        def session_func(config, *args, **kwargs):
-            assert isinstance(config, ConfigurationType), \
-                "load_session expects a fully prepared ConfigurationType for config"
-            session_injection = kwargs.pop("session", None)
-            if not session_injection:
-                session_injection = requests.Session()
-            if not isinstance(session_injection, str):
-                return func(config, session=session_injection, *args, **kwargs)
-            session_provider = Processor.get_processor_class(session_injection)
-            session = session_provider.get_session(config)
-            return func(config, session=session, *args, **kwargs)
-        return session_func
-    return wrap
 
 
 def get_resource_link(config, session=None):
@@ -64,28 +36,12 @@ def send(config, *args, **kwargs):
     method = kwargs.pop("method", None)
     success = []
     errors = []
-    has_next_request = True
-    current_request = {}
-    count = 0
-    limit = config.continuation_limit or 1
-    # Continue as long as there are subsequent requests
-    while has_next_request and count < limit:
-        # Get payload
-        link = get_resource_link(config, session)
-        link.request = current_request
-        link.interval_duration = config.interval_duration
-        try:
-            link = link.send(method, *args, **kwargs)
-            link.close()
+    # Send initial Resource as well as any followup Resources and iterator over all of them
+    for link in send_iterator(method=method, config=config, session=session, *args, **kwargs):
+        if link.success:
             success.append(link.id)
-        except DGResourceException as exc:
-            log.debug(exc)
-            link = exc.resource
-            link.close()
+        else:
             errors.append(link.id)
-        # Prepare next request
-        has_next_request = current_request = link.create_next_request()
-        count += 1
     # Output results in simple type for json serialization
     return [success, errors]
 

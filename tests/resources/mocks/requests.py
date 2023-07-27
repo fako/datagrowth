@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import requests
 from requests.models import Response
@@ -13,6 +14,13 @@ ok_response = NonCallableMock(spec=Response)
 ok_response.headers = CaseInsensitiveDict(data={"content-type": "application/json"})
 ok_response.content = json.dumps(MOCK_DATA)
 ok_response.status_code = 200
+
+next_response = NonCallableMock(spec=Response)
+next_response.headers = CaseInsensitiveDict(data={"content-type": "application/json"})
+NEXT_MOCK_DATA = deepcopy(MOCK_DATA)
+NEXT_MOCK_DATA["list"] = ["value 3", "value 4", "value 5"]
+next_response.content = json.dumps(NEXT_MOCK_DATA)
+next_response.status_code = 200
 
 agent_response = NonCallableMock(spec=Response)
 agent_response.headers = CaseInsensitiveDict(data={
@@ -47,6 +55,8 @@ def return_response(prepared_request, proxies, verify, timeout):
         return not_found_response
     elif "500" in prepared_request.url:
         return error_response
+    elif "next=1" in prepared_request.url:
+        return next_response
     else:
         return ok_response
 

@@ -228,3 +228,27 @@ class TestExtractProcessor(TestCase):
         rsl = keys_processor.application_json(self.json_records)
         self.assertEqual(list(rsl), [MOCK_JSON_DATA[0]])
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+
+    def test_application_json_nested_extraction(self):
+        # Extracting a nested data structure with generator syntax
+        nested_generator_objective = {
+            "@": lambda data: (value for rec in data for value in rec["list"]),
+            "value": "$"
+        }
+        nested_generator_extractor = ExtractProcessor(config={"objective": nested_generator_objective})
+        rsl = nested_generator_extractor.application_json([self.json_records, self.json_records])
+        for ix, content in enumerate(rsl):
+            self.assertIsInstance(content, dict)
+            self.assertEqual(len(content), 1)
+            self.assertEqual(content["value"], f"value {ix % 3}")
+        # Extracting a nested data structure with list syntax
+        nested_list_objective = {
+            "@": lambda data: [value for rec in data for value in rec["list"]],
+            "value": "$"
+        }
+        nested_list_extractor = ExtractProcessor(config={"objective": nested_list_objective})
+        rsl = nested_list_extractor.application_json([self.json_records, self.json_records])
+        for ix, content in enumerate(rsl):
+            self.assertIsInstance(content, dict)
+            self.assertEqual(len(content), 1)
+            self.assertEqual(content["value"], f"value {ix % 3}")

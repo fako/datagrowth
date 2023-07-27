@@ -17,8 +17,18 @@ v0.19
   BeautifulSoup warns against using Datagrowth's previous default parser (lxml) for XML parsing as it is less reliable.
 * Allows ``ExtractProcessor`` to extract data using a generator function for the "@" objective.
   This can be useful to extract from nested data structures.
+* Provides a ``send_iterator`` generator that initiates and sends a ``HttpResource``
+  as well as any subsequent ``HttpResources``. This generator allows you to do something with in-between results
+  when fetching the data.
+* Provides a ``send_serie_iterator`` generator which acts like the ``send_iterator``
+  except it can perform multiple send calls.
+* Provides a ``content_iterator`` generator that given a ``send_iterator`` or ``send_serie_iterator``
+  will extract the content from generated ``HttpResources`` using a given objective.
+  This generator will also yield in-between results as extracted content.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
+* Moved ``load_session`` decorator into ``datagrowth.resources.http``.
+* Moved ``get_resource_link`` function into ``datagrowth.resources.http``.
 
 
 v0.18

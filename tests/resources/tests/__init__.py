@@ -5,6 +5,7 @@ from .http.files import TestHttpImageResourceInterface
 from .http.micro import TestMicroServiceResourceInterface
 from .http.tasks import (TestSendMassTaskGet, TestSendMassTaskPost, TestSendTaskGet, TestSendTaskPost,
                          TestGetResourceLink, TestLoadSession)
+from .http.iterators import TestSendIterator, TestSendSerieIterator
 
 from .shell.core import TestShellResource
 from .shell.generic import TestShellResourceInterface

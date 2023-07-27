@@ -127,7 +127,7 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
         )
 
     @patch("datagrowth.resources.http.tasks.send_serie", return_value=([], [],))
-    def test_send_inserted_session_provider(self, send_serie):
+    def test_send_injected_session_provider(self, send_serie):
         send_mass([1], [{}], method=self.method, config=self.config, session="ProcessorMock")
         args, kwargs = send_serie.call_args
         self.assertEqual(args, ([1], [{}],))
@@ -176,15 +176,15 @@ class TestSendTaskGet(TestHTTPTasksBase):
         self.check_results(scc, 2)
         self.check_results(err, 0)
 
-    def test_send_inserted_session(self):
+    def test_send_injected_session(self):
         scc, err = send("test", method=self.method, config=self.config, session=MockRequestsWithAgent)
         self.check_results(scc, 1)
         self.check_results(err, 0)
         link = HttpResourceMock.objects.get(id=scc[0])
         self.assertIn("user-agent", link.head)
 
-    @patch("datagrowth.resources.http.tasks.get_resource_link")
-    def test_send_inserted_session_provider(self, get_resource_link_mock):
+    @patch("datagrowth.resources.http.iterators.get_resource_link")
+    def test_send_injected_session_provider(self, get_resource_link_mock):
         send("test", method=self.method, config=self.config, session="ProcessorMock")
         args, kwargs = get_resource_link_mock.call_args
         config, session = args
@@ -223,15 +223,15 @@ class TestSendTaskPost(TestHTTPTasksBase):
         self.check_results(scc, 2)
         self.check_results(err, 0)
 
-    def test_send_inserted_session(self):
+    def test_send_injected_session(self):
         scc, err = send(query="test", method=self.method, config=self.config, session=MockRequestsWithAgent)
         self.check_results(scc, 1)
         self.check_results(err, 0)
         link = HttpResourceMock.objects.get(id=scc[0])
         self.assertIn("user-agent", link.head)
 
-    @patch("datagrowth.resources.http.tasks.get_resource_link")
-    def test_send_inserted_session_provider(self, get_resource_link_mock):
+    @patch("datagrowth.resources.http.iterators.get_resource_link")
+    def test_send_injected_session_provider(self, get_resource_link_mock):
         send("test", method=self.method, config=self.config, session="ProcessorMock")
         args, kwargs = get_resource_link_mock.call_args
         config, session = args
