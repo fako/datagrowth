@@ -191,7 +191,7 @@ class HttpResource(Resource):
             elif content_type == "text/html":
                 return content_type, BeautifulSoup(self.body, "html.parser")
             elif content_type == "text/xml" or content_type == "application/xml":
-                return content_type, BeautifulSoup(self.body, "lxml")
+                return content_type, BeautifulSoup(self.body, "xml")
             else:
                 return content_type, None
         return None, None

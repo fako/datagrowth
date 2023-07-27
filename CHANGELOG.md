@@ -13,6 +13,8 @@ v0.19
 
 * Adds support for Python 3.11 and Django 4.2.
 * Adds preliminary support for Python 3.12.
+* Doesn't specify a specific parser for BeautifulSoup when loading XML content.
+  BeautifulSoup warns against using Datagrowth's previous default parser (lxml) for XML parsing as it is less reliable.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
 
