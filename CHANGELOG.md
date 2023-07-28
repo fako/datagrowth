@@ -26,6 +26,8 @@ v0.19
   will extract the content from generated ``HttpResources`` using a given objective.
   This generator will also yield in-between results as extracted content.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
+* Makes ``Document.output_from_content`` pass along content if values are not a JSON path.
+* Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
 * Moved ``load_session`` decorator into ``datagrowth.resources.http``.

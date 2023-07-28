@@ -70,14 +70,69 @@ class TestDocument(TestCase):
         self.assertEqual(results, [self.value_outcome])
         results = self.instance.output_from_content(self.instance.content, ["$.value", "$.value"])
         self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
-        results = self.instance.output_from_content(self.instance.content, [])
-        self.assertEqual(results, [])
         results = self.instance.output_from_content(self.instance.content, {"value": "$.value"})
         self.assertEqual(results, self.dict_outcome)
         results = self.instance.output_from_content(self.instance.content, [{"value": "$.value"}, {"value": "$.value"}])
         self.assertEqual(list(results), [self.dict_outcome, self.dict_outcome])
+
+    def test_output_from_content_replacement_character(self):
+        results = self.instance.output_from_content(self.instance.content, "#._id", replacement_character="#")
+        self.assertEqual(results, self.instance.id)
+        results = self.instance.output_from_content(self.instance.content, "#.value", replacement_character="#")
+        self.assertEqual(results, self.value_outcome)
+        results = self.instance.output_from_content(
+            self.instance.content, "#.value", "#.value",
+            replacement_character="#"
+        )
+        # self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
+        results = self.instance.output_from_content(self.instance.content, ["#.value"], replacement_character="#")
+        self.assertEqual(results, [self.value_outcome])
+        results = self.instance.output_from_content(
+            self.instance.content, ["#.value", "#.value"],
+            replacement_character="#"
+        )
+        self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
+        results = self.instance.output_from_content(
+            self.instance.content, {"value": "#.value"},
+            replacement_character="#"
+        )
+        self.assertEqual(results, self.dict_outcome)
+        results = self.instance.output_from_content(
+            self.instance.content, [{"value": "#.value"}, {"value": "#.value"}],
+            replacement_character="#"
+        )
+        # self.assertEqual(list(results), [self.dict_outcome, self.dict_outcome])
+
+    def test_output_from_content_no_replacement(self):
+        results = self.instance.output_from_content(self.instance.content, "value")
+        self.assertEqual(results, "value")
+        results = self.instance.output_from_content(self.instance.content, "value", 1)
+        self.assertEqual(list(results), ["value", 1])
+        results = self.instance.output_from_content(self.instance.content, ["value"])
+        self.assertEqual(results, ["value"])
+        results = self.instance.output_from_content(self.instance.content, ["value", 1])
+        self.assertEqual(list(results), ["value", 1])
+        results = self.instance.output_from_content(self.instance.content, {"value": "value"})
+        self.assertEqual(results, {"value": "value"})
+        results = self.instance.output_from_content(self.instance.content, [{"value": "value"}, {"value": 1}])
+        self.assertEqual(list(results), [{"value": "value"}, {"value": 1}])
+
+    def test_output_from_content_empty_values(self):
+        results = self.instance.output_from_content(self.instance.content, [])
+        self.assertEqual(results, [])
         results = self.instance.output_from_content(self.instance.content, {})
         self.assertEqual(results, {})
+
+    def test_output_from_content_escaped(self):
+        results = self.instance.output_from_content(self.instance.content, "\$.value")
+        self.assertEqual(results, "$.value", "Expected escaped replacement_character to be passed along")
+        results = self.instance.output_from_content(self.instance.content, "\\\$.value")
+        self.assertEqual(results, "\$.value", "Expected escaped backslash to be passed along")
+        try:
+            self.instance.output_from_content(self.instance.content, "$.value", replacement_character="\\")
+            self.fail("Document.output_from_content did not raise AssertionError with invalid replacement_character")
+        except AssertionError:
+            pass
 
     def test_update_using_dict(self):
         created_at = self.instance.created_at

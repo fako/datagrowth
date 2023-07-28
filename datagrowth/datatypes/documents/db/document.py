@@ -100,23 +100,43 @@ class DocumentBase(DataStorage):
         return self.output_from_content(self.content, *args)
 
     @staticmethod
-    def output_from_content(content, *args):
+    def output_from_content(content, *args, replacement_character="$"):
+        # Assert and abbreviate the replacement_character input
+        assert replacement_character != "\\", "Can't use '\' as a replacement character"
+        rpl = replacement_character
+        # When dealing with multiple args we'll handle it one by one using map function
         if len(args) > 1:
-            return map(DocumentBase.output_from_content, repeat(content), args)
+            return map(
+                lambda cnt, arg: DocumentBase.output_from_content(cnt, arg, replacement_character=rpl),
+                repeat(content), args
+            )
+        # From here we'll check different types of the input and return values accordingly
         frm = args[0]
         if not frm:
             return frm
-        if isinstance(frm, str):
+        # This is the case that matters most. It replaces a JSON path with a value from the input content
+        if isinstance(frm, str) and frm.startswith(replacement_character):
+            frm = frm.replace(rpl, "$", 1)
             return reach(frm, content)
+        # When dealing with a list as args we'll recursively call this function
+        # Making sure that we'll always return a list
         elif isinstance(frm, list):
             if len(frm) > 1:
-                return DocumentBase.output_from_content(content, *frm)
+                return DocumentBase.output_from_content(content, *frm, replacement_character=rpl)
             else:
-                return [DocumentBase.output_from_content(content, *frm)]
+                return [DocumentBase.output_from_content(content, *frm, replacement_character=rpl)]
+        # When dealing with a dict as args we'll recursively call this function on the values
+        # and make sure we always return a dict
         elif isinstance(frm, dict):
-            return {key: DocumentBase.output_from_content(content, value) for key, value in frm.items()}
-        else:
-            raise AssertionError("Expected a string, list or dict as argument got {} instead".format(type(frm)))
+            return {
+                key: DocumentBase.output_from_content(content, value, replacement_character=rpl)
+                for key, value in frm.items()
+            }
+        # We'll remove any backslash characters from the start of strings
+        elif isinstance(frm, str) and frm.startswith(f"\\"):
+            frm = frm.replace("\\", "", 1)
+        # Passing along input as-is
+        return frm
 
     def items(self):
         return self.properties.items()
