@@ -25,6 +25,7 @@ v0.19
 * Provides a ``content_iterator`` generator that given a ``send_iterator`` or ``send_serie_iterator``
   will extract the content from generated ``HttpResources`` using a given objective.
   This generator will also yield in-between results as extracted content.
+* Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
 * Moved ``load_session`` decorator into ``datagrowth.resources.http``.

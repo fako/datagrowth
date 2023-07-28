@@ -32,6 +32,12 @@ class DocumentBase(DataStorage):
     def __setitem__(self, key, value):
         self.properties[key] = value
 
+    @classmethod
+    def build(cls, data, collection=None):
+        instance = cls(properties=data, collection=collection)
+        instance.clean()
+        return instance
+
     @staticmethod
     def validate(data, schema):
         """

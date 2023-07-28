@@ -1,11 +1,10 @@
 from unittest.mock import patch
-from datetime import datetime, date
+from datetime import date
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from django.utils.timezone import make_aware
 
-from datatypes.models import Document
+from datatypes.models import Document, Collection
 
 
 class TestDocument(TestCase):
@@ -28,6 +27,11 @@ class TestDocument(TestCase):
                 "language": {"type": "string"},
                 "country": {"type": "string"}
             }
+        }
+        self.build_data = {
+            "identifier": "identity",
+            "referee": "reference",
+            "value": "value"
         }
 
     def test_url(self):
@@ -184,3 +188,18 @@ class TestDocument(TestCase):
         expected_values = tuple(sorted(expected_values))
         values = tuple(sorted(self.instance.values()))
         self.assertEqual(values, expected_values)
+
+    def test_build_with_collection(self):
+        collection = Collection.objects.create(name="build-test", identifier="identifier", referee="referee")
+        build = Document.build(self.build_data, collection=collection)
+        self.assertIsNone(build.id, "Did not expect a build to be created in the database")
+        self.assertEqual(build.properties, self.build_data)
+        self.assertEqual(build.reference, "reference")
+        self.assertEqual(build.identity, "identity")
+
+    def test_build(self):
+        build = Document.build(self.build_data)
+        self.assertIsNone(build.id, "Did not expect a build to be created in the database")
+        self.assertEqual(build.properties, self.build_data)
+        self.assertIsNone(build.reference, "Did not expect an implicit reference without a Collection")
+        self.assertIsNone(build.identity, "Did not expect an implicit identity without a Collection")
