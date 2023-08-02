@@ -4,7 +4,7 @@ Django==3.2.20
 
 # Development packages
 tox==4.6.4
-twine==1.11.0
+twine==4.0.2
 ipython==8.10.0
 ipdb==0.13.9
 Sphinx==2.4.4
