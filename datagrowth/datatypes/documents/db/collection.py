@@ -57,18 +57,41 @@ class CollectionBase(DataStorage):
         for instance in data:
             Document.validate(instance, schema)
 
-    def add(self, data, reset=False, batch_size=500, collection=None, modified_at=None, validate=True):
+    def add(self, data, reset=False, collection=None, modified_at=None):
         """
-        Add new data to the Collection in batches, possibly deleting all data before adding.
+        Add new data to the Collection, possibly deleting all data before adding.
+        This method will load all data into memory before inserting it into the database.
+        Use ``add_batches`` for a more memory footprint friendly version.
 
-        :param data: The data to use for the update
+        :param data: The data to use for the inserts
         :param reset: (optional) whether to delete existing data or not (no by default)
-        :param batch_size: (optional) how many instances to add in a single batch (default: 500)
         :param collection: (optional) a collection instance to add the data to (default: self)
         :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
-        :param validate: (deprecated) used to allow JSON schema validation before addition
-        :return: A list of updated or created instances.
+        :return: A list of created instances.
         """
+        batches = self.add_batches(
+            data,
+            reset=reset,
+            collection=collection,
+            modified_at=modified_at
+        )
+        additions = []
+        for batch in batches:
+            additions += batch
+        return additions
+
+    def add_batches(self, data, batch_size=None, reset=False, collection=None, modified_at=None):
+        """
+        Add new data to the Collection, possibly deleting all data before adding.
+
+        :param data: The data to use for the inserts
+        :param batch_size: The amount of objects to load in memory and insert at once
+        :param reset: (optional) whether to delete existing data or not (no by default)
+        :param collection: (optional) a collection instance to add the data to (default: self)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :return: An iterator of batches with created instances.
+        """
+        batch_size = batch_size or datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
         collection = collection or self
         modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
@@ -94,45 +117,66 @@ class CollectionBase(DataStorage):
                     prepared += prepare_additions(instance)
             return prepared
 
-        count = 0
         for additions in ibatch(data, batch_size=batch_size):
             additions = prepare_additions(additions)
-            count += len(additions)
-            Document.objects.bulk_create(additions, batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE)
+            yield Document.objects.bulk_create(additions, batch_size=batch_size)
 
         if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
             collection.modified_at = modified_at
             collection.save()
-        return count
 
-    def update(self, data, by_property, batch_size=32, collection=None, modified_at=None, validate=True):
+    def update(self, data, by_property, collection=None, modified_at=None):
         """
-        Update data to the Collection in batches, using a property value to identify which Documents to update.
+        Update data to the Collection, using a property value to identify which Documents to update.
+        Any data that does not exist will be added instead.
+        This method will load all data into memory before performing upserts into the database.
+        Use ``update_batches`` for a more memory footprint friendly version.
 
-        :param data: The data to use for the update
+        :param data: The data to use for the upsert
         :param by_property: The property to identify a Document with
-        :param batch_size: (optional) how many instances to add in a single batch (default: 32)
-        :param collection: (optional) a collection instance to update the data to (default: self)
+        :param collection: (optional) a collection instance to upsert the data to (default: self)
         :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
-        :param validate: (deprecated) used to allow JSON schema validation before updates
         :return: A list of updated or created instances.
         """
+        batches = self.update_batches(
+            data,
+            by_property=by_property,
+            collection=collection,
+            modified_at=modified_at
+        )
+        upserts = []
+        for batch in batches:
+            upserts += batch
+        return upserts
+
+    def update_batches(self, data, by_property, batch_size=32, collection=None, modified_at=None):
+        """
+        Update data to the Collection, using a property value to identify which Documents to update.
+        Any data that does not exist will be added instead.
+
+        :param data: The data to use for the upsert
+        :param by_property: The property to identify a Document with
+        :param batch_size: The amount of objects to load in memory and insert at once
+        :param collection: (optional) a collection instance to upsert the data to (default: self)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :return: An iterator of batches with updated or created instances.
+        """
+        batch_size = batch_size or datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
         collection = collection or self
         modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
         assert isinstance(data, (Iterator, list, tuple,)), \
             f"Collection.update expects data to be formatted as iteratable not {type(data)}"
 
-        count = 0
-        for updates in ibatch(data, batch_size=batch_size):
+        for update_data in ibatch(data, batch_size=batch_size):
             # We bulk update by getting all objects whose property matches
             # any update's "by_property" property value and then updating these source objects.
             # One update object can potentially target multiple sources
             # if multiple objects with the same value for the by_property property exist.
             updated = set()
-            prepared = []
+            updates = []
             sources_by_lookup = defaultdict(list)
-            for update in updates:
+            for update in update_data:
                 sources_by_lookup[update[by_property]].append(update)
             target_filters = Q()
             for lookup_value in sources_by_lookup.keys():
@@ -140,13 +184,12 @@ class CollectionBase(DataStorage):
             for target in collection.documents.filter(target_filters):
                 for update_value in sources_by_lookup[target.properties[by_property]]:
                     target.update(update_value, commit=False)
-                count += 1
                 updated.add(target.properties[by_property])
-                prepared.append(target)
+                updates.append(target)
             Document.objects.bulk_update(
-                prepared,
+                updates,
                 ["properties", "identity", "reference", "modified_at"],
-                batch_size=datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
+                batch_size=batch_size
             )
             # After all updates we add all data that hasn't been used in any update operation
             additions = []
@@ -154,12 +197,12 @@ class CollectionBase(DataStorage):
                 if lookup_value not in updated:
                     additions += sources
             if len(additions):
-                count += self.add(additions, batch_size=batch_size, collection=collection, modified_at=modified_at)
+                additions = self.add(additions, collection=collection, modified_at=modified_at)
+            yield updates + additions
 
         if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
             collection.modified_at = modified_at
             collection.save()
-        return count
 
     @property
     def content(self):

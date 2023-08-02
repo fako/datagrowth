@@ -2,6 +2,7 @@ import os
 import json
 from unittest.mock import patch, MagicMock, NonCallableMagicMock
 from datetime import date
+from types import GeneratorType
 
 from django.test import TestCase
 
@@ -130,7 +131,12 @@ class TestCollection(TestCase):
     def test_add_batch(self):
         docs = list(self.instance2.documents.all()) * 5
         with self.assertNumQueries(4):
-            self.instance2.add(docs, reset=True, batch_size=20)
+            add_batches = self.instance2.add_batches(docs, reset=True, batch_size=20)
+            self.assertIsInstance(add_batches, GeneratorType)
+            for batch in add_batches:
+                self.assertIsInstance(batch, list)
+                for doc in batch:
+                    self.assertIsInstance(doc, Document)
         self.assertEqual(self.instance2.documents.count(), 25)
 
     @patch('datatypes.models.Collection.influence')
@@ -192,7 +198,12 @@ class TestCollection(TestCase):
             # Batch 2: select + update + insert
             # Batch 3: select + insert
             # Query 8: update modified_at
-            self.instance.update(docs, "value", batch_size=2)
+            update_batches = self.instance.update_batches(docs, "value", batch_size=2)
+            self.assertIsInstance(update_batches, GeneratorType)
+            for batch in update_batches:
+                self.assertIsInstance(batch, list)
+                for doc in batch:
+                    self.assertIsInstance(doc, Document)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance.documents.count(), 5)
         self.assertEqual(self.instance.created_at, created_at)

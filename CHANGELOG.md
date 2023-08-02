@@ -25,13 +25,18 @@ v0.19
 * Provides a ``content_iterator`` generator that given a ``send_iterator`` or ``send_serie_iterator``
   will extract the content from generated ``HttpResources`` using a given objective.
   This generator will also yield in-between results as extracted content.
+* Adds ``Collection.add_batches`` and ``Collection.update_batches`` which are variants on
+  ``Collection.add`` and ``Collection.update`` that will return generators
+  instead of adding/updating everything in-memory.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * Makes ``Document.output_from_content`` pass along content if values are not a JSON path.
 * Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
+* Removes validate parameter from  ``Collection.add`` and ``Collection.update``.
 * Moved ``load_session`` decorator into ``datagrowth.resources.http``.
 * Moved ``get_resource_link`` function into ``datagrowth.resources.http``.
+* Sets default batch size to a smaller 100 elements per batch and ``Collection.update`` now respects this default.
 
 
 v0.18

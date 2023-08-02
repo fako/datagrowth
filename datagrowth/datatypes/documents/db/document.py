@@ -41,7 +41,7 @@ class DocumentBase(DataStorage):
     @staticmethod
     def validate(data, schema):
         """
-        Validates the data against given schema and checks validity of ds_id and ds_spirit.
+        Validates the data against given schema
 
         :param data: The data to validate
         :param schema: The JSON schema to use for validation.
