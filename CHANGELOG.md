@@ -37,6 +37,7 @@ v0.19
 * Moved ``load_session`` decorator into ``datagrowth.resources.http``.
 * Moved ``get_resource_link`` function into ``datagrowth.resources.http``.
 * Sets default batch size to a smaller 100 elements per batch and ``Collection.update`` now respects this default.
+* Removes implicit Indico and Wizenoze API key loading
 
 
 v0.18

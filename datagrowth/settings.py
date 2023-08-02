@@ -62,9 +62,6 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "google_api_key": getattr(settings, 'GOOGLE_API_KEY', ''),
     "google_cx": getattr(settings, 'GOOGLE_CX', ''),
 
-    "indico_api_key": getattr(settings, 'INDICO_API_KEY', ''),
-    "wizenoze_api_key": getattr(settings, 'WIZENOZE_API_KEY', ''),
-
     "rank_processor_batch_size": 1000,
     "rank_processor_result_size": 20,
 
