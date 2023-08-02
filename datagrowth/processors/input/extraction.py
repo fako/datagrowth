@@ -22,7 +22,7 @@ class ExtractProcessor(Processor):
     These values will be called/parsed to extract data from the input data.
     The extracted data gets stored under the keys.
 
-    The special "@" key indicates where extraction should start and its value should result in a list.
+    The special "@" key indicates where extraction should start and its value should result in a list or generator.
     By default objective values get evaluated against elements in the list retrieved from the '@' value.
     Objective items who's keys start with "#" will get evaluated against the entire input.
 
