@@ -34,6 +34,14 @@ class DocumentBase(DataStorage):
 
     @classmethod
     def build(cls, data, collection=None):
+        """
+        Build a new Document without committing to the database.
+        Will perform a clean to correctly set attributes based on input data.
+
+        :param data: The data to set as properties of the new Document
+        :param collection: The collection for the new Document
+        :return:
+        """
         instance = cls(properties=data, collection=collection)
         instance.clean()
         return instance
