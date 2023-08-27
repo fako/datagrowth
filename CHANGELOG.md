@@ -29,6 +29,7 @@ v0.19
   ``Collection.add`` and ``Collection.update`` that will return generators
   instead of adding/updating everything in-memory.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
+* Deprecates ``Collection.init_document`` in favour of ``Collection.build_document`` for consistency in naming.
 * Makes ``Document.output_from_content`` pass along content if values are not a JSON path.
 * Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``

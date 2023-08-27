@@ -3,6 +3,7 @@ from collections import defaultdict
 from collections.abc import Iterator, Iterable
 from math import ceil
 from datetime import datetime
+import warnings
 
 from django.apps import apps
 from django.db import models
@@ -35,12 +36,15 @@ class CollectionBase(DataStorage):
         Annotation = apps.get_model("{}.Annotation".format(self._meta.app_label))
         return Annotation.objects.filter(reference__in=self.documents.values("reference"))
 
-    def init_document(self, data, collection=None):
+    def build_document(self, data, collection=None):
+        if hasattr(self, "init_document"):
+            warnings.warn("Collection.init_document method is deprecated in favour of Collection.build_document",
+                          DeprecationWarning)
+            document = self.init_document(data, collection)
+            document.clean()  # this gets handles by Document.build, but not by the legacy Collection.init_document
+            return document
         Document = self.get_document_model()
-        return Document(
-            collection=collection,
-            properties=data
-        )
+        return Document.build(data, collection=collection)
 
     @classmethod
     def validate(cls, data, schema):
@@ -101,19 +105,17 @@ class CollectionBase(DataStorage):
         if reset:
             self.documents.all().delete()
 
-        def prepare_additions(data):
+        def prepare_additions(initial_data):
 
             prepared = []
-            if isinstance(data, dict):
-                document = self.init_document(data, collection=collection)
-                document.clean()
+            if isinstance(initial_data, dict):
+                document = self.build_document(initial_data, collection=collection)
                 prepared.append(document)
-            elif isinstance(data, Document):
-                data = self.init_document(data.properties, collection=collection)
-                data.clean()
-                prepared.append(data)
+            elif isinstance(initial_data, Document):
+                document = self.build_document(initial_data.properties, collection=collection)
+                prepared.append(document)
             else:  # type is list
-                for instance in data:
+                for instance in initial_data:
                     prepared += prepare_additions(instance)
             return prepared
 
