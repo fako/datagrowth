@@ -28,6 +28,7 @@ v0.19
 * Adds ``Collection.add_batches`` and ``Collection.update_batches`` which are variants on
   ``Collection.add`` and ``Collection.update`` that will return generators
   instead of adding/updating everything in-memory.
+* Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * Deprecates ``Collection.init_document`` in favour of ``Collection.build_document`` for consistency in naming.
 * Makes ``Document.output_from_content`` pass along content if values are not a JSON path.

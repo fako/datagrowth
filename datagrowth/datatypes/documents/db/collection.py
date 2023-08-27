@@ -46,6 +46,15 @@ class CollectionBase(DataStorage):
         Document = self.get_document_model()
         return Document.build(data, collection=collection)
 
+    @property
+    def document_update_fields(self):
+        """
+        Specified which fields on Document are required to update in bulk_update operations
+
+        :return list: field names
+        """
+        return ["properties", "identity", "reference", "modified_at"]
+
     @classmethod
     def validate(cls, data, schema):
         """
@@ -188,11 +197,7 @@ class CollectionBase(DataStorage):
                     target.update(update_value, commit=False)
                 updated.add(target.properties[by_property])
                 updates.append(target)
-            Document.objects.bulk_update(
-                updates,
-                ["properties", "identity", "reference", "modified_at"],
-                batch_size=batch_size
-            )
+            Document.objects.bulk_update(updates, self.document_update_fields, batch_size=batch_size)
             # After all updates we add all data that hasn't been used in any update operation
             additions = []
             for lookup_value, sources in sources_by_lookup.items():
