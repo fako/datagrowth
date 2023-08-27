@@ -37,7 +37,7 @@ when giving another ``Document`` as data argument.
 * Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
   before setting ``ConfigurationProperty`` upon the class.
-* Removes validate parameter from  ``Collection.add`` and ``Collection.update``.
+* Removes validate parameter from  ``Collection.add``, ``Collection.update`` and ``Document.update``.
 * Moved ``load_session`` decorator into ``datagrowth.resources.http``.
 * Moved ``get_resource_link`` function into ``datagrowth.resources.http``.
 * Sets default batch size to a smaller 100 elements per batch and ``Collection.update`` now respects this default.

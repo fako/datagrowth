@@ -74,13 +74,12 @@ class DocumentBase(DataStorage):
             django_exception.schema = exc.schema
             raise django_exception
 
-    def update(self, data, commit=True, validate=True):
+    def update(self, data, commit=True):
         """
         Update the properties with new data.
 
         :param data: The data to use for the update
         :param commit: Whether to commit new values to the database or not
-        :param validate: (deprecated) used to validate data using JSON schema
         :return: Updated content
         """
         content = data.properties if isinstance(data, DocumentBase) else data
