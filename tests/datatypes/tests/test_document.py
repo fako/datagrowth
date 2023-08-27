@@ -65,15 +65,15 @@ class TestDocument(TestCase):
         results = self.instance.output_from_content(self.instance.content, "$.value")
         self.assertEqual(results, self.value_outcome)
         results = self.instance.output_from_content(self.instance.content, "$.value", "$.value")
-        self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
+        self.assertEqual(results, [self.value_outcome, self.value_outcome])
         results = self.instance.output_from_content(self.instance.content, ["$.value"])
         self.assertEqual(results, [self.value_outcome])
         results = self.instance.output_from_content(self.instance.content, ["$.value", "$.value"])
-        self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
+        self.assertEqual(results, [self.value_outcome, self.value_outcome])
         results = self.instance.output_from_content(self.instance.content, {"value": "$.value"})
         self.assertEqual(results, self.dict_outcome)
         results = self.instance.output_from_content(self.instance.content, [{"value": "$.value"}, {"value": "$.value"}])
-        self.assertEqual(list(results), [self.dict_outcome, self.dict_outcome])
+        self.assertEqual(results, [self.dict_outcome, self.dict_outcome])
 
     def test_output_from_content_replacement_character(self):
         results = self.instance.output_from_content(self.instance.content, "#._id", replacement_character="#")
@@ -84,14 +84,14 @@ class TestDocument(TestCase):
             self.instance.content, "#.value", "#.value",
             replacement_character="#"
         )
-        # self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
+        self.assertEqual(results, [self.value_outcome, self.value_outcome])
         results = self.instance.output_from_content(self.instance.content, ["#.value"], replacement_character="#")
         self.assertEqual(results, [self.value_outcome])
         results = self.instance.output_from_content(
             self.instance.content, ["#.value", "#.value"],
             replacement_character="#"
         )
-        self.assertEqual(list(results), [self.value_outcome, self.value_outcome])
+        self.assertEqual(results, [self.value_outcome, self.value_outcome])
         results = self.instance.output_from_content(
             self.instance.content, {"value": "#.value"},
             replacement_character="#"
@@ -101,21 +101,21 @@ class TestDocument(TestCase):
             self.instance.content, [{"value": "#.value"}, {"value": "#.value"}],
             replacement_character="#"
         )
-        # self.assertEqual(list(results), [self.dict_outcome, self.dict_outcome])
+        self.assertEqual(results, [self.dict_outcome, self.dict_outcome])
 
     def test_output_from_content_no_replacement(self):
         results = self.instance.output_from_content(self.instance.content, "value")
         self.assertEqual(results, "value")
         results = self.instance.output_from_content(self.instance.content, "value", 1)
-        self.assertEqual(list(results), ["value", 1])
+        self.assertEqual(results, ["value", 1])
         results = self.instance.output_from_content(self.instance.content, ["value"])
         self.assertEqual(results, ["value"])
         results = self.instance.output_from_content(self.instance.content, ["value", 1])
-        self.assertEqual(list(results), ["value", 1])
+        self.assertEqual(results, ["value", 1])
         results = self.instance.output_from_content(self.instance.content, {"value": "value"})
         self.assertEqual(results, {"value": "value"})
         results = self.instance.output_from_content(self.instance.content, [{"value": "value"}, {"value": 1}])
-        self.assertEqual(list(results), [{"value": "value"}, {"value": 1}])
+        self.assertEqual(results, [{"value": "value"}, {"value": 1}])
 
     def test_output_from_content_empty_values(self):
         results = self.instance.output_from_content(self.instance.content, [])

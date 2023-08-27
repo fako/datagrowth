@@ -113,10 +113,11 @@ class DocumentBase(DataStorage):
         rpl = replacement_character
         # When dealing with multiple args we'll handle it one by one using map function
         if len(args) > 1:
-            return map(
+            mapping = map(
                 lambda cnt, arg: DocumentBase.output_from_content(cnt, arg, replacement_character=rpl),
                 repeat(content), args
             )
+            return list(mapping)
         # From here we'll check different types of the input and return values accordingly
         frm = args[0]
         if not frm:
