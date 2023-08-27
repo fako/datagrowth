@@ -83,7 +83,7 @@ class DocumentBase(DataStorage):
         :param validate: (deprecated) used to validate data using JSON schema
         :return: Updated content
         """
-        content = data.content if isinstance(data, DocumentBase) else data
+        content = data.properties if isinstance(data, DocumentBase) else data
         self.properties.update(content)
         self.clean()
         if commit:

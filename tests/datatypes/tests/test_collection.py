@@ -174,11 +174,8 @@ class TestCollection(TestCase):
         for doc in self.instance.documents.all():
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
-            elif doc.properties["value"] == "1":
+            elif doc.properties["value"] in ["1", "2"]:
                 expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
-                self.assertEqual(doc.modified_at.date(), today)
-            elif doc.properties["value"] == "2":
-                expected_keys = tuple(sorted(["_id", "value", "nested", "context", "word", "country", "language"]))
                 self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
                 expected_keys = tuple(sorted(["word", "country", "value", "language"]))
@@ -211,11 +208,8 @@ class TestCollection(TestCase):
         for doc in self.instance.documents.all():
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
-            elif doc.properties["value"] == "1":
+            elif doc.properties["value"] in ["1", "2"]:
                 expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
-                self.assertEqual(doc.modified_at.date(), today)
-            elif doc.properties["value"] == "2":
-                expected_keys = tuple(sorted(["_id", "value", "nested", "context", "word", "country", "language"]))
                 self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
                 expected_keys = tuple(sorted(["word", "country", "value", "language"]))
@@ -243,11 +237,8 @@ class TestCollection(TestCase):
         for doc in self.instance.documents.all():
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
-            elif doc.properties["value"] == "1":
+            elif doc.properties["value"] in ["1", "2"]:
                 expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
-                self.assertEqual(doc.modified_at.date(), today)
-            elif doc.properties["value"] == "2":
-                expected_keys = tuple(sorted(["_id", "value", "nested", "context", "word", "country", "language"]))
                 self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
                 expected_keys = tuple(sorted(["word", "country", "value", "language"]))

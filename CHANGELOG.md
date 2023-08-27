@@ -30,6 +30,8 @@ v0.19
   instead of adding/updating everything in-memory.
 * Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
+* ``Document.update`` will now use properties as update data instead of content
+when giving another ``Document`` as data argument.
 * Deprecates ``Collection.init_document`` in favour of ``Collection.build_document`` for consistency in naming.
 * Makes ``Document.output_from_content`` pass along content if values are not a JSON path.
 * Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
