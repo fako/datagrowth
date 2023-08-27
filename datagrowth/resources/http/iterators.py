@@ -7,7 +7,7 @@ from datagrowth.exceptions import DGResourceException
 from datagrowth.resources.http import load_session
 
 
-log = logging.getLogger("datascope")
+log = logging.getLogger("datagrowth")
 
 
 def get_resource_link(config, session=None):

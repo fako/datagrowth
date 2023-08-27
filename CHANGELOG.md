@@ -40,6 +40,7 @@ v0.19
 * Moved ``get_resource_link`` function into ``datagrowth.resources.http``.
 * Sets default batch size to a smaller 100 elements per batch and ``Collection.update`` now respects this default.
 * Removes implicit Indico and Wizenoze API key loading
+* Corrects log names to "datagrowth" instead of "datascope"
 
 
 v0.18

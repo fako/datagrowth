@@ -7,7 +7,7 @@ from datagrowth.configuration import load_config
 from datagrowth.exceptions import DGResourceException
 
 
-log = logging.getLogger("datascope")
+log = logging.getLogger("datagrowth")
 
 
 @app.task(name="shell_resource.run")

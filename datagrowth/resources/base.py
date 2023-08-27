@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from datagrowth import configuration
 
 
-log = logging.getLogger("datascope")
+log = logging.getLogger("datagrowth")
 
 
 class Resource(models.Model):

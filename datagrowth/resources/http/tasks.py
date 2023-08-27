@@ -8,7 +8,7 @@ from datagrowth.resources.http import load_session
 from datagrowth.resources.http import send_iterator
 
 
-log = logging.getLogger("datascope")
+log = logging.getLogger("datagrowth")
 
 
 def get_resource_link(config, session=None):
