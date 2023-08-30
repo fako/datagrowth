@@ -184,7 +184,7 @@ class CollectionBase(DataStorage):
             # any update's "by_property" property value and then updating these source objects.
             # One update object can potentially target multiple sources
             # if multiple objects with the same value for the by_property property exist.
-            updated = set()
+            exists = set()
             updates = []
             sources_by_lookup = defaultdict(list)
             for update in update_data:
@@ -193,15 +193,19 @@ class CollectionBase(DataStorage):
             for lookup_value in sources_by_lookup.keys():
                 target_filters |= Q(**{f"properties__{by_property}": lookup_value})
             for target in collection.documents.filter(target_filters):
+                has_update = False
                 for update_value in sources_by_lookup[target.properties[by_property]]:
-                    target.update(update_value, commit=False)
-                updated.add(target.properties[by_property])
-                updates.append(target)
+                    if target != update_value:  # this will be False unless a __eq__ override decides otherwise
+                        has_update = True
+                        target.update(update_value, commit=False)
+                exists.add(target.properties[by_property])
+                if has_update:
+                    updates.append(target)
             Document.objects.bulk_update(updates, self.document_update_fields, batch_size=batch_size)
             # After all updates we add all data that hasn't been used in any update operation
             additions = []
             for lookup_value, sources in sources_by_lookup.items():
-                if lookup_value not in updated:
+                if lookup_value not in exists:
                     additions += sources
             if len(additions):
                 additions = self.add(additions, collection=collection, modified_at=modified_at)

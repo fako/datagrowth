@@ -28,6 +28,8 @@ v0.19
 * Adds ``Collection.add_batches`` and ``Collection.update_batches`` which are variants on
   ``Collection.add`` and ``Collection.update`` that will return generators
   instead of adding/updating everything in-memory.
+* The ``Collection.update`` and ``Collection.update_batches`` will check for equality between ``Documents`` before updating.
+This makes it possible to skip updates in particular cases by overriding ``Document.__eq__``.
 * Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * ``Document.update`` will now use properties as update data instead of content
