@@ -45,8 +45,9 @@ The convenience of lists is more important here than memory footprint which will
 * Moved ``load_session`` decorator into ``datagrowth.resources.http``.
 * Moved ``get_resource_link`` function into ``datagrowth.resources.http``.
 * Sets default batch size to a smaller 100 elements per batch and ``Collection.update`` now respects this default.
-* Removes implicit Indico and Wizenoze API key loading
-* Corrects log names to "datagrowth" instead of "datascope"
+* Removes implicit Indico and Wizenoze API key loading.
+* Corrects log names to "datagrowth" instead of "datascope".
+* Adds a ``copy_dataset`` command that will copy a dataset by signature.
 
 
 v0.18
