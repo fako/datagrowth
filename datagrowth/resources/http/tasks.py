@@ -4,8 +4,7 @@ from django.apps import apps
 from celery import current_app as app
 
 from datagrowth.configuration import ConfigurationType, load_config
-from datagrowth.resources.http import load_session
-from datagrowth.resources.http import send_iterator
+from datagrowth.resources.http import load_session, send_iterator
 
 
 log = logging.getLogger("datagrowth")

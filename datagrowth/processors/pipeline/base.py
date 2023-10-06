@@ -1,9 +1,10 @@
 from django.apps import apps
 from celery import current_app as app, chord
+from celery.exceptions import SoftTimeLimitExceeded
 
 from datagrowth.configuration import load_config
-from datagrowth.processors import Processor
-from datagrowth.utils import ibatch
+from datagrowth.processors.base import Processor
+from datagrowth.utils import ibatch, DatabaseConnectionResetTask
 
 
 def load_pipeline_models(app_label, models):
@@ -19,17 +20,29 @@ def load_pipeline_models(app_label, models):
     return Batch, Document, ProcessResult
 
 
-@app.task(name="pipeline_full_merge")  # TODO: namespacing to pipeline?
+@app.task(
+    name="growth.full_merge",
+    base=DatabaseConnectionResetTask,
+    soft_time_limit=60*30,
+    autoretry_for=(SoftTimeLimitExceeded,),
+    retry_kwargs={"max_retries": 3}
+)
 @load_config()
 def full_merge(config, batch_ids, processor_name):
     app_label = config.pipeline_app_label
     models = config.pipeline_models
     Batch, Document, ProcessResult = load_pipeline_models(app_label, models)
     processor = Processor.create_processor(processor_name, config)
-    return processor.full_merge(Document.objects.filter(batch__id__in=batch_ids))
+    return processor.full_merge(Document.objects.filter(processresult__batch_id__in=batch_ids))
 
 
-@app.task(name="pipeline_process_and_merge")  # TODO: namespacing to pipeline?
+@app.task(
+    name="growth.process_and_merge",
+    base=DatabaseConnectionResetTask,
+    soft_time_limit=60*30,
+    autoretry_for=(SoftTimeLimitExceeded,),
+    retry_kwargs={"max_retries": 3}
+)
 @load_config()
 def process_and_merge(config, batch_id):
     app_label = config.pipeline_app_label
@@ -45,7 +58,10 @@ def process_and_merge(config, batch_id):
 class PipelineProcessor(Processor):
 
     Document = None
+    Batch = None
     ProcessResult = None
+
+    result_type = None  # ContentType of the model that holds result data for growth
 
     def filter_documents(self, queryset):
         return queryset
@@ -57,9 +73,11 @@ class PipelineProcessor(Processor):
         pass
 
     def full_merge(self, queryset):
-        pass
+        self.ProcessResult.objects.filter(document__in=queryset).delete()
 
     def _dispatch_tasks(self, tasks, finish, asynchronous=True):
+        if not tasks:
+            return
         if asynchronous:
             return chord(tasks)(finish)
         batch_ids = [task() for task in tasks]
@@ -78,7 +96,7 @@ class PipelineProcessor(Processor):
         # Allow derived classes to filter the target Documents
         queryset = self.filter_documents(queryset)
         # Only target Documents that have no ProcessResult associated
-        queryset = queryset.filter(processresult__isnull=True)
+        queryset = queryset.exclude(processresult__result_type=self.result_type)
         # Create batches of documents with no processing results
         batches = []
         for document_batch in ibatch(queryset, batch_size=self.config.batch_size):

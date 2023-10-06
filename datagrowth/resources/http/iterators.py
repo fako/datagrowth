@@ -4,7 +4,7 @@ from django.apps import apps
 
 from datagrowth.configuration import ConfigurationType, load_config
 from datagrowth.exceptions import DGResourceException
-from datagrowth.resources.http import load_session
+from datagrowth.resources.http.decorators import load_session
 
 
 log = logging.getLogger("datagrowth")
