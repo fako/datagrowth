@@ -1,4 +1,4 @@
 from .base import Processor, QuerySetProcessor, ProcessorFactory
+from .growth import GrowthProcessor
 from .input import ExtractProcessor
-from .pipeline.base import PipelineProcessor
-from .pipeline.http import HttpPipelineProcessor
+from .resources.growth import HttpGrowthProcessor

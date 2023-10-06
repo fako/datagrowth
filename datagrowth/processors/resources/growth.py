@@ -8,10 +8,10 @@ from datagrowth.configuration import create_config
 from datagrowth.resources.http.tasks import send
 from datagrowth.resources.shell.tasks import run
 from datagrowth.processors import Processor
-from datagrowth.processors.pipeline.base import PipelineProcessor
+from datagrowth.processors.growth import GrowthProcessor
 
 
-class ResourcePipelineProcessor(PipelineProcessor):
+class ResourceGrowthProcessor(GrowthProcessor):
 
     resource_type = None
 
@@ -122,7 +122,7 @@ class ResourcePipelineProcessor(PipelineProcessor):
                 break
 
 
-class HttpPipelineProcessor(ResourcePipelineProcessor):
+class HttpGrowthProcessor(ResourceGrowthProcessor):
 
     resource_type = "http_resource"
 
@@ -133,7 +133,7 @@ class HttpPipelineProcessor(ResourcePipelineProcessor):
         return resource.status == 204
 
 
-class ShellPipelineProcessor(ResourcePipelineProcessor):
+class ShellGrowthProcessor(ResourceGrowthProcessor):
 
     resource_type = "shell_resource"
 

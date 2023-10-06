@@ -55,7 +55,7 @@ def process_and_merge(config, batch_id):
     return batch.id
 
 
-class PipelineProcessor(Processor):
+class GrowthProcessor(Processor):
 
     Document = None
     Batch = None
