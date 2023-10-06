@@ -1,5 +1,5 @@
-from datagrowth.processors import PipelineProcessor
+from datagrowth.processors import GrowthProcessor
 
 
-class DataProcessor(PipelineProcessor):
+class DataProcessor(GrowthProcessor):
     pass
