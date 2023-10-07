@@ -1,4 +1,4 @@
 from .base import TestProcessorBase, TestDatagrowthProcessorDjangoConfig
 from .extraction import TestExtractProcessor
 from .iterators import TestContentIteratorWithSendIterator, TestContentIteratorWithSendSerieIterator
-from .pipeline.http import TestHttpGrowthProcessor
+from .growth.http import TestHttpGrowthProcessor

@@ -15,11 +15,6 @@ class ResourceGrowthProcessor(GrowthProcessor):
 
     resource_type = None
 
-    def __init__(self, config):
-        super().__init__(config)
-        resource_app_label, resource_model = self.config.retrieve_data["resource"].split(".")
-        self.result_type = ContentType.objects.get_by_natural_key(resource_app_label, resource_model)
-
     def resource_is_empty(self, resource):
         return False
 
@@ -27,12 +22,12 @@ class ResourceGrowthProcessor(GrowthProcessor):
         return [], []
 
     def filter_documents(self, queryset):
-        depends_on = self.config.pipeline_depends_on
-        pipeline_phase = self.config.pipeline_phase
-        filters = Q(**{f"pipeline__{pipeline_phase}__success": False})
-        filters |= Q(**{f"pipeline__{pipeline_phase}__isnull": True})
+        depends_on = self.config.depends_on
+        growth_phase = self.config.growth_phase
+        filters = Q(**{f"task_results__{growth_phase}__success": False})
+        filters |= Q(**{f"task_results__{growth_phase}__isnull": True})
         if depends_on:
-            filters |= Q(**{f"pipeline__{depends_on}__success": True})
+            filters |= Q(**{f"task_results__{depends_on}__success": True})
         return queryset.filter(filters)
 
     def process_batch(self, batch):
@@ -41,8 +36,6 @@ class ResourceGrowthProcessor(GrowthProcessor):
         app_label, resource_model = config.resource.split(".")
         resource_type = ContentType.objects.get_by_natural_key(app_label, resource_model)
 
-        updates = []
-        creates = []
         for process_result in batch.processresult_set.all():
             args, kwargs = process_result.document.output(config.args, config.kwargs)
             successes, fails = self.dispatch_resource(config, *args, **kwargs)
@@ -52,22 +45,22 @@ class ResourceGrowthProcessor(GrowthProcessor):
             result_id = results.pop(0)
             process_result.result_type = resource_type
             process_result.result_id = result_id
-            updates.append(process_result)
-            for result_id in results:
-                creates.append(
-                    self.ProcessResult(document=process_result.document, batch=batch,
-                                       result_id=result_id, result_type=resource_type)
-                )
-            self.ProcessResult.objects.bulk_create(creates)
-            self.ProcessResult.objects.bulk_update(updates, ["result_type", "result_id"])
+            process_result.save()
+            creates = [
+                self.ProcessResult(document=process_result.document, batch=batch, result_id=result_id,
+                                   result_type=resource_type)
+                for result_id in results
+            ]
+            if creates:
+                self.ProcessResult.objects.bulk_create(creates)
 
     def merge_batch(self, batch):
 
-        pipeline_phase = self.config.pipeline_phase
+        growth_phase = self.config.growth_phase
         config = create_config("extract_processor", self.config.contribute_data)
-        contribution_processor = config.extractor
+        contribution_processor = self.config.extractor
         contribution_field = "properties"
-        contribution_property = config.to_property
+        contribution_property = self.config.to_property
         if contribution_property and "/" in contribution_property:
             contribution_field, contribution_property = contribution_property.split("/")
             contribution_property = contribution_property or None
@@ -78,8 +71,8 @@ class ResourceGrowthProcessor(GrowthProcessor):
             documents = []
             for process_result in batch.processresult_set.filter(result_id__isnull=False):
                 result = process_result.result
-                # Write results to the pipeline
-                process_result.document.pipeline[pipeline_phase] = {
+                # Write results to the task_results
+                process_result.document.task_results[growth_phase] = {
                     "success": result.success,
                     "resource": f"{result._meta.app_label}.{result._meta.model_name}",
                     "id": result.id
@@ -113,11 +106,11 @@ class ResourceGrowthProcessor(GrowthProcessor):
                     )
                 except transaction.DatabaseError:
                     attempts += 1
-                    warning = f"Failed to acquire lock to merge pipeline batch (attempt={attempts})"
+                    warning = f"Failed to acquire lock to merge growth batch (attempt={attempts})"
                     # capture_message(warning, level="warning")
                     sleep(5)
                     continue
-                fields = ["pipeline", contribution_field] + config.apply_resource_to
+                fields = ["task_results", contribution_field] + config.apply_resource_to
                 self.Document.objects.bulk_update(documents, fields)
                 break
 

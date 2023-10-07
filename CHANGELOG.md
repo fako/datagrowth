@@ -8,6 +8,15 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.20
+-----
+
+* ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
+  to ``global_datatypes_app_label`` and ``global_datatype_models``.
+* The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
+  part of the ``growth_resource`` namespace.
+
+
 v0.19
 -----
 
