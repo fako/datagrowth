@@ -1,3 +1,5 @@
+import logging
+
 from django.test import TestCase
 
 from datagrowth.configuration import register_defaults
@@ -14,13 +16,15 @@ class TestHttpGrowthProcessor(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         register_defaults("global", {
-            "cache_only": True
+            "cache_only": True,
+            "resource_exception_log_level": logging.WARNING
         })
 
     @classmethod
     def tearDownClass(cls):
         register_defaults("global", {
-            "cache_only": False
+            "cache_only": False,
+            "resource_exception_log_level": logging.DEBUG
         })
         super().tearDownClass()
 
