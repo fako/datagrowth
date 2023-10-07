@@ -1,3 +1,4 @@
+import logging
 import os
 
 from django.conf import settings
@@ -37,13 +38,30 @@ DATAGROWTH_KALDI_NL_BASE_PATH = getattr(settings, "DATAGROWTH_KALDI_NL_BASE_PATH
 
 
 DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGURATION", {
+    # Global configurations that control multiple classes
     "global_asynchronous": True,  # by default offload to celery where possible
-    "global_async": True,  # legacy "asynchronous" configuration for Python <= 3.6
+    "global_sample_size": 0,
+    "global_datatypes_app_label": None,
+    "global_datatype_models": {
+        "document": "Document",
+        "collection": "Collection",
+        "dataset_version": "DatasetVersion",
+        "process_result": "ProcessResult",
+        "batch": "Batch"
+    },
+    # Legacy global pipeline configuration, use datatype configurations instead
+    "global_pipeline_app_label": None,
+    "global_pipeline_models": {
+        "document": "Document",
+        "process_result": "ProcessResult",
+        "batch": "Batch"
+    },
+    # Resources specific "global" configurations
     "global_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
     "global_purge_after": {},
     "global_purge_immediately": False,  # by default keep resources around
-    "global_sample_size": 0,
     "global_cache_only": False,
+    "global_resource_exception_log_level": logging.DEBUG,
 
     "http_resource_continuation_limit": 1,
     "http_resource_interval_duration": 0,  # NB: milliseconds!

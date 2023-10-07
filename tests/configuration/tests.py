@@ -263,7 +263,6 @@ class TestConfigurationType(TestCase):
         self.assertEqual(self.config.get("test5", None), None)
         # Test fallbacks of legacy async configurations
         self.assertEqual(self.empty.get("asynchronous", None), True)  # global default should exist
-        self.assertEqual(self.empty.get("async", None), True)
         # Namespace configuration (with a list default)
         self.assertNotIn("namespace_configuration", self.config.__dict__)
         self.assertEqual(self.config.get("namespace_configuration", None), "namespace configuration")

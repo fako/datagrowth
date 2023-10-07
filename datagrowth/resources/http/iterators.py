@@ -46,7 +46,7 @@ def send_iterator(config, *args, **kwargs):
             link = link.send(method, *args, **kwargs)
             link.close()
         except DGResourceException as exc:
-            log.debug(exc)
+            log.log(config.resource_exception_log_level, exc)
             link = exc.resource
             link.close()
         # Prepare next request

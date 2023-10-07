@@ -24,7 +24,7 @@ def run(config, *args, **kwargs):
         cmd.close()
         success.append(cmd.id)
     except DGResourceException as exc:
-        log.debug(exc)
+        log.log(config.resource_exception_log_level, exc)
         cmd = exc.resource
         cmd.close()
         errors.append(cmd.id)
