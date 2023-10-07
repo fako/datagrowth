@@ -51,7 +51,7 @@ class TestDocument(TestCase):
                 app_label = "testing_apps"
         document_test = DocumentTest()
         document_test.id = 1
-        with patch("datagrowth.datatypes.documents.db.base.reverse") as reverse_mock:
+        with patch("datagrowth.datatypes.storage.reverse") as reverse_mock:
             url = document_test.url
             reverse_mock.assert_called_once_with("v1:testing-apps:document-test-content", args=[1])
 

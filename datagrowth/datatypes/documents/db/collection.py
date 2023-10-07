@@ -13,10 +13,12 @@ from django.utils.timezone import make_aware
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.utils import ibatch, reach, is_hashable
-from .base import DataStorage
+from datagrowth.datatypes.storage import DataStorage
 
 
 class CollectionBase(DataStorage):
+
+    dataset_version = models.ForeignKey("DatasetVersion", null=True, blank=True, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255, null=True, blank=True)
     identifier = models.CharField(max_length=255, null=True, blank=True)

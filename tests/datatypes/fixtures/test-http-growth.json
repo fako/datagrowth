@@ -12,6 +12,7 @@
 {
     "fields": {
         "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
         "is_current": true,
         "version": "0.0.1",
         "state": "Growing",

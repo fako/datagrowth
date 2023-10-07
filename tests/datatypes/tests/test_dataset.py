@@ -2,7 +2,6 @@ from django.test import TestCase
 
 from unittest.mock import Mock, patch
 
-from datagrowth.datatypes.documents.db.base import DataStorage
 from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
 
 from datatypes.models import Dataset, DatasetMock, DatasetVersion, Collection, Document
