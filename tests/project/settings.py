@@ -174,7 +174,7 @@ LOGGING = {
     'loggers': {
         'datagrowth': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'propagate': True
         },
     },
