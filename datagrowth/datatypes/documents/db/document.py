@@ -8,21 +8,19 @@ from jsonschema.exceptions import ValidationError as SchemaValidationError
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.timezone import make_aware
-try:
-    from django.db.models import JSONField
-except ImportError:
-    from django.contrib.postgres.fields import JSONField
-
+from django.db.models import JSONField
 
 from datagrowth.utils import reach
-from .base import DataStorage
+from datagrowth.datatypes.storage import DataStorage
 
 
 class DocumentBase(DataStorage):
 
     properties = JSONField(default=dict)
 
+    dataset_version = models.ForeignKey("DatasetVersion", null=True, blank=True, on_delete=models.CASCADE)
     collection = models.ForeignKey("Collection", blank=True, null=True, on_delete=models.CASCADE)
+
     identity = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     reference = models.CharField(max_length=255, blank=True, null=True, db_index=True)
 

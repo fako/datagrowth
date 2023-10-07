@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
+from datagrowth.datatypes.storage import DataStorage
 from datagrowth.datatypes.datasets.constants import GrowthState
 
 
@@ -11,7 +12,7 @@ class DatasetVersionManager(models.Manager):
         return super().filter(is_current=True).last()
 
 
-class DatasetVersionBase(models.Model):
+class DatasetVersionBase(DataStorage):
 
     objects = DatasetVersionManager()
 
@@ -20,7 +21,6 @@ class DatasetVersionBase(models.Model):
     dataset_id = models.PositiveIntegerField()
 
     is_current = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
     version = models.CharField(max_length=50, null=False, blank=True)
     state = models.CharField(max_length=50, choices=[(state.value, state.value,) for state in GrowthState],
                              default=GrowthState.PENDING)

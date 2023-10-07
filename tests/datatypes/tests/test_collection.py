@@ -62,7 +62,7 @@ class TestCollection(TestCase):
                 app_label = "testing_apps"
         collection_test = CollectionTest()
         collection_test.id = 1
-        with patch("datagrowth.datatypes.documents.db.base.reverse") as reverse_mock:
+        with patch("datagrowth.datatypes.storage.reverse") as reverse_mock:
             url = collection_test.url
             reverse_mock.assert_called_once_with("v1:testing-apps:collection-test-content", args=[1])
 

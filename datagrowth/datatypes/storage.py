@@ -3,15 +3,21 @@ from copy import copy
 from django.db import models
 from django.urls import reverse
 from django.utils.text import camel_case_to_spaces
+from django.db.models import JSONField
+from django.utils.timezone import now
+
 from datagrowth.settings import DATAGROWTH_API_VERSION
 
 
 class DataStorage(models.Model):
 
-    dataset_version = models.ForeignKey("DatasetVersion", null=True, blank=True, on_delete=models.CASCADE)
+    tasks = JSONField(default=dict, blank=True)
+    task_results = JSONField(default=dict, blank=True)
+    derivatives = models.JSONField(default=dict, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    pending_at = models.DateTimeField(default=now, null=True, blank=True)
 
     @staticmethod
     def validate(data, schema):
