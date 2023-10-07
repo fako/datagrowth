@@ -15,6 +15,11 @@ class ResourceGrowthProcessor(GrowthProcessor):
 
     resource_type = None
 
+    def __init__(self, config):
+        super().__init__(config)
+        resource_app_label, resource_model = self.config.retrieve_data["resource"].split(".")
+        self.result_type = ContentType.objects.get_by_natural_key(resource_app_label, resource_model)
+
     def resource_is_empty(self, resource):
         return False
 
@@ -33,8 +38,6 @@ class ResourceGrowthProcessor(GrowthProcessor):
     def process_batch(self, batch):
 
         config = create_config(self.resource_type, self.config.retrieve_data)
-        app_label, resource_model = config.resource.split(".")
-        resource_type = ContentType.objects.get_by_natural_key(app_label, resource_model)
 
         for process_result in batch.processresult_set.all():
             args, kwargs = process_result.document.output(config.args, config.kwargs)
@@ -43,24 +46,23 @@ class ResourceGrowthProcessor(GrowthProcessor):
             if not len(results):
                 continue
             result_id = results.pop(0)
-            process_result.result_type = resource_type
+            process_result.result_type = self.result_type
             process_result.result_id = result_id
             process_result.save()
             creates = [
                 self.ProcessResult(document=process_result.document, batch=batch, result_id=result_id,
-                                   result_type=resource_type)
+                                   result_type=self.result_type)
                 for result_id in results
             ]
             if creates:
                 self.ProcessResult.objects.bulk_create(creates)
 
     def merge_batch(self, batch):
-
         growth_phase = self.config.growth_phase
         config = create_config("extract_processor", self.config.contribute_data)
         contribution_processor = self.config.extractor
-        contribution_field = "properties"
-        contribution_property = self.config.to_property
+        contribution_field = "derivatives"
+        contribution_property = self.config.to_property or growth_phase
         if contribution_property and "/" in contribution_property:
             contribution_field, contribution_property = contribution_property.split("/")
             contribution_property = contribution_property or None
@@ -78,7 +80,7 @@ class ResourceGrowthProcessor(GrowthProcessor):
                     "id": result.id
                 }
                 # Possibly "apply" the Resource to the Document to allow custom updates
-                if config.apply_resource_to:
+                if self.config.apply_resource_to:
                     process_result.document.apply_resource(process_result.result)
 
                 documents.append(process_result.document)
@@ -110,7 +112,7 @@ class ResourceGrowthProcessor(GrowthProcessor):
                     # capture_message(warning, level="warning")
                     sleep(5)
                     continue
-                fields = ["task_results", contribution_field] + config.apply_resource_to
+                fields = ["task_results", contribution_field] + self.config.apply_resource_to
                 self.Document.objects.bulk_update(documents, fields)
                 break
 

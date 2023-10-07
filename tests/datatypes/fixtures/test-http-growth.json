@@ -54,7 +54,7 @@
 },
 {
     "fields": {
-        "properties": {"context":"nested value","value":"nested value 0"},
+        "properties": {"context":"nested value","value":"nested value 0","resource":"extra0"},
         "collection": 3,
         "modified_at": "2015-06-02T10:01:47.572Z",
         "created_at": "2015-06-02T10:00:20.247Z"
@@ -64,7 +64,7 @@
 },
 {
     "fields": {
-        "properties": {"context":"nested value","value":"nested value 1"},
+        "properties": {"context":"nested value","value":"nested value 1","resource":"extra1"},
         "collection": 3,
         "modified_at": "2015-06-02T10:01:47.572Z",
         "created_at": "2015-06-02T10:00:20.247Z"
@@ -74,7 +74,7 @@
 },
 {
     "fields": {
-        "properties": {"context":"nested value","value":"nested value 2"},
+        "properties": {"context":"nested value","value":"nested value 2","resource":"extra2"},
         "collection": 3,
         "modified_at": "2015-06-02T10:01:47.572Z",
         "created_at": "2015-06-02T10:00:20.247Z"
@@ -170,7 +170,7 @@
         "modified_at": "2015-05-12T18:45:22.105Z",
         "created_at": "2015-05-12T18:45:22.105Z",
         "request": {"url":"http://localhost:8000/en/?param=1&q=extra0","args":["en","extra0"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
-        "uri": "localhost:8000/en/?param=1&q=extra0",
+        "uri": "localhost:8000/en/?meta=extra0&param=1&q=extra0",
         "data_hash": "",
         "config": "{}",
         "purge_at": null
@@ -186,7 +186,7 @@
         "modified_at": "2015-05-12T18:45:22.105Z",
         "created_at": "2015-05-12T18:45:22.105Z",
         "request": {"url":"http://localhost:8000/en/?param=1&q=extra1","args":["en","extra1"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
-        "uri": "localhost:8000/en/?param=1&q=extra1",
+        "uri": "localhost:8000/en/?meta=extra1&param=1&q=extra1",
         "data_hash": "",
         "config": "{}",
         "purge_at": null
@@ -202,7 +202,7 @@
         "modified_at": "2015-05-12T18:45:22.105Z",
         "created_at": "2015-05-12T18:45:22.105Z",
         "request": {"url":"http://localhost:8000/en/?param=1&q=extra2","args":["en","extra2"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
-        "uri": "localhost:8000/en/?param=1&q=extra2",
+        "uri": "localhost:8000/en/?meta=extra2&param=1&q=extra2",
         "data_hash": "",
         "config": "{}",
         "purge_at": null
