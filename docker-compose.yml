@@ -14,7 +14,7 @@ services:
       - ./tests/project/databases/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - postgres-datagrowth:/var/lib/postgresql/data/pgdata
     ports:
-      - 5432:5432
+      - "5432:5432"
 
   mysql:
     image: mysql:8.0
@@ -28,7 +28,7 @@ services:
       - ./tests/project/databases/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mysql-datagrowth:/var/lib/mysql
     ports:
-      - 3306:3306
+      - "3306:3306"
 
 volumes:
   postgres-datagrowth:
