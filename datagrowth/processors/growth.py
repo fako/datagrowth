@@ -75,7 +75,8 @@ class GrowthProcessor(Processor):
         pass
 
     def full_merge(self, queryset):
-        self.ProcessResult.objects.filter(document__in=queryset).delete()
+        document_ids = list(queryset.values_list("id", flat=True))
+        self.ProcessResult.objects.filter(document__in=document_ids).delete()
 
     def _dispatch_tasks(self, tasks, finish, asynchronous=True):
         if not tasks:
