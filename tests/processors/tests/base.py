@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.apps import apps
 
-from datagrowth.processors import Processor, QuerySetProcessor, ExtractProcessor, GrowthProcessor, HttpGrowthProcessor
+from datagrowth.processors import (Processor, QuerySetProcessor, ExtractProcessor, GrowthProcessor, HttpGrowthProcessor,
+                                   HttpSeedingProcessor)
 from datagrowth.processors.base import ArgumentsTypes
 from processors.processors import ProcessorMock
 from datatypes.processors import DataProcessor
@@ -19,6 +20,7 @@ class TestDatagrowthProcessorDjangoConfig(TestCase):
             "QuerySetProcessor": QuerySetProcessor,
             "GrowthProcessor": GrowthProcessor,
             "HttpGrowthProcessor": HttpGrowthProcessor,
+            "HttpSeedingProcessor": HttpSeedingProcessor,
             # Test processors
             "ProcessorMock": ProcessorMock,
             "DataProcessor": DataProcessor
