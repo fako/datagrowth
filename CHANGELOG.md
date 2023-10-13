@@ -21,6 +21,7 @@ v0.20
   will be set in the ``derivatives`` field instead of ``properties``.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
   Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
+* A ``Collection`` will now set the ``DatasetVersion`` of any ``Document`` it influences.
 
 
 v0.19
