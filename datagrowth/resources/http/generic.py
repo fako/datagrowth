@@ -31,11 +31,13 @@ class HttpResource(Resource):
     This class is a wrapper around the requests library and provides:
 
     * easy follow up of continuation URL's in responses
-    * handle authentication through Datagrowth configs
     * cached responses when retrieving data a second time
+    * handle authentication through setting headers or GET parameters without storing credentials
+    * slowing down requests when servers give errors or warnings related to high-load
 
     Response headers, body and status get stored in the database as well as an abstraction of the request.
     Any authentication data gets stripped before storage in the database.
+    Override handle_errors method to customize how errors in responses are detected.
     """
 
     # Identification
@@ -501,7 +503,6 @@ class HttpResource(Resource):
             self.request["backoff_delay"] = backoff_delay if backoff_delay else False
             if self.status not in [420, 429, 502, 503, 504]:
                 break
-
 
     def _update_from_results(self, response):
         self.head = dict(response.headers.lower_items())
