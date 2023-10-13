@@ -19,6 +19,8 @@ v0.20
   ``DatasetVersion``.
 * Default property to write contributions to has become equal to the ``growth_phase`` and
   will be set in the ``derivatives`` field instead of ``properties``.
+* Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
+  Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
 
 
 v0.19
