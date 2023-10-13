@@ -775,7 +775,10 @@ class TestClientResource(HttpResource):
         self._update_from_results(response)
 
     def _update_from_results(self, response):
-        self.head = response.headers
+        self.head = {
+            key: value[1]  # extracts the lower case headers
+            for key, value in response.headers._store.items()
+        }
         self.status = response.status_code
         self.body = response.content.decode("utf-8", "replace")
 
