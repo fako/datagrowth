@@ -16,6 +16,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now
 from django.db.models import JSONField
+from django.test import Client
+from django.urls import reverse
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
@@ -730,6 +732,52 @@ class MicroServiceResource(HttpResource):
         assert path, "A path should be specified in the micro service configuration"
         args = (protocol, host, path) + args
         return super().send(method, *args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
+class TestClientResource(HttpResource):
+    """
+    You can extend from this base class to declare a ``Resource`` that gathers data through Django's test Client.
+    By setting ``test_view_name`` to a named Django urlpattern this ``Resource`` will fetch data from the view,
+    associated with that urlpattern.
+
+    This ``Resource ``can be useful to create tests for Datagrowth components,
+    where data comes from Django views that output test data.
+    """
+
+    test_view_name = None
+
+    def _create_url(self, *args):
+        variables = self.variables(*args)
+        path = reverse(self.test_view_name, args=variables["url"])
+        params = self.parameters(**variables)
+        return f"{path}?{urlencode(params, doseq=True)}"
+
+    def _send(self):
+        assert self.request and isinstance(self.request, dict), \
+            "Trying to make request before having a valid request dictionary."
+
+        method = self.request.get("method")
+        form_data = self.request.get("data") if not method == "get" else None
+        json_data = self.request.get("json") if not method == "get" else None
+        data = json_data or form_data or None
+
+        client = Client()
+        client_method = getattr(client, method)
+        path = self.request["url"]
+        if data:
+            content_type = "application/octet-stream" if not json_data else "application/json"
+            response = client_method(path, data=data, content_type=content_type, follow=True)
+        else:
+            response = client_method(path, follow=True)
+        self._update_from_results(response)
+
+    def _update_from_results(self, response):
+        self.head = response.headers
+        self.status = response.status_code
+        self.body = response.content.decode("utf-8", "replace")
 
     class Meta:
         abstract = True
