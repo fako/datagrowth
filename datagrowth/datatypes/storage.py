@@ -18,6 +18,7 @@ class DataStorage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     pending_at = models.DateTimeField(default=now, null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
 
     @staticmethod
     def validate(data, schema):
