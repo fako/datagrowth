@@ -1,3 +1,4 @@
+from typing import Iterator, List
 from copy import copy
 
 from datagrowth.utils import ibatch
@@ -6,7 +7,7 @@ from project.entities.constants import Entities, SEED_DEFAULTS, SEED_SEQUENCE_PR
 from datatypes.models import Collection, Document
 
 
-def seed_generator(entity: Entities, size: int) -> list[dict]:
+def seed_generator(entity: Entities, size: int) -> Iterator[dict]:
     for ix in range(0, size):
         seed = copy(SEED_DEFAULTS[entity])
         sequenced = {
@@ -26,7 +27,8 @@ def seed_generator(entity: Entities, size: int) -> list[dict]:
         yield seed
 
 
-def document_generator(entity: Entities, size: int, batch_size: int, collection: Collection):
+def document_generator(entity: Entities, size: int, batch_size: int,
+                       collection: Collection) -> Iterator[List[Document]]:
     documents = [
         Document.build(seed, collection=collection)
         for seed in seed_generator(entity, size)
