@@ -342,6 +342,8 @@ class CollectionBase(DataStorage):
             document.identity = reach("$." + self.identifier, document.properties)
         if self.referee:
             document.reference = reach("$." + self.referee, document.properties)
+        if self.dataset_version:
+            document.dataset_version = self.dataset_version
         return document
 
     def to_file(self, file_path):
