@@ -1,4 +1,3 @@
-from copy import copy
 from collections.abc import Iterator
 
 from django.db import models
@@ -6,7 +5,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 from datagrowth.configuration import ConfigurationField
 from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
-from datagrowth.datatypes.datasets.constants import GrowthState
+from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
 from datagrowth.version import VERSION
 

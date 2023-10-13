@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 from datagrowth.datatypes.storage import DataStorage
-from datagrowth.datatypes.datasets.constants import GrowthState
+from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 
 
 class DatasetVersionManager(models.Manager):
@@ -20,10 +20,12 @@ class DatasetVersionBase(DataStorage):
     dataset_type = models.ForeignKey(ContentType, related_name="+", on_delete=models.PROTECT)
     dataset_id = models.PositiveIntegerField()
 
+    growth_strategy = models.CharField(max_length=50, choices=GrowthStrategy.choices, default=GrowthStrategy.FREEZE)
+    task_definitions = models.JSONField(default=dict, blank=True)
+
     is_current = models.BooleanField(default=False)
     version = models.CharField(max_length=50, null=False, blank=True)
-    state = models.CharField(max_length=50, choices=[(state.value, state.value,) for state in GrowthState],
-                             default=GrowthState.PENDING)
+    state = models.CharField(max_length=50, choices=GrowthState.choices, default=GrowthState.PENDING)
 
     def __str__(self):
         return "{} (v={}, id={})".format(self.dataset.signature, self.version, self.id)
