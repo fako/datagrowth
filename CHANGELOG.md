@@ -50,6 +50,7 @@ The convenience of lists is more important here than memory footprint which will
 * Adds a ``copy_dataset`` command that will copy a dataset by signature.
 * The ``async`` configuration has been removed from settings file.
 * A ``resource_exception_log_level`` setting now controls at what level ``DGResourceExceptions`` will get logged.
+* Fallback for ``JSONField`` imports from ``django.contrib.postgres.fields`` has been removed.
 
 
 v0.18

@@ -15,10 +15,7 @@ from bs4 import BeautifulSoup
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.timezone import now
-try:
-    from django.db.models import JSONField
-except ImportError:
-    from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.resources.base import Resource
