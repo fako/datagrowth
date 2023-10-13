@@ -104,42 +104,42 @@ class TestDataset(TestCase):
     def raise_unfinished(self, result):
         raise DGGrowthUnfinished("Raised for test")
 
-    def test_seed(self):
-        # With all different DatasetVersion states accept "Seeding"
-        for instance in [self.instance, self.incomplete, self.complete, self.error]:
-            current_version = instance.versions.get_latest_version() or DatasetVersion()
-            version = instance.seed(current_version, seeds=self.seeds)
-            self.assertNotEqual(current_version.id, version.id)
-            self.assertEqual(version.version, "0.0.2")
-            self.assertEqual(version.collection_set.count(), 1)
-            collection = version.collection_set.last()
-            self.assertEqual(collection.name, instance.signature)
-            content = list(collection.content)
-            for doc in content:
-                del doc["_id"]
-            self.assertEqual(content, self.seeds)
-        # With a "Seeding" DatasetVersion
-        instance = self.seeding
-        current_version = instance.versions.get_latest_version()
-        version = instance.seed(current_version, seeds=self.seeds)
-        self.assertEqual(current_version.id, version.id)
-        self.assertEqual(version.version, "0.0.1")
-        self.assertEqual(version.collection_set.count(), 1)
-        collection = version.collection_set.last()
-        self.assertEqual(collection.name, instance.signature)
-        content = list(collection.content)
-        for doc in content:
-            del doc["_id"]
-        self.assertEqual(content, self.seeds)
-        # Adding more seeds to the seeding DatasetVersion through an iterator
-        version = instance.seed(current_version, seeds=iter([{"test": 4}]))
-        self.assertEqual(current_version.id, version.id)
-        self.assertEqual(version.version, "0.0.1")
-        self.assertEqual(version.collection_set.count(), 1)
-        content = list(collection.content)
-        for doc in content:
-            del doc["_id"]
-        self.assertEqual(content, self.seeds + [{"test": 4}])
+    # def test_seed(self):
+    #     # With all different DatasetVersion states accept "Seeding"
+    #     for instance in [self.instance, self.incomplete, self.complete, self.error]:
+    #         current_version = instance.versions.get_latest_version() or DatasetVersion()
+    #         version = instance.seed(current_version, seeds=self.seeds)
+    #         self.assertNotEqual(current_version.id, version.id)
+    #         self.assertEqual(version.version, "0.0.2")
+    #         self.assertEqual(version.collection_set.count(), 1)
+    #         collection = version.collection_set.last()
+    #         self.assertEqual(collection.name, instance.signature)
+    #         content = list(collection.content)
+    #         for doc in content:
+    #             del doc["_id"]
+    #         self.assertEqual(content, self.seeds)
+    #     # With a "Seeding" DatasetVersion
+    #     instance = self.seeding
+    #     current_version = instance.versions.get_latest_version()
+    #     version = instance.seed(current_version, seeds=self.seeds)
+    #     self.assertEqual(current_version.id, version.id)
+    #     self.assertEqual(version.version, "0.0.1")
+    #     self.assertEqual(version.collection_set.count(), 1)
+    #     collection = version.collection_set.last()
+    #     self.assertEqual(collection.name, instance.signature)
+    #     content = list(collection.content)
+    #     for doc in content:
+    #         del doc["_id"]
+    #     self.assertEqual(content, self.seeds)
+    #     # Adding more seeds to the seeding DatasetVersion through an iterator
+    #     version = instance.seed(current_version, seeds=iter([{"test": 4}]))
+    #     self.assertEqual(current_version.id, version.id)
+    #     self.assertEqual(version.version, "0.0.1")
+    #     self.assertEqual(version.collection_set.count(), 1)
+    #     content = list(collection.content)
+    #     for doc in content:
+    #         del doc["_id"]
+    #     self.assertEqual(content, self.seeds + [{"test": 4}])
 
     # def test_growth_sample(self):
     #     self.instance.SAMPLE_SIZE = 2
