@@ -94,11 +94,23 @@ class HttpSeedingProcessorTestCase(TestCase):
             "published_at": None,
             "modified_at": None
         })
+        self.undeleted_paper = self.create_document({
+            "id": 4,
+            "state": EntityStates.DELETED,
+            "doi": "https://doi.org/10.4",
+            "title": "Title for 4",
+            "abstract": "Abstract for 4",
+            "authors": [],
+            "url": "https://academic.oup.com/4.pdf",
+            "published_at": None,
+            "modified_at": None
+        })
         # These will get added multiple times to the class instance,
         # but that won't affect test results.
         self.preexisting_documents.add(self.deleted_paper.id)
         self.preexisting_documents.add(self.updated_paper.id)
         self.preexisting_documents.add(self.unchanged_paper.id)
+        self.preexisting_documents.add(self.undeleted_paper.id)
 
     def assert_result_document(self, document, extra_properties):
         extra_properties = extra_properties or []
@@ -126,7 +138,7 @@ class HttpSeedingProcessorTestCase(TestCase):
     def assert_documents(self, expected_documents=20):
         self.assertEqual(
             self.collection.documents.count(), expected_documents + 1,
-            f"Expected {expected_documents} generated simple data structures and one pre-existing unchanged document"
+            f"Expected {expected_documents} generated documents and one pre-existing unchanged document"
         )
         # Pre-existing documents that are not in the harvest data should be left alone
         ignored_document = Document.objects.get(id=self.ignored_document.id)

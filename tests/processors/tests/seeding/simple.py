@@ -54,7 +54,7 @@ class TestSimpleHttpSeedingProcessor(HttpSeedingProcessorTestCase):
             self.assertEqual(resource.request["args"], ["paper"])
 
 
-UPDATE_PARAMETERS = {
+DELTA_PARAMETERS = {
     "size": 20,
     "page_size": 10,
     "deletes": 3  # deletes the 1st seed and every 3rd seed after that
@@ -69,7 +69,7 @@ class TestSimpleDeltaHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         super().setUp()
         self.setup_delta_data()
 
-    @patch.object(EntityListResource, "PARAMETERS", UPDATE_PARAMETERS)
+    @patch.object(EntityListResource, "PARAMETERS", DELTA_PARAMETERS)
     def test_seeding(self):
         processor = HttpSeedingProcessor(self.collection, {
             "phases": SEEDING_PHASES
@@ -110,4 +110,18 @@ class TestSimpleDeltaHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         self.assertIn(
             "check_doi", unchanged_paper.task_results,
             "Expected pre-existing document without update to keep any task_results state"
+        )
+
+        # Assert undeleted document
+        undeleted_paper = Document.objects.get(id=self.undeleted_paper.id)
+        self.assertEqual(undeleted_paper.properties["state"], EntityStates.OPEN, "Expected state to become open")
+        self.assertEqual(undeleted_paper.properties["title"], "Title for 4", "Expected the title to remain as-is")
+        self.assertIsNone(undeleted_paper.pending_at, "Did not expect state change to set Document as pending")
+        self.assertIn(
+            "check_doi", updated_paper.task_results,
+            "Expected pre-existing document without relevant update to keep any task_results state"
+        )
+        self.assertEqual(
+            updated_paper.finished_at, self.current_time,
+            "Expected title change not to change finished_at value"
         )
