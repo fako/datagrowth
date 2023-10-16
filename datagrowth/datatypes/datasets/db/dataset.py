@@ -90,6 +90,19 @@ class DatasetBase(models.Model):
         # Actual filtering of input
         return {key: value for key, value in kwargs.items() if key.strip("$") in harvest_keys}
 
+    def create_dataset_version(self):
+        DatasetVersion = self.get_dataset_version_model()
+        Collection = DatasetVersion.get_collection_model()
+        dataset_version = DatasetVersion.build(self)
+        dataset_version.save()
+        collections = []
+        for collection_name, initialization in self.get_collection_initialization().items():
+            collection = Collection(name=collection_name, dataset_version=dataset_version, **initialization)
+            collection.clean()
+            collections.append(collection)
+        Collection.objects.bulk_create(collections)
+        return dataset_version
+
     def gather_seeds(self, *args):
         """
         This method can get overridden. Its output will be used as initial seeding for new DatasetVersions

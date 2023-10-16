@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils.timezone import now
 
-from datatypes.models import Dataset, DatasetVersion, Collection, Document
+from datatypes.models import Dataset, Document
 from project.entities.constants import EntityStates
 
 
@@ -23,30 +23,10 @@ class HttpSeedingProcessorTestCase(TestCase):
         cls.setup_dataset_data()
 
     @classmethod
-    def setup_dataset_data(cls):
-        cls.dataset = Dataset.objects.create()
-        cls.dataset_version = DatasetVersion.objects.create(dataset=cls.dataset)
-        cls.collection = Collection.objects.create(name="test", identifier="id", dataset_version=cls.dataset_version)
-        cls.ignored_document = Document(
-            collection=cls.collection,
-            task_results={},
-            properties={
-                "state": "active"
-            },
-            pending_at=None,
-            finished_at=cls.current_time
-        )
-        cls.ignored_document.clean()
-        cls.ignored_document.save()
-        # We reload the ignored_document here, because Django will cause very minor updates while reloading,
-        # that we want to ignore for the tests
-        cls.ignored_document = Document.objects.get(id=cls.ignored_document.id)
-        cls.preexisting_documents.add(cls.ignored_document.id)
-
-    def create_document(self, properties):
+    def create_document(cls, properties):
         document = Document(
-            dataset_version=self.dataset_version,
-            collection=self.collection,
+            dataset_version=cls.dataset_version,
+            collection=cls.collection,
             task_results={
                 "check_doi": {
                     "success": True
@@ -54,11 +34,24 @@ class HttpSeedingProcessorTestCase(TestCase):
             },
             properties=properties,
             pending_at=None,
-            finished_at=self.current_time
+            finished_at=cls.current_time
         )
         document.clean()
         document.save()
         return document
+
+    @classmethod
+    def setup_dataset_data(cls):
+        cls.dataset = Dataset.objects.create()
+        cls.dataset_version = cls.dataset.create_dataset_version()
+        cls.collection = cls.dataset_version.collections.first()
+        cls.ignored_document = cls.create_document({
+            "state": "active"
+        })
+        # We reload the ignored_document here, because Django will cause very minor updates while reloading,
+        # that we want to ignore for the tests
+        cls.ignored_document = Document.objects.get(id=cls.ignored_document.id)
+        cls.preexisting_documents.add(cls.ignored_document.id)
 
     def setup_delta_data(self):
         self.deleted_paper = self.create_document({
@@ -148,3 +141,46 @@ class HttpSeedingProcessorTestCase(TestCase):
         self.assertEqual(ignored_document.derivatives, self.ignored_document.derivatives)
         self.assertIsNone(ignored_document.pending_at)
         self.assertIsNotNone(ignored_document.finished_at)
+
+    def assert_delta_documents(self, assert_deleted=True):
+        # Assert delete document
+        if assert_deleted:
+            deleted_paper = Document.objects.get(id=self.deleted_paper.id)
+            self.assertEqual(deleted_paper.properties["state"], EntityStates.DELETED)
+
+        # Assert update document
+        updated_paper = Document.objects.get(id=self.updated_paper.id)
+        self.assertEqual(updated_paper.properties["title"], "Title for 1", "Expected the title to get updated")
+        self.assertIsNone(updated_paper.pending_at, "Did not expect title change to set Document as pending")
+        self.assertIn(
+            "check_doi", updated_paper.task_results,
+            "Expected pre-existing document without relevant update to keep any task_results state"
+        )
+        self.assertEqual(
+            updated_paper.finished_at, self.current_time,
+            "Expected title change not to change finished_at value"
+        )
+
+        # Assert unchanged document
+        unchanged_paper = Document.objects.get(id=self.unchanged_paper.id)
+        self.assertEqual(unchanged_paper.properties["title"], "Title for 2", "Expected the title to remain as-is")
+        self.assertIsNone(
+            unchanged_paper.pending_at,
+            "Expected pre-existing document without update to not become pending for tasks"
+        )
+        self.assertEqual(
+            unchanged_paper.finished_at, self.current_time,
+            "Expected unchanged document to keep finished_at same as at start of test"
+        )
+        self.assertIn(
+            "check_doi", unchanged_paper.task_results,
+            "Expected pre-existing document without update to keep any task_results state"
+        )
+
+        # Assert undeleted document
+        undeleted_paper = Document.objects.get(id=self.undeleted_paper.id)
+        self.assertEqual(undeleted_paper.properties["state"], EntityStates.OPEN, "Expected state to become open")
+        self.assertEqual(undeleted_paper.properties["title"], "Title for 4", "Expected the title to remain as-is")
+        self.assertIsNotNone(undeleted_paper.pending_at, "Expect state change to set Document as pending")
+        self.assertEqual(undeleted_paper.task_results, {}, "Expected state change to reset task_results")
+        self.assertIsNone(undeleted_paper.finished_at, "Expected state change to mark Document as unfinished")
