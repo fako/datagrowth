@@ -58,7 +58,10 @@ class CollectionBase(DataStorage):
 
         :return list: field names
         """
-        return ["properties", "identity", "reference", "modified_at"]
+        return [
+            "properties", "derivatives", "task_results", "identity", "reference",
+            "modified_at", "pending_at", "finished_at"
+        ]
 
     @classmethod
     def validate(cls, data, schema):

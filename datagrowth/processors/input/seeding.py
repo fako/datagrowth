@@ -1,6 +1,7 @@
-from typing import Iterator, List, Dict, Union
+from typing import Any, Iterator, List, Dict, Union
 from copy import deepcopy
 from collections import OrderedDict
+from requests import Session
 
 from datagrowth.datatypes import CollectionBase
 from datagrowth.configuration import create_config, ConfigurationType
@@ -22,13 +23,17 @@ class ResourceSeedingProcessor(Processor):
     buffer = []
     batch = []
 
-    def should_skip_phase(self, phase):
+    def should_skip_phase(self, phase: Dict) -> bool:
         if not self.contents:
             return False
         highest_content_phase = max(self.contents.keys())
         return phase["phase"].index < highest_content_phase
 
-    def build_seed_iterator(self, phase, *args, **kwargs) -> Iterator:
+    def get_resource_iterator(self, args_list: List[Any], kwargs_list: List[Dict],
+                              resource_config: ConfigurationType) -> Iterator:
+        raise NotImplemented("ResourceSeedingProcessor does not implement get_resource_iterator")
+
+    def build_seed_iterator(self, phase: Dict, *args, **kwargs) -> Iterator:
         resource_config = phase["retrieve"]
         if not len(self.batch):
             # This is the initial case where there is no input from a buffer.
@@ -60,21 +65,17 @@ class ResourceSeedingProcessor(Processor):
                 kwargs_list.append(content_kwargs)
 
         # Sending the parsed args and kwargs, possibly with batch data to the Resource
-        resource_iterator = send_serie_iterator(
-            args_list, kwargs_list,
-            method=resource_config.method,
-            config=resource_config
-        )
+        resource_iterator = self.get_resource_iterator(args_list, kwargs_list, resource_config)
         seed_iterator = content_iterator(resource_iterator, phase["contribute"].objective)
         batch_size = phase["phase"].batch_size
         return ibatch(seed_iterator, batch_size=batch_size)
 
-    def build_callback_iterator(self, phase, *args) -> Iterator:
+    def build_callback_iterator(self, phase: Dict, *args) -> Iterator:
         callback = phase["contribute"].callback
         for seed in self.batch:
             yield callback(seed, *args)
 
-    def flush_buffer(self, phase, force=False) -> None:
+    def flush_buffer(self, phase: Dict, force: bool = False) -> None:
         if not self.buffer and not force:
             raise ValueError(f"Did not expect to encounter an empty buffer with strategy for phase {phase['phase']}")
 
@@ -117,6 +118,9 @@ class ResourceSeedingProcessor(Processor):
         self.contents = {}
         if not initial:
             phases_selection = self.config.phases
+            initial_phase = phases_selection[0]
+            assert initial_phase["strategy"] == "initial", \
+                "Expected first phase to have strategy 'initial' if no initial seeds are given to the constructor"
         else:
             phases_selection = [phase for phase in self.config.phases if phase.get("is_post_initialization", False)]
         self.phases = OrderedDict()
@@ -175,3 +179,15 @@ class ResourceSeedingProcessor(Processor):
 
 class HttpSeedingProcessor(ResourceSeedingProcessor):
     resource_type = "http_resource"
+
+    def get_session(self) -> Session:
+        return Session()
+
+    def get_resource_iterator(self, args_list: List[Any], kwargs_list: List[Dict],
+                              resource_config: ConfigurationType) -> Iterator:
+        return send_serie_iterator(
+            args_list, kwargs_list,
+            method=resource_config.method,
+            config=resource_config,
+            session=self.get_session()
+        )
