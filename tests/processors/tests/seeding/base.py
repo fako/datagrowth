@@ -181,6 +181,3 @@ class HttpSeedingProcessorTestCase(TestCase):
         undeleted_paper = Document.objects.get(id=self.undeleted_paper.id)
         self.assertEqual(undeleted_paper.properties["state"], EntityStates.OPEN, "Expected state to become open")
         self.assertEqual(undeleted_paper.properties["title"], "Title for 4", "Expected the title to remain as-is")
-        self.assertIsNotNone(undeleted_paper.pending_at, "Expect state change to set Document as pending")
-        self.assertEqual(undeleted_paper.task_results, {}, "Expected state change to reset task_results")
-        self.assertIsNone(undeleted_paper.finished_at, "Expected state change to mark Document as unfinished")

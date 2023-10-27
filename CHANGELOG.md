@@ -21,7 +21,13 @@ v0.20
   will be set in the ``derivatives`` field instead of ``properties``.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
   Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
-* A ``Collection`` will now set the ``DatasetVersion`` of any ``Document`` it influences.
+* A ``DatasetVersion`` will influence its ``Collections`` and ``Documents``.
+  ``Collections`` may set ``DatasetVersion`` for ``Documents`` and facilitate ``DatasetVersion`` influence for them.
+* The ``Dataset.create_dataset_version`` method will create a non-pending ``DatasetVersion``
+  with the default ``GROWTH_STRATEGY`` and a default non-pending ``Collection``. Customize defaults by setting
+  ``DOCUMENT_TASKS``, ``COLLECTION_TASKS``, ``DATASET_VERSION_TASKS``, ``COLLECTION_IDENTIFIER``,
+  ``COLLECTION_REFEREE`` and ``DATASET_VERSION_MODEL``.
+  Or override ``Dataset.get_collection_initialization`` and/or ``Dataset.get_task_definitions`` for more control.
 
 
 v0.19

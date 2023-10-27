@@ -7,8 +7,8 @@ from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.utils.timezone import make_aware
 from django.db.models import JSONField
+from django.utils.timezone import make_aware
 
 from datagrowth.utils import reach
 from datagrowth.datatypes.storage import DataStorage

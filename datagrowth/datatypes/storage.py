@@ -1,5 +1,6 @@
 from copy import copy
 
+from django.apps import apps
 from django.db import models
 from django.urls import reverse
 from django.utils.text import camel_case_to_spaces
@@ -19,6 +20,26 @@ class DataStorage(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     pending_at = models.DateTimeField(default=now, null=True, blank=True)
     finished_at = models.DateTimeField(null=True, blank=True)
+
+    DOCUMENT_MODEL = "Document"
+    COLLECTION_MODEL = "Collection"
+    DATASET_VERSION_MODEL = "DatasetVersion"
+
+    @classmethod
+    def get_document_model(cls):
+        return apps.get_model(f"{cls._meta.app_label}.{cls.DOCUMENT_MODEL}")
+
+    @classmethod
+    def get_collection_model(cls):
+        return apps.get_model(f"{cls._meta.app_label}.{cls.COLLECTION_MODEL}")
+
+    @classmethod
+    def get_dataset_version_model(cls):
+        return apps.get_model(f"{cls._meta.app_label}.{cls.DATASET_VERSION_MODEL}")
+
+    @classmethod
+    def build(cls, *args):
+        raise NotImplementedError()
 
     @staticmethod
     def validate(data, schema):

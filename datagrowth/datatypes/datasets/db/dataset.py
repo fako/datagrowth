@@ -1,5 +1,6 @@
 from collections.abc import Iterator
 
+from django.apps import apps
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
@@ -27,6 +28,16 @@ class DatasetBase(models.Model):
     NAME = None
     CONFIG = {}
 
+    GROWTH_STRATEGY = GrowthStrategy.FREEZE
+    SEEDING_PHASES = []
+    DOCUMENT_TASKS = {}
+    COLLECTION_TASKS = {}
+    DATASET_VERSION_TASKS = {}
+
+    COLLECTION_IDENTIFIER = "id"
+    COLLECTION_REFEREE = None
+    DATASET_VERSION_MODEL = "DatasetVersion"
+
     @property
     def pipelines(self):
         return {
@@ -34,6 +45,32 @@ class DatasetBase(models.Model):
             "growth": [],
             "harvest": []
         }
+
+    def get_seeding_phases(self):
+        assert self.SEEDING_PHASES, "Expected Dataset to specify SEEDING_PHASES"
+        return {
+            self.signature: self.SEEDING_PHASES
+        }
+
+    def get_collection_initialization(self):
+        return {
+            phase_name: {
+                "identifier": self.COLLECTION_IDENTIFIER,
+                "referee": self.COLLECTION_REFEREE
+            }
+            for phase_name in self.get_seeding_phases().keys()
+        }
+
+    def get_task_definitions(self):
+        return {
+            "document": self.DOCUMENT_TASKS,
+            "collection": self.COLLECTION_TASKS,
+            "datasetversion": self.DATASET_VERSION_TASKS
+        }
+
+    @classmethod
+    def get_dataset_version_model(cls):
+        return apps.get_model(f"{cls._meta.app_label}.{cls.DATASET_VERSION_MODEL}")
 
     @property
     def version(self):
@@ -94,10 +131,16 @@ class DatasetBase(models.Model):
         DatasetVersion = self.get_dataset_version_model()
         Collection = DatasetVersion.get_collection_model()
         dataset_version = DatasetVersion.build(self)
+        dataset_version.pending_at = None
         dataset_version.save()
         collections = []
         for collection_name, initialization in self.get_collection_initialization().items():
-            collection = Collection(name=collection_name, dataset_version=dataset_version, **initialization)
+            collection = Collection(
+                name=collection_name,
+                dataset_version=dataset_version,
+                pending_at=None,
+                **initialization
+            )
             collection.clean()
             collections.append(collection)
         Collection.objects.bulk_create(collections)
