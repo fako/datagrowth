@@ -87,6 +87,12 @@ class TestDatasetProtocol(TestCase):
         self.assertNotIn("setting3", configuration)
         self.assertNotIn("$setting4", configuration)
 
+    def test_get_dataset_version_model(self):
+        dataset_version_model = Dataset.get_dataset_version_model()
+        self.assertEqual(dataset_version_model, DatasetVersion)
+        with patch.object(Dataset, "DATASET_VERSION_MODEL", "DatasetVersionInvalid"):
+            self.assertRaises(LookupError, Dataset.get_dataset_version_model)
+
 
 class TestDataset(TestCase):
 
@@ -103,6 +109,145 @@ class TestDataset(TestCase):
 
     def raise_unfinished(self, result):
         raise DGGrowthUnfinished("Raised for test")
+
+    def test_create_dataset_version(self):
+        dataset_version = self.instance.create_dataset_version()
+        self.assertIsInstance(dataset_version, DatasetVersion)
+        self.assertIsNotNone(dataset_version.id)
+        self.assertEqual(dataset_version.dataset, self.instance)
+        self.assertEqual(dataset_version.growth_strategy, self.instance.GROWTH_STRATEGY)
+        self.assertEqual(dataset_version.task_definitions, {
+            "document": {
+                "check_doi": {
+                    "depends_on": [
+                        "$.state",
+                        "$.doi"
+                    ],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "collection": {},
+            "datasetversion": {}
+        })
+        self.assertEqual(dataset_version.tasks, {})
+        self.assertIsNone(dataset_version.pending_at, "Expected DatasetVersion not to start processing immediately")
+        self.assertIsNone(dataset_version.finished_at, "Expected DatasetVersion to not finish processing")
+        self.assertEqual(dataset_version.collections.all().count(), 1)
+        self.assertEqual(dataset_version.documents.all().count(), 0)
+        collection = dataset_version.collections.last()
+        self.assertEqual(collection.identifier, "id")
+        self.assertIsNone(collection.referee)
+        self.assertEqual(collection.tasks, {})
+        self.assertIsNone(collection.pending_at, "Expected Collection not to start processing immediately")
+        self.assertIsNone(collection.finished_at, "Expected Collection to not finish processing")
+        self.assertEqual(collection.name, "setting1=const&test",
+                         "Expected Dataset.signature to be the default Collection.name")
+        # Test creating a document using the created dataset version
+        document = collection.build_document({"id": 1})
+        self.assertEqual(document.dataset_version, dataset_version)
+        self.assertEqual(document.collection, collection)
+        self.assertEqual(document.identity, 1)
+        self.assertEqual(document.tasks, {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        })
+        self.assertIsNotNone(document.pending_at, "New Documents should be pending processing")
+        self.assertIsNone(document.finished_at, "New Documents should not be finished with processing")
+
+    def test_get_collection_initialization(self):
+        collection_initialization = self.instance.get_collection_initialization()
+        self.assertEqual(collection_initialization, {
+            "setting1=const&test": {
+                "identifier": "id",
+                "referee": None
+            }
+        })
+        with patch.object(Dataset, "COLLECTION_IDENTIFIER", None):
+            collection_initialization = self.instance.get_collection_initialization()
+            self.assertEqual(collection_initialization, {
+                "setting1=const&test": {
+                    "identifier": None,
+                    "referee": None
+                }
+            })
+        with patch.object(Dataset, "COLLECTION_REFEREE", "referee"):
+            collection_initialization = self.instance.get_collection_initialization()
+            self.assertEqual(collection_initialization, {
+                "setting1=const&test": {
+                    "identifier": "id",
+                    "referee": "referee"
+                }
+            })
+
+    def test_get_seeding_phases(self):
+        seeding_phases = self.instance.get_seeding_phases()
+        self.assertEqual(seeding_phases, {
+            "setting1=const&test": [
+                {
+                    "phase": "papers",
+                    "strategy": "initial",
+                    "batch_size": 5,
+                    "retrieve_data": {
+                        "resource": "resources.EntityListResource",
+                        "method": "get",
+                        "args": [],
+                        "kwargs": {},
+                        "continuation_limit": 2
+                    },
+                    "contribute_data": {
+                        "objective": {
+                            "id": "$.id",
+                            "state": "$.state",
+                            "doi": "$.doi",
+                            "title": "$.title",
+                            "abstract": "$.abstract",
+                            "authors": "$.authors",
+                            "url": "$.url",
+                            "published_at": "$.published_at",
+                            "modified_at": "$.modified_at",
+                            "@": "$.results"
+                        }
+                    }
+                }
+            ]
+        }, "Expected Dataset.SEEDING_PHASES to be the seeding phases for the default collection")
+
+    def test_get_task_definitions(self):
+        task_definitions = self.instance.get_task_definitions()
+        self.assertEqual(task_definitions, {
+            "document": {
+                "check_doi": {
+                    "depends_on": [
+                        "$.state",
+                        "$.doi"
+                    ],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "collection": {},
+            "datasetversion": {}
+        })
+        with patch.object(Dataset, "DOCUMENT_TASKS", {}):
+            task_definitions = self.instance.get_task_definitions()
+            self.assertEqual(task_definitions, {
+                "document": {},
+                "collection": {},
+                "datasetversion": {}
+            })
+        with patch.object(Dataset, "COLLECTION_TASKS", {"test": "test"}):
+            task_definitions = self.instance.get_task_definitions()
+            self.assertEqual(task_definitions["collection"], {"test": "test"})
+        with patch.object(Dataset, "DATASET_VERSION_TASKS", {"test": "test"}):
+            task_definitions = self.instance.get_task_definitions()
+            self.assertEqual(task_definitions["datasetversion"], {"test": "test"})
 
     # def test_seed(self):
     #     # With all different DatasetVersion states accept "Seeding"

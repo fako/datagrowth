@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 from datagrowth.datatypes import DatasetBase, DatasetVersionBase
 
+from project.entities.constants import PAPER_DEFAULTS
 from datatypes.models import Document
 from datatypes.processors import DataProcessor
 
@@ -10,7 +11,39 @@ class DatasetVersion(DatasetVersionBase):
     pass
 
 
+PAPER_OBJECTIVE = {
+    key: f"$.{key}"
+    for key in PAPER_DEFAULTS.keys()
+}
+PAPER_OBJECTIVE["@"] = "$.results"
+
+
 class Dataset(DatasetBase):
+
+    SEEDING_PHASES = [
+        {
+            "phase": "papers",
+            "strategy": "initial",
+            "batch_size": 5,
+            "retrieve_data": {
+                "resource": "resources.EntityListResource",
+                "method": "get",
+                "args": [],
+                "kwargs": {},
+                "continuation_limit": 2,
+            },
+            "contribute_data": {
+                "objective": PAPER_OBJECTIVE
+            }
+        }
+    ]
+    DOCUMENT_TASKS = {
+        "check_doi": {
+            "depends_on": ["$.state", "$.doi"],
+            "checks": [],
+            "resources": []
+        }
+    }
 
     COMMUNITY_SPIRIT = OrderedDict([
         ("phase1", {

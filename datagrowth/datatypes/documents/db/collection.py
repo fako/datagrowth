@@ -27,11 +27,6 @@ class CollectionBase(DataStorage):
     identifier = models.CharField(max_length=255, null=True, blank=True)
     referee = models.CharField(max_length=255, null=True, blank=True)
 
-    @classmethod
-    def get_document_model(cls):
-        # This method should use "Document" with local app label and get_model function to load the model
-        return apps.get_model("{}.Document".format(cls._meta.app_label))
-
     @property
     def documents(self):
         raise NotImplementedError("CollectionBase needs to implement the documents property to work correctly")
@@ -49,7 +44,7 @@ class CollectionBase(DataStorage):
             document.clean()  # this gets handles by Document.build, but not by the legacy Collection.init_document
             return document
         Document = self.get_document_model()
-        return Document.build(data, collection=collection)
+        return Document.build(data, collection=collection or self)
 
     @property
     def document_update_fields(self):
@@ -355,12 +350,16 @@ class CollectionBase(DataStorage):
         if self.referee:
             document.reference = reach("$." + self.referee, document.properties)
         if self.dataset_version:
-            document.dataset_version = self.dataset_version
+            self.dataset_version.influence(document)
         return document
 
     def to_file(self, file_path):
         with open(file_path, "w") as json_file:
             json.dump(list(self.content), json_file, cls=DjangoJSONEncoder)
+
+    def clean(self):
+        if self.dataset_version:
+            self.dataset_version.influence(self)
 
     class Meta:
         abstract = True
