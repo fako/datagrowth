@@ -14,7 +14,7 @@ v0.20
 * ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
   to ``global_datatypes_app_label`` and ``global_datatype_models``.
 * The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
-  part of the ``growth_resource`` namespace.
+  part of the ``growth_processor`` namespace.
 * The ``pipeline`` attributes gets replaced by the ``task_results`` attributes for ``Document``, ``Collection`` and
   ``DatasetVersion``.
 * Default property to write contributions to has become equal to the ``growth_phase`` and
