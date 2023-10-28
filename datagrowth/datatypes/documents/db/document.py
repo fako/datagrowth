@@ -1,14 +1,12 @@
 from itertools import repeat
 import warnings
-from datetime import datetime
 
 import jsonschema
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.db.models import JSONField
-from django.utils.timezone import make_aware
+from django.utils.timezone import now
 
 from datagrowth.utils import reach
 from datagrowth.datatypes.storage import DataStorage
@@ -16,7 +14,7 @@ from datagrowth.datatypes.storage import DataStorage
 
 class DocumentBase(DataStorage):
 
-    properties = JSONField(default=dict)
+    properties = models.JSONField(default=dict)
 
     dataset_version = models.ForeignKey("DatasetVersion", null=True, blank=True, on_delete=models.CASCADE)
     collection = models.ForeignKey("Collection", blank=True, null=True, on_delete=models.CASCADE)
@@ -81,12 +79,22 @@ class DocumentBase(DataStorage):
         :return: Updated content
         """
         content = data.properties if isinstance(data, DocumentBase) else data
+        current_time = now()
+
+        # See if pipeline task need to re-run due to changes
+        for dependency_key, task_names in self.get_property_dependencies().items():
+            current_value = reach(dependency_key, self.properties)
+            update_value = reach(dependency_key, content)
+            if current_value != update_value:
+                for task in task_names:
+                    self.invalidate_task(task, current_time=current_time)
+
         self.properties.update(content)
         self.clean()
         if commit:
             self.save()
         else:
-            self.modified_at = make_aware(datetime.now())
+            self.modified_at = current_time
         return self.content
 
     @property
@@ -170,7 +178,7 @@ class DocumentBase(DataStorage):
 
 class DocumentMysql(models.Model):
 
-    properties = JSONField(default=dict)
+    properties = models.JSONField(default=dict)
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
@@ -187,7 +195,7 @@ class DocumentMysql(models.Model):
 
 class DocumentPostgres(models.Model):
 
-    properties = JSONField(default=dict)
+    properties = models.JSONField(default=dict)
 
     def __init_subclass__(cls, *args, **kwargs):
         super().__init_subclass__(*args, **kwargs)
