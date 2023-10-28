@@ -1,13 +1,13 @@
 from unittest.mock import patch
 from datetime import date
 
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from datatypes.tests import data_storage
 from datatypes.models import Document, Collection
 
 
-class TestDocument(TestCase):
+class TestDocument(data_storage.DataStorageTestCase):
 
     fixtures = ["test-data-storage"]
 

@@ -11,6 +11,10 @@ which indicates breakages that you may expect when upgrading from lower versions
 v0.20
 -----
 
+This update is the first Datagrowth version that includes the ``DatasetVersion`` model.
+The implementation of that model can be a steep change over current implementation.
+However it's not required to implement Datagrowth's ``DatasetVersion`` to update to v0.20.
+
 * ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
   to ``global_datatypes_app_label`` and ``global_datatype_models``.
 * The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
@@ -21,12 +25,17 @@ v0.20
   will be set in the ``derivatives`` field instead of ``properties``.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
   Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
+* The ``DatasetVersion.task_definitions`` field holds dictionaries per ``DataStorage`` model that specifies,
+  which tasks should run for which model.
 * A ``DatasetVersion`` will influence its ``Collections`` and ``Documents``.
   ``Collections`` may set ``DatasetVersion`` for ``Documents`` and facilitate ``DatasetVersion`` influence for them.
+* Task definitions given to ``DatasetVersion`` propagate to ``Collection`` and ``Document``
+  through the influence method.
 * The ``Dataset.create_dataset_version`` method will create a non-pending ``DatasetVersion``
-  with the default ``GROWTH_STRATEGY`` and a default non-pending ``Collection``. Customize defaults by setting
-  ``DOCUMENT_TASKS``, ``COLLECTION_TASKS``, ``DATASET_VERSION_TASKS``, ``COLLECTION_IDENTIFIER``,
-  ``COLLECTION_REFEREE`` and ``DATASET_VERSION_MODEL``.
+  with the default ``GROWTH_STRATEGY`` and ``DatasetVersion.tasks`` set.
+  It also creates a default non-pending ``Collection`` with ``Collection.tasks`` set.
+  Customize defaults by setting ``DOCUMENT_TASKS``, ``COLLECTION_TASKS``, ``DATASET_VERSION_TASKS``,
+  ``COLLECTION_IDENTIFIER``, ``COLLECTION_REFEREE`` and ``DATASET_VERSION_MODEL``.
   Or override ``Dataset.get_collection_initialization`` and/or ``Dataset.get_task_definitions`` for more control.
 
 
