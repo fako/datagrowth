@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase
 from django.utils.timezone import now
 
@@ -108,7 +109,14 @@ class HttpSeedingProcessorTestCase(TestCase):
     def assert_result_document(self, document, extra_properties):
         extra_properties = extra_properties or []
         self.assertIsInstance(document, Document)
-        self.assertIsNotNone(document.id, "Expected a Document saved to the database")
+        if settings.DEFAULT_DATABASE != "mysql":
+            self.assertIsNotNone(document.id, "Expected a Document saved to the database")
+        else:
+            # Unfortunately it's a bit ambiguous what MySQL will do with auto increment ids.
+            # It usually doesn't return them with Django's bulk_create, but sometimes it does.
+            # That makes it difficult to write tests that work with MySQL.
+            # Assume that Document.id is not available for MySQL.
+            pass
         self.assertEqual(document.collection_id, self.collection.id, "Expected a Document as part of test Collection")
         self.assertEqual(document.dataset_version.id, self.dataset_version.id,
                          "Expected Document to specify the DatasetVersion")

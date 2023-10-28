@@ -90,6 +90,7 @@ POSTGRES_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 MYSQL_USER = os.environ.get('DJANGO_MYSQL_USER', 'django')
 MYSQL_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 
+DEFAULT_DATABASE = os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')
 DATABASES_MATRIX = {
     'postgres': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -111,7 +112,7 @@ DATABASES_MATRIX = {
     }
 }
 DATABASES = {
-    'default': DATABASES_MATRIX[os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')]
+    'default': DATABASES_MATRIX[DEFAULT_DATABASE]
 }
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
