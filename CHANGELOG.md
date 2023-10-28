@@ -15,6 +15,12 @@ This update is the first Datagrowth version that includes the ``DatasetVersion``
 The implementation of that model can be a steep change over current implementation.
 However it's not required to implement Datagrowth's ``DatasetVersion`` to update to v0.20.
 
+Another note of caution is that due to the way Django implements ``bulk_create``
+it's not possible to access ``Document.id`` on MySQL databases when using ``HttpSeedingProcessor``
+or any other code that relies on ``Collection.update`` or ``Collection.update_batches``.
+Using MariaDB might solve this, but it's unclear how the ``JSONField`` performs on MariaDB, and it's not tested against.
+Highly recommended to use Postgres when knowing the ``Document.id`` is important directly after bulk creation.
+
 * ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
   to ``global_datatypes_app_label`` and ``global_datatype_models``.
 * The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
