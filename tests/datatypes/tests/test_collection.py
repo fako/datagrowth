@@ -4,12 +4,11 @@ from unittest.mock import patch, MagicMock, NonCallableMagicMock
 from datetime import date
 from types import GeneratorType
 
-from django.test import TestCase
-
+from datatypes.tests import data_storage
 from datatypes.models import Collection, Document
 
 
-class TestCollection(TestCase):
+class TestCollection(data_storage.DataStorageTestCase):
 
     fixtures = ["test-data-storage"]
 
