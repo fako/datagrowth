@@ -32,7 +32,7 @@ class ResourceGrowthProcessor(GrowthProcessor):
         filters = Q(**{f"task_results__{growth_phase}__success": False})
         filters |= Q(**{f"task_results__{growth_phase}__isnull": True})
         if depends_on:
-            filters |= Q(**{f"task_results__{depends_on}__success": True})
+            filters &= Q(**{f"task_results__{depends_on}__success": True})
         return queryset.filter(filters)
 
     def process_batch(self, batch):
