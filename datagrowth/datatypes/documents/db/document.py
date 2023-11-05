@@ -152,6 +152,9 @@ class DocumentBase(DataStorage):
         # Passing along input as-is
         return frm
 
+    def apply_resource(self, resource):
+        raise NotImplementedError(f"{self.__class__.__name__} does not implement apply_resource")
+
     def items(self):
         return self.properties.items()
 
