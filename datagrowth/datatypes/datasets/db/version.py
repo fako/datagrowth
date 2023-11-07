@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -48,12 +50,14 @@ class DatasetVersionBase(DataStorage):
     def copy_collection(self, collection):
         Document = collection.get_document_model()
         source_id = collection.id
+        collection = deepcopy(collection)
         collection.pk = None
         collection.id = None
         collection.dataset_version = self
         collection.clean()
         collection.save()
-        collection.add_batches(Document.objects.filter(collection_id=source_id))
+        for _ in collection.add_batches(Document.objects.filter(collection_id=source_id).iterator()):
+            pass
         return collection
 
     def influence(self, instance):

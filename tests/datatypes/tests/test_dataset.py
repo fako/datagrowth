@@ -161,6 +161,20 @@ class TestDataset(TestCase):
         self.assertIsNotNone(document.pending_at, "New Documents should be pending processing")
         self.assertIsNone(document.finished_at, "New Documents should not be finished with processing")
 
+    def test_copy_dataset_version(self):
+        source_dataset_version = self.complete.versions.first()
+        source_collection_ids = set(source_dataset_version.collections.values_list("id", flat=True))
+        source_document_ids = set(source_dataset_version.documents.values_list("id", flat=True))
+        dataset_version = self.complete.copy_dataset_version(source_dataset_version)
+        collection_ids = set(dataset_version.collections.values_list("id", flat=True))
+        document_ids = set(dataset_version.documents.values_list("id", flat=True))
+        self.assertNotEqual(dataset_version, source_dataset_version)
+        self.assertNotEquals(dataset_version.id, source_dataset_version.id)
+        self.assertEqual(dataset_version.collections.count(), source_dataset_version.collections.count())
+        self.assertEqual(dataset_version.documents.count(), source_dataset_version.documents.count())
+        self.assertFalse(collection_ids.intersection(source_collection_ids))
+        self.assertFalse(document_ids.intersection(source_document_ids))
+
     def test_get_collection_initialization(self):
         collection_initialization = self.instance.get_collection_initialization()
         self.assertEqual(collection_initialization, {
