@@ -23,10 +23,14 @@ class TestDatasetVersion(data_storage.DataStorageTestCase):
         collection = Collection.objects.get(id=2)
         self.assertIsNone(collection.dataset_version, "Expected test collection to not be connected to DatasetVersion")
         copied_collection = self.instance.copy_collection(collection)
-        self.assertEqual(copied_collection, collection)
+        self.assertNotEqual(copied_collection, collection)
         self.assertNotEqual(copied_collection.id, 2, "Expected copied collection to get a new id")
         self.assertEqual(copied_collection.dataset_version, self.instance)
+        self.assertTrue(copied_collection.documents.count() > 0)
         self.assertEqual(copied_collection.documents.count(), collection.documents.count())
+        document = collection.documents.first()
+        copied_document = copied_collection.documents.first()
+        self.assertEqual(document.properties, copied_document.properties)
 
     def test_influence_collection(self):
         collection = Collection.objects.get(id=2)

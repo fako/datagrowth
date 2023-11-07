@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from copy import deepcopy
 
 from django.apps import apps
 from django.db import models
@@ -9,6 +10,7 @@ from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
 from datagrowth.version import VERSION
+from datagrowth.utils import ibatch
 
 
 class DatasetBase(models.Model):
@@ -144,6 +146,18 @@ class DatasetBase(models.Model):
             collection.clean()
             collections.append(collection)
         Collection.objects.bulk_create(collections)
+        return dataset_version
+
+    @staticmethod
+    def copy_dataset_version(dataset_version):
+        collections = list(dataset_version.collections.all())
+        dataset_version = deepcopy(dataset_version)
+        dataset_version.pk = None
+        dataset_version.id = None
+        dataset_version.clean()
+        dataset_version.save()
+        for collection in collections:
+            dataset_version.copy_collection(collection)
         return dataset_version
 
     def gather_seeds(self, *args):
