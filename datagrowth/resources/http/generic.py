@@ -298,7 +298,7 @@ class HttpResource(Resource):
         assert isinstance(request, dict), "Request should be a dictionary."
         method = request.get("method")
         assert method, "Method should not be falsy."
-        assert method in ["get", "post", "put"], \
+        assert method in ["get", "post", "put", "head"], \
             "{} is not a supported resource method.".format(request.get("method"))  # FEATURE: allow all methods
         if validate_input:
             self._validate_input(
@@ -490,7 +490,8 @@ class HttpResource(Resource):
                     preq,
                     proxies=datagrowth_settings.DATAGROWTH_REQUESTS_PROXIES,
                     verify=datagrowth_settings.DATAGROWTH_REQUESTS_VERIFY,
-                    timeout=self.timeout
+                    timeout=self.timeout,
+                    allow_redirects=self.config.allow_redirects
                 )
                 self._update_from_results(response)
             except requests.exceptions.SSLError:

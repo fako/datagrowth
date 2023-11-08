@@ -67,6 +67,8 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "http_resource_interval_duration": 0,  # NB: milliseconds!
     "http_resource_concat_args_size": 0,
     "http_resource_concat_args_symbol": "|",
+    # TODO: these two configurations should be http_resource, not global
+    "global_allow_redirects": True,
     "global_backoff_delays": [2, 4, 8, 16],
 
     "shell_resource_interval_duration": 0,  # NB: milliseconds!

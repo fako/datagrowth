@@ -51,6 +51,8 @@ The convenience of lists is more important here than memory footprint which will
 * The ``async`` configuration has been removed from settings file.
 * A ``resource_exception_log_level`` setting now controls at what level ``DGResourceExceptions`` will get logged.
 * Fallback for ``JSONField`` imports from ``django.contrib.postgres.fields`` has been removed.
+* Adds ``global_allow_redirects`` configuration which controls how requests library will handle redirects.
+  Defaults to True even for "head" requests.
 
 
 v0.18
