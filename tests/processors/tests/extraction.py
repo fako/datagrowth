@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from unittest.mock import Mock
 from types import GeneratorType
+from collections import namedtuple
 
 from django.test import TestCase
 
@@ -198,6 +199,33 @@ class TestExtractProcessor(TestCase):
         rsl = xml_prc.text_xml(self.xml)
         self.assertEqual(list(rsl), MOCK_SCRAPE_DATA)
         self.assertIsInstance(rsl, GeneratorType, "Extractors are expected to return generators.")
+
+    def test_xml_text_callback_extraction(self):
+        # Extracting a data structure with generator callback syntax using a namedtuple
+        Info = namedtuple("Info", ["label", "url"])
+        generator_objective = {
+            "@": lambda soup: (Info(label, url) for label, url in zip(soup.find_all("label"), soup.find_all("url"))),
+            "text": "el.label.text",
+            "link": "el.url.text"
+        }
+        generator_extractor = ExtractProcessor(config={"objective": generator_objective})
+        rsl = generator_extractor.text_xml(self.xml)
+        for ix, content in enumerate(rsl):
+            self.assertIsInstance(content, dict)
+            self.assertEqual(len(content), 2)
+            self.assertEqual(content["text"], MOCK_SCRAPE_DATA[ix]["text"])
+            self.assertEqual(content["link"], MOCK_SCRAPE_DATA[ix]["link"])
+        # Extracting a data structure with list callback syntax using BeautifulSoup directly
+        list_objective = {
+            "@": lambda soup: soup.find_all("url"),
+            "link": "el.text"
+        }
+        list_extractor = ExtractProcessor(config={"objective": list_objective})
+        rsl = list_extractor.text_xml(self.xml)
+        for ix, content in enumerate(rsl):
+            self.assertIsInstance(content, dict)
+            self.assertEqual(len(content), 1)
+            self.assertEqual(content["link"], MOCK_SCRAPE_DATA[ix]["link"])
 
     def test_application_json_records(self):
         json_prc_eval = self.get_json_processor()

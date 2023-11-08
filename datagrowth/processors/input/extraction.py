@@ -154,7 +154,7 @@ class ExtractProcessor(Processor):
             context[name] = self._eval_extraction(name, objective, soup)
 
         at = elements = self._eval_extraction("@", self._at, soup)
-        if not isinstance(at, list):
+        if not isinstance(at, (list, GeneratorType,)):
             elements = [at]
 
         for el in elements:  # el used in eval!
