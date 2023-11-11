@@ -23,14 +23,133 @@
     "fields": {
         "created_at": "2015-06-05T16:17:54.436Z",
         "modified_at": "2015-06-05T16:17:54.436Z",
-        "is_current": true,
+        "pending_at": "2015-06-05T16:17:54.436Z",
+        "finished_at": null,
+        "is_current": false,
         "version": "0.0.1",
         "state": "Growing",
         "dataset_type": ["datatypes", "dataset"],
-        "dataset_id": 2
+        "dataset_id": 2,
+        "tasks": {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {},
+        "derivatives": {}
     },
     "model": "datatypes.DatasetVersion",
     "pk": 1
+},
+{
+    "fields": {
+        "name": "test",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "pending_at": null,
+        "finished_at": null,
+        "dataset_version": 1,
+        "tasks": {
+            "collection_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {},
+        "derivatives": {}
+    },
+    "model": "datatypes.collection",
+    "pk": 1
+},
+{
+    "fields": {
+        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
+        "collection": 1,
+        "dataset_version": 1,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-02T10:01:47.572Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
+    "pk": 1
+},
+{
+    "fields": {
+        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
+        "collection": 1,
+        "dataset_version": 1,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-02T10:01:47.572Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": false
+            }
+        },
+        "derivatives": {}
+    },
+    "model": "datatypes.document",
+    "pk": 2
+},
+{
+    "fields": {
+        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
+        "collection": 1,
+        "dataset_version": 1,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": "2015-06-02T10:01:47.572Z",
+        "finished_at": null,
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {},
+        "derivatives": {}
+    },
+    "model": "datatypes.document",
+    "pk": 3
 },
 {
     "fields": {
@@ -46,34 +165,161 @@
     "fields": {
         "created_at": "2015-06-05T16:17:54.436Z",
         "modified_at": "2015-06-05T16:17:54.436Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
         "is_current": true,
         "version": "0.0.1",
         "state": "Complete",
         "dataset_type": ["datatypes", "dataset"],
-        "dataset_id": 3
+        "dataset_id": 3,
+        "tasks": {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "dataset_version_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "dataset_version_task": {
+                "test": "test"
+            }
+        }
     },
     "model": "datatypes.DatasetVersion",
     "pk": 2
 },
 {
     "fields": {
-        "created_at": "2015-06-05T16:17:54.000Z",
-        "modified_at": "2015-06-05T16:17:54.000Z",
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"setting1\": \"const\"}",
-        "signature": "setting1=const&test-multiple"
+        "name": "setting1=const&test-multiple",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "dataset_version": 2,
+        "tasks": {
+            "collection_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "collection_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "collection_task": {
+                "test": "test"
+            }
+        }
     },
-    "model": "datatypes.Dataset",
+    "model": "datatypes.collection",
+    "pk": 2
+},
+{
+    "fields": {
+        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
+        "collection": 2,
+        "dataset_version": 2,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
     "pk": 4
 },
 {
     "fields": {
-        "created_at": "2015-06-05T16:17:54.000Z",
-        "modified_at": "2015-06-05T16:17:54.000Z",
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
-        "signature": "setting1=const&test-ready"
+        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
+        "collection": 2,
+        "dataset_version": 2,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
     },
-    "model": "datatypes.Dataset",
+    "model": "datatypes.document",
     "pk": 5
+},
+{
+    "fields": {
+        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
+        "collection": 2,
+        "dataset_version": 2,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
+    "pk": 6
 },
 {
     "fields": {
@@ -83,222 +329,67 @@
         "signature": "setting1=const&test-empty"
     },
     "model": "datatypes.Dataset",
-    "pk": 6
+    "pk": 4
 },
 {
     "fields": {
         "created_at": "2015-06-05T16:17:54.436Z",
         "modified_at": "2015-06-05T16:17:54.436Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T16:17:54.436Z",
         "is_current": true,
         "version": "0.0.1",
         "state": "Seeding",
         "dataset_type": ["datatypes", "dataset"],
-        "dataset_id": 6
-    },
-    "model": "datatypes.DatasetVersion",
-    "pk": 4
-},
-{
-    "fields": {
-        "created_at": "2016-06-05T16:17:54.000Z",
-        "modified_at": "2016-06-05T16:17:54.000Z",
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"include_odd\": true, \"include_even\": false}",
-        "signature": "setting1=const&test-ready"
-    },
-    "model": "datatypes.Dataset",
-    "pk": 7
-},
-{
-    "fields": {
-        "created_at": "2015-06-05T16:17:54.436Z",
-        "modified_at": "2015-06-05T16:17:54.436Z",
-        "is_current": true,
-        "version": "0.0.1",
-        "state": "Complete",
-        "dataset_type": ["datatypes", "dataset"],
-        "dataset_id": 7
+        "dataset_id": 4,
+        "tasks": {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "dataset_version_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "dataset_version_task": {
+                "test": "test"
+            }
+        }
     },
     "model": "datatypes.DatasetVersion",
     "pk": 3
-},
-{
-    "fields": {
-        "created_at": "2017-06-05T16:17:54.000Z",
-        "modified_at": "2017-06-05T16:17:54.000Z",
-        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"include_odd\": true, \"include_even\": true}",
-        "signature": "setting1=const&test-ready"
-    },
-    "model": "datatypes.Dataset",
-    "pk": 8
-},
-{
-    "fields": {
-        "name": "test",
-        "created_at": "2015-06-04T11:31:27.940Z",
-        "modified_at": "2015-06-04T11:34:06.960Z",
-        "dataset_version": 1
-    },
-    "model": "datatypes.collection",
-    "pk": 1
-},
-{
-    "fields": {
-        "name": "test",
-        "created_at": "2015-06-04T11:31:27.940Z",
-        "modified_at": "2015-06-04T11:34:06.960Z",
-        "dataset_version": 1
-    },
-    "model": "datatypes.collection",
-    "pk": 2
-},
-{
-    "fields": {
-        "name": "setting1=const&test-multiple",
-        "created_at": "2015-06-04T11:31:27.940Z",
-        "modified_at": "2015-06-04T11:34:06.960Z",
-        "dataset_version": 2
-    },
-    "model": "datatypes.collection",
-    "pk": 3
-},
-{
-    "fields": {
-        "name": "setting1=const&test-ready",
-        "created_at": "2015-06-04T11:31:27.940Z",
-        "modified_at": "2015-06-04T11:34:06.960Z",
-        "dataset_version": 3
-    },
-    "model": "datatypes.collection",
-    "pk": 4
 },
 {
     "fields": {
         "name": "setting1=const&test-empty",
         "created_at": "2015-06-04T11:31:27.940Z",
         "modified_at": "2015-06-04T11:34:06.960Z",
-        "dataset_version": 4
+        "pending_at": null,
+        "finished_at": "2015-06-05T16:17:54.436Z",
+        "dataset_version": 3,
+        "tasks": {
+            "collection_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "collection_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "collection_task": {
+                "test": "test"
+            }
+        }
     },
     "model": "datatypes.collection",
-    "pk": 5
-},
-{
-    "fields": {
-        "body": "{\"error\": \"failure\"}",
-        "status": 404,
-        "head": "{\"content-type\":\"application/json\"}",
-        "modified_at": "2015-05-12T18:45:22.105Z",
-        "created_at": "2015-05-12T18:45:22.105Z",
-        "request": "{\"url\":\"http://localhost:8000/en/?q=success3&param=1\",\"args\":[\"en\",\"success3\"],\"headers\":{\"Accept\":\"application/json\"},\"kwargs\":{},\"data\":{},\"method\":\"get\"}",
-        "uri": "localhost:8000/en/?q=notfound&param=1",
-        "data_hash": "",
-        "config": "{}",
-        "purge_at": null,
-        "retainer_type": ["datatypes", "dataset"],
-        "retainer_id": 4
-    },
-    "model": "resources.httpresourcemock",
-    "pk": 1
-},
-{
-    "fields": {
-        "body": "{\"error\": \"failure\"}",
-        "status": 502,
-        "head": "{\"content-type\":\"application/json\"}",
-        "modified_at": "2015-05-12T18:45:22.105Z",
-        "created_at": "2015-05-12T18:45:22.105Z",
-        "request": "{\"url\":\"http://localhost:8000/en/?q=fail&param=1\",\"args\":[\"en\",\"fail\"],\"headers\":{\"Accept\":\"application/json\"},\"kwargs\":{},\"data\":{},\"method\":\"get\"}",
-        "uri": "localhost:8000/en/?q=fail&param=1",
-        "data_hash": "",
-        "config": "{}",
-        "purge_at": null,
-        "retainer_type": ["datatypes", "dataset"],
-        "retainer_id": 4
-    },
-    "model": "resources.httpresourcemock",
-    "pk": 2
-},
-{
-    "fields": {
-        "body": "{\"error\": \"failure\"}",
-        "status": 502,
-        "head": "{\"content-type\":\"application/json\"}",
-        "modified_at": "2015-05-12T18:45:22.105Z",
-        "created_at": "2015-05-12T18:45:22.105Z",
-        "request": "{\"url\":\"http://localhost:8000/en/?q=fail2&param=1\",\"args\":[\"en\",\"fail2\"],\"headers\":{\"Accept\":\"application/json\"},\"kwargs\":{},\"data\":{},\"method\":\"get\"}",
-        "uri": "localhost:8000/en/?q=fail2&param=1",
-        "data_hash": "",
-        "config": "{}",
-        "purge_at": null,
-        "retainer_type": ["datatypes", "dataset"],
-        "retainer_id": 4
-    },
-    "model": "resources.httpresourcemock",
     "pk": 3
-},
-{
-    "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
-        "collection": 3,
-        "dataset_version": 2,
-        "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z"
-    },
-    "model": "datatypes.document",
-    "pk": 1
-},
-{
-    "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
-        "collection": 3,
-        "dataset_version": 2,
-        "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z"
-    },
-    "model": "datatypes.document",
-    "pk": 2
-},
-{
-    "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
-        "collection": 3,
-        "dataset_version": 2,
-        "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z"
-    },
-    "model": "datatypes.document",
-    "pk": 3
-},
-{
-    "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
-        "collection": 4,
-        "dataset_version": 3,
-        "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z"
-    },
-    "model": "datatypes.document",
-    "pk": 4
-},
-{
-    "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
-        "collection": 4,
-        "dataset_version": 3,
-        "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z"
-    },
-    "model": "datatypes.document",
-    "pk": 5
-},
-{
-    "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
-        "collection": 4,
-        "dataset_version": 3,
-        "modified_at": "2015-06-02T10:01:47.572Z",
-        "created_at": "2015-06-02T10:00:20.247Z"
-    },
-    "model": "datatypes.document",
-    "pk": 6
 }
 ]
