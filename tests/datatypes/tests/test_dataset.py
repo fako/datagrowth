@@ -103,8 +103,7 @@ class TestDataset(TestCase):
         self.instance = Dataset.objects.get(id=1)
         self.incomplete = Dataset.objects.get(id=2)
         self.complete = Dataset.objects.get(id=3)
-        self.error = Dataset.objects.get(id=4)
-        self.seeding = Dataset.objects.get(id=6)
+        self.empty = Dataset.objects.get(id=4)
         self.seeds = [{"test": 1}, {"test": 2}, {"test": 3}]
 
     def raise_unfinished(self, result):
