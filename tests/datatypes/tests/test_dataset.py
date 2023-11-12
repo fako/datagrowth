@@ -1,8 +1,10 @@
 from django.test import TestCase
+from django.utils.timezone import now
 
 from unittest.mock import Mock, patch
 
-from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
+from datagrowth.exceptions import DGGrowthUnfinished
+from datagrowth.datatypes.datasets.constants import GrowthState
 
 from datatypes.models import Dataset, DatasetMock, DatasetVersion, Collection, Document
 from resources.models import HttpResourceMock, MockErrorQuerySet
@@ -173,6 +175,95 @@ class TestDataset(TestCase):
         self.assertEqual(dataset_version.documents.count(), source_dataset_version.documents.count())
         self.assertFalse(collection_ids.intersection(source_collection_ids))
         self.assertFalse(document_ids.intersection(source_document_ids))
+
+    def assert_document_preparation(self, document, current_time, should_reprocess=False):
+        self.assertEqual(document.tasks, {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        })
+        if not should_reprocess:
+            self.assertIsNone(document.pending_at,
+                              "Completed documents should not become pending a second time")
+            self.assertIsNotNone(document.finished_at, "Completed Documents should retain their finished_at value")
+            self.assertEqual(document.derivatives, {
+                "check_doi": {
+                    "doi": "ok"
+                }
+            })
+            self.assertEqual(document.task_results, {
+                "check_doi": {
+                    "success": True
+                }
+            })
+        else:
+            self.assertEqual(document.pending_at, current_time,
+                             "Erroneous Documents should retry processing")
+            self.assertIsNone(document.finished_at, "Erroneous Documents should retry processing")
+
+    def assert_dataset_version_preparation(self, dataset_version, current_time, document_count=3):
+        self.assertEqual(dataset_version.state, GrowthState.PENDING)
+        self.assertEqual(dataset_version.pending_at, current_time)
+        self.assertIsNone(dataset_version.finished_at)
+        self.assertEqual(dataset_version.derivatives, {})
+        self.assertEqual(dataset_version.task_results, {})
+        self.assertEqual(dataset_version.tasks, {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        })
+        self.assertEqual(dataset_version.collections.count(), 1)
+        for collection in dataset_version.collections.all():
+            self.assertIsNone(collection.pending_at,
+                              "Collection should not become pending until all Documents are created")
+            self.assertIsNone(collection.finished_at)
+            self.assertEqual(collection.derivatives, {})
+            self.assertEqual(collection.task_results, {})
+            self.assertEqual(collection.tasks, {
+                "collection_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
+            })
+            self.assertEqual(collection.documents.all().count(), document_count)
+        self.assertEqual(dataset_version.documents.all().count(), document_count)
+        for document in dataset_version.documents.all():
+            self.assert_document_preparation(document, current_time, should_reprocess=document.id in [2, 3])
+
+    def test_prepare_dataset_version(self):
+        current_time = now()
+        complete_dataset_version = self.complete.versions.first()
+        dataset_version = self.complete.prepare_dataset_version(complete_dataset_version, current_time)
+        self.assert_dataset_version_preparation(dataset_version, current_time)
+
+    def test_prepare_dataset_version_error(self):
+        current_time = now()
+        error_dataset_version = self.incomplete.versions.first()
+        dataset_version = self.incomplete.prepare_dataset_version(error_dataset_version, current_time)
+        self.assert_dataset_version_preparation(dataset_version, current_time)
+
+    def test_prepare_dataset_version_weeding(self):
+        current_time = now()
+        complete_dataset_version = self.complete.versions.first()
+        with patch.object(self.complete, "weed_document", lambda doc: doc.id % 2):
+            dataset_version = self.complete.prepare_dataset_version(complete_dataset_version, current_time)
+        self.assert_dataset_version_preparation(dataset_version, current_time, 2)
+        self.assertEqual(list(dataset_version.documents.values_list("id", flat=True)), [4, 6],
+                         "Expected weed_document to filter out Documents it returns True for")
+
+    def test_prepare_dataset_version_empty(self):
+        current_time = now()
+        empty_dataset_version = self.empty.versions.first()
+        dataset_version = self.empty.prepare_dataset_version(empty_dataset_version, current_time)
+        self.assert_dataset_version_preparation(dataset_version, current_time, document_count=0)
 
     def test_get_collection_initialization(self):
         collection_initialization = self.instance.get_collection_initialization()

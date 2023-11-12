@@ -3,6 +3,7 @@ from copy import deepcopy
 
 from django.apps import apps
 from django.db import models
+from django.utils.timezone import now
 from django.contrib.contenttypes.fields import GenericRelation
 
 from datagrowth.configuration import ConfigurationField
@@ -160,6 +161,37 @@ class DatasetBase(models.Model):
             dataset_version.copy_collection(collection)
         return dataset_version
 
+    def prepare_dataset_version(self, dataset_version, current_time=None):
+        DatasetVersion = self.get_dataset_version_model()
+        Document = DatasetVersion.get_document_model()
+        current_time = current_time or now()
+
+        dataset_version.state = GrowthState.PENDING
+        dataset_version.pending_at = current_time
+        dataset_version.finished_at = None
+        dataset_version.task_results = {}
+        dataset_version.derivatives = {}
+        dataset_version.save()
+
+        for batch in ibatch(dataset_version.documents.all(), batch_size=100):
+            documents = []
+            invalid_document_ids = []
+            for document in batch:
+                for task in document.tasks.keys():
+                    result = document.task_results.get(task, {})
+                    if not result.get("success"):
+                        document.invalidate_task(task, current_time=current_time)
+                if self.weed_document(document):
+                    invalid_document_ids.append(document.id)
+                else:
+                    documents.append(document)
+            Document.objects.filter(id__in=invalid_document_ids).delete()
+            Document.objects.bulk_update(documents, ["task_results", "derivatives", "pending_at", "finished_at"])
+
+        dataset_version.collections.update(pending_at=None, finished_at=None, task_results={}, derivatives={})
+
+        return dataset_version
+
     def gather_seeds(self, *args):
         """
         This method can get overridden. Its output will be used as initial seeding for new DatasetVersions
@@ -170,16 +202,15 @@ class DatasetBase(models.Model):
         """
         return iter([])
 
-    def refine_seeds(self, document_queryset):
+    def weed_document(self, document):
         """
-        This method can get overridden. Its output will be used as seeding for new DatasetVersions
-        A Documents queryset from the last DatasetVersion gets passed into this method,
-        but by default it returns an empty iterator.
+        This method can get overridden. Its output determines if a Document should get deleted before a new growth.
+        It receives the Document to assess, but by default will retain all Documents
 
-        :param document_queryset: Document queryset from the last DatasetVersion
-        :return: iterator of dicts or Documents
+        :param document: Document to assess
+        :return: whether to weed out the document or not
         """
-        return iter([])
+        return False
 
     def seed(self, current_version, seeds):
         """

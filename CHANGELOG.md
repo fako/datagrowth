@@ -43,6 +43,8 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
   Customize defaults by setting ``DOCUMENT_TASKS``, ``COLLECTION_TASKS``, ``DATASET_VERSION_TASKS``,
   ``COLLECTION_IDENTIFIER``, ``COLLECTION_REFEREE`` and ``DATASET_VERSION_MODEL``.
   Or override ``Dataset.get_collection_initialization`` and/or ``Dataset.get_task_definitions`` for more control.
+* ``Document.invalidate_task`` will now always set ``pending_at`` and ``finished_at`` attributes,
+  regardless of whether tasks have run before.
 
 
 v0.19

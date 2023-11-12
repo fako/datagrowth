@@ -102,16 +102,12 @@ class DataStorage(models.Model):
         return property_dependencies
 
     def invalidate_task(self, task_name: str, current_time: datetime = None) -> None:
-        is_invalidated = False
         if task_name in self.task_results:
-            is_invalidated = True
             del self.task_results[task_name]
         if task_name in self.derivatives:
-            is_invalidated = True
             del self.derivatives[task_name]
-        if is_invalidated:
-            self.pending_at = current_time or now()
-            self.finished_at = None
+        self.pending_at = current_time or now()
+        self.finished_at = None
 
     def __str__(self):
         return "{} {}".format(self.__class__.__name__, self.id)
