@@ -4,7 +4,6 @@ from datagrowth.processors import HttpSeedingProcessor
 
 from project.entities.constants import PAPER_DEFAULTS, EntityStates
 from processors.tests.seeding.base import HttpSeedingProcessorTestCase
-from datatypes.models import Document
 from resources.models import EntityListResource
 
 
@@ -34,6 +33,13 @@ SEEDING_PHASES = [
 ]
 
 
+EXCLUSIVE_DELETE_SIMPLE_PARAMETERS = {
+    "size": 20,
+    "page_size": 10,
+    "deletes": -1  # deletes all seeds
+}
+
+
 class TestSimpleHttpSeedingProcessor(HttpSeedingProcessorTestCase):
 
     seed_defaults = PAPER_DEFAULTS
@@ -52,6 +58,15 @@ class TestSimpleHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         for resource in EntityListResource.objects.all():
             self.assertTrue(resource.success)
             self.assertEqual(resource.request["args"], ["paper"])
+
+    @patch.object(EntityListResource, "PARAMETERS", EXCLUSIVE_DELETE_SIMPLE_PARAMETERS)
+    def test_exclusive_deletes(self):
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": SEEDING_PHASES
+        })
+        results = processor("paper")
+        self.assert_results(results)
+        self.assert_documents()
 
 
 DELTA_PARAMETERS = {
@@ -79,3 +94,17 @@ class TestSimpleDeltaHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         self.assert_results(results)
         self.assert_documents()
         self.assert_delta_documents()
+
+    @patch.object(EntityListResource, "PARAMETERS", EXCLUSIVE_DELETE_SIMPLE_PARAMETERS)
+    def test_exclusive_deletes(self):
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": SEEDING_PHASES
+        })
+        results = processor("paper")
+        self.assert_results(results)
+        self.assert_documents()
+        for doc in self.collection.documents.all():
+            if doc.id == self.ignored_document.id:
+                self.assertEqual(doc.properties["state"], EntityStates.OPEN)
+            else:
+                self.assertEqual(doc.properties["state"], EntityStates.DELETED)
