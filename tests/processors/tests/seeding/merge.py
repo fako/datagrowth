@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from datagrowth.processors import HttpSeedingProcessor
 
-from project.entities.constants import PAPER_DEFAULTS
+from project.entities.constants import PAPER_DEFAULTS, EntityStates
 from processors.tests.seeding.base import HttpSeedingProcessorTestCase
 from resources.models import EntityIdListResource, EntityDetailResource
 
@@ -53,6 +53,13 @@ SEEDING_PHASES = [
 ]
 
 
+EXCLUSIVE_DELETE_MERGE_PARAMETERS = {
+    "size": 20,
+    "page_size": 10,
+    "deletes": -1  # deletes all seeds
+}
+
+
 class TestMergeHttpSeedingProcessor(HttpSeedingProcessorTestCase):
 
     seed_defaults = PAPER_DEFAULTS
@@ -82,6 +89,15 @@ class TestMergeHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         for ix, resource in enumerate(EntityDetailResource.objects.all()):
             self.assertTrue(resource.success)
             self.assertEqual(resource.request["args"], ["paper", ix])
+
+    @patch.object(EntityIdListResource, "PARAMETERS", EXCLUSIVE_DELETE_MERGE_PARAMETERS)
+    def test_exclusive_deletes(self):
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": SEEDING_PHASES
+        })
+        results = processor("paper")
+        self.assert_results(results)
+        self.assert_documents(expected_documents=0)
 
 
 DELTA_PARAMETERS = {
@@ -119,3 +135,22 @@ class TestMergeDeltaHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         self.assert_results(results)
         self.assert_documents(expected_documents=expected_documents)
         self.assert_delta_documents(assert_deleted=False)
+
+    @patch.object(EntityIdListResource, "PARAMETERS", EXCLUSIVE_DELETE_MERGE_PARAMETERS)
+    def test_exclusive_deletes(self):
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": SEEDING_PHASES
+        })
+        results = processor("paper")
+
+        # The id list endpoint will not return deleted ids.
+        # So the metadata that's deleted will never be retrieved.
+        # Therefor the "deleted" test Document will never actually be deleted.
+        # It is up to the Dataset and its growth_strategy to handle or ignore deletes like this.
+        self.assert_results(results)
+        self.assert_documents(expected_documents=4)  # there are 4 pre-existing documents in delta data
+        for doc in self.collection.documents.all():
+            if doc.id != self.undeleted_paper.id:
+                self.assertEqual(doc.properties["state"], EntityStates.OPEN)
+            else:
+                self.assertEqual(doc.properties["state"], EntityStates.DELETED)

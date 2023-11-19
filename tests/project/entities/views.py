@@ -26,7 +26,7 @@ class EntityListAPIView(APIView):
         deletes = int(request.GET.get("deletes", 0))
         if deletes:
             for ix, seed in enumerate(seeds):
-                if not ix % deletes:
+                if deletes < 0 or not ix % deletes:
                     seed["state"] = EntityStates.DELETED
 
         # Generate some nested seeds if required and divide those among the main generated seeds
@@ -62,7 +62,7 @@ class EntityIdListAPIView(APIView):
         deletes = int(request.GET.get("deletes", 0))
         if deletes:
             for ix, seed in enumerate(seeds):
-                if not ix % deletes:
+                if deletes < 0 or not ix % deletes:
                     delete_ids.append(seed["id"])
 
         return Response([{"id": obj["id"]} for obj in seeds if obj["id"] not in delete_ids])

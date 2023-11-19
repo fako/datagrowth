@@ -47,7 +47,7 @@ class HttpSeedingProcessorTestCase(TestCase):
         cls.dataset_version = cls.dataset.create_dataset_version()
         cls.collection = cls.dataset_version.collections.first()
         cls.ignored_document = cls.create_document({
-            "state": "active"
+            "state": "open"
         })
         # We reload the ignored_document here, because Django will cause very minor updates while reloading,
         # that we want to ignore for the tests

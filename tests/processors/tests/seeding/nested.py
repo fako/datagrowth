@@ -23,7 +23,7 @@ def get_nested_seeds(journal_data: dict) -> Iterator[dict]:
 
 
 def back_fill_deletes(seed: dict, collection: Collection) -> Iterator[dict]:
-    if not seed["state"] == "deleted":
+    if not seed["state"] == EntityStates.DELETED:
         yield seed
         return
     for doc in collection.documents.filter(properties__journal_id=seed["journal_id"]):
@@ -71,6 +71,12 @@ NESTING_PARAMETERS = {
     "page_size": 10,
     "nested": "paper"
 }
+EXCLUSIVE_DELETE_NESTING_PARAMETERS = {
+    "size": 20,
+    "page_size": 10,
+    "nested": "paper",
+    "deletes": -1  # deletes all root level seeds (journals) and outputs no nested seeds (papers)
+}
 
 
 class TestNestedHttpSeedingProcessor(HttpSeedingProcessorTestCase):
@@ -92,6 +98,15 @@ class TestNestedHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         for resource in EntityListResource.objects.all():
             self.assertTrue(resource.success)
             self.assertEqual(resource.request["args"], ["journal"])
+
+    @patch.object(EntityListResource, "PARAMETERS", EXCLUSIVE_DELETE_NESTING_PARAMETERS)
+    def test_exclusive_deletes(self):
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": SEEDING_PHASES
+        })
+        results = processor("journal")
+        self.assert_results(results, extra_properties=["journal_id"])
+        self.assert_documents(expected_documents=0)
 
 
 NESTED_DELETE_PARAMETERS = {
@@ -176,3 +191,17 @@ class TestNestedDeltaHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         self.assert_results(results, extra_properties=["journal_id"])
         self.assert_documents(expected_documents=16)
         self.assert_delta_documents()
+
+    @patch.object(EntityListResource, "PARAMETERS", EXCLUSIVE_DELETE_NESTING_PARAMETERS)
+    def test_exclusive_deletes(self):
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": SEEDING_PHASES
+        })
+        results = processor("journal")
+        self.assert_results(results, extra_properties=["journal_id"])
+        self.assert_documents(expected_documents=4)  # there are 4 pre-existing documents in delta data
+        for doc in self.collection.documents.all():
+            if doc.id == self.ignored_document.id:
+                self.assertEqual(doc.properties["state"], EntityStates.OPEN)
+            else:
+                self.assertEqual(doc.properties["state"], EntityStates.DELETED)
