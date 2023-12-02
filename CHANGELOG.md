@@ -53,6 +53,7 @@ The convenience of lists is more important here than memory footprint which will
 * Fallback for ``JSONField`` imports from ``django.contrib.postgres.fields`` has been removed.
 * Adds ``global_allow_redirects`` configuration which controls how requests library will handle redirects.
   Defaults to True even for "head" requests.
+* Exposes ``ProcessorFactory`` and ``DataStorageFactory`` to easily build processors and datatypes in the future.
 
 
 v0.18
