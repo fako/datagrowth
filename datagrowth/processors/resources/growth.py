@@ -7,7 +7,7 @@ from django.db import transaction
 from datagrowth.configuration import create_config
 from datagrowth.resources.http.tasks import send
 from datagrowth.resources.shell.tasks import run
-from datagrowth.processors import Processor
+from datagrowth.processors import ProcessorFactory
 from datagrowth.processors.growth import GrowthProcessor
 
 
@@ -85,11 +85,9 @@ class ResourceGrowthProcessor(GrowthProcessor):
 
                 documents.append(process_result.document)
                 # Write data to the Document
-                extractor_name, method_name = Processor.get_processor_components(contribution_processor)
-                extractor_class = Processor.get_processor_class(extractor_name)
-                extractor = extractor_class(config)
-                extractor_method = getattr(extractor, method_name)
-                contributions = list(extractor_method(result)) if not self.resource_is_empty(result) else []
+                extract_processor, extract_method = \
+                    ProcessorFactory(contribution_processor).build_with_callable(config)
+                contributions = list(extract_method(result)) if not self.resource_is_empty(result) else []
                 if len(contributions):
                     contribution = contributions.pop(0)
                     field_attribute = getattr(process_result.document, contribution_field)

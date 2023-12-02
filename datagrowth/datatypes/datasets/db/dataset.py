@@ -7,9 +7,11 @@ from django.utils.timezone import now
 from django.contrib.contenttypes.fields import GenericRelation
 
 from datagrowth.configuration import ConfigurationField
+from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
+from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
 from datagrowth.version import VERSION
 from datagrowth.utils import ibatch
 
@@ -36,32 +38,30 @@ class DatasetBase(models.Model):
     DOCUMENT_TASKS = {}
     COLLECTION_TASKS = {}
     DATASET_VERSION_TASKS = {}
+    HARVEST_PHASES = []
 
     COLLECTION_IDENTIFIER = "id"
     COLLECTION_REFEREE = None
     DATASET_VERSION_MODEL = "DatasetVersion"
 
-    @property
-    def pipelines(self):
-        return {
-            "seeder": None,
-            "growth": [],
-            "harvest": []
-        }
+    def get_seeding_configurations(self):
+        seeding_configurations = []
+        for phase_name, factory in self.get_seeding_factories().items():
+            for configs in factory.processor.create_phase_configurations(factory.defaults["phases"]):
+                for config in configs.values():
+                    seeding_configurations.append(config)
+        return seeding_configurations
 
-    def get_seeding_phases(self):
+    def get_seeding_factories(self):
         assert self.SEEDING_PHASES, "Expected Dataset to specify SEEDING_PHASES"
         return {
-            self.signature: self.SEEDING_PHASES
+            self.signature: SeedingProcessorFactory(HttpSeedingProcessor, self.SEEDING_PHASES)
         }
 
-    def get_collection_initialization(self):
+    def get_collection_factories(self):
         return {
-            phase_name: {
-                "identifier": self.COLLECTION_IDENTIFIER,
-                "referee": self.COLLECTION_REFEREE
-            }
-            for phase_name in self.get_seeding_phases().keys()
+            phase_name: DataStorageFactory(identifier=self.COLLECTION_IDENTIFIER, referee=self.COLLECTION_REFEREE)
+            for phase_name in self.get_seeding_factories().keys()
         }
 
     def get_task_definitions(self):
@@ -110,11 +110,8 @@ class DatasetBase(models.Model):
     def filter_growth_configuration(self, **kwargs):
         # Calculate which keys are whitelisted
         growth_keys = set()
-        growth_configs = [config for processor, config in self.pipelines.get("growth", [])]
+        growth_configs = self.get_seeding_configurations()
         growth_configs.append(self.CONFIG)
-        seeder_processor = self.pipelines.get("seeder", None)
-        if seeder_processor:
-            growth_configs.append(seeder_processor.config)
         for config in growth_configs:
             growth_keys.update({key[1:] for key, value in config.items() if key.startswith("$")})
         # Actual filtering of input
@@ -123,7 +120,7 @@ class DatasetBase(models.Model):
     def filter_harvest_configuration(self, **kwargs):
         # Calculate which keys are whitelisted
         harvest_keys = set()
-        harvest_configs = [config for processor, config in self.pipelines.get("harvest", [])]
+        harvest_configs = [factory.defaults for factory in self.HARVEST_PHASES]
         harvest_configs.append(self.CONFIG)
         for config in harvest_configs:
             harvest_keys.update({key[1:] for key, value in config.items() if key.startswith("$")})
@@ -137,14 +134,13 @@ class DatasetBase(models.Model):
         dataset_version.pending_at = None
         dataset_version.save()
         collections = []
-        for collection_name, initialization in self.get_collection_initialization().items():
-            collection = Collection(
+        for collection_name, factory in self.get_collection_factories().items():
+            collection = factory.build(
+                Collection,
                 name=collection_name,
                 dataset_version=dataset_version,
-                pending_at=None,
-                **initialization
+                pending_at=None
             )
-            collection.clean()
             collections.append(collection)
         Collection.objects.bulk_create(collections)
         return dataset_version

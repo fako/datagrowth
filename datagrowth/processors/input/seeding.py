@@ -6,7 +6,7 @@ from requests import Session
 from datagrowth.datatypes import CollectionBase
 from datagrowth.configuration import create_config, ConfigurationType
 from datagrowth.resources.http.iterators import send_serie_iterator
-from datagrowth.processors import Processor
+from datagrowth.processors import Processor, ProcessorFactory
 from datagrowth.processors.input.iterators import content_iterator
 from datagrowth.utils import ibatch
 
@@ -103,6 +103,22 @@ class ResourceSeedingProcessor(Processor):
             documents.append(doc)
         return self.collection.update_batches(documents, self.collection.identifier)
 
+    @classmethod
+    def create_phase_configurations(cls, phases):
+        for ix, phase in enumerate(phases):
+            phase = deepcopy(phase)
+            phase["index"] = ix
+            retrieve_data = phase.pop("retrieve_data", {})
+            contribute_data = phase.pop("contribute_data", {})
+            phase_config = create_config("seeding_processor", phase)
+            retrieve_config = create_config(cls.resource_type, retrieve_data)
+            contribute_config = create_config(cls.contribute_type, contribute_data)
+            yield {
+                "phase": phase_config,
+                "retrieve": retrieve_config,
+                "contribute": contribute_config
+            }
+
     def __init__(self, collection: CollectionBase, config: Union[ConfigurationType, Dict],
                  initial: List[Dict] = None) -> None:
         super().__init__(config)
@@ -125,20 +141,10 @@ class ResourceSeedingProcessor(Processor):
                 "Expected first phase to have strategy 'initial' if no initial seeds are given to the constructor"
         else:
             phases_selection = [phase for phase in self.config.phases if phase.get("is_post_initialization", False)]
-        self.phases = OrderedDict()
-        for ix, phase in enumerate(phases_selection):
-            phase = deepcopy(phase)
-            phase["index"] = ix
-            retrieve_data = phase.pop("retrieve_data", None)
-            contribute_data = phase.pop("contribute_data")
-            phase_config = create_config("seeding_processor", phase)
-            retrieve_config = create_config(self.resource_type, retrieve_data) if retrieve_data else None
-            contribute_config = create_config(self.contribute_type, contribute_data)
-            self.phases[phase_config.phase] = {
-                "phase": phase_config,
-                "retrieve": retrieve_config,
-                "contribute": contribute_config
-            }
+        self.phases = OrderedDict({
+            configs["phase"].phase: configs
+            for configs in self.create_phase_configurations(phases_selection)
+        })
 
     def __call__(self, *args, **kwargs) -> Iterator:
         while self.contents or self.buffer is None:
@@ -195,3 +201,10 @@ class HttpSeedingProcessor(ResourceSeedingProcessor):
             config=resource_config,
             session=self.get_session()
         )
+
+
+class SeedingProcessorFactory(ProcessorFactory):
+
+    def __init__(self, processor, phases, defaults=None):
+        super().__init__(processor, defaults=defaults)
+        self.defaults["phases"] = phases
