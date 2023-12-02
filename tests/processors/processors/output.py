@@ -1,6 +1,5 @@
 from datagrowth.configuration import ConfigurationProperty
 from datagrowth.processors import Processor
-from core.processors import RankProcessor, LegacyRankProcessor
 
 
 class MockProcessor(Processor):
@@ -27,67 +26,3 @@ class MockFilterProcessor(MockProcessor):
                 yield individual
             elif self.config.include_odd and self.config.include_even:
                 yield individual
-
-
-class MockLegacyRankProcessor(LegacyRankProcessor):
-
-    @staticmethod
-    def rank_by_value(individual):
-        return individual["value"]
-
-    @staticmethod
-    def is_double(individual):
-        return 1 if "double" in individual["name"] else 0
-
-    @staticmethod
-    def is_highest(individual):
-        return 1 if "highest" in individual["name"] else 0
-
-    @staticmethod
-    def ban_highest(individual):
-        return 0.5 if "highest" in individual["name"] else 1
-
-    @staticmethod
-    def wrong_return_value(individual):
-        return "wrong"
-
-    @staticmethod
-    def alter_individual(individual):
-        individual["name"] += "-highest"
-        return 0
-
-    @staticmethod
-    def i_think_none_of_it(individual):
-        return None
-
-
-class MockRankProcessor(RankProcessor):
-
-    @staticmethod
-    def rank_by_value(individual):
-        return individual["value"]
-
-    @staticmethod
-    def is_double(individual):
-        return 1 if "double" in individual["name"] else 0
-
-    @staticmethod
-    def is_highest(individual):
-        return 1 if "highest" in individual["name"] else 0
-
-    @staticmethod
-    def ban_highest(individual):
-        return 0.5 if "highest" in individual["name"] else 1
-
-    @staticmethod
-    def wrong_return_value(individual):
-        return "wrong"
-
-    @staticmethod
-    def alter_individual(individual):
-        individual["name"] += "-highest"
-        return 0
-
-    @staticmethod
-    def i_think_none_of_it(individual):
-        return None
