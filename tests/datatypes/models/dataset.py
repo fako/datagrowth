@@ -1,10 +1,15 @@
 from collections import OrderedDict
 
 from datagrowth.datatypes import DatasetBase, DatasetVersionBase
+from datagrowth.processors import QuerySetProcessor, ProcessorFactory
 
 from project.entities.constants import PAPER_DEFAULTS
 from datatypes.models import Document
-from datatypes.processors import DataProcessor
+from processors.processors import MockNumberProcessor, MockFilterProcessor
+
+
+class StubHarvestProcessor(QuerySetProcessor):
+    pass
 
 
 class DatasetVersion(DatasetVersionBase):
@@ -31,9 +36,11 @@ class Dataset(DatasetBase):
                 "args": [],
                 "kwargs": {},
                 "continuation_limit": 2,
+                "setting0": "private",
             },
             "contribute_data": {
-                "objective": PAPER_OBJECTIVE
+                "objective": PAPER_OBJECTIVE,
+                "$setting1": "const"
             }
         }
     ]
@@ -44,6 +51,13 @@ class Dataset(DatasetBase):
             "resources": []
         }
     }
+    HARVEST_PHASES = [
+        ProcessorFactory(MockNumberProcessor, method="number_documents"),
+        ProcessorFactory("MockFilterProcessor.filter_documents", defaults={
+            "$setting2": "variable",
+            "$include_even": False
+        }),
+    ]
 
     COMMUNITY_SPIRIT = OrderedDict([
         ("phase1", {
@@ -112,47 +126,47 @@ class Dataset(DatasetBase):
     def version(self):
         return "0.0.2"
 
-    @property
-    def pipelines(self):
-        return {
-            "seeder": None,
-            "growth": [
-                (DataProcessor, {
-                    "_args": ["$.test"],
-                    "_kwargs": {},
-                    "_resource": "HttpResourceMock",
-                    "_objective": {
-                        "@": "$.dict.list",
-                        "value": "$",
-                        "#context": "$.dict.test"
-                    },
-                    "setting0": "private",
-                    "$setting1": "const"
-                }),
-                (DataProcessor, {
-                    "_args": ["$.value"],
-                    "_kwargs": {},
-                    "_resource": "HttpResourceMock",
-                    "_objective": {
-                        "@": "$.dict.list",
-                        "value": "$",
-                        "#context": "$.dict.test"
-                    }
-                }),
-                (DataProcessor, {
-                    "_args": ["$.value"],
-                    "_kwargs": {},
-                    "_resource": "HttpResourceMock",
-                })
-            ],
-            "harvest": [
-                (DataProcessor, {}),
-                (DataProcessor, {
-                    "$setting2": "variable",
-                    "$include_even": False
-                })
-            ]
-        }
+    # @property
+    # def pipelines(self):
+    #     return {
+    #         "seeder": None,
+    #         "growth": [
+    #             (DataProcessor, {
+    #                 "_args": ["$.test"],
+    #                 "_kwargs": {},
+    #                 "_resource": "HttpResourceMock",
+    #                 "_objective": {
+    #                     "@": "$.dict.list",
+    #                     "value": "$",
+    #                     "#context": "$.dict.test"
+    #                 },
+    #                 "setting0": "private",
+    #                 "$setting1": "const"
+    #             }),
+    #             (DataProcessor, {
+    #                 "_args": ["$.value"],
+    #                 "_kwargs": {},
+    #                 "_resource": "HttpResourceMock",
+    #                 "_objective": {
+    #                     "@": "$.dict.list",
+    #                     "value": "$",
+    #                     "#context": "$.dict.test"
+    #                 }
+    #             }),
+    #             (DataProcessor, {
+    #                 "_args": ["$.value"],
+    #                 "_kwargs": {},
+    #                 "_resource": "HttpResourceMock",
+    #             })
+    #         ],
+    #         "harvest": [
+    #             (DataProcessor, {}),
+    #             (DataProcessor, {
+    #                 "$setting2": "variable",
+    #                 "$include_even": False
+    #             })
+    #         ]
+    #     }
 
     def gather_seeds(self, *args):
         return [
@@ -180,4 +194,11 @@ class Dataset(DatasetBase):
 
 
 class DatasetMock(DatasetBase):
-    pass
+
+    SEEDING_PHASES = [
+        {
+            "phase": "mock",
+            "strategy": "initial",
+            "batch_size": 5,
+        }
+    ]

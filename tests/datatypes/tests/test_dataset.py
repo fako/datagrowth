@@ -5,6 +5,8 @@ from unittest.mock import Mock, patch
 
 from datagrowth.exceptions import DGGrowthUnfinished
 from datagrowth.datatypes.datasets.constants import GrowthState
+from datagrowth.datatypes.storage import DataStorageFactory
+from datagrowth.processors import SeedingProcessorFactory
 
 from datatypes.models import Dataset, DatasetMock, DatasetVersion, Collection, Document
 from resources.models import HttpResourceMock, MockErrorQuerySet
@@ -265,63 +267,63 @@ class TestDataset(TestCase):
         dataset_version = self.empty.prepare_dataset_version(empty_dataset_version, current_time)
         self.assert_dataset_version_preparation(dataset_version, current_time, document_count=0)
 
-    def test_get_collection_initialization(self):
-        collection_initialization = self.instance.get_collection_initialization()
-        self.assertEqual(collection_initialization, {
-            "setting1=const&test": {
-                "identifier": "id",
-                "referee": None
-            }
-        })
+    def test_get_collection_factories(self):
+        collection_factories = self.instance.get_collection_factories()
+        self.assertEqual(list(collection_factories.keys()), ["setting1=const&test"])
+        self.assertIsInstance(collection_factories["setting1=const&test"], DataStorageFactory)
+        self.assertEqual(collection_factories["setting1=const&test"].defaults["identifier"], "id")
+        self.assertIsNone(collection_factories["setting1=const&test"].defaults["referee"])
         with patch.object(Dataset, "COLLECTION_IDENTIFIER", None):
-            collection_initialization = self.instance.get_collection_initialization()
-            self.assertEqual(collection_initialization, {
-                "setting1=const&test": {
-                    "identifier": None,
-                    "referee": None
-                }
-            })
+            collection_factories = self.instance.get_collection_factories()
+            self.assertEqual(list(collection_factories.keys()), ["setting1=const&test"])
+            self.assertIsInstance(collection_factories["setting1=const&test"], DataStorageFactory)
+            self.assertIsNone(collection_factories["setting1=const&test"].defaults["identifier"])
+            self.assertIsNone(collection_factories["setting1=const&test"].defaults["referee"])
         with patch.object(Dataset, "COLLECTION_REFEREE", "referee"):
-            collection_initialization = self.instance.get_collection_initialization()
-            self.assertEqual(collection_initialization, {
-                "setting1=const&test": {
-                    "identifier": "id",
-                    "referee": "referee"
-                }
-            })
+            collection_factories = self.instance.get_collection_factories()
+            self.assertEqual(list(collection_factories.keys()), ["setting1=const&test"])
+            self.assertIsInstance(collection_factories["setting1=const&test"], DataStorageFactory)
+            self.assertEqual(collection_factories["setting1=const&test"].defaults["identifier"], "id")
+            self.assertEqual(collection_factories["setting1=const&test"].defaults["referee"], "referee")
 
-    def test_get_seeding_phases(self):
-        seeding_phases = self.instance.get_seeding_phases()
-        self.assertEqual(seeding_phases, {
-            "setting1=const&test": [
-                {
-                    "phase": "papers",
-                    "strategy": "initial",
-                    "batch_size": 5,
-                    "retrieve_data": {
-                        "resource": "resources.EntityListResource",
-                        "method": "get",
-                        "args": [],
-                        "kwargs": {},
-                        "continuation_limit": 2
+    maxDiff = None
+
+    def test_get_seeding_factories(self):
+        seeding_phases = self.instance.get_seeding_factories()
+        self.assertEqual(list(seeding_phases.keys()), ["setting1=const&test"],
+                         "Expected default collection to get a name equal to the Dataset signature")
+        self.assertIsInstance(seeding_phases["setting1=const&test"], SeedingProcessorFactory)
+        self.assertEqual(seeding_phases["setting1=const&test"].defaults["phases"], [
+            {
+                "phase": "papers",
+                "strategy": "initial",
+                "batch_size": 5,
+                "retrieve_data": {
+                    "resource": "resources.EntityListResource",
+                    "method": "get",
+                    "args": [],
+                    "kwargs": {},
+                    "continuation_limit": 2,
+                    "setting0": "private"
+
+                },
+                "contribute_data": {
+                    "objective": {
+                        "id": "$.id",
+                        "state": "$.state",
+                        "doi": "$.doi",
+                        "title": "$.title",
+                        "abstract": "$.abstract",
+                        "authors": "$.authors",
+                        "url": "$.url",
+                        "published_at": "$.published_at",
+                        "modified_at": "$.modified_at",
+                        "@": "$.results"
                     },
-                    "contribute_data": {
-                        "objective": {
-                            "id": "$.id",
-                            "state": "$.state",
-                            "doi": "$.doi",
-                            "title": "$.title",
-                            "abstract": "$.abstract",
-                            "authors": "$.authors",
-                            "url": "$.url",
-                            "published_at": "$.published_at",
-                            "modified_at": "$.modified_at",
-                            "@": "$.results"
-                        }
-                    }
+                    "$setting1": "const",
                 }
-            ]
-        }, "Expected Dataset.SEEDING_PHASES to be the seeding phases for the default collection")
+            }
+        ], "Expected Dataset.SEEDING_PHASES to be the seeding phases for the default collection")
 
     def test_get_task_definitions(self):
         task_definitions = self.instance.get_task_definitions()
