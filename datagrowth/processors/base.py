@@ -1,3 +1,5 @@
+import inspect
+
 from django.apps import apps
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType
@@ -8,7 +10,7 @@ class ArgumentsTypes:
     BATCH = 'batch'
 
 
-class Processor(object):
+class Processor:
     """
     This class is the base class for all processors.
     All processors have a config attribute that contains the configuration for the ``Processor``.
@@ -80,3 +82,29 @@ class Processor(object):
 
 class QuerySetProcessor(Processor):
     pass
+
+
+class ProcessorFactory:
+
+    def __init__(self, processor, defaults=None, method=None):
+        self.defaults = defaults or {}
+        if isinstance(processor, str):
+            processor_name, method_name = Processor.get_processor_components(processor)
+            self.processor = Processor.get_processor_class(processor_name)
+            self.method = method_name
+        elif inspect.isclass(processor) and issubclass(processor, Processor):
+            self.processor = processor
+            self.method = method
+        else:
+            raise TypeError("Expected a Processor or name and method of a Processor to build")
+
+    def build(self, config):
+        config.update(self.defaults)
+        return self.processor(config)
+
+    def build_with_callable(self, config, asynchronous=False):
+        prc = self.build(config)
+        clb = getattr(prc, self.method) if self.method else prc
+        if asynchronous:
+            clb = getattr(clb, "delay")
+        return prc, clb

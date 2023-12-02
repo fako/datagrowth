@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.db import models
 from django.urls import reverse
 from django.utils.text import camel_case_to_spaces
@@ -34,3 +36,16 @@ class DataStorage(models.Model):
 
     class Meta:
         abstract = True
+
+
+class DataStorageFactory:
+
+    def __init__(self, **defaults):
+        self.defaults = defaults
+
+    def build(self, model, **kwargs):
+        initialization = copy(self.defaults)
+        initialization.update(kwargs)
+        instance = model(**initialization)
+        instance.clean()
+        return instance
