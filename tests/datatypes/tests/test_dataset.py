@@ -286,8 +286,6 @@ class TestDataset(TestCase):
             self.assertEqual(collection_factories["setting1=const&test"].defaults["identifier"], "id")
             self.assertEqual(collection_factories["setting1=const&test"].defaults["referee"], "referee")
 
-    maxDiff = None
-
     def test_get_seeding_factories(self):
         seeding_phases = self.instance.get_seeding_factories()
         self.assertEqual(list(seeding_phases.keys()), ["setting1=const&test"],
