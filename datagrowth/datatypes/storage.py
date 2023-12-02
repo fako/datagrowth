@@ -2,6 +2,7 @@ from typing import List
 from copy import copy
 from datetime import datetime
 from collections import defaultdict
+from copy import copy
 
 from django.apps import apps
 from django.db import models
