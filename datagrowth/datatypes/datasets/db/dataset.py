@@ -30,6 +30,12 @@ class DatasetBase(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
+    #######################################################
+    # DATASET CONFIGURATION CONSTANTS AND METHODS
+    #######################################################
+    # Attributes that may get set for a Dataset to configure its behaviour.
+    # It's also possible to override the methods that use the constant attributes to compute the configurations.
+
     NAME = None
     CONFIG = {}
 
@@ -127,6 +133,11 @@ class DatasetBase(models.Model):
         # Actual filtering of input
         return {key: value for key, value in kwargs.items() if key.strip("$") in harvest_keys}
 
+    #######################################################
+    # DATASET VERSION MANIPULATION
+    #######################################################
+    # Methods that work with DatasetVersions
+
     def create_dataset_version(self):
         DatasetVersion = self.get_dataset_version_model()
         Collection = DatasetVersion.get_collection_model()
@@ -187,6 +198,11 @@ class DatasetBase(models.Model):
         dataset_version.collections.update(pending_at=None, finished_at=None, task_results={}, derivatives={})
 
         return dataset_version
+
+    #######################################################
+    # DATASET GROWTH
+    #######################################################
+    # Methods that enable a Dataset to expand its data.
 
     def gather_seeds(self, *args):
         """
@@ -260,11 +276,21 @@ class DatasetBase(models.Model):
         if asynchronous:
             raise DGGrowthUnfinished()
 
+    #######################################################
+    # DATASET HARVEST
+    #######################################################
+    # Methods that handle how a fully grown Dataset may export its data through a harvest.
+
     def harvest_sample(self):
         pass
 
     def harvest(self):
         pass
+
+    #######################################################
+    # UTILITY
+    #######################################################
+    # Some standard methods to work easier with Datasets
 
     def __str__(self):
         return f"{self.signature} ({self.id})"
