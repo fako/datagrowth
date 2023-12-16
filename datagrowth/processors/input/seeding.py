@@ -31,7 +31,7 @@ class ResourceSeedingProcessor(Processor):
 
     def get_resource_iterator(self, args_list: List[Any], kwargs_list: List[Dict],
                               resource_config: ConfigurationType) -> Iterator:
-        raise NotImplemented("ResourceSeedingProcessor does not implement get_resource_iterator")
+        raise NotImplementedError("ResourceSeedingProcessor does not implement get_resource_iterator")
 
     def build_seed_iterator(self, phase: Dict, *args, **kwargs) -> Iterator:
         resource_config = phase["retrieve"]
@@ -182,9 +182,16 @@ class ResourceSeedingProcessor(Processor):
                         continue
                 self.flush_buffer(phase)
             if not self.batch:
-                return
+                # Not trying to yield a batch that doesn't exist
+                # Likely that the while loop will end now and reset the processor
+                continue
             for batch in self.batch_to_documents():
                 yield batch
+            # Resetting batch after yielding it, because the batch is considered processed
+            self.batch = []
+        # Resets object state to allow multiple calls to the processor
+        self.buffer = None
+        self.batch = []
 
 
 class HttpSeedingProcessor(ResourceSeedingProcessor):
