@@ -90,22 +90,22 @@ class TestHttpResource(ResourceTestMixin):
         self.assertIsInstance(variables, dict)
         self.assertIn("url", variables)
         self.assertIn("meta", variables)
-        self.assertEquals(variables["url"], ("arg1", "arg2"))
-        self.assertEquals(variables["meta"], "arg2")
+        self.assertEqual(variables["url"], ("arg1", "arg2"))
+        self.assertEqual(variables["meta"], "arg2")
         # Variables without input
         variables = self.instance.variables()
         self.assertIsInstance(variables, dict)
         self.assertIn("url", variables)
         self.assertIn("meta", variables)
-        self.assertEquals(variables["url"], tuple())
+        self.assertEqual(variables["url"], tuple())
         self.assertIsNone(variables["meta"])
         # Variables with input through get
         self.instance.get("success")
         variables = self.instance.variables()
         self.assertIn("url", variables)
         self.assertIn("meta", variables)
-        self.assertEquals(variables["url"], ("en", "success"))
-        self.assertEquals(variables["meta"], "success")
+        self.assertEqual(variables["url"], ("en", "success"))
+        self.assertEqual(variables["meta"], "success")
 
     def test_data(self):
         self.assertIsInstance(self.instance.data(), dict)
@@ -133,7 +133,7 @@ class TestHttpResource(ResourceTestMixin):
         }
         self.instance._send()
         # See if request was made properly
-        self.assertEquals(self.instance.session.send.call_count, 1)
+        self.assertEqual(self.instance.session.send.call_count, 1)
         args, kwargs = self.instance.session.send.call_args
         preq = args[0]
         user_agent_header = preq.headers.pop("User-Agent", None)
@@ -166,7 +166,7 @@ class TestHttpResource(ResourceTestMixin):
         }
         self.instance._send()
         # See if request was made properly
-        self.assertEquals(self.instance.session.send.call_count, 1)
+        self.assertEqual(self.instance.session.send.call_count, 1)
         args, kwargs = self.instance.session.send.call_args
         preq = args[0]
         user_agent_header = preq.headers.pop("User-Agent", None)
@@ -200,7 +200,7 @@ class TestHttpResource(ResourceTestMixin):
         }
         self.instance._send()
         # See if request was made properly
-        self.assertEquals(self.instance.session.send.call_count, 1)
+        self.assertEqual(self.instance.session.send.call_count, 1)
         args, kwargs = self.instance.session.send.call_args
         preq = args[0]
         user_agent_header = preq.headers.pop("User-Agent", None)
@@ -245,7 +245,7 @@ class TestHttpResource(ResourceTestMixin):
                 self.fail("Connection error did not raise for GET exception: {}".format(exception))
             except (DGHttpError40X, DGHttpError50X):
                 pass
-            self.assertEquals(instance.status, exception_status)
+            self.assertEqual(instance.status, exception_status)
             self.assertEqual(instance.head, {})
             self.assertEqual(instance.body, "")
             if exception_status in [502, 504]:
@@ -275,7 +275,7 @@ class TestHttpResource(ResourceTestMixin):
                 self.fail("Connection error did not raise for POST exception: {}".format(exception))
             except (DGHttpError40X, DGHttpError50X):
                 pass
-            self.assertEquals(instance.status, exception_status)
+            self.assertEqual(instance.status, exception_status)
             self.assertEqual(instance.head, {})
             self.assertEqual(instance.body, "")
             if exception_status in [502, 504]:
@@ -374,7 +374,7 @@ class TestHttpResource(ResourceTestMixin):
         self.assertEqual(data_hash, "")
         # Give data
         data_hash = HttpResource.hash_from_data(self.test_data)
-        self.assertEquals(
+        self.assertEqual(
             data_hash, "22678875db79b37d27f3a7ae598e65c72eb55c36",
             "Data hashes do not match, perhaps keys were not sorted before JSON dump?"
         )
@@ -594,7 +594,7 @@ class TestHttpResource(ResourceTestMixin):
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)
         self.assertFalse(instance.data_hash)
-        self.assertEquals(instance.session.send.call_count, 1)
+        self.assertEqual(instance.session.send.call_count, 1)
         args, kwargs = instance.session.send.call_args
         preq = args[0]
         self.assert_agent_header(preq, "DataScope (custom)")
@@ -632,23 +632,23 @@ class TestHttpResource(ResourceTestMixin):
 
     def test_parse_content_type(self):
         mime_type, encoding = HttpResource.parse_content_type("text/html; charset=utf-8")
-        self.assertEquals(mime_type, "text/html")
-        self.assertEquals(encoding, "utf-8")
+        self.assertEqual(mime_type, "text/html")
+        self.assertEqual(encoding, "utf-8")
         mime_type, encoding = HttpResource.parse_content_type("text/html; charset=utf-16")
-        self.assertEquals(mime_type, "text/html")
-        self.assertEquals(encoding, "utf-16")
+        self.assertEqual(mime_type, "text/html")
+        self.assertEqual(encoding, "utf-16")
         mime_type, encoding = HttpResource.parse_content_type("text/plain; charset=latin-1")
-        self.assertEquals(mime_type, "text/plain")
-        self.assertEquals(encoding, "latin-1")
+        self.assertEqual(mime_type, "text/plain")
+        self.assertEqual(encoding, "latin-1")
         mime_type, encoding = HttpResource.parse_content_type("text/html")
-        self.assertEquals(mime_type, "text/html")
-        self.assertEquals(encoding, "utf-8")
+        self.assertEqual(mime_type, "text/html")
+        self.assertEqual(encoding, "utf-8")
         mime_type, encoding = HttpResource.parse_content_type("text/plain")
-        self.assertEquals(mime_type, "text/plain")
-        self.assertEquals(encoding, "utf-8")
+        self.assertEqual(mime_type, "text/plain")
+        self.assertEqual(encoding, "utf-8")
         mime_type, encoding = HttpResource.parse_content_type("text/html", default_encoding="utf-16")
-        self.assertEquals(mime_type, "text/html")
-        self.assertEquals(encoding, "utf-16")
+        self.assertEqual(mime_type, "text/html")
+        self.assertEqual(encoding, "utf-16")
         mime_type, encoding = HttpResource.parse_content_type("text/plain", default_encoding="latin-1")
-        self.assertEquals(mime_type, "text/plain")
-        self.assertEquals(encoding, "latin-1")
+        self.assertEqual(mime_type, "text/plain")
+        self.assertEqual(encoding, "latin-1")

@@ -51,7 +51,7 @@ class TestHttpImageResourceInterface(TestCase):
 
     def assert_call_args_get(self, call_args, expected_url):
         args, kwargs = call_args
-        self.assertEquals(len(args), 1)
+        self.assertEqual(len(args), 1)
         preq = args[0]
         self.assertEqual(preq.url, expected_url)
         self.assert_agent_header(preq, "DataGrowth (test)")
@@ -63,13 +63,13 @@ class TestHttpImageResourceInterface(TestCase):
 
     def assert_call_args_save(self, call_args, expected_file_path):
         args, kwargs = call_args
-        self.assertEquals(len(args), 2)
+        self.assertEqual(len(args), 2)
         file_path = args[0]
         fd = args[1]
-        self.assertEquals(file_path, os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, expected_file_path))
+        self.assertEqual(file_path, os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, expected_file_path))
         self.assertIsInstance(fd, ImageFile)
-        self.assertEquals(fd.width, 10)
-        self.assertEquals(fd.height, 10)
+        self.assertEqual(fd.width, 10)
+        self.assertEqual(fd.height, 10)
 
     def test_send_get_request(self):
         default_storage_save_target = "datagrowth.resources.http.files.default_storage.save"
@@ -91,10 +91,10 @@ class TestHttpImageResourceInterface(TestCase):
                 new_url = "http://localhost:8000/{}".format(term)
                 instance = self.model().get(new_url)
                 self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
-                self.assertEquals(storage_save_mock.call_count, 1)
+                self.assertEqual(storage_save_mock.call_count, 1)
                 self.assert_call_args_save(storage_save_mock.call_args, expected_file_path)
                 instance.save()
-                self.assertEquals(instance.session.send.call_count, 1)
+                self.assertEqual(instance.session.send.call_count, 1)
                 self.assert_call_args_get(instance.session.send.call_args, new_url)
                 self.assertEqual(instance.head, self.content_type_header)
                 self.assertEqual(instance.body, expected_file_path)
@@ -109,10 +109,10 @@ class TestHttpImageResourceInterface(TestCase):
             storage_save_mock.reset_mock()
             instance = self.model(request=request).get()
             self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
-            self.assertEquals(storage_save_mock.call_count, 1)
+            self.assertEqual(storage_save_mock.call_count, 1)
             self.assert_call_args_save(storage_save_mock.call_args, "resources/downloads/8/2f/new2.html")
             instance.save()
-            self.assertEquals(instance.session.send.call_count, 1)
+            self.assertEqual(instance.session.send.call_count, 1)
             self.assert_call_args_get(instance.session.send.call_args, new_url_request)
             self.assertEqual(instance.head, self.content_type_header)
             self.assertEqual(instance.body, "resources/downloads/8/2f/new2.html")
@@ -125,7 +125,7 @@ class TestHttpImageResourceInterface(TestCase):
         instance = self.model().get("http://localhost:8000/success")
         self.assertFalse(instance.session.send.called)
         self.assertEqual(instance.head, self.content_type_header)
-        self.assertEquals(instance.body, "resources/downloads/2/60/success.html")
+        self.assertEqual(instance.body, "resources/downloads/2/60/success.html")
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
         # Load an existing resource from its request
@@ -133,7 +133,7 @@ class TestHttpImageResourceInterface(TestCase):
         instance = self.model(request=request).get()
         self.assertFalse(instance.session.send.called)
         self.assertEqual(instance.head, self.content_type_header)
-        self.assertEquals(instance.body, "resources/downloads/2/60/success.html")
+        self.assertEqual(instance.body, "resources/downloads/2/60/success.html")
         self.assertEqual(instance.status, 200)
         self.assertTrue(instance.id)
 
@@ -141,9 +141,9 @@ class TestHttpImageResourceInterface(TestCase):
     def test_get_retry(self, storage_save_mock):
         # Load and retry an existing request
         instance = self.model().get("http://localhost:8000/fail")
-        self.assertEquals(instance.session.send.call_count, 1)
+        self.assertEqual(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "http://localhost:8000/fail")
-        self.assertEquals(storage_save_mock.call_count, 1)
+        self.assertEqual(storage_save_mock.call_count, 1)
         self.assert_call_args_save(storage_save_mock.call_args, "resources/downloads/e/11/fail.html")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, "resources/downloads/e/11/fail.html")
@@ -153,9 +153,9 @@ class TestHttpImageResourceInterface(TestCase):
         storage_save_mock.reset_mock()
         request = instance.request
         instance = self.model(request=request).get()
-        self.assertEquals(instance.session.send.call_count, 1)
+        self.assertEqual(instance.session.send.call_count, 1)
         self.assert_call_args_get(instance.session.send.call_args, "http://localhost:8000/fail")
-        self.assertEquals(storage_save_mock.call_count, 1)
+        self.assertEqual(storage_save_mock.call_count, 1)
         self.assert_call_args_save(storage_save_mock.call_args, "resources/downloads/e/11/fail.html")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, "resources/downloads/e/11/fail.html")
@@ -176,9 +176,9 @@ class TestHttpImageResourceInterface(TestCase):
         except DGHttpError40X:
             pass
         self.assertFalse(instance.session.send.called, "Should not make request for invalid URL")
-        self.assertEquals(instance.status, 404)
-        self.assertEquals(instance.head, {})
-        self.assertEquals(instance.body, None)
+        self.assertEqual(instance.status, 404)
+        self.assertEqual(instance.head, {})
+        self.assertEqual(instance.body, None)
         self.assertTrue(instance.request["cancel"])
         # Invalid request preset
         self.test_get_request["args"] = tuple()
@@ -224,32 +224,32 @@ class TestHttpImageResourceInterface(TestCase):
         # Check with successful download
         instance = HttpImageResourceMock.objects.get(id=3)  # success with actual content
         content_type, image = instance.content
-        self.assertEquals(storage_open_mock.call_count, 1)
+        self.assertEqual(storage_open_mock.call_count, 1)
         self.assertIsInstance(image, Image)
-        self.assertEquals(content_type, "image/png")
-        self.assertEquals(image.width, 10)
-        self.assertEquals(image.height, 10)
+        self.assertEqual(content_type, "image/png")
+        self.assertEqual(image.width, 10)
+        self.assertEqual(image.height, 10)
         # With transformation override
         storage_open_mock.reset_mock()
         transform = instance.transform
         instance.transform = lambda file: file
         content_type, image = instance.content
-        self.assertEquals(storage_open_mock.call_count, 1)
+        self.assertEqual(storage_open_mock.call_count, 1)
         self.assertIsInstance(image, File)
-        self.assertEquals(content_type, "image/png")
+        self.assertEqual(content_type, "image/png")
         instance.transform = transform
         # Check with download error
         storage_open_mock.reset_mock()
         instance = HttpImageResourceMock.objects.get(id=2)  # fail
         content_type, image = instance.content
-        self.assertEquals(storage_open_mock.call_count, 0)
+        self.assertEqual(storage_open_mock.call_count, 0)
         self.assertIsNone(image)
         self.assertIsNone(content_type)
 
     def test_get_file_name(self):
         now = datetime(1970, 1, 1)
         name = HttpFileResource.get_file_name("test", now)
-        self.assertEquals(name, "19700101000000000000.test")
+        self.assertEqual(name, "19700101000000000000.test")
 
 
 class TestFileResourceDeleteHandler(TestCase):
@@ -259,13 +259,13 @@ class TestFileResourceDeleteHandler(TestCase):
         # Delete content
         instance = HttpImageResourceMock.objects.get(id=3)  # success with actual content
         file_resource_delete_handler(HttpImageResourceMock, instance, extra="ignored")
-        self.assertEquals(storage_delete_mock.call_count, 1)
+        self.assertEqual(storage_delete_mock.call_count, 1)
         # Ignore if no content at all
         storage_delete_mock.reset_mock()
         instance.body = ""
         file_resource_delete_handler(HttpImageResourceMock, instance, extra="ignored")
-        self.assertEquals(storage_delete_mock.call_count, 0)
+        self.assertEqual(storage_delete_mock.call_count, 0)
         # Ignore if file does not exist
         instance.body = "does-not-exist.png"
         file_resource_delete_handler(HttpImageResourceMock, instance, extra="ignored")
-        self.assertEquals(storage_delete_mock.call_count, 0)
+        self.assertEqual(storage_delete_mock.call_count, 0)

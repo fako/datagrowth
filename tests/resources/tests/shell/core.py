@@ -95,22 +95,22 @@ class TestShellResource(ResourceTestMixin):
         self.assertIsInstance(variables, dict)
         self.assertIn("input", variables)
         self.assertIn("dir", variables)
-        self.assertEquals(variables["input"], ("arg1", "arg2"))
-        self.assertEquals(variables["dir"], "arg2")
+        self.assertEqual(variables["input"], ("arg1", "arg2"))
+        self.assertEqual(variables["dir"], "arg2")
         # Variables without input
         variables = self.instance.variables()
         self.assertIsInstance(variables, dict)
         self.assertIn("input", variables)
         self.assertIn("dir", variables)
-        self.assertEquals(variables["input"], tuple())
+        self.assertEqual(variables["input"], tuple())
         self.assertIsNone(variables["dir"])
         # Variables with input through run
         self.instance.run("test", context=5)
         variables = self.instance.variables()
         self.assertIn("input", variables)
         self.assertIn("dir", variables)
-        self.assertEquals(variables["input"], ("test", ".",))
-        self.assertEquals(variables["dir"], ".")
+        self.assertEqual(variables["input"], ("test", ".",))
+        self.assertEqual(variables["dir"], ".")
 
     @patch("datagrowth.resources.shell.generic.subprocess.run", return_value=SubprocessResult(0, b"out", b"err"))
     def test_run_command_core(self, subprocess_mock):
@@ -123,7 +123,7 @@ class TestShellResource(ResourceTestMixin):
         }
         self.instance._run()
         # See if request was made properly
-        self.assertEquals(subprocess_mock.call_count, 1)
+        self.assertEqual(subprocess_mock.call_count, 1)
         args, kwargs = subprocess_mock.call_args
         cmd = args[0]
         self.assertEqual(cmd, test_command)

@@ -54,7 +54,7 @@ class TestShellResourceInterface(TestCase):
         instance = self.model(interval_duration=1000).run("test", ".", context=5)
         self.assertIsNone(instance.id, "ShellResource used cache when it should have retrieved with requests")
         instance.save()
-        self.assertEquals(subprocess_mock.call_count, 1)
+        self.assertEqual(subprocess_mock.call_count, 1)
         self.assert_call_args_run(subprocess_mock.call_args, self.test_command)
         self.assertEqual(instance.stdout, "out")
         self.assertEqual(instance.stderr, "")
@@ -68,7 +68,7 @@ class TestShellResourceInterface(TestCase):
         instance = self.model(command=command).run()
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
-        self.assertEquals(subprocess_mock.call_count, 1)
+        self.assertEqual(subprocess_mock.call_count, 1)
         self.assert_call_args_run(subprocess_mock.call_args, self.test_command_2)
         self.assertEqual(instance.stdout, "out")
         self.assertEqual(instance.stderr, "")
@@ -105,7 +105,7 @@ class TestShellResourceInterface(TestCase):
     def test_run_retry(self, subprocess_mock, sleep_mock):
         # Load and retry an existing command
         instance = self.model(interval_duration=1000).run("fail", ".", context=5)
-        self.assertEquals(subprocess_mock.call_count, 1)
+        self.assertEqual(subprocess_mock.call_count, 1)
         self.assert_call_args_run(subprocess_mock.call_args, self.fail_command)
         self.assertEqual(instance.stdout, "out")
         self.assertEqual(instance.stderr, "")
@@ -117,7 +117,7 @@ class TestShellResourceInterface(TestCase):
         sleep_mock.reset_mock()
         command = instance.command
         instance = self.model(command=command).run()
-        self.assertEquals(subprocess_mock.call_count, 1)
+        self.assertEqual(subprocess_mock.call_count, 1)
         self.assert_call_args_run(subprocess_mock.call_args, self.fail_command)
         self.assertEqual(instance.stdout, "out")
         self.assertEqual(instance.stderr, "")

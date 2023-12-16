@@ -62,19 +62,19 @@ class TestDumpLoadDjangoModels(TestCase):
         fd = open(self.get_file_path("write"), "w")
         fd.writelines = Mock()
         queryset_to_disk(queryset, fd, batch_size=2, progress_bar=False)
-        self.assertEquals(fd.writelines.call_count, 3)
-        self.assertEquals(serialize_mock.call_count, 3)
+        self.assertEqual(fd.writelines.call_count, 3)
+        self.assertEqual(serialize_mock.call_count, 3)
         current_id = 1
         for call in fd.writelines.call_args_list:
             args, kwargs = call
             lines = args[0]
-            self.assertEquals(len(lines), 1)
+            self.assertEqual(len(lines), 1)
             line = lines[0]
             self.assertTrue(line.endswith("\n"))
             models = json.loads(line)
-            self.assertEquals(len(models), 2)
+            self.assertEqual(len(models), 2)
             for model in models:
-                self.assertEquals(model["pk"], current_id)
+                self.assertEqual(model["pk"], current_id)
                 current_id += 1
 
     @patch("datagrowth.utils.io.serialize", wraps=serialize)
@@ -83,16 +83,16 @@ class TestDumpLoadDjangoModels(TestCase):
         fd = open(self.get_file_path("write"), "w")
         fd.write = Mock()
         object_to_disk(obj, fd)
-        self.assertEquals(fd.write.call_count, 1)
-        self.assertEquals(serialize_mock.call_count, 1)
+        self.assertEqual(fd.write.call_count, 1)
+        self.assertEqual(serialize_mock.call_count, 1)
         call = fd.write.call_args_list[0]
         args, kwargs = call
         line = args[0]
         self.assertTrue(line.endswith("\n"))
         models = json.loads(line)
-        self.assertEquals(len(models), 1)
+        self.assertEqual(len(models), 1)
         model = models[0]
-        self.assertEquals(model["pk"], 1)
+        self.assertEqual(model["pk"], 1)
 
     @patch("datagrowth.utils.io.tqdm", wraps=tqdm)
     @patch("datagrowth.utils.io.deserialize", wraps=deserialize)
@@ -101,12 +101,12 @@ class TestDumpLoadDjangoModels(TestCase):
             iterator = objects_from_disk(fd, progress_bar=False)
             self.assertIsInstance(iterator, Iterator)
             data = list(iterator)
-        self.assertEquals(deserialize_mock.call_count, 4)
+        self.assertEqual(deserialize_mock.call_count, 4)
         tqdm_mock.assert_called_once_with(fd, total=4, disable=True)
-        self.assertEquals(len(data[0]), 1)
-        self.assertEquals(len(data[1]), 2)
-        self.assertEquals(len(data[2]), 2)
-        self.assertEquals(len(data[3]), 1)
+        self.assertEqual(len(data[0]), 1)
+        self.assertEqual(len(data[1]), 2)
+        self.assertEqual(len(data[2]), 2)
+        self.assertEqual(len(data[3]), 1)
         model = data[0][0]
         self.assertIsInstance(model, HttpResourceMock)
-        self.assertEquals(model.id, 1)
+        self.assertEqual(model.id, 1)
