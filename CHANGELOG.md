@@ -11,8 +11,7 @@ which indicates breakages that you may expect when upgrading from lower versions
 v0.19
 -----
 
-* Adds support for Python 3.11 and Django 4.2.
-* Adds preliminary support for Python 3.12.
+* Adds support for Python 3.11, Python 3.12 and Django 4.2.
 * Doesn't specify a specific parser for BeautifulSoup when loading XML content.
   BeautifulSoup warns against using Datagrowth's previous default parser (lxml) for XML parsing as it is less reliable.
 * Allows ``ExtractProcessor`` to extract data using a generator function for the "@" objective.
