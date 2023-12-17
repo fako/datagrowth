@@ -172,7 +172,7 @@ class TestDataset(TestCase):
         collection_ids = set(dataset_version.collections.values_list("id", flat=True))
         document_ids = set(dataset_version.documents.values_list("id", flat=True))
         self.assertNotEqual(dataset_version, source_dataset_version)
-        self.assertNotEquals(dataset_version.id, source_dataset_version.id)
+        self.assertNotEqual(dataset_version.id, source_dataset_version.id)
         self.assertEqual(dataset_version.collections.count(), source_dataset_version.collections.count())
         self.assertEqual(dataset_version.documents.count(), source_dataset_version.documents.count())
         self.assertFalse(collection_ids.intersection(source_collection_ids))
