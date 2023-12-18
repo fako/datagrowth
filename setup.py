@@ -41,6 +41,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Framework :: Django :: 3.2",
         "Framework :: Django :: 4.2",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
