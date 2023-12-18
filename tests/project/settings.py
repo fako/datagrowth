@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'datagrowth',
 
+    'project',
     'configuration',
     'utils',
     'resources',
@@ -134,6 +135,17 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# Celery
+# https://docs.celeryproject.org/en/v5.3.6/
+
+CELERY_BROKER_URL = f'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = f'redis://redis:6379/0'
+
+CELERY_WORKER_HIJACK_ROOT_LOGGER = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 50
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 
 # Internationalization
