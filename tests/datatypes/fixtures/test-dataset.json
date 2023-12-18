@@ -46,6 +46,7 @@
 {
     "fields": {
         "name": "test",
+        "identifier": "id",
         "created_at": "2015-06-04T11:31:27.940Z",
         "modified_at": "2015-06-04T11:34:06.960Z",
         "pending_at": null,
@@ -196,6 +197,7 @@
 {
     "fields": {
         "name": "setting1=const&test-multiple",
+        "identifier": "id",
         "created_at": "2015-06-04T11:31:27.940Z",
         "modified_at": "2015-06-04T11:34:06.960Z",
         "pending_at": null,
@@ -366,6 +368,7 @@
 {
     "fields": {
         "name": "setting1=const&test-empty",
+        "identifier": "id",
         "created_at": "2015-06-04T11:31:27.940Z",
         "modified_at": "2015-06-04T11:34:06.960Z",
         "pending_at": null,

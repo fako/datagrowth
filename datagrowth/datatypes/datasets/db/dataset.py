@@ -7,10 +7,10 @@ from django.utils.timezone import now
 from django.contrib.contenttypes.fields import GenericRelation
 
 from datagrowth.configuration import ConfigurationField
+from datagrowth.exceptions import DGGrowthUnfinished, DGGrowthFrozen
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
-from datagrowth.exceptions import DGGrowthUnfinished, DGPipelineError
 from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
 from datagrowth.version import VERSION
 from datagrowth.utils import ibatch
@@ -204,7 +204,7 @@ class DatasetBase(models.Model):
     #######################################################
     # Methods that enable a Dataset to expand its data.
 
-    def gather_seeds(self, *args):
+    def ennoble_seeds(self, *args):
         """
         This method can get overridden. Its output will be used as initial seeding for new DatasetVersions
         The ``grow`` method calls this method with all of its positional arguments
@@ -251,16 +251,21 @@ class DatasetBase(models.Model):
         collection.add(seeds)
         return new_version
 
-    def grow(self, *args, seeds=None, asynchronous=True, grow_once=False):
-        # We do nothing if a growth has already started asynchronously
-        current_version = self.versions.filter(is_current=True).last()
-        current_state = GrowthState(current_version.state)
-        if current_version is None:
-            current_version = self.versions.create(dataset=self, version=self.version, is_current=True)
-        if current_state is GrowthState.GROWING and asynchronous:
-            raise DGGrowthUnfinished()
-        elif current_state is GrowthState.COMPLETE and grow_once:
-            return True
+    def prepare_growth(self, growth_strategy, current_version=None, retry=False):
+        if not current_version or growth_strategy in [GrowthStrategy.RESET, GrowthStrategy.STACK]:
+            current_version = self.create_dataset_version()
+            current_version = self.prepare_dataset_version(current_version)
+        elif retry:
+            current_version = self.prepare_dataset_version(current_version)
+        elif growth_strategy == GrowthStrategy.REVISE:
+            current_version = self.copy_dataset_version(current_version)
+            current_version = self.prepare_dataset_version(current_version)
+        else:
+            raise ValueError(f"Unknown growth_strategy to prepare for: {growth_strategy}")
+        return current_version
+
+    def dispatch_growth(self, dataset_version, *args, asynchronous=True, seeds=None, limit=None):
+        return
         # Seeding a new DatasetVersion if necessary
         if current_state not in [GrowthState.SEEDING, GrowthState.GROWING]:
             seeds = seeds or []
@@ -270,9 +275,28 @@ class DatasetBase(models.Model):
                 raise DGPipelineError(
                     "Expected the DatasetVersion to contain at least one Document after seeding"
                 )
-        current_version.state = GrowthState.GROWING
-        current_version.save()
+
+    def grow(self, *args, growth_strategy=None, asynchronous=True, retry=False, seeds=None, limit=None):
+        # Set argument defaults
+        growth_strategy = growth_strategy or self.GROWTH_STRATEGY
+        current_version = self.versions.filter(is_current=True).last()
+
+        # Decide on growth preparation
+        if growth_strategy == GrowthStrategy.FREEZE and current_version:
+            raise DGGrowthFrozen()
+        elif current_version is None or current_version.state == GrowthState.COMPLETE:
+            current_version = self.prepare_growth(growth_strategy, current_version=current_version, retry=False)
+        elif retry and current_version.state != GrowthState.COMPLETE:
+            current_version = self.prepare_growth(growth_strategy, current_version=current_version, retry=True)
+
+        # Decide on whether to start the growth
+        current_state = GrowthState(current_version.state)
+        if current_state is GrowthState.GROWING and asynchronous:
+            raise DGGrowthUnfinished()
+
         # Now we actually start the growing process
+        self.dispatch_growth(current_version, *args, seeds=seeds, limit=limit)
+
         if asynchronous:
             raise DGGrowthUnfinished()
 

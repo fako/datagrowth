@@ -14,6 +14,8 @@ v0.20
 This update is the first Datagrowth version that includes the ``DatasetVersion`` model.
 The implementation of that model can be a steep change over current implementation.
 However it's not required to implement Datagrowth's ``DatasetVersion`` to update to v0.20.
+Instead you can run your own ``DatasetVersion`` which should implement ``influence`` or set the
+``dataset_version`` attribute to None for ``Collection`` and ``Document``.
 
 Another note of caution is that due to the way Django implements ``bulk_create``
 it's not possible to access ``Document.id`` on MySQL databases when using ``HttpSeedingProcessor``
@@ -45,7 +47,8 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
   It also creates a default non-pending ``Collection`` with ``Collection.tasks`` set.
   Customize defaults by setting ``DOCUMENT_TASKS``, ``COLLECTION_TASKS``, ``DATASET_VERSION_TASKS``,
   ``COLLECTION_IDENTIFIER``, ``COLLECTION_REFEREE`` and ``DATASET_VERSION_MODEL``.
-  Or override ``Dataset.get_collection_initialization`` and/or ``Dataset.get_task_definitions`` for more control.
+  Or override ``Dataset.get_collection_factories``, ``Dataset.get_seeding_factories`` and/or
+  ``Dataset.get_task_definitions`` for more control.
 * ``Document.invalidate_task`` will now always set ``pending_at`` and ``finished_at`` attributes,
   regardless of whether tasks have run before.
 
