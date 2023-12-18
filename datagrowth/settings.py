@@ -41,6 +41,7 @@ DATAGROWTH_KALDI_NL_BASE_PATH = getattr(settings, "DATAGROWTH_KALDI_NL_BASE_PATH
 DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGURATION", {
     # Global configurations that control multiple classes
     "global_asynchronous": True,  # by default offload to celery where possible
+    "global_batch_size": 100,
     "global_sample_size": 0,
     "global_datatypes_app_label": None,
     "global_datatype_models": {
