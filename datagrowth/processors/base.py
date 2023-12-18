@@ -1,4 +1,5 @@
 import inspect
+from typing import Union, Callable, Tuple, Dict, Type
 
 from django.apps import apps
 
@@ -86,7 +87,7 @@ class QuerySetProcessor(Processor):
 
 class ProcessorFactory:
 
-    def __init__(self, processor, defaults=None, method=None):
+    def __init__(self, processor: Union[Type[Processor], str], defaults: Dict = None, method: str = None):
         self.defaults = defaults or {}
         if isinstance(processor, str):
             processor_name, method_name = Processor.get_processor_components(processor)
@@ -98,12 +99,17 @@ class ProcessorFactory:
         else:
             raise TypeError("Expected a Processor or name and method of a Processor to build")
 
-    def build(self, config):
-        config.update(self.defaults)
+    def build(self, config: Union[ConfigurationType, dict] = None, **kwargs) -> Processor:
+        config = config or {}
+        if isinstance(config, ConfigurationType):
+            config.supplement(self.defaults)
+        else:
+            config.update(self.defaults)
         return self.processor(config)
 
-    def build_with_callable(self, config, asynchronous=False):
-        prc = self.build(config)
+    def build_with_callable(self, config: Union[ConfigurationType, dict] = None, asynchronous: bool = False,
+                            **kwargs) -> Tuple[Processor, Callable]:
+        prc = self.build(config=config, **kwargs)
         clb = getattr(prc, self.method) if self.method else prc
         if asynchronous:
             clb = getattr(clb, "delay")
