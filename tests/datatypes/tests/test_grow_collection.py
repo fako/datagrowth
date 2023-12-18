@@ -16,6 +16,9 @@ class TestGrowCollection(TestCase):
 
     def test_grow_collection(self):
         grow_collection("datatypes.Collection", self.collection.id, "paper", config=self.config, asynchronous=False)
-        self.assertEqual(Document.objects.count(), 6 + 20, "Expected twenty new Documents and six unchanged Documents")
+        self.assertEqual(
+            Document.objects.count(), 3 + 20,
+            "Expected twenty new Documents and three unchanged Documents"
+        )
         self.assertEqual(Collection.objects.count(), 3, "Expected three unchanged Collections")
         self.assertEqual(DatasetVersion.objects.count(), 3, "Expected three unchanged DatasetVersions")

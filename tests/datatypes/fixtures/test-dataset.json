@@ -67,7 +67,7 @@
 },
 {
     "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
+        "properties": {"context":"nested value","value":"nested value 0","id":1},
         "collection": 1,
         "dataset_version": 1,
         "modified_at": "2015-06-02T10:01:47.572Z",
@@ -100,7 +100,7 @@
 },
 {
     "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
+        "properties": {"context":"nested value","value":"nested value 1","id":2},
         "collection": 1,
         "dataset_version": 1,
         "modified_at": "2015-06-02T10:01:47.572Z",
@@ -129,7 +129,7 @@
 },
 {
     "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
+        "properties": {"context":"nested value","value":"nested value 2","id":3},
         "collection": 1,
         "dataset_version": 1,
         "modified_at": "2015-06-02T10:01:47.572Z",
@@ -226,7 +226,7 @@
 },
 {
     "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 0\"}",
+        "properties": {"context":"nested value","value":"nested value 0","id":4},
         "collection": 2,
         "dataset_version": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
@@ -259,7 +259,7 @@
 },
 {
     "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 1\"}",
+        "properties": {"context":"nested value","value":"nested value 1","id":5},
         "collection": 2,
         "dataset_version": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
@@ -292,7 +292,7 @@
 },
 {
     "fields": {
-        "properties": "{\"context\":\"nested value\",\"value\":\"nested value 2\"}",
+        "properties": {"context":"nested value","value":"nested value 2","id":6},
         "collection": 2,
         "dataset_version": 2,
         "modified_at": "2015-06-02T10:01:47.572Z",
