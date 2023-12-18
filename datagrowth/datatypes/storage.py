@@ -1,5 +1,4 @@
 from typing import List
-from copy import copy
 from datetime import datetime
 from collections import defaultdict
 from copy import copy
@@ -40,6 +39,10 @@ class DataStorage(models.Model):
     @classmethod
     def get_dataset_version_model(cls):
         return apps.get_model(f"{cls._meta.app_label}.{cls.DATASET_VERSION_MODEL}")
+
+    @classmethod
+    def get_label(cls):
+        return f"{cls._meta.app_label}.{cls._meta.model_name}"
 
     @classmethod
     def build(cls, *args):
@@ -102,13 +105,21 @@ class DataStorage(models.Model):
                     property_dependencies[dependency].append(task_name)
         return property_dependencies
 
-    def invalidate_task(self, task_name: str, current_time: datetime = None) -> None:
+    def invalidate_task(self, task_name: str, current_time: datetime = None, commit: bool = False) -> None:
         if task_name in self.task_results:
             del self.task_results[task_name]
         if task_name in self.derivatives:
             del self.derivatives[task_name]
         self.pending_at = current_time or now()
         self.finished_at = None
+        if commit:
+            self.save()
+
+    def finish_processing(self, current_time: datetime = None, commit: bool = True):
+        self.pending_at = None
+        self.finished_at = current_time or now()
+        if commit:
+            self.save()
 
     def __str__(self):
         return "{} {}".format(self.__class__.__name__, self.id)

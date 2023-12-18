@@ -33,6 +33,7 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
   will be set in the ``derivatives`` field instead of ``properties``.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
   Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
+* The ``DataStorages`` dataclass has been added to manage typing for dynamically loaded ``DataStorage`` models.
 * The ``DatasetVersion.task_definitions`` field holds dictionaries per ``DataStorage`` model that specifies,
   which tasks should run for which model.
 * A ``DatasetVersion`` will influence its ``Collections`` and ``Documents``.
