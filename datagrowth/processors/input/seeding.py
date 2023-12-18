@@ -1,4 +1,4 @@
-from typing import Any, Iterator, List, Dict, Union
+from typing import Any, Iterator, List, Dict, Union, Tuple, Callable
 from copy import deepcopy
 from collections import OrderedDict
 from requests import Session
@@ -215,3 +215,15 @@ class SeedingProcessorFactory(ProcessorFactory):
     def __init__(self, processor, phases, defaults=None):
         super().__init__(processor, defaults=defaults)
         self.defaults["phases"] = phases
+
+    def build(self, config: Union[ConfigurationType, dict] = None, **kwargs) -> Processor:
+        config = config or {}
+        collection = kwargs.get("collection")
+        initial = kwargs.get("initial")
+        assert isinstance(collection, CollectionBase), \
+            "Expected to build SeedingProcessor with a class inheriting from CollectionBase"
+        if isinstance(config, ConfigurationType):
+            config.supplement(self.defaults)
+        else:
+            config.update(self.defaults)
+        return self.processor(collection, config, initial=initial)

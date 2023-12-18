@@ -45,13 +45,29 @@ class DGResourceDoesNotExist(DGResourceException):
     pass
 
 
-class DGPipelineException(Exception):
+class DGGrowthException(Exception):
     pass
 
 
-class DGGrowthUnfinished(DGPipelineException):
+class DGGrowthUnfinished(DGGrowthException):
     pass
 
 
-class DGPipelineError(DGPipelineException):
+class DGGrowthFrozen(DGGrowthException):
+    pass
+
+
+class DGGrowthError(DGGrowthException):
+    pass
+
+
+class DGPendingDataStorage(Exception):
+    pass
+
+
+class DGPendingDocuments(DGPendingDataStorage):
+    pass
+
+
+class DGPendingCollections(DGPendingDataStorage):
     pass
