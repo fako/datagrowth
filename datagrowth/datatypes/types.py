@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Type, Union
+from typing import Any, Type, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from datagrowth.datatypes.datasets.db.dataset import DatasetBase
+
 from dataclasses import dataclass
 
 from django.apps import apps
 
 from datagrowth.datatypes.storage import DataStorage
-from datagrowth.datatypes.datasets.db.dataset import DatasetBase
 from datagrowth.datatypes.documents.db.version import DatasetVersionBase
 from datagrowth.datatypes.documents.db.collection import CollectionBase
 from datagrowth.datatypes.documents.db.document import DocumentBase

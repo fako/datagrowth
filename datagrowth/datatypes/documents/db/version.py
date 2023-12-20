@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import datetime
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -28,6 +29,22 @@ class DatasetVersionBase(DataStorage):
     is_current = models.BooleanField(default=False)
     version = models.CharField(max_length=50, null=False, blank=True)
     state = models.CharField(max_length=50, choices=GrowthState.choices, default=GrowthState.PENDING)
+
+    def evaluate_dataset_version(self) -> bool:
+        """
+        This method summarizes performance for the dataset version. It should return True if performance is sufficient.
+        This method can be overridden and will be called at the end of any harvester process,
+        as part of finish_processing during validate_pending_data_storages when running task dispatch.
+
+        :return: whether dataset_version passes validation (and should become "current")
+        """
+        return True
+
+    def finish_processing(self, current_time: datetime = None, commit: bool = True):
+        if self.evaluate_dataset_version():
+            type(self).objects.all().update(is_current=False)
+            self.is_current = True
+        super().finish_processing(current_time=current_time, commit=commit)
 
     @property
     def collections(self):

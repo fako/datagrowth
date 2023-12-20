@@ -1,14 +1,18 @@
+from typing import Optional
 from copy import deepcopy
 
 from django.apps import apps
 from django.db import models
 from django.utils.timezone import now
 from django.contrib.contenttypes.fields import GenericRelation
+from celery import group
+from celery.canvas import GroupResult  # for type checking only
 
 from datagrowth.configuration import ConfigurationField
 from datagrowth.exceptions import DGGrowthUnfinished, DGGrowthFrozen
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
+from datagrowth.datatypes.documents.tasks.collection import grow_collection
 from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
 from datagrowth.version import VERSION
 from datagrowth.utils import ibatch
@@ -204,13 +208,13 @@ class DatasetBase(models.Model):
 
     def ennoble_seeds(self, *args):
         """
-        This method can get overridden. Its output will be used as initial seeding for new DatasetVersions
+        This method can get overridden. Its output will be used as initial seeding.
         The ``grow`` method calls this method with all of its positional arguments
 
         :param args: arbitrary input from a call to ``growth``
-        :return: iterator of dicts or Documents
+        :return: list of dicts/Documents or Processor method as string to generate dicts
         """
-        return iter([])
+        return []
 
     def weed_document(self, document):
         """
@@ -221,33 +225,6 @@ class DatasetBase(models.Model):
         :return: whether to weed out the document or not
         """
         return False
-
-    def seed(self, current_version, seeds):
-        """
-        Creates a new DatasetVersion with seeds as Documents in a Collection.
-        Will include copies of Documents belonging to a previous DatasetVersion if it is given
-
-        :param current_version: (DatasetVersion) A DatasetVersion which Documents should become part of.
-        :param seeds: (list) Dicts or Documents that should become part of the new version
-        :return:
-        """
-        # Check input and distill class
-        DatasetVersion = current_version.__class__
-        assert issubclass(DatasetVersion, DatasetVersionBase), \
-            f"Expected current_version to be of type DatsetVersion not {type(current_version)}"
-        assert isinstance(seeds, (Iterator, list, tuple,)), "Expected seeds to be a sequential iterable"
-        # If version is in seeding state we simply add to it
-        if GrowthState(current_version.state) is GrowthState.SEEDING:
-            collection = current_version.collection_set.last()
-            if not collection:
-                raise DGPipelineError("Was unable to add seeds to Collection of DatasetVersion")
-            collection.add(seeds)
-            return current_version
-        # In any other scenario we create a new version to add the seeds to
-        new_version = DatasetVersion.objects.create(dataset=self, version=self.version, state=GrowthState.SEEDING)
-        collection = new_version.collection_set.create(name=self.signature)
-        collection.add(seeds)
-        return new_version
 
     def prepare_growth(self, growth_strategy, current_version=None, retry=False):
         if not current_version or growth_strategy in [GrowthStrategy.RESET, GrowthStrategy.STACK]:
@@ -262,41 +239,74 @@ class DatasetBase(models.Model):
             raise ValueError(f"Unknown growth_strategy to prepare for: {growth_strategy}")
         return current_version
 
-    def dispatch_growth(self, dataset_version, *args, asynchronous=True, seeds=None, limit=None):
-        return
-        # Seeding a new DatasetVersion if necessary
-        if current_state not in [GrowthState.SEEDING, GrowthState.GROWING]:
-            seeds = seeds or []
-            seeds += self.gather_seeds(*args)
-            current_version = self.seed(current_version, seeds)
-            if not current_version.document_set.exists():
-                raise DGPipelineError(
-                    "Expected the DatasetVersion to contain at least one Document after seeding"
-                )
+    def dispatch_growth(self, dataset_version, *args, asynchronous=True, retry=False, seeds=None,
+                        limit=None) -> Optional[GroupResult]:
+        # Decide on whether to start the growth or exit, because a growth is already in progress
+        if dataset_version.state == GrowthState.GROWING:
+            raise DGGrowthUnfinished()
+        dataset_version.state = GrowthState.GROWING
+        dataset_version.save()
 
-    def grow(self, *args, growth_strategy=None, asynchronous=True, retry=False, seeds=None, limit=None):
+        grow_signatures = []
+        for collection in dataset_version.collections.all():
+            has_documents = collection.documents.exists()
+            label = collection.get_label()
+
+            # Determine what to do with parameters to grow_collection task
+            # We only pass seeds to grow_collection when the DatasetVersion has no historic data.
+            if dataset_version.state == GrowthState.PENDING and not has_documents:
+                seeds = seeds or self.ennoble_seeds()
+            else:
+                seeds = None
+            # When the limit is set to -1 no new Documents will be created and only the tasks will be retried.
+            # This is the default for retry when Documents exist
+            if retry and has_documents and limit is None:
+                seeding_limit = -1
+            else:
+                seeding_limit = limit
+
+            # Create the signatures for dispatching
+            grow_signature = grow_collection.signature(
+                label, collection.id, *args,
+                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit
+            )
+            grow_signatures.append(grow_signature)
+
+        if asynchronous:
+            return group(grow_signatures).delay()
+        for task in grow_signatures:
+            task()
+
+    def grow(self, *args, growth_strategy=None, asynchronous=True, retry=False, seeds=None,
+             limit=None) -> Optional[GroupResult]:
         # Set argument defaults
         growth_strategy = growth_strategy or self.GROWTH_STRATEGY
         current_version = self.versions.filter(is_current=True).last()
 
         # Decide on growth preparation
+        # After this current_version should never be None and any new DatasetVersions will be PENDING.
+        # Any GROWING datasets still get passed through, but will raise exceptions from dispatch_growth.
         if growth_strategy == GrowthStrategy.FREEZE and current_version:
+            # Updates of frozen data is forbidden
             raise DGGrowthFrozen()
         elif current_version is None or current_version.state == GrowthState.COMPLETE:
+            # There is no current DatasetVersion or it has completed in the past.
+            # We'll start a new DatasetVersion with PENDING state.
+            # It's either a copy of the last DatasetVersion or an empty DatasetVersion (depending on the strategy)
             current_version = self.prepare_growth(growth_strategy, current_version=current_version, retry=False)
-        elif retry and current_version.state != GrowthState.COMPLETE:
+        elif retry and current_version.state != GrowthState.GROWING:
+            # When DatasetVersion.state is PENDING or ERROR a retry of a growth will keep the current DatasetVersion.
+            # Except it will remove faulty Documents as well as all task history to allow tasks to run again.
             current_version = self.prepare_growth(growth_strategy, current_version=current_version, retry=True)
 
-        # Decide on whether to start the growth
-        current_state = GrowthState(current_version.state)
-        if current_state is GrowthState.GROWING and asynchronous:
-            raise DGGrowthUnfinished()
-
         # Now we actually start the growing process
-        self.dispatch_growth(current_version, *args, seeds=seeds, limit=limit)
-
-        if asynchronous:
-            raise DGGrowthUnfinished()
+        return self.dispatch_growth(
+            current_version, *args,
+            asynchronous=asynchronous,
+            retry=retry,
+            seeds=seeds,
+            limit=limit
+        )
 
     #######################################################
     # DATASET HARVEST
