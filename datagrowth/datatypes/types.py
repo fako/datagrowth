@@ -15,7 +15,7 @@ from datagrowth.datatypes.documents.db.collection import CollectionBase
 from datagrowth.datatypes.documents.db.document import DocumentBase
 
 
-@dataclass(slots=True)
+@dataclass()
 class DataStorages:
     model: Any
     DatasetVersion: Type[DatasetVersionBase]
