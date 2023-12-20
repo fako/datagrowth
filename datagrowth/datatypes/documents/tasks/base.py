@@ -1,4 +1,4 @@
-from typing import Type, List, Union
+from typing import Type, List, Union, Optional
 from collections import defaultdict
 
 from celery import signature, chord
@@ -9,7 +9,7 @@ from datagrowth.datatypes.storage import DataStorage
 
 
 def load_pending_data_storages(*args, model: Type[DataStorage] = None,
-                               as_list: bool = False) -> Union[List[DataStorage] | DataStorage]:
+                               as_list: bool = False) -> Union[List[DataStorage], DataStorage]:
     if not args:
         raise ValueError("load_pending_data_storages expects at least one model id or model instance")
     # We check that we didn't get already loaded instances and return them if we do
@@ -23,7 +23,7 @@ def load_pending_data_storages(*args, model: Type[DataStorage] = None,
     return list(model.objects.filter(id__in=args, pending_at__isnull=False))
 
 
-def validate_pending_data_storages(instances: Union[List[DataStorage] | DataStorage],
+def validate_pending_data_storages(instances: Union[List[DataStorage], DataStorage],
                                    model: Type[DataStorage]) -> List[DataStorage]:
     if instances is None:
         return []
@@ -46,7 +46,7 @@ def validate_pending_data_storages(instances: Union[List[DataStorage] | DataStor
     return pending
 
 
-def dispatch_data_storage_tasks(label: str, *args, callback=Signature, asynchronous=True) -> Signature | None:
+def dispatch_data_storage_tasks(label: str, *args, callback=Signature, asynchronous=True) -> Optional[Signature]:
     pending_tasks = defaultdict(list)
     for obj in args:
         for pending_task in obj.get_pending_tasks():
