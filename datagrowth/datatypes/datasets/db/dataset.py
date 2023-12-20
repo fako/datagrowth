@@ -1,4 +1,3 @@
-from collections.abc import Iterator
 from copy import deepcopy
 
 from django.apps import apps
@@ -9,7 +8,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 from datagrowth.configuration import ConfigurationField
 from datagrowth.exceptions import DGGrowthUnfinished, DGGrowthFrozen
 from datagrowth.datatypes.storage import DataStorageFactory
-from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
 from datagrowth.version import VERSION

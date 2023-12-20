@@ -7,7 +7,7 @@ from django.apps import apps
 
 from datagrowth.datatypes.storage import DataStorage
 from datagrowth.datatypes.datasets.db.dataset import DatasetBase
-from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
+from datagrowth.datatypes.documents.db.version import DatasetVersionBase
 from datagrowth.datatypes.documents.db.collection import CollectionBase
 from datagrowth.datatypes.documents.db.document import DocumentBase
 

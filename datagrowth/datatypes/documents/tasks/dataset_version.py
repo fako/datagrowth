@@ -7,7 +7,7 @@ from datagrowth.exceptions import DGPendingDataStorage
 from datagrowth.utils.tasks import DatabaseConnectionResetTask
 from datagrowth.datatypes import (DataStorages, load_pending_data_storages, validate_pending_data_storages,
                                   dispatch_data_storage_tasks)
-from datagrowth.datatypes.datasets.db.version import DatasetVersionBase
+from datagrowth.datatypes.documents.db.version import DatasetVersionBase
 
 
 @app.task(
