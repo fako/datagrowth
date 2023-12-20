@@ -9,9 +9,12 @@ from datagrowth.exceptions import DGPendingDocuments
 from datagrowth.configuration import ConfigurationType, load_config
 from datagrowth.utils import ibatch
 from datagrowth.utils.tasks import DatabaseConnectionResetTask
-from datagrowth.datatypes import (DataStorages, CollectionBase, load_pending_data_storages,
-                                  validate_pending_data_storages, dispatch_data_storage_tasks)
+from datagrowth.datatypes.types import DataStorages
+from datagrowth.datatypes.documents.db.collection import CollectionBase
+from datagrowth.datatypes.documents.tasks.base import (load_pending_data_storages, validate_pending_data_storages,
+                                                       dispatch_data_storage_tasks)
 from datagrowth.datatypes.documents.tasks.dataset_version import dispatch_dataset_version_tasks
+
 from datagrowth.datatypes.documents.tasks.document import start_document_tasks, cancel_document_tasks
 from datagrowth.processors import ProcessorFactory
 
@@ -102,7 +105,7 @@ def start_collection_tasks(collection: CollectionBase, start_time: datetime, asy
 @app.task(name="growth.grow_collection", base=DatabaseConnectionResetTask)
 @load_config()
 def grow_collection(config: ConfigurationType, label: str, collection_id: int, *args, asynchronous: bool = True,
-                    initial: Union[List[Dict], str] = None, limit: int = None):
+                    seeds: Union[List[Dict], str] = None, limit: int = None):
     current_time = now()
     storages = DataStorages.load_instances(label, collection_id)
     collection = storages.instance
@@ -119,25 +122,25 @@ def grow_collection(config: ConfigurationType, label: str, collection_id: int, *
         start_document_tasks(documents, asynchronous=asynchronous)
 
     # Load initial seeds through processor if necessary
-    if isinstance(initial, str):
-        initial_factory = ProcessorFactory(initial)
+    if isinstance(seeds, str):
+        initial_factory = ProcessorFactory(seeds)
         prc, create_seeds = initial_factory.build_with_callable(config)
         initial = create_seeds()
 
     # Process new seeds to documents
     if limit == -1:
         # A limit of -1 indicates that this task shouldn't try to gather more seeds for growing
-        seeds = []
+        seeding = []
     else:
         # By default we'll use a seeding factory from the Dataset to gather more seeds for growing
         factories = storages.dataset.get_seeding_factories()
         seeding_factory = factories[collection.name]
-        seeding_processor = seeding_factory.build(config=config, collection=collection, initial=initial)
-        seeds = seeding_processor(*args)
-    # TODO: move DatasetVersion to document package
+        seeding_processor = seeding_factory.build(config=config, collection=collection, initial=seeds)
+        seeding = seeding_processor(*args)
+
     log.info(f"Starting seeding: {label}, {collection.name}")
     count = 0
-    for documents in seeds:
+    for documents in seeding:
         start_document_tasks(documents, asynchronous=asynchronous)
         count += len(documents)
         if limit is not None and count >= limit:

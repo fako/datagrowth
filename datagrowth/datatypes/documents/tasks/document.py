@@ -1,12 +1,13 @@
 from typing import List, Union
-from datetime import datetime
 
 from django.utils.timezone import now
 from celery import current_app as app
 
 from datagrowth.utils.tasks import DatabaseConnectionResetTask
-from datagrowth.datatypes import (DataStorages, DocumentBase, load_pending_data_storages, validate_pending_data_storages,
-                                  dispatch_data_storage_tasks)
+from datagrowth.datatypes.types import DataStorages
+from datagrowth.datatypes.documents.db.document import DocumentBase
+from datagrowth.datatypes.documents.tasks.base import (load_pending_data_storages, validate_pending_data_storages,
+                                                       dispatch_data_storage_tasks)
 
 
 @app.task(name="growth.dispatch_document_tasks", base=DatabaseConnectionResetTask)
