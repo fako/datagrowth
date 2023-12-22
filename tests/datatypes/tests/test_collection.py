@@ -36,6 +36,7 @@ class TestCollection(TestCase):
             "required": ["value"],
             "type": "object",
             "properties": {
+                "id": {"type": "string"},
                 "word": {"type": "string"},
                 "value": {"type": "string"},
                 "language": {"type": "string"},
@@ -175,10 +176,10 @@ class TestCollection(TestCase):
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
             elif doc.properties["value"] in ["1", "2"]:
-                expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
+                expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language", "id"]))
                 self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
-                expected_keys = tuple(sorted(["word", "country", "value", "language"]))
+                expected_keys = tuple(sorted(["word", "country", "value", "language", "id"]))
                 self.assertEqual(doc.modified_at.date(), today)
             else:
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
@@ -209,10 +210,10 @@ class TestCollection(TestCase):
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
             elif doc.properties["value"] in ["1", "2"]:
-                expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
+                expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language", "id"]))
                 self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
-                expected_keys = tuple(sorted(["word", "country", "value", "language"]))
+                expected_keys = tuple(sorted(["word", "country", "value", "language", "id"]))
                 self.assertEqual(doc.modified_at.date(), today)
             else:
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
@@ -238,10 +239,10 @@ class TestCollection(TestCase):
             if doc.properties["value"] == "0":
                 expected_keys = tuple(sorted(["value", "nested", "context"]))
             elif doc.properties["value"] in ["1", "2"]:
-                expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language"]))
+                expected_keys = tuple(sorted(["value", "nested", "context", "word", "country", "language", "id"]))
                 self.assertEqual(doc.modified_at.date(), today)
             elif doc.properties["value"] in ["3", "4"]:
-                expected_keys = tuple(sorted(["word", "country", "value", "language"]))
+                expected_keys = tuple(sorted(["word", "country", "value", "language", "id"]))
                 self.assertEqual(doc.modified_at.date(), today)
             else:
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
@@ -356,7 +357,7 @@ class TestCollection(TestCase):
     def test_influence(self):
         self.document.identity = None
         self.instance2.influence(self.document)
-        self.assertEqual(self.document.identity, self.document.properties["word"])
+        self.assertEqual(self.document.identity, self.document.properties["id"])
         self.instance2.identifier = "country"
         self.instance2.influence(self.document)
         self.assertEqual(self.document.identity, self.document.properties["country"])
