@@ -186,7 +186,7 @@ class ResourceSeedingProcessor(Processor):
                 # Likely that the while loop will end now and reset the processor
                 continue
             for batch in self.batch_to_documents():
-                yield batch
+                yield self.collection.reload_document_ids(batch)
             # Resetting batch after yielding it, because the batch is considered processed
             self.batch = []
         # Resets object state to allow multiple calls to the processor
