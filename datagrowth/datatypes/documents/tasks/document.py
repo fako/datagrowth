@@ -23,7 +23,7 @@ def dispatch_document_tasks(label: str, documents: List[Union[int, DocumentBase]
     if len(pending):
         recursive_callback_signature = dispatch_document_tasks.si(
             label,
-            [doc.id for doc in documents],
+            [doc.id for doc in pending],
             asynchronous=asynchronous,
             recursion_depth=recursion_depth+1
         )
