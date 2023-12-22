@@ -88,7 +88,7 @@ class CollectionBase(DataStorage):
         for document in documents:
             if document.id:
                 reloaded.append(document)
-            elif not document.identity:
+            elif document.identity is None:
                 raise ValueError("Can't reload document id if identity is unknown")
             else:
                 document_identities.append(document.identity)
