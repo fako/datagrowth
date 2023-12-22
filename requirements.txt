@@ -13,6 +13,11 @@ wheel==0.38.1
 setuptools==65.5.1
 celery==5.2.2
 docker-compose==1.29.2
+invoke==2.2.0
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-xdist==3.5.0
+flake8==4.0.1
 
 # Add the current project as a package
 -e .
