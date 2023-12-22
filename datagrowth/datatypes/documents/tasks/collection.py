@@ -125,7 +125,7 @@ def grow_collection(config: ConfigurationType, label: str, collection_id: int, *
     if isinstance(seeds, str):
         initial_factory = ProcessorFactory(seeds)
         prc, create_seeds = initial_factory.build_with_callable(config)
-        initial = create_seeds()
+        seeds = create_seeds()
 
     # Process new seeds to documents
     if limit == -1:
