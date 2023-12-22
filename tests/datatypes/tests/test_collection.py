@@ -18,6 +18,7 @@ class TestCollection(TestCase):
         self.instance = Collection.objects.get(id=1)
         self.instance2 = Collection.objects.get(id=2)
         self.document = Document.objects.get(id=4)
+        self.document2 = Document.objects.get(id=5)
         self.value_outcome = ["0", "1", "2"]
         self.list_outcome = [["0"], ["1"], ["2"]]
         self.double_list_outcome = [
@@ -374,3 +375,20 @@ class TestCollection(TestCase):
             content = json.load(json_file)
         self.assertEqual(list(self.instance.content), content)
         os.remove("test.json")
+
+    def test_reload_document_ids(self):
+        # test reloading when identity is set and a mixture of known/unknown ids
+        self.document2.id = None
+        documents = self.instance2.reload_document_ids([self.document, self.document2])
+        for doc in documents:
+            self.assertIn(doc.id, [4, 5])
+        # test when identifier is not set
+        self.assertRaises(AssertionError, self.instance.reload_document_ids, [self.document, self.document2])
+        # test when identity is not set
+        self.document2.identity = None
+        self.assertRaises(ValueError, self.instance2.reload_document_ids, [self.document, self.document2])
+        # test when all objects have an identifier
+        documents = self.instance2.reload_document_ids([self.document])
+        self.assertEqual(len(documents), 1)
+        document = documents[0]
+        self.assertTrue(document is self.document)

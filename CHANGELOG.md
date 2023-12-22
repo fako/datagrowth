@@ -53,6 +53,7 @@ The convenience of lists is more important here than memory footprint which will
 * Adds ``global_allow_redirects`` configuration which controls how requests library will handle redirects.
   Defaults to True even for "head" requests.
 * Exposes ``ProcessorFactory`` and ``DataStorageFactory`` to easily build processors and datatypes in the future.
+* Adds the ``Collection.reload_document_ids`` method to be able to load ``Document.id`` after ``bulk_create``.
 
 
 v0.18

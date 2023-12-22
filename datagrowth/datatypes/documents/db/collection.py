@@ -70,6 +70,33 @@ class CollectionBase(DataStorage):
         for instance in data:
             Document.validate(instance, schema)
 
+    def reload_document_ids(self, documents):
+        """
+        Reloads given documents from the database if ``identifier`` is set. Reloaded documents always have an id.
+        Unfortunately MySQL doesn't work well with Django's batch create,
+        because ids won't be set for MySQL when using batch_create.
+        This method is here to provide a workaround for MySQL,
+        because sometimes having ids of new instances is required.
+        Using ``reload_document_ids`` on Documents that have ids does nothing.
+
+        :param documents: the documents that may or may not have ids
+        :return: the documents with ids
+        """
+        assert self.identifier, "Can't reload document ids if Collection is not setting Document identity"
+        reloaded = []
+        document_identities = []
+        for document in documents:
+            if document.id:
+                reloaded.append(document)
+            elif not document.identity:
+                raise ValueError("Can't reload document id if identity is unknown")
+            else:
+                document_identities.append(document.identity)
+        if len(document_identities):
+            Document = self.get_document_model()
+            reloaded += Document.objects.filter(identity__in=document_identities)
+        return reloaded
+
     def add(self, data, reset=False, collection=None, modified_at=None):
         """
         Add new data to the Collection, possibly deleting all data before adding.
