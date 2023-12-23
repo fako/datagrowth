@@ -55,6 +55,7 @@ class TestCollection(TestCase):
             self.fail("url property did not raise when id is not known")
         except ValueError:
             pass
+
         # Testing URL's with special class names
         class CollectionTest(Collection):
             class Meta:

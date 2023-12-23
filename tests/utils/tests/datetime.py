@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from unittest import TestCase
 
-from datagrowth.utils import parse_datetime_string, format_datetime, override_dict
+from datagrowth.utils import parse_datetime_string, format_datetime
 
 
 class TestDatetimeUtils(TestCase):

@@ -411,7 +411,10 @@ class TestHttpResource(ResourceTestMixin):
         self.assertIn("auth=1", request["url"])
         self.assertNotIn("auth=1", self.instance.request["url"], "request_with_auth should not alter existing request")
         self.assertIn("key=oehhh", request["url"])
-        self.assertNotIn("key=oehhh", self.instance.request["url"], "request_with_auth should not alter existing request")
+        self.assertNotIn(
+            "key=oehhh", self.instance.request["url"],
+            "request_with_auth should not alter existing request"
+        )
         self.assertEqual({"Accept": "application/json", "Authorization": "Bearer oehhh"}, request["headers"])
         self.assertNotIn("Authorization", self.instance.request["headers"],
                          "request_without_auth should not alter existing request")
@@ -481,7 +484,7 @@ class TestHttpResource(ResourceTestMixin):
             self.fail("validate_request raised for a valid request using JSON string.")
         # Invalid
         invalid_request = deepcopy(self.test_get_request)
-        invalid_request["args"] = ("en", "en", "test")
+        invalid_request["args"] = ("en", "en", "test",)
         try:
             self.instance.validate_request(invalid_request)
             self.fail("validate_request did not raise with invalid args for schema.")

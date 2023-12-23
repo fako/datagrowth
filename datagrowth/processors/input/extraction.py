@@ -16,8 +16,10 @@ class ExtractProcessor(Processor):
     Values in this dictionary can be one of the following:
 
      * A JSON path as described by the reach function (for JSON extraction)
-     * A string containing BeautifulSoup expressions using the "soup" and "el" variables (for HTML/XML extraction, not recommended)
-     * A processor name and method name (like: Processor.method) that take a soup and el argument (for HTML/XML extraction, recommended)
+     * A string containing BeautifulSoup expressions using the "soup" and "el" variables
+       (for HTML/XML extraction, not recommended)
+     * A processor name and method name (like: Processor.method) that take a soup and el argument
+       (for HTML/XML extraction, recommended)
 
     These values will be called/parsed to extract data from the input data.
     The extracted data gets stored under the keys.

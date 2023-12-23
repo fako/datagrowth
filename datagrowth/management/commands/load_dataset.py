@@ -33,7 +33,7 @@ class Command(DatasetCommand):
         for entry in os.scandir(get_dumps_path(self.model)):
             if entry.is_file() and not entry.name.startswith("."):
                 instance = self.model()
-                file_match = re.search("(?P<signature>.+?)\.?(?P<pk>\d+)?\.json$", entry.name)
+                file_match = re.search(r"(?P<signature>.+?)\.?(?P<pk>\d+)?\.json$", entry.name)
                 file_info = file_match.groupdict()
                 instance.signature = file_info["signature"]
                 instance.file_path = entry.path  # this property gets added especially for the command

@@ -18,7 +18,8 @@ class ConfigurationType(object):
     There are two types of defaults:
 
         - Any configuration with a prefixes of `global` will be a default for all configuration properties
-        - Any configuration with a prefix equal to namespace will be a default for configuration properties that share the namespace
+        - Any configuration with a prefix equal to namespace will be a default for configuration properties
+          that share the namespace
 
     If you for example add `my_scoped_config` to the defaults.
     Then configuration properties with the namespace set to `my` will
@@ -298,7 +299,7 @@ class ConfigurationProperty(object):
     def __get__(self, obj, cls=None):
         if obj is None:  # happens with system checks
             return self
-        elif not self._storage_attribute in obj.__dict__ or not obj.__dict__[self._storage_attribute]:
+        elif self._storage_attribute not in obj.__dict__ or not obj.__dict__[self._storage_attribute]:
             obj.__dict__[self._storage_attribute] = ConfigurationType(
                 defaults=self._defaults,
                 namespace=self._namespace,

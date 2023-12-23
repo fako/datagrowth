@@ -16,4 +16,4 @@ invoke==2.2.0
 pytest==7.4.3
 pytest-django==4.7.0
 pytest-xdist==3.5.0
-flake8==4.0.1
+flake8==6.1.0

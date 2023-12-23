@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from time import sleep
 
 from django.conf import settings
 from django.db import models

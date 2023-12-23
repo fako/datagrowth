@@ -631,7 +631,7 @@ class HttpResource(Resource):
         :return: mime_type, encoding
         """
         match = re.match(
-            "(?P<mime_type>[A-Za-z]+/[A-Za-z]+);? ?(charset=(?P<encoding>[A-Za-z0-9\-]+))?",
+            r"(?P<mime_type>[A-Za-z]+/[A-Za-z]+);? ?(charset=(?P<encoding>[A-Za-z0-9\-]+))?",
             content_type
         )
         if match is None:

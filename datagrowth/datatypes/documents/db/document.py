@@ -141,7 +141,7 @@ class DocumentBase(DataStorage):
                 for key, value in frm.items()
             }
         # We'll remove any backslash characters from the start of strings
-        elif isinstance(frm, str) and frm.startswith(f"\\"):
+        elif isinstance(frm, str) and frm.startswith("\\"):
             frm = frm.replace("\\", "", 1)
         # Passing along input as-is
         return frm

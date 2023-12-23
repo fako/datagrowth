@@ -60,7 +60,7 @@ class KaldiNLResource(ShellResource):
                 is_transcript = False
             elif is_transcript:
                 out.append(line)
-        return re.sub(" \(.+\)$", "", "\n".join(out), flags=re.MULTILINE)
+        return re.sub(r" \(.+\)$", "", "\n".join(out), flags=re.MULTILINE)
 
     class Meta:
         abstract = True

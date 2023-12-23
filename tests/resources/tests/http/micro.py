@@ -5,7 +5,6 @@ Some core functionality shared by all derived classes of HttpResource gets teste
 import json
 
 from django.test import TestCase
-from django.core.exceptions import ValidationError
 
 from datagrowth.resources import HttpResource
 

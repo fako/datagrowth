@@ -44,6 +44,7 @@ class TestDocument(TestCase):
             self.fail("url property did not raise when id is not known")
         except ValueError:
             pass
+
         # Testing URL's with special class names
         class DocumentTest(Document):
             class Meta:
@@ -124,10 +125,10 @@ class TestDocument(TestCase):
         self.assertEqual(results, {})
 
     def test_output_from_content_escaped(self):
-        results = self.instance.output_from_content(self.instance.content, "\$.value")
+        results = self.instance.output_from_content(self.instance.content, r"\$.value")
         self.assertEqual(results, "$.value", "Expected escaped replacement_character to be passed along")
-        results = self.instance.output_from_content(self.instance.content, "\\\$.value")
-        self.assertEqual(results, "\$.value", "Expected escaped backslash to be passed along")
+        results = self.instance.output_from_content(self.instance.content, r"\\$.value")
+        self.assertEqual(results, r"\$.value", "Expected escaped backslash to be passed along")
         try:
             self.instance.output_from_content(self.instance.content, "$.value", replacement_character="\\")
             self.fail("Document.output_from_content did not raise AssertionError with invalid replacement_character")
