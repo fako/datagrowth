@@ -4,8 +4,7 @@ from datagrowth.datatypes import DatasetBase, DatasetVersionBase
 from datagrowth.processors import QuerySetProcessor, ProcessorFactory
 
 from project.entities.constants import PAPER_DEFAULTS
-from datatypes.models import Document
-from processors.processors import MockNumberProcessor, MockFilterProcessor
+from processors.processors import MockNumberProcessor
 
 
 class StubHarvestProcessor(QuerySetProcessor):
@@ -125,72 +124,6 @@ class Dataset(DatasetBase):
     @property
     def version(self):
         return "0.0.2"
-
-    # @property
-    # def pipelines(self):
-    #     return {
-    #         "seeder": None,
-    #         "growth": [
-    #             (DataProcessor, {
-    #                 "_args": ["$.test"],
-    #                 "_kwargs": {},
-    #                 "_resource": "HttpResourceMock",
-    #                 "_objective": {
-    #                     "@": "$.dict.list",
-    #                     "value": "$",
-    #                     "#context": "$.dict.test"
-    #                 },
-    #                 "setting0": "private",
-    #                 "$setting1": "const"
-    #             }),
-    #             (DataProcessor, {
-    #                 "_args": ["$.value"],
-    #                 "_kwargs": {},
-    #                 "_resource": "HttpResourceMock",
-    #                 "_objective": {
-    #                     "@": "$.dict.list",
-    #                     "value": "$",
-    #                     "#context": "$.dict.test"
-    #                 }
-    #             }),
-    #             (DataProcessor, {
-    #                 "_args": ["$.value"],
-    #                 "_kwargs": {},
-    #                 "_resource": "HttpResourceMock",
-    #             })
-    #         ],
-    #         "harvest": [
-    #             (DataProcessor, {}),
-    #             (DataProcessor, {
-    #                 "$setting2": "variable",
-    #                 "$include_even": False
-    #             })
-    #         ]
-    #     }
-
-    def gather_seeds(self, *args):
-        return [
-            Document.objects.create(properties={"test": "test", "input": args})
-        ]
-
-    def begin_phase1(self, inp):
-        return
-
-    def finish_phase2(self, out, err):
-        return
-
-    def error_phase1_unreachable(self, err, out):
-        return True  # continue if there are results
-
-    def error_phase1_not_found(self, err, out):
-        return False  # abort community
-
-    def before_filter_individuals_manifestation(self, part):
-        return
-
-    def set_kernel(self):
-        self.kernel = self.growth_set.filter(type="phase3").last().output
-        super(CommunityMock, self).set_kernel()
 
 
 class DatasetMock(DatasetBase):

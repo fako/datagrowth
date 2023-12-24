@@ -1,3 +1,4 @@
+import logging
 from time import sleep
 
 from django.db.models import Q
@@ -9,6 +10,9 @@ from datagrowth.resources.http.tasks import send
 from datagrowth.resources.shell.tasks import run
 from datagrowth.processors import ProcessorFactory
 from datagrowth.processors.growth import GrowthProcessor
+
+
+log = logging.getLogger("datagrowth.growth")
 
 
 class ResourceGrowthProcessor(GrowthProcessor):
@@ -107,7 +111,7 @@ class ResourceGrowthProcessor(GrowthProcessor):
                 except transaction.DatabaseError:
                     attempts += 1
                     warning = f"Failed to acquire lock to merge growth batch (attempt={attempts})"
-                    # capture_message(warning, level="warning")
+                    log.warning(warning)
                     sleep(5)
                     continue
                 fields = ["task_results", contribution_field] + self.config.apply_resource_to
