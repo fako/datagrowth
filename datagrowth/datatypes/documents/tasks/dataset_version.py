@@ -17,8 +17,9 @@ from datagrowth.datatypes.documents.tasks.base import (load_pending_data_storage
     autoretry_for=(DGPendingDataStorage,),
     retry_kwargs={"max_retries": 5, "countdown": 5 * 60}
 )
-def dispatch_dataset_version_tasks(label: str, dataset_version: Union[int, DatasetVersionBase], asynchronous: bool = True,
-                                   recursion_depth: int = 0, previous_tasks: List[str] = None) -> None:
+def dispatch_dataset_version_tasks(label: str, dataset_version: Union[int, DatasetVersionBase],
+                                   asynchronous: bool = True, recursion_depth: int = 0,
+                                   previous_tasks: List[str] = None) -> None:
     if recursion_depth >= 10:
         raise RecursionError("Maximum harvest_dataset_version recursion reached")
     previous_tasks = previous_tasks or []

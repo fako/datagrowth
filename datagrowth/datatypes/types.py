@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Type, Union, TYPE_CHECKING
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Type, Union
 if TYPE_CHECKING:
     from datagrowth.datatypes.datasets.db.dataset import DatasetBase
 

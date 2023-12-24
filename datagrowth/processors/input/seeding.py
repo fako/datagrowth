@@ -1,4 +1,4 @@
-from typing import Any, Iterator, List, Dict, Union, Tuple, Callable
+from typing import Any, Iterator, List, Dict, Union
 from copy import deepcopy
 from collections import OrderedDict
 from requests import Session
