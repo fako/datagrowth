@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from datagrowth.datatypes import DatasetBase, DatasetVersionBase
+from datagrowth.datatypes import DatasetBase, DatasetVersionBase, GrowthStrategy
 from datagrowth.processors import QuerySetProcessor, ProcessorFactory
 
 from project.entities.constants import PAPER_DEFAULTS
@@ -22,7 +22,7 @@ PAPER_OBJECTIVE = {
 PAPER_OBJECTIVE["@"] = "$.results"
 
 
-class Dataset(DatasetBase):
+class DatasetTestBase(DatasetBase):
 
     SEEDING_PHASES = [
         {
@@ -121,17 +121,40 @@ class Dataset(DatasetBase):
         "document": "datatypes.Document"
     }
 
-    @property
-    def version(self):
-        return "0.0.2"
+    class Meta:
+        abstract = True
 
 
-class DatasetMock(DatasetBase):
+class Dataset(DatasetTestBase):
+    GROWTH_STRATEGY = GrowthStrategy.REVISE
 
-    SEEDING_PHASES = [
+
+class ResettingDataset(DatasetTestBase):
+    GROWTH_STRATEGY = GrowthStrategy.RESET
+
+
+class DatasetPile(DatasetTestBase):
+    GROWTH_STRATEGY = GrowthStrategy.STACK
+    CONFIG = {}
+    SEEDING_PHASES = [  # same as base class, but without configurations
         {
-            "phase": "mock",
+            "phase": "papers",
             "strategy": "initial",
             "batch_size": 5,
+            "retrieve_data": {
+                "resource": "resources.EntityListResource",
+                "method": "get",
+                "args": [],
+                "kwargs": {},
+                "continuation_limit": 2,
+            },
+            "contribute_data": {
+                "objective": PAPER_OBJECTIVE,
+            }
         }
     ]
+    HARVEST_PHASES = []
+
+
+class FrozenDataset(DatasetTestBase):
+    GROWTH_STRATEGY = GrowthStrategy.FREEZE

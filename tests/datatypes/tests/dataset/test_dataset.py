@@ -8,7 +8,7 @@ from datagrowth.datatypes.datasets.constants import GrowthState
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.processors import SeedingProcessorFactory
 
-from datatypes.models import Dataset, DatasetMock, DatasetVersion
+from datatypes.models import Dataset, ResettingDataset, DatasetPile, DatasetVersion
 
 
 class TestDatasetProtocol(TestCase):
@@ -25,14 +25,15 @@ class TestDatasetProtocol(TestCase):
 
     def test_get_name(self):
         self.assertEqual(Dataset.get_name(), 'dataset')
-        self.assertEqual(DatasetMock.get_name(), 'mock')
+        self.assertEqual(ResettingDataset.get_name(), 'resetting')
+        self.assertEqual(DatasetPile.get_name(), 'pile')
         with patch.object(Dataset, "NAME", "dataset_real"):
             self.assertEqual(Dataset.get_name(), 'dataset_real')
 
     def test_get_namespace(self):
         self.assertEqual(Dataset.get_namespace(), "datatypes")
-        with patch.object(DatasetMock._meta, "app_label", "test_app"):
-            self.assertEqual(DatasetMock.get_namespace(), "test-app")
+        with patch.object(DatasetPile._meta, "app_label", "test_app"):
+            self.assertEqual(DatasetPile.get_namespace(), "test-app")
 
     def test_cast_to_string(self):
         dataset = Dataset()
@@ -45,7 +46,7 @@ class TestDatasetProtocol(TestCase):
         signature = dataset.get_signature_from_input("test", **self.input_configuration)
         self.assertEqual(signature, "$setting4=input&setting1=const&test")
 
-        dataset_mock = DatasetMock()
+        dataset_mock = DatasetPile()
         signature = dataset_mock.get_signature_from_input("test", **self.input_configuration)
         self.assertEqual(signature, "test")
 
@@ -59,7 +60,7 @@ class TestDatasetProtocol(TestCase):
         self.assertNotIn("illegal", configuration)
         self.assertNotIn("setting0", configuration)
 
-        dataset_mock = DatasetMock()
+        dataset_mock = DatasetPile()
         configuration = dataset_mock.filter_growth_configuration(**self.input_configuration)
         self.assertIsInstance(configuration, dict)
         self.assertNotIn("setting1", configuration)
@@ -80,7 +81,7 @@ class TestDatasetProtocol(TestCase):
         self.assertNotIn("setting0", configuration)
         self.assertNotIn("illegal", configuration)
 
-        dataset_mock = DatasetMock()
+        dataset_mock = DatasetPile()
         configuration = dataset_mock.filter_harvest_configuration(**self.input_configuration)
         self.assertIsInstance(configuration, dict)
         self.assertNotIn("setting1", configuration)
