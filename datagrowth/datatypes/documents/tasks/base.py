@@ -5,6 +5,7 @@ from celery import signature, chord
 from celery.canvas import Signature  # for type checking only
 
 from datagrowth.exceptions import DGPendingDocuments, DGPendingCollections
+from datagrowth.datatypes import DatasetVersionBase
 from datagrowth.datatypes.storage import DataStorage
 
 
@@ -42,7 +43,10 @@ def validate_pending_data_storages(instances: Union[List[DataStorage], DataStora
             finished.append(instance)
         else:
             pending.append(instance)
-    model.objects.bulk_update(finished, ["pending_at", "finished_at"])
+    update_fields = ["pending_at", "finished_at"]
+    if issubclass(model, DatasetVersionBase):
+        update_fields += ["is_current", "errors"]
+    model.objects.bulk_update(finished, update_fields)
     return pending
 
 

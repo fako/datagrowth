@@ -50,7 +50,7 @@ def send_iterator(config, *args, **kwargs):
             link = exc.resource
             link.close()
             if config.resource_exception_reraise:
-                raise exc
+                raise
         # Prepare next request
         has_next_request = current_request = link.create_next_request()
         count += 1

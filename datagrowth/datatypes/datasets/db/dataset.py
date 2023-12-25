@@ -14,6 +14,7 @@ from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 from datagrowth.datatypes.documents.tasks.collection import grow_collection
 from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
+from datagrowth.resources.utils import update_serialized_resources
 from datagrowth.version import VERSION
 from datagrowth.utils import ibatch
 
@@ -307,6 +308,11 @@ class DatasetBase(models.Model):
             seeds=seeds,
             limit=limit
         )
+
+    def handle_seeding_error(self, collection, exception):
+        if dataset_version := collection.dataset_version:
+            update_serialized_resources(dataset_version.errors["seeding"], exception.resource)
+            dataset_version.save()
 
     #######################################################
     # DATASET HARVEST

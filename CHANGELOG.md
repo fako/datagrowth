@@ -38,9 +38,13 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
   will be set in the ``derivatives`` field instead of ``properties``.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
   Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
+* Importing ``DataStorage`` from ``datagrowth.datatypes.documents.db.base`` has to be replaced
+  with importing from ``datagrowth.datatypes.storage``.
 * The ``DataStorages`` dataclass has been added to manage typing for dynamically loaded ``DataStorage`` models.
 * The ``DatasetVersion.task_definitions`` field holds dictionaries per ``DataStorage`` model that specifies,
   which tasks should run for which model.
+* The ``DatasetVersion.errors`` field has a ``seeding`` and ``tasks`` field where some basic error information is kept
+  for debugging purposes.
 * A ``DatasetVersion`` will influence its ``Collections`` and ``Documents``.
   ``Collections`` may set ``DatasetVersion`` for ``Documents`` and facilitate ``DatasetVersion`` influence for them.
 * Task definitions given to ``DatasetVersion`` propagate to ``Collection`` and ``Document``
@@ -55,6 +59,7 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
 * ``Document.invalidate_task`` will now always set ``pending_at`` and ``finished_at`` attributes,
   regardless of whether tasks have run before.
 * The ``content`` of a Document now contains output from ``derivatives`` through ``Document.get_derivatives_content``.
+* Calling ``validate_pending_data_storages`` now may update ``DatasetVersion.is_current`` and ``DatasetVersion.errors``.
 
 
 v0.19

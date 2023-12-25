@@ -3,7 +3,6 @@ from django.utils.timezone import now
 
 from unittest.mock import patch
 
-from datagrowth.exceptions import DGGrowthUnfinished
 from datagrowth.datatypes.datasets.constants import GrowthState
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.processors import SeedingProcessorFactory
@@ -108,10 +107,6 @@ class TestDataset(TestCase):
         self.incomplete = Dataset.objects.get(id=2)
         self.complete = Dataset.objects.get(id=3)
         self.empty = Dataset.objects.get(id=4)
-        self.seeds = [{"test": 1}, {"test": 2}, {"test": 3}]
-
-    def raise_unfinished(self, result):
-        raise DGGrowthUnfinished("Raised for test")
 
     def test_create_dataset_version(self):
         dataset_version = self.instance.create_dataset_version()

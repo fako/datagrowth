@@ -199,3 +199,8 @@ LOGGING = {
 
 DATAGROWTH_MEDIA_ROOT = MEDIA_ROOT = os.path.join(BASE_DIR, "data", "media")
 DATAGROWTH_API_VERSION = 1
+
+
+# Test variables
+
+TEST_CHECK_DOI_FAILURE_IDENTITIES = []
