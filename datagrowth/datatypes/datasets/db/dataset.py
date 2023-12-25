@@ -266,9 +266,9 @@ class DatasetBase(models.Model):
                 seeding_limit = limit
 
             # Create the signatures for dispatching
-            grow_signature = grow_collection.signature(
+            grow_signature = grow_collection.s(
                 label, collection.id, *args,
-                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit
+                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit, config=self.config
             )
             grow_signatures.append(grow_signature)
 
