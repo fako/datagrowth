@@ -29,6 +29,9 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
 * The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
   part of the ``growth_processor`` namespace.
 * The ``batch_size`` setting is now part of the default global configuration namespace.
+* The configuration ``async`` will no longer get patched to ``asynchronous`` to be compatible with Python >= 3.7.
+  Instead supply ``asynchronous`` directly and replace all ``async`` occurrences.
+* When using ``ConfigurationType.supplement`` default values are now ignored when determining if values exist.
 * The ``pipeline`` attributes gets replaced by the ``task_results`` attributes for ``Document``, ``Collection`` and
   ``DatasetVersion``.
 * Default property to write contributions to has become equal to the ``growth_phase`` and

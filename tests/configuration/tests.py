@@ -27,7 +27,7 @@ class TestConfigurationType(TestCase):
             "_test2": "protected",
             "_test3": "private",
             "$test4": "variable",  # variable config is not recommended
-            "async": False  # should map to "asynchronous" property for Python 3.7+
+            "asynchronous": False
         })
 
     def test_init(self):
@@ -138,9 +138,6 @@ class TestConfigurationType(TestCase):
 
     def test_from_dict(self):
         test_dict = self.config.to_dict(private=True, protected=True)
-        # Make sure that the legacy async key works
-        test_dict.pop("asynchronous")
-        test_dict["async"] = False
         # Make actual call
         type_instance = ConfigurationType.from_dict(
             test_dict,
@@ -173,7 +170,6 @@ class TestConfigurationType(TestCase):
         self.assertTrue("_test2" in self.config)
         self.assertTrue("_test3" in self.config)
         self.assertTrue("test4" in self.config)
-        self.assertTrue("async" in self.config)
         self.assertTrue("asynchronous" in self.config)
         self.assertFalse("test5" in self.config)
 
@@ -196,9 +192,10 @@ class TestConfigurationType(TestCase):
         update_method.assert_not_called()
         self.config.supplement({"new": "new", "_new2": "new 2", "$new3": "new 3"})
         update_method.assert_called_once_with({"new": "new", "_new2": "new 2", "$new3": "new 3"})
-        # Make sure that legacy async keys get set properly
-        self.empty.supplement({"async": False})
-        self.assertFalse(self.config.asynchronous)
+        # When dealing with empty defaults we do supplement to override those
+        update_method.reset_mock()
+        self.config.supplement({"batch_size": 5})
+        update_method.assert_called_once_with({"batch_size": 5})
 
     def test_items(self):
         # Get all different possibilities
@@ -255,7 +252,6 @@ class TestConfigurationType(TestCase):
         self.assertEqual(self.config.get("_test2", None), "protected")
         self.assertEqual(self.config.get("_test3", None), "private")
         self.assertEqual(self.config.get("test4", None), "variable")
-        self.assertEqual(self.config.get("async", None), False)
         self.assertEqual(self.config.get("asynchronous", None), False)
         # Default fallback
         self.assertEqual(self.config.get("test5", "does-not-exist"), "does-not-exist")
