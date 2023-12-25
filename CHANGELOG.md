@@ -54,6 +54,7 @@ The convenience of lists is more important here than memory footprint which will
   Defaults to True even for "head" requests.
 * Exposes ``ProcessorFactory`` and ``DataStorageFactory`` to easily build processors and datatypes in the future.
 * Adds the ``Collection.reload_document_ids`` method to be able to load ``Document.id`` after ``bulk_create``.
+* For consistent ``Resource`` serialization adds ``serialize_resources`` and ``update_serialized_resources``.
 
 
 v0.18
