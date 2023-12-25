@@ -25,6 +25,7 @@ class DatasetVersionBase(DataStorage):
 
     growth_strategy = models.CharField(max_length=50, choices=GrowthStrategy.choices, default=GrowthStrategy.FREEZE)
     task_definitions = models.JSONField(default=dict, blank=True)
+    errors = models.JSONField(default=dict, blank=True)
 
     is_current = models.BooleanField(default=False)
     version = models.CharField(max_length=50, null=False, blank=True)
