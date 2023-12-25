@@ -157,4 +157,4 @@ class DatasetPile(DatasetTestBase):
 
 
 class FrozenDataset(DatasetTestBase):
-    GROWTH_STRATEGY = GrowthStrategy.FREEZE
+    pass

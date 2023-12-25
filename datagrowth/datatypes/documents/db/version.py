@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 
+from django.apps import apps
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -46,6 +47,17 @@ class DatasetVersionBase(DataStorage):
 
         :return: whether dataset_version passes validation (and should become "current")
         """
+        for model_name, model_task_definitions in self.task_definitions.items():
+            model = apps.get_model(self._meta.app_label, model_name)
+            for task_name, task_definition in model_task_definitions.items():
+                success = model.objects.filter(**{f"task_results__{task_name}__success": True}).count()
+                fail = model.objects.filter(**{f"task_results__{task_name}__success": False}).count()
+                skipped = model.objects.filter(**{f"task_results__{task_name}__isnull": True}).count()
+                self.errors["tasks"][task_name] = {
+                    "success": success,
+                    "fail": fail,
+                    "skipped": skipped
+                }
         return True
 
     def finish_processing(self, current_time: datetime = None, commit: bool = True):

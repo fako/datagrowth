@@ -5,7 +5,7 @@ from datetime import datetime
 from django.utils.timezone import now
 from celery import current_app as app
 
-from datagrowth.exceptions import DGPendingDocuments
+from datagrowth.exceptions import DGResourceException, DGPendingDocuments
 from datagrowth.configuration import ConfigurationType, load_config
 from datagrowth.utils import ibatch
 from datagrowth.utils.tasks import DatabaseConnectionResetTask
@@ -140,11 +140,17 @@ def grow_collection(config: ConfigurationType, label: str, collection_id: int, *
 
     log.info(f"Starting seeding: {label}, {collection.name}")
     count = 0
-    for documents in seeding:
-        start_document_tasks(documents, asynchronous=asynchronous)
-        count += len(documents)
-        if limit is not None and count >= limit:
-            break
+    try:
+        for documents in seeding:
+            start_document_tasks(documents, asynchronous=asynchronous)
+            count += len(documents)
+            if limit is not None and count >= limit:
+                break
+    except DGResourceException as exc:
+        if collection.dataset_version and (dataset := collection.dataset_version.dataset):
+            dataset.handle_seeding_error(collection, exc)
+        else:
+            raise
 
     log.info(f"Starting tasks for: {label}, {collection.name}")
     start_collection_tasks(collection, current_time, asynchronous=asynchronous)
