@@ -97,6 +97,17 @@ class DocumentBase(DataStorage):
             self.modified_at = current_time
         return self.content
 
+    def get_derivatives_content(self) -> dict:
+        content = {}
+        for base, derivatives in self.derivatives.items():
+            for key, value in derivatives.items():
+                if key in content:
+                    message = f"Derivative based on '{base}' is trying to add '{key}', but this has already been set."
+                    warnings.warn(message, RuntimeWarning)
+                    continue
+                content[key] = value
+        return content
+
     @property
     def content(self):
         """
@@ -104,10 +115,13 @@ class DocumentBase(DataStorage):
 
         :return: Dictionary filled with properties.
         """
-        return dict(
+        base_content = dict(
             {key: value for key, value in self.properties.items() if not key.startswith('_')},
             _id=self.id
         )
+        derivatives_content = self.get_derivatives_content()
+        base_content.update(derivatives_content)
+        return base_content
 
     def output(self, *args):
         return self.output_from_content(self.content, *args)

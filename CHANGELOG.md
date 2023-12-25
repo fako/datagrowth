@@ -51,6 +51,7 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
   ``Dataset.get_task_definitions`` for more control.
 * ``Document.invalidate_task`` will now always set ``pending_at`` and ``finished_at`` attributes,
   regardless of whether tasks have run before.
+* The ``content`` of a Document now contains output from ``derivatives`` through ``Document.get_derivatives_content``.
 
 
 v0.19
