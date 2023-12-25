@@ -55,6 +55,31 @@ class TestDocument(data_storage.DataStorageTestCase):
             url = document_test.url
             reverse_mock.assert_called_once_with("v1:testing-apps:document-test-content", args=[1])
 
+    def test_content(self):
+        # Standard content
+        self.assertEqual(self.instance.content, {
+            "value": "0",
+            "nested": "nested value 0",
+            "context": "nested value",
+            "_id": 1
+        })
+        # Content with derivatives set
+        self.instance.derivatives = {
+            "task_1": {
+                "task_1_result": "test"
+            },
+            "new_context": {
+                "context": "new"
+            }
+        }
+        self.assertEqual(self.instance.content, {
+            "value": "0",
+            "nested": "nested value 0",
+            "context": "new",
+            "task_1_result": "test",
+            "_id": 1
+        })
+
     @patch("datagrowth.datatypes.DocumentBase.output_from_content")
     def test_output(self, output_from_content):
         self.instance.output("$.value")
