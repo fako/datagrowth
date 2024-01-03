@@ -14,16 +14,19 @@ class TestInitialDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
     def test_growth_success(self):
         self.dataset.grow(self.entity_type, asynchronous=False)
         self.assert_initial_grow_success(dataset_versions=1, collections=1, documents=20)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=20)
 
     def test_growth_limit(self):
         # This test sets the limit to 3.
         # However the batch_size is 5 and therefor we expect to grow 5 Documents.
         self.dataset.grow(self.entity_type, asynchronous=False, limit=3)
         self.assert_initial_grow_success(dataset_versions=1, collections=1, documents=5)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=5)
 
     def test_seeding_error(self):
         self.dataset.grow("does_not_exist", asynchronous=False)
         self.assert_initial_grow_success(dataset_versions=1, collections=1, documents=0)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=0)
         entity_list_resource = EntityListResource.objects.last()
         dataset_version = DatasetVersion.objects.first()
         self.assertEqual(dataset_version.errors, {
@@ -48,6 +51,7 @@ class TestInitialDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
         with override_settings(TEST_CHECK_DOI_FAILURE_IDENTITIES=["1"]):
             self.dataset.grow(self.entity_type, asynchronous=False)
         self.assert_initial_grow_failure(dataset_versions=1, collections=1, documents=19, error_documents=1)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=20)
         dataset_version = DatasetVersion.objects.first()
         self.assertEqual(dataset_version.errors, {
             "tasks": {
