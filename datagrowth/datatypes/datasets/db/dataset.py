@@ -1,4 +1,5 @@
 from typing import Optional
+import os
 from copy import deepcopy
 
 from django.apps import apps
@@ -16,7 +17,7 @@ from datagrowth.datatypes.documents.tasks.collection import grow_collection
 from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
 from datagrowth.resources.utils import update_serialized_resources
 from datagrowth.version import VERSION
-from datagrowth.utils import ibatch
+from datagrowth.utils import ibatch, get_dumps_path, object_to_disk, queryset_to_disk, objects_from_disk
 
 
 class DatasetBase(models.Model):
@@ -282,7 +283,8 @@ class DatasetBase(models.Model):
              limit=None) -> Optional[GroupResult]:
         # Set argument defaults
         growth_strategy = growth_strategy or self.GROWTH_STRATEGY
-        current_version = self.versions.filter(is_current=True).last()
+        dataset_version_filters = {} if growth_strategy == GrowthStrategy.STACK else {"is_current": True}
+        current_version = self.versions.filter(**dataset_version_filters).last()
 
         # Decide on growth preparation
         # After this current_version should never be None and any new DatasetVersions will be PENDING.
@@ -324,6 +326,123 @@ class DatasetBase(models.Model):
 
     def harvest(self):
         pass
+
+    #######################################################
+    # DATASET RAW IO
+    #######################################################
+    # Methods that handle how a fully grown Dataset may export its data through a harvest.
+
+    def to_querysets(self):
+        # Loading models
+        DatasetVersion = self.get_dataset_version_model()
+        Collection = DatasetVersion.get_collection_model()
+        Document = DatasetVersion.get_document_model()
+        # Load DatasetVersion instances based on GROWTH_STRATEGY
+        dataset_version_filters = {} if self.GROWTH_STRATEGY == GrowthStrategy.STACK else {"is_current": True}
+        versions_set = self.versions.filter(**dataset_version_filters)
+        version_ids = versions_set.values_list("id", flat=True)
+        # Load other data based on the DatasetVersion
+        collection_set = Collection.objects.filter(dataset_version_id__in=version_ids)
+        document_set = Document.objects.filter(dataset_version_id__in=version_ids)
+        # Return QuerySets
+        return versions_set, collection_set, document_set
+
+    @property
+    def collections(self):
+        dvs, cols, docs = self.to_querysets()
+        return cols
+
+    @property
+    def documents(self):
+        dvs, cols, docs = self.to_querysets()
+        return docs
+
+    def to_file(self, batch_size=100, progress_bar=True):
+        destination = get_dumps_path(self)
+        if not os.path.exists(destination):
+            os.makedirs(destination)
+        file_name = os.path.join(destination, f"{self.signature}.{self.id}.json")
+        with open(file_name, "w") as json_file:
+            object_to_disk(self, json_file)
+            dataset_versions, collections, documents = self.to_querysets()
+            queryset_to_disk(dataset_versions, json_file, batch_size=batch_size, progress_bar=progress_bar)
+            queryset_to_disk(collections, json_file, batch_size=batch_size, progress_bar=progress_bar)
+            queryset_to_disk(documents, json_file, batch_size=batch_size, progress_bar=progress_bar)
+
+    @classmethod
+    def from_file(cls, file_path, replace=False, progress_bar=True):
+        # Basic path check
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"No dump exists at: {file_path}")
+        # Preset model and instance variables
+        dataset = None
+        DatasetVersion = None
+        Collection = None
+        Document = None
+        # Preset id containers
+        dataset_version_ids = {}
+        collection_ids = {}
+        # Start reading the file
+        with open(file_path, "r") as dump_file:
+            for objects in objects_from_disk(dump_file, progress_bar=progress_bar):
+                # Handling no objects makes no sense
+                if not len(objects):
+                    continue
+
+                # When we can blindly replace all data
+                # Then we delete/add the objects and ignore everything else in this loop
+                if replace:
+                    obj = objects[0]
+                    model = type(obj)
+                    model.objects.filter(id__in=[obj.id for obj in objects]).delete()
+                    model.objects.bulk_create(objects)
+                    continue
+
+                # We'll decide what to do based on type of the first object
+                obj = objects[0]
+                # Datasets we want to use for determining types,
+                # as well as saving it and possible changes based on signatures
+                if isinstance(obj, DatasetBase):
+                    dataset = obj
+                    Dataset = type(obj)
+                    DatasetVersion = Dataset.get_dataset_version_model()
+                    Collection = DatasetVersion.get_collection_model()
+                    Document = DatasetVersion.get_document_model()
+                    original = Dataset.objects.get(signature=obj.signature)
+                    if original:
+                        original.versions.update(is_current=False)
+                        dataset.id = original.id
+                    dataset.save()
+                # DatasetVersions need to store the correct Dataset relation.
+                # And we'll possibly need to map Collections and Documents to new DatasetVersion ids.
+                elif isinstance(obj, DatasetVersion):
+                    for dataset_version in objects:
+                        dump_id = dataset_version.id
+                        dataset_version.pk = None
+                        dataset_version.id = None
+                        dataset_version.dataset = dataset
+                        dataset_version.save()
+                        dataset_version_ids[dump_id] = dataset_version.id
+                # Collections need to store the correct DatasetVersion relation.
+                # And we'll possibly need to map Documents to new Collection ids.
+                elif isinstance(obj, Collection):
+                    for collection in objects:
+                        dump_id = collection.id
+                        collection.pk = None
+                        collection.id = None
+                        collection.dataset_version_id = dataset_version_ids[collection.dataset_version_id]
+                        collection.save()
+                        collection_ids[dump_id] = collection.id
+                # For Documents we only need to update ids of relations
+                elif isinstance(obj, Document):
+                    for document in objects:
+                        document.pk = None
+                        document.id = None
+                        document.dataset_version_id = dataset_version_ids[document.dataset_version_id]
+                        document.collection_id = collection_ids[document.collection_id]
+                    Document.objects.bulk_create(objects)
+
+        return dataset
 
     #######################################################
     # UTILITY

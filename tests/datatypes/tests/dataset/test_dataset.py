@@ -1,13 +1,17 @@
+import os
+
+from django.conf import settings
 from django.test import TestCase
 from django.utils.timezone import now
+from django.db.models import QuerySet
 
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 
 from datagrowth.datatypes.datasets.constants import GrowthState
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.processors import SeedingProcessorFactory
 
-from datatypes.models import Dataset, ResettingDataset, DatasetPile, DatasetVersion
+from datatypes.models import Dataset, ResettingDataset, DatasetPile, DatasetVersion, Collection, Document
 
 
 class TestDatasetProtocol(TestCase):
@@ -347,3 +351,67 @@ class TestDataset(TestCase):
         with patch.object(Dataset, "DATASET_VERSION_TASKS", {"test": "test"}):
             task_definitions = self.instance.get_task_definitions()
             self.assertEqual(task_definitions["datasetversion"], {"test": "test"})
+
+    def test_to_queryset_initialized(self):
+        dataset_versions, collections, documents = self.instance.to_querysets()
+        self.assertEqual(dataset_versions.count(), 0)
+        self.assertEqual(collections.count(), 0)
+        self.assertEqual(documents.count(), 0)
+
+    def test_to_queryset_growing(self):
+        dataset_versions, collections, documents = self.incomplete.to_querysets()
+        self.assertEqual(dataset_versions.count(), 0)
+        self.assertEqual(collections.count(), 0)
+        self.assertEqual(documents.count(), 0)
+
+    def test_to_queryset_complete(self):
+        dataset_versions, collections, documents = self.complete.to_querysets()
+        self.assertEqual(dataset_versions.count(), 1)
+        self.assertEqual(collections.count(), 1)
+        self.assertEqual(documents.count(), 3)
+
+    def test_to_queryset_empty(self):
+        dataset_versions, collections, documents = self.empty.to_querysets()
+        self.assertEqual(dataset_versions.count(), 1)
+        self.assertEqual(collections.count(), 1)
+        self.assertEqual(documents.count(), 0)
+
+    @patch("datagrowth.datatypes.datasets.db.dataset.queryset_to_disk", return_value=None)
+    @patch("datagrowth.datatypes.datasets.db.dataset.object_to_disk", return_value=None)
+    @patch("builtins.open", mock_open())
+    def test_to_file(self, object_to_disk_mock, queryset_to_disk_mock):
+        self.complete.to_file()
+        self.assertEqual(object_to_disk_mock.call_count, 1)
+        for args, kwargs in object_to_disk_mock.call_args_list:
+            self.assertEqual(args[0].signature, self.complete.signature)
+            self.assertEqual(kwargs, {})
+        self.assertEqual(queryset_to_disk_mock.call_count, 3)
+        expected_object_type = [DatasetVersion, Collection, Document]
+        expected_object_count = [1, 1, 3]
+        for ix, arguments in enumerate(queryset_to_disk_mock.call_args_list):
+            args, kwargs = arguments
+            self.assertIsInstance(args[0], QuerySet)
+            self.assertEqual(args[0].model, expected_object_type[ix])
+            self.assertEqual(args[0].count(), expected_object_count[ix])
+            self.assertEqual(kwargs, {"batch_size": 100, "progress_bar": True})
+
+    def test_from_file_append(self):
+        dump_file = os.path.join(settings.BASE_DIR, "data/datatypes/dumps/dataset/setting1=const&test-multiple.3.json")
+        self.complete.from_file(dump_file, progress_bar=False)
+        self.assertEqual(self.complete.versions.count(), 2)
+        self.assertEqual(self.complete.versions.filter(is_current=True).count(), 1)
+        self.assertEqual(Collection.objects.count(), 4, "Expected three existing and one added Collection")
+        self.assertEqual(Document.objects.count(), 9, "Expected six existing and three added Documents")
+        updated_document = Document.objects.get(properties__context="updated value")
+        self.assertGreater(updated_document.id, 4)
+
+    def test_from_file_replace(self):
+        dump_file = os.path.join(settings.BASE_DIR, "data/datatypes/dumps/dataset/setting1=const&test-multiple.3.json")
+        self.complete.from_file(dump_file, replace=True, progress_bar=False)
+        self.assertEqual(self.complete.versions.count(), 1)
+        self.assertEqual(self.complete.versions.filter(is_current=True).count(), 1)
+        dataset_version = self.complete.versions.last()
+        self.assertEqual(dataset_version.collections.count(), 1, "Expected one updated Collection")
+        self.assertEqual(dataset_version.documents.count(), 3, "Expected three updated Documents")
+        updated_document = Document.objects.get(id=4)
+        self.assertEqual(updated_document.properties["context"], "updated value")

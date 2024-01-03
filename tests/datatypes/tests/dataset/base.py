@@ -63,3 +63,9 @@ class BaseDatasetTestCase(TestCase):
             self.assertEqual(failure_document.derivatives, {
                 "check_doi": {"check_doi": {"doi": "fail"}}
             })
+
+    def assert_dataset_output(self, dataset, dataset_versions=0, collections=0, documents=0):
+        dataset_version_set, collection_set, document_set = dataset.to_querysets()
+        self.assertEqual(dataset_version_set.count(), dataset_versions)
+        self.assertEqual(collection_set.count(), collections)
+        self.assertEqual(document_set.count(), documents)
