@@ -4,6 +4,7 @@ import json
 import re
 
 from django.apps import apps
+from django.core.management.base import CommandError
 from django.contrib.contenttypes.models import ContentType
 
 from datagrowth.management.base import DatasetCommand
@@ -20,6 +21,7 @@ class Command(DatasetCommand):
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
+        parser.add_argument('-r', '--replace', action="store_true")
         parser.add_argument('-t', '--transform-community', action="store_true")
 
     def get_dataset(self):  # picks the correct dataset from all available datasets based on signature
@@ -40,7 +42,15 @@ class Command(DatasetCommand):
                 datasets.append(instance)
         return datasets
 
-    def bulk_create_objects(self, objects, transform_community):
+    def handle_dataset(self, dataset, *args, **options):
+        replace = options["replace"]
+        dataset.from_file(dataset.file_path, replace=replace)
+
+    ###################################
+    # Legacy Community compatability
+    ###################################
+
+    def bulk_create_community_objects(self, objects, transform_community):
 
         obj = objects[0]
         model = type(obj)
@@ -73,18 +83,18 @@ class Command(DatasetCommand):
 
         model.objects.bulk_create(objects)
 
-    def handle_dataset(self, dataset, *args, **options):
+    def handle_community(self, community, *args, **options):
         transform_community = options.get("transform_community", False)
         if transform_community:
             log.info("Using transformation to change all data storage into Document and Collection")
             self.Growth = apps.get_model("core", "Growth")
-            self.Document = apps.get_model(dataset._meta.app_label, "Document")
+            self.Document = apps.get_model(community._meta.app_label, "Document")
             self.Individual = apps.get_model("core", "Individual")
-            self.Collection = apps.get_model(dataset._meta.app_label, "Collection")
+            self.Collection = apps.get_model(community._meta.app_label, "Collection")
             self.Collective = apps.get_model("core", "Collective")
-        if not os.path.exists(dataset.file_path):
-            log.error("Dump with signature {} does not exist".format(dataset.signature))
+        if not os.path.exists(community.file_path):
+            log.error("Dump with signature {} does not exist".format(community.signature))
             exit(1)
-        with open(dataset.file_path, "r") as dump_file:
+        with open(community.file_path, "r") as dump_file:
             for objects in objects_from_disk(dump_file):
-                self.bulk_create_objects(objects, transform_community)
+                self.bulk_create_community_objects(objects, transform_community)

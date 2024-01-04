@@ -6,10 +6,14 @@ from datagrowth.utils import ibatch
 
 class Command(DatasetCommand):
     """
-    Copies a dataset by signature to a new dataset instance
-    """
+    Copies a Community by signature to a new Community instance
 
-    def handle_dataset(self, dataset, *args, **options):
+    This command refers to dataset in its name, but is only suitable for legacy Community "datasets".
+    To achieve the same functionality with proper Datasets use the load_dataset command without the replace flag.
+    """
+    cast_as_community = True
+
+    def handle_community(self, dataset, *args, **options):
         # First we prepare all QuerySets and instances that we want to copy
         growths = dataset.growth_set.all()
         kernel_key = (type(dataset.kernel), dataset.kernel.id)
