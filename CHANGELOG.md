@@ -60,6 +60,8 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
   regardless of whether tasks have run before.
 * The ``content`` of a Document now contains output from ``derivatives`` through ``Document.get_derivatives_content``.
 * Calling ``validate_pending_data_storages`` now may update ``DatasetVersion.is_current`` and ``DatasetVersion.errors``.
+* Commands inheriting from ``DatasetCommand`` that expect ``Community`` compliant objects,
+  should set ``cast_as_community`` to True on the Command class and rename ``handle_dataset`` to ``handle_community``.
 
 
 v0.19

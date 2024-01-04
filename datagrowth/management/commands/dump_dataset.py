@@ -10,6 +10,13 @@ class Command(DatasetCommand):
     """
 
     def handle_dataset(self, dataset, *args, **options):
+        dataset.to_file()
+
+    ###################################
+    # Legacy Community compatability
+    ###################################
+
+    def handle_community(self, dataset, *args, **options):
         setattr(dataset, "current_growth", None)  # resets the dataset
         destination = get_dumps_path(dataset)
         if not os.path.exists(destination):
