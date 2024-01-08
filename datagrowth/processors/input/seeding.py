@@ -35,7 +35,7 @@ class ResourceSeedingProcessor(Processor):
 
     def build_seed_iterator(self, phase: Dict, *args, **kwargs) -> Iterator:
         resource_config = phase["retrieve"]
-        resource_config.supplement({"resource_exception_reraise": True})
+        resource_config.supplement({"resource_exception_reraise": phase["phase"].strategy == "initial"})
         if not len(self.batch):
             # This is the initial case where there is no input from a buffer.
             # So we just use args and kwargs as given to the call to the processor.
