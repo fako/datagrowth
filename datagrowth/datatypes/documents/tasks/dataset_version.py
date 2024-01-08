@@ -1,6 +1,5 @@
 from typing import Union, List
 
-from django.db.transaction import atomic
 from celery import current_app as app
 
 from datagrowth.exceptions import DGPendingDataStorage
@@ -47,23 +46,3 @@ def dispatch_dataset_version_tasks(label: str, dataset_version: Union[int, Datas
             callback=recursive_callback_signature,
             asynchronous=asynchronous
         )
-
-
-@app.task(name="set_current_dataset_version", base=DatabaseConnectionResetTask)
-@atomic
-def set_current_dataset_version(label: str, dataset_version_id: int) -> None:
-    storages = DataStorages.load_instances(label, dataset_version_id, lock=True)
-    dataset_version = storages.instance
-    # A Collection is unfinished when it is not yet pending (because Documents are still coming in),
-    # but any tasks for the Collection haven't run either
-    has_unfinished_sets = dataset_version.sets.filter(finished_at__isnull=True).exists()
-    # A Collection will become pending when all Documents have been fetched and stored
-    # and will remain pending as long as not all tasks have been completed
-    has_pending_sets = dataset_version.sets.filter(pending_at__isnull=False).exists()
-    # We only want to set the DatasetVersion to become "current",
-    # meaning all output will use this DatasetVersion, when all tasks for all sets have executed.
-    should_set_current = not has_unfinished_sets and not has_pending_sets
-    if should_set_current:
-        dataset_version.set_current()
-        dataset_version.pipeline["set_current_dataset_version"] = {"success": True}
-        dataset_version.save()
