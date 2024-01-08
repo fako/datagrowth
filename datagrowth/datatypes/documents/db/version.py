@@ -61,7 +61,7 @@ class DatasetVersionBase(DataStorage):
         return True
 
     def finish_processing(self, current_time: datetime = None, commit: bool = True):
-        if self.evaluate_dataset_version():
+        if self.evaluate_dataset_version() and self.growth_strategy != GrowthStrategy.STACK:
             type(self).objects.all().update(is_current=False)
             self.is_current = True
         super().finish_processing(current_time=current_time, commit=commit)
