@@ -93,8 +93,9 @@ class Command(DatasetCommand):
             self.Collection = apps.get_model(community._meta.app_label, "Collection")
             self.Collective = apps.get_model("core", "Collective")
         if not os.path.exists(community.file_path):
-            log.error("Dump with signature {} does not exist".format(community.signature))
-            exit(1)
+            message = f"Dump with signature {community.signature} does not exist"
+            log.error(message)
+            raise CommandError(message)
         with open(community.file_path, "r") as dump_file:
             for objects in objects_from_disk(dump_file):
                 self.bulk_create_community_objects(objects, transform_community)
