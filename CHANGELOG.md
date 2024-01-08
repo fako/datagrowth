@@ -62,6 +62,8 @@ Highly recommended to use Postgres when knowing the ``Document.id`` is important
 * Calling ``validate_pending_data_storages`` now may update ``DatasetVersion.is_current`` and ``DatasetVersion.errors``.
 * Commands inheriting from ``DatasetCommand`` that expect ``Community`` compliant objects,
   should set ``cast_as_community`` to True on the Command class and rename ``handle_dataset`` to ``handle_community``.
+* Unlike the legacy ``Community`` model a ``Dataset`` has a unique signature. If the signature of a ``Dataset`` matches
+  an existing ``Dataset`` the ``growth`` method will create a new ``DatasetVersion`` instead of a different ``Dataset``.
 
 
 v0.19

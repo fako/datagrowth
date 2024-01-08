@@ -22,7 +22,7 @@ from datagrowth.utils import ibatch, get_dumps_path, object_to_disk, queryset_to
 
 class DatasetBase(models.Model):
 
-    signature = models.CharField(max_length=255, db_index=True)
+    signature = models.CharField(max_length=255, db_index=True, unique=True)
     config = ConfigurationField()
     versions = GenericRelation(
         "DatasetVersion",
