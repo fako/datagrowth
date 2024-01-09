@@ -49,6 +49,9 @@ class DatasetCommand(BaseCommand):
             community, created = self.model.objects.get_latest_or_create_by_signature(self.signature, **self.config)
             return community
         dataset, created = self.model.objects.get_or_create(signature=self.signature)
+        if created:
+            dataset.config = self.config
+            dataset.save()
         return dataset
 
     def get_datasets(self):
