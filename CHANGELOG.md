@@ -55,6 +55,7 @@ The convenience of lists is more important here than memory footprint which will
 * Exposes ``ProcessorFactory`` and ``DataStorageFactory`` to easily build processors and datatypes in the future.
 * Adds the ``Collection.reload_document_ids`` method to be able to load ``Document.id`` after ``bulk_create``.
 * For consistent ``Resource`` serialization adds ``serialize_resources`` and ``update_serialized_resources``.
+* Experimental support for ``ResourceFixturesMixin`` that can be used to load resource content through fixture files.
 
 
 v0.18

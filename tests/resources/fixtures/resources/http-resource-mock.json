@@ -1,0 +1,36 @@
+[
+    {
+        "fields": {
+            "body": "en-success.json",
+            "status": 200,
+            "head": {
+                "content-type": "application/json"
+            },
+            "modified_at": "2015-05-12T18:45:22.105Z",
+            "created_at": "2015-05-12T18:45:22.105Z",
+            "request": {
+                "args": [
+                    "en",
+                    "success"
+                ],
+                "kwargs": {},
+                "headers": {
+                    "User-Agent": "DataGrowth (test); python-requests/2.20.0",
+                    "Accept": "application/json",
+                    "Accept-Encoding": "gzip, deflate",
+                    "Connection": "keep-alive"
+                },
+                "method": "get",
+                "url": "http://localhost:8000/en/?param=1&q=success&meta=success",
+                "data": null,
+                "backoff_delay": 0
+            },
+            "uri": "localhost:8000/en/?meta=success&param=1&q=success",
+            "data_hash": "",
+            "config": "{}",
+            "purge_at": null
+        },
+        "model": "resources.httpresourcemock",
+        "pk": 1
+    }
+]
