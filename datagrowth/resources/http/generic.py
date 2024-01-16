@@ -673,7 +673,7 @@ class URLResource(HttpResource):
     GET_SCHEMA = {
         "args": {
             "type": "array",
-            "items": [
+            "prefixItems": [
                 {
                     "type": "string",
                     "pattern": "^http"

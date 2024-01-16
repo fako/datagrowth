@@ -26,7 +26,7 @@ setuptools.setup(
     install_requires=[
         "Django>=3.2",
         "celery",
-        "jsonschema",
+        "jsonschema>=4.20.0",
         "lxml",
         "beautifulsoup4",
         "urlobject",
