@@ -29,7 +29,10 @@ class Command(DatasetCommand):
         limit = options["limit"]
         retry = options["retry"]
         seeds = options["initial_seeder"]
-        dataset.grow(growth_strategy=growth_strategy, asynchronous=asynchronous, limit=limit, retry=retry, seeds=seeds)
+        dataset.grow(
+            *args,
+            growth_strategy=growth_strategy, asynchronous=asynchronous, limit=limit, retry=retry, seeds=seeds
+        )
 
     ###################################
     # Legacy Community compatability

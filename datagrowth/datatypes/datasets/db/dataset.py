@@ -270,7 +270,8 @@ class DatasetBase(models.Model):
             # Create the signatures for dispatching
             grow_signature = grow_collection.s(
                 label, collection.id, *args,
-                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit, config=self.config
+                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit,
+                config=self.config.to_dict(protected=True, private=True)
             )
             grow_signatures.append(grow_signature)
 
