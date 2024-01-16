@@ -24,6 +24,7 @@ Using MariaDB might solve this, but it's unclear how the ``JSONField`` performs 
 Highly recommended to use Postgres when knowing the ``Document.id`` is important directly after bulk creation.
 
 * Minimal version for Celery is now 5.x.
+* Minimal version for jsonschema is now 4.20.0, which uses draft 12 instead of draft 4.
 * ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
   to ``global_datatypes_app_label`` and ``global_datatype_models``.
 * The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
