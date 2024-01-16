@@ -14,11 +14,15 @@ class ResourceFixturesMixin:
 
     @classmethod
     def read_resource_attribute_fixture(cls, fixture_dir, resource, attribute):
-        attribute_file_path = os.path.join(fixture_dir, getattr(resource, attribute))
-        if os.path.exists(attribute_file_path):
-            with open(attribute_file_path, "r") as attribute_file:
-                content = attribute_file.read()
-                setattr(resource, attribute, content)
+        file_name = getattr(resource, attribute)
+        if not file_name:
+            return
+        attribute_file_path = os.path.join(fixture_dir, file_name)
+        if not os.path.exists(attribute_file_path):
+            raise FileNotFoundError(f"Can't find resource fixture: {file_name}")
+        with open(attribute_file_path, "r") as attribute_file:
+            content = attribute_file.read()
+            setattr(resource, attribute, content)
 
     @classmethod
     def setUpTestData(cls):
