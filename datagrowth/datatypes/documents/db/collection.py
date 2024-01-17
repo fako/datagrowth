@@ -12,7 +12,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.timezone import make_aware
 
 from datagrowth import settings as datagrowth_settings
-from datagrowth.utils import ibatch, reach
+from datagrowth.utils import ibatch, reach, is_hashable
 from .base import DataStorage
 
 
@@ -155,6 +155,17 @@ class CollectionBase(DataStorage):
                     prepared += prepare_additions(instance)
             return prepared
 
+        # Make instances in data unique by hash to prevent adding instances with identical hashes
+        # This is mostly relevant for models that override the __hash__ method,
+        # because Django won't delete instances with identical hashes even when using Document.objects.all().delete().
+        # We can't force uniqueness for Iterator based updates, because that would mean loading all instances in memory.
+        if len(data) and isinstance(data, list):
+            unique_instances = {
+                obj if is_hashable(obj) else ix: obj
+                for ix, obj in enumerate(data)
+            }
+            data = list(unique_instances.values())
+
         for additions in ibatch(data, batch_size=batch_size):
             additions = prepare_additions(additions)
             yield Document.objects.bulk_create(additions, batch_size=batch_size)
@@ -215,6 +226,9 @@ class CollectionBase(DataStorage):
             updates = []
             sources_by_lookup = defaultdict(list)
             for update in update_data:
+                # If input is a dict we cast it to Document to allow __eq__ methods to do their job.
+                if isinstance(update, dict):
+                    update = self.build_document(update, collection=collection)
                 sources_by_lookup[update[by_property]].append(update)
             target_filters = Q()
             for lookup_value in sources_by_lookup.keys():

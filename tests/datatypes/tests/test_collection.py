@@ -132,7 +132,14 @@ class TestCollection(TestCase):
             self.assertIn(id_value, new_ids)
 
     def test_add_batch(self):
-        docs = list(self.instance2.documents.all()) * 5
+        # Make a bunch of Documents to add in batches
+        # We unset the id, because we prevent duplicates from being added
+        docs = []
+        for ix in range(0, 5):
+            docs += list(self.instance2.documents.all())
+        for doc in docs:
+            doc.id = None
+        # Documents should get added in two batches
         with self.assertNumQueries(4):
             add_batches = self.instance2.add_batches(docs, reset=True, batch_size=20)
             self.assertIsInstance(add_batches, GeneratorType)
@@ -160,6 +167,27 @@ class TestCollection(TestCase):
         )
 
     @patch('datatypes.models.Collection.influence')
+    def test_add_no_duplicates(self, influence_method):
+        docs, doc_ids = self.get_docs_list_and_ids(value="value 3")
+        docs.append(docs[1])  # adds a Document instance as a duplicate
+        today = date.today()
+        created_at = self.instance2.created_at
+        with self.assertNumQueries(3):
+            # Query 1: reset
+            # Query 2: insert documents
+            # Query 3: update modified_at
+            self.instance2.add(docs, reset=True)
+        self.assertEqual(influence_method.call_count, 5)
+        self.assertEqual(self.instance2.documents.count(), 5)
+        self.assertEqual(self.instance2.created_at, created_at)
+        self.assertEqual(self.instance2.modified_at.date(), today)
+        for doc in self.instance2.documents.all():
+            self.assertEqual(doc.properties["value"], "value 3")
+            self.assertIsNotNone(doc.created_at)
+            self.assertIsNotNone(doc.modified_at)
+            self.assertNotIn(doc.id, doc_ids)
+
+    @patch('datatypes.models.Collection.influence')
     def test_update(self, influence_method):
         docs, doc_ids = self.get_docs_list_and_ids()
         today = date.today()
@@ -170,7 +198,10 @@ class TestCollection(TestCase):
             # Query 3: add sources
             # Query 4: update modified_at
             self.instance.update(docs, "value")
-        self.assertEqual(influence_method.call_count, 5)
+        self.assertEqual(
+            influence_method.call_count, 8,
+            "5 calls for 5 Documents and 3 extra to build Documents from dicts for correct (hashed) equality check"
+        )
         self.assertEqual(self.instance.documents.count(), 5)
         self.assertEqual(self.instance.created_at, created_at)
         self.assertEqual(self.instance.modified_at.date(), today)
@@ -204,7 +235,10 @@ class TestCollection(TestCase):
                 self.assertIsInstance(batch, list)
                 for doc in batch:
                     self.assertIsInstance(doc, Document)
-        self.assertEqual(influence_method.call_count, 5)
+        self.assertEqual(
+            influence_method.call_count, 8,
+            "5 calls for 5 Documents and 3 extra to build Documents from dicts for correct (hashed) equality check"
+        )
         self.assertEqual(self.instance.documents.count(), 5)
         self.assertEqual(self.instance.created_at, created_at)
         self.assertEqual(self.instance.modified_at.date(), today)
@@ -233,7 +267,10 @@ class TestCollection(TestCase):
             # Query 3: add sources
             # Query 4: update modified_at
             self.instance2.update(docs, "value", collection=self.instance)
-        self.assertEqual(influence_method.call_count, 5)
+        self.assertEqual(
+            influence_method.call_count, 8,
+            "5 calls for 5 Documents and 3 extra to build Documents from dicts for correct (hashed) equality check"
+        )
         self.assertEqual(self.instance.documents.count(), 5)
         self.assertEqual(self.instance.created_at, created_at)
         self.assertEqual(self.instance.modified_at.date(), today)
@@ -250,6 +287,29 @@ class TestCollection(TestCase):
                 self.fail(f"Unexpected property 'value':{doc.properties['value']}")
             self.assertEqual(tuple(sorted(doc.keys())), expected_keys)
             self.assertNotIn(doc.id, doc_ids)
+
+    @patch('datatypes.models.Collection.influence')
+    def test_update_no_duplicates(self, influence_method):
+        docs, doc_ids = self.get_docs_list_and_ids()
+        docs.append(docs[-2])  # adds a Document instance that doesn't exist yet as a duplicate
+        today = date.today()
+        created_at = self.instance.created_at
+        with self.assertNumQueries(4):
+            # Query 1: fetch targets
+            # Query 2: update sources
+            # Query 3: add sources
+            # Query 4: update modified_at
+            self.instance.update(docs, "value")
+        self.assertEqual(
+            influence_method.call_count, 8,
+            "5 calls for 5 Documents and 3 extra to build Documents from dicts for correct (hashed) equality check"
+        )
+        self.assertEqual(
+            self.instance.documents.count(), 5,
+            "The duplicate Document should not be added to the Collection"
+        )
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertEqual(self.instance.modified_at.date(), today)
 
     def test_output(self):
         results = self.instance.output("$.value")
