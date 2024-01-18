@@ -8,6 +8,7 @@ from time import sleep
 
 import requests
 import jsonschema
+from jsonschema.validators import Draft4Validator
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 from urlobject import URLObject
 from bs4 import BeautifulSoup
@@ -328,14 +329,14 @@ class HttpResource(Resource):
             raise ValidationError("Received keyword arguments for request where there should be none.")
         if args_schema:
             try:
-                jsonschema.validate(list(args), args_schema)
+                jsonschema.validate(list(args), args_schema, cls=Draft4Validator)
             except SchemaValidationError as ex:
                 raise ValidationError(
                     "{}: {}".format(self.__class__.__name__, str(ex))
                 )
         if kwargs_schema:
             try:
-                jsonschema.validate(kwargs, kwargs_schema)
+                jsonschema.validate(kwargs, kwargs_schema, cls=Draft4Validator)
             except SchemaValidationError as ex:
                 raise ValidationError(
                     "{}: {}".format(self.__class__.__name__, str(ex))
@@ -673,7 +674,7 @@ class URLResource(HttpResource):
     GET_SCHEMA = {
         "args": {
             "type": "array",
-            "prefixItems": [
+            "items": [
                 {
                     "type": "string",
                     "pattern": "^http"
