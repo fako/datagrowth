@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import patch
 
 from datagrowth.processors import HttpSeedingProcessor
@@ -46,7 +47,6 @@ SEEDING_PHASES = [
             "kwargs": {},
         },
         "contribute_data": {
-            "merge_on": "id",
             "objective": OBJECTIVE
         }
     }
@@ -98,6 +98,78 @@ class TestMergeHttpSeedingProcessor(HttpSeedingProcessorTestCase):
         results = processor("paper")
         self.assert_results(results)
         self.assert_documents(expected_documents=0)
+
+    def test_composition_to(self):
+        seeding_phases = deepcopy(SEEDING_PHASES)
+        seeding_phases[1]["contribute_data"]["composition_to"] = "details"
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": seeding_phases
+        })
+        results = processor("paper")
+
+        expected_detail_properties = sorted(list(self.seed_defaults.keys()))
+        for batch in results:
+            self.assertIsInstance(batch, list)
+            for result in batch:
+                self.assertIn("id", result.properties)
+                self.assertIn("details", result.properties)
+                self.assertEqual(sorted(result.properties["details"].keys()), expected_detail_properties)
+        self.assert_documents(expected_documents=10)
+
+    def test_buffer_base_composition_to(self):
+        seeding_phases = deepcopy(SEEDING_PHASES)
+        seeding_phases[1]["contribute_data"]["composition_to"] = "source"
+        seeding_phases[1]["contribute_data"]["merge_base"] = "buffer"
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": seeding_phases
+        })
+        results = processor("paper")
+
+        for batch in results:
+            self.assertIsInstance(batch, list)
+            for result in batch:
+                self.assertEqual(result.properties["source"], {"id": result.properties["id"]})
+                self.assert_result_document(result, extra_properties=["source"])
+        self.assert_documents(expected_documents=10)
+
+    def test_invalid_base(self):
+        seeding_phases = deepcopy(SEEDING_PHASES)
+        seeding_phases[1]["contribute_data"]["composition_to"] = "source"
+        seeding_phases[1]["contribute_data"]["merge_base"] = "invalid"
+        processor = HttpSeedingProcessor(self.collection, {
+            "phases": seeding_phases
+        })
+        self.assertRaises(ValueError, lambda inp: list(processor(inp)), "paper")
+
+    def test_custom_merge_on(self):
+        # Create custom Collection to play around with identifier value freely
+        Collection = type(self.collection)
+        custom_merge_on_collection = Collection.objects.create(
+            name="custom_merge_on",
+            dataset_version=self.dataset_version,
+            identifier="url"  # setting identifier to something else than merge_to
+        )
+        custom_merge_on_collection.documents.add(self.ignored_document)
+        # Setup the seeding phases
+        seeding_phases = deepcopy(SEEDING_PHASES)
+        seeding_phases[1]["contribute_data"]["composition_to"] = "source"
+        seeding_phases[1]["contribute_data"]["merge_base"] = "buffer"
+        seeding_phases[1]["contribute_data"]["merge_on"] = "id"
+        processor = HttpSeedingProcessor(custom_merge_on_collection, {
+            "phases": seeding_phases
+        })
+        results = processor("paper")
+
+        for batch in results:
+            self.assertIsInstance(batch, list)
+            for result in batch:
+                self.assertNotIn("id", result.properties,
+                                 "Expected non-identifier merge_on value to be excluded from properties")
+                self.assertIn("id", result.properties["source"],
+                              "Expected non-identifier merge_on value to occur in composition data")
+                result.properties["id"] = result.properties["source"]["id"]  # mocking value for assert_result_document
+                self.assert_result_document(result, extra_properties=["source"], collection=custom_merge_on_collection)
+        self.assert_documents(expected_documents=10, collection=custom_merge_on_collection)
 
 
 DELTA_PARAMETERS = {

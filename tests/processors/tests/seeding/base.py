@@ -106,8 +106,9 @@ class HttpSeedingProcessorTestCase(TestCase):
         self.preexisting_documents.add(self.unchanged_paper.id)
         self.preexisting_documents.add(self.undeleted_paper.id)
 
-    def assert_result_document(self, document, extra_properties):
+    def assert_result_document(self, document, extra_properties=None, collection=None):
         extra_properties = extra_properties or []
+        collection = collection or self.collection
         self.assertIsInstance(document, Document)
         if settings.DEFAULT_DATABASE != "mysql":
             self.assertIsNotNone(document.id, "Expected a Document saved to the database")
@@ -117,7 +118,7 @@ class HttpSeedingProcessorTestCase(TestCase):
             # That makes it difficult to write tests that work with MySQL.
             # Assume that Document.id is not available for MySQL.
             pass
-        self.assertEqual(document.collection_id, self.collection.id, "Expected a Document as part of test Collection")
+        self.assertEqual(document.collection_id, collection.id, "Expected a Document as part of test Collection")
         self.assertEqual(document.dataset_version.id, self.dataset_version.id,
                          "Expected Document to specify the DatasetVersion")
         self.assertIsNotNone(document.identity, "Expected Collection to prescribe the identity for Document")
@@ -136,9 +137,10 @@ class HttpSeedingProcessorTestCase(TestCase):
                     self.assertTrue(result.pending_at, "Expected new Document to be pending for processing")
                     self.assertIsNone(result.finished_at, "Expected new Documents to not be finished")
 
-    def assert_documents(self, expected_documents=20):
+    def assert_documents(self, expected_documents=20, collection=None):
+        collection = collection or self.collection
         self.assertEqual(
-            self.collection.documents.count(), expected_documents + 1,
+            collection.documents.count(), expected_documents + 1,
             f"Expected {expected_documents} generated documents and one pre-existing unchanged document"
         )
         # Pre-existing documents that are not in the harvest data should be left alone

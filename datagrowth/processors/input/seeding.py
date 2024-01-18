@@ -85,13 +85,31 @@ class ResourceSeedingProcessor(Processor):
         if strategy in ["initial", "replace", "back_fill"]:
             self.batch = deepcopy(self.buffer)
         elif strategy == "merge":
-            merge_on = phase["contribute"].merge_on
-            buffer = {
-                content[merge_on]: content
-                for content in self.buffer
-            }
-            for content in self.batch:
-                content.update(buffer.get(content[merge_on], {}))
+            merge_base = phase["contribute"].get("merge_base", "batch")
+            merge_on = phase["contribute"].get("merge_on", self.collection.identifier)
+            composition_to = phase["contribute"].get("composition_to", None)
+            pop_merge_on = composition_to and merge_on != self.collection.identifier
+            if merge_base == "batch":
+                buffer = {
+                    content[merge_on]: content if not composition_to else {composition_to: content}
+                    for content in self.buffer
+                }
+                for content in self.batch:
+                    content.update(buffer.get(content[merge_on], {}))
+                    if pop_merge_on:
+                        content.pop(merge_on)
+            elif merge_base == "buffer":
+                batch = {
+                    content[merge_on]: content if not composition_to else {composition_to: content}
+                    for content in self.batch
+                }
+                for content in self.buffer:
+                    content.update(batch.get(content[merge_on], {}))
+                    if pop_merge_on:
+                        content.pop(merge_on)
+                self.batch = deepcopy(self.buffer)
+            else:
+                raise ValueError(f"Unexpected merge base: {merge_base}")
 
         self.buffer = []
 
@@ -196,6 +214,7 @@ class ResourceSeedingProcessor(Processor):
 
 
 class HttpSeedingProcessor(ResourceSeedingProcessor):
+
     resource_type = "http_resource"
 
     def get_session(self) -> Session:
