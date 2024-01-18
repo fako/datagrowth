@@ -139,7 +139,7 @@ class TestCollection(data_storage.DataStorageTestCase):
         for doc in docs:
             doc.id = None
         # Documents should get added in two batches
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(6):
             add_batches = self.instance2.add_batches(docs, reset=True, batch_size=20)
             self.assertIsInstance(add_batches, GeneratorType)
             for batch in add_batches:
@@ -171,10 +171,10 @@ class TestCollection(data_storage.DataStorageTestCase):
         docs.append(docs[1])  # adds a Document instance as a duplicate
         today = date.today()
         created_at = self.instance2.created_at
-        with self.assertNumQueries(3):
-            # Query 1: reset
-            # Query 2: insert documents
-            # Query 3: update modified_at
+        with self.assertNumQueries(5):
+            # Query 1-3: reset
+            # Query 4: insert documents
+            # Query 5: update modified_at
             self.instance2.add(docs, reset=True)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance2.documents.count(), 5)
@@ -192,10 +192,10 @@ class TestCollection(data_storage.DataStorageTestCase):
         docs.append(docs[1])  # adds a Document instance as a duplicate
         today = date.today()
         created_at = self.instance2.created_at
-        with self.assertNumQueries(3):
-            # Query 1: reset
-            # Query 2: insert documents
-            # Query 3: update modified_at
+        with self.assertNumQueries(5):
+            # Query 1-3: reset
+            # Query 4: insert documents
+            # Query 5: update modified_at
             self.instance2.add((doc for doc in docs), reset=True)
         self.assertEqual(
             influence_method.call_count, 6,
