@@ -3,6 +3,7 @@ import string
 import json
 import jsonschema
 from copy import copy
+from jsonschema.validators import Draft4Validator
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 from time import sleep
 
@@ -223,14 +224,14 @@ class ShellResource(Resource):
             raise ValidationError("Received keyword arguments for command where there should be none.")
         if args_schema:
             try:
-                jsonschema.validate(list(args), args_schema)
+                jsonschema.validate(list(args), args_schema, cls=Draft4Validator)
             except SchemaValidationError as ex:
                 raise ValidationError(
                     "{}: {}".format(self.__class__.__name__, str(ex))
                 )
         if kwargs_schema:
             try:
-                jsonschema.validate(kwargs, kwargs_schema)
+                jsonschema.validate(kwargs, kwargs_schema, cls=Draft4Validator)
             except SchemaValidationError as ex:
                 raise ValidationError(
                     "{}: {}".format(self.__class__.__name__, str(ex))
