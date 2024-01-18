@@ -159,7 +159,7 @@ class CollectionBase(DataStorage):
         # This is mostly relevant for models that override the __hash__ method,
         # because Django won't delete instances with identical hashes even when using Document.objects.all().delete().
         # We can't force uniqueness for Iterator based updates, because that would mean loading all instances in memory.
-        if len(data) and isinstance(data, list):
+        if isinstance(data, list) and len(data):
             unique_instances = {
                 obj if is_hashable(obj) else ix: obj
                 for ix, obj in enumerate(data)
