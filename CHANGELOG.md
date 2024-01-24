@@ -15,13 +15,14 @@ This update is the first Datagrowth version that includes the ``DatasetVersion``
 The implementation of that model can be a steep change over current implementation.
 However it's not required to implement Datagrowth's ``DatasetVersion`` to update to v0.20.
 Instead you can run your own ``DatasetVersion`` which should implement ``influence`` or set the
-``dataset_version`` attribute to None for ``Collection`` and ``Document``.
+``dataset_version`` attribute to None for ``Collection`` and ``Document``
+if you don't want to use any ``DatasetVersion``.
 
 Another note of caution is that due to the way Django implements ``bulk_create``
 it's not possible to access ``Document.id`` on MySQL databases when using ``HttpSeedingProcessor``
 or any other code that relies on ``Collection.update`` or ``Collection.update_batches``.
-Using MariaDB might solve this, but it's unclear how the ``JSONField`` performs on MariaDB, and it's not tested against.
-Highly recommended to use Postgres when knowing the ``Document.id`` is important directly after bulk creation.
+Highly recommended to use Postgres when knowing the ``Document.id`` is important directly after bulk creation,
+but MariaDB has been added as a test target and should also be capable of providing the ``Document.id`` in these cases.
 
 * Minimal version for Celery is now 5.x.
 * Minimal version for jsonschema is now 4.20.0, but jsonschema draft version remains 4.
