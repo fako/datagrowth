@@ -110,6 +110,17 @@ DATABASES_MATRIX = {
         'OPTIONS': {
             'charset': 'utf8mb4'
         }
+    },
+    'mariadb': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'datagrowth',
+        'USER': MYSQL_USER,
+        'PASSWORD': MYSQL_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3307',
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        }
     }
 }
 DATABASES = {

@@ -30,6 +30,20 @@ services:
     ports:
       - "3306:3306"
 
+  mariadb:
+    image: mariadb:11.2
+    environment:
+      MARIADB_ROOT_PASSWORD: czykMn28LiNaKox6U3RDRw23MEZbSxWk
+      MARIADB_USER: django
+      MARIADB_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
+      MARIADB_DATABASE: datagrowth
+    volumes:
+      - ./tests/project/databases/mariadb/conf.d:/etc/mysql/conf.d
+      - ./tests/project/databases/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - mariadb-datagrowth:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
   redis:
     image: redis
     command: redis-server
@@ -40,4 +54,6 @@ volumes:
   postgres-datagrowth:
     driver: local
   mysql-datagrowth:
+    driver: local
+  mariadb-datagrowth:
     driver: local
