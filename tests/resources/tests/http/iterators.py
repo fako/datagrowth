@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from datagrowth.configuration import ConfigurationType
 from datagrowth.resources.http import send_iterator, send_serie_iterator
+from datagrowth.exceptions import DGResourceException
 
 from resources.mocks.requests import MockRequests, MockRequestsWithAgent
 
@@ -67,6 +68,14 @@ class TestSendIterator(TestHttpResourceIteratorBase):
         resource_iterator = send_iterator("500", method="get", config=self.config, session=self.session)
         self.check_resources(resource_iterator, 1, 500)
 
+    def test_error_reraise(self):
+        config = self.config.to_dict(protected=True, private=True)
+        config["resource_exception_reraise"] = True
+        self.assertRaises(
+            DGResourceException,
+            lambda: list(send_iterator("500", method="get", config=config, session=self.session)),
+        )
+
 
 class TestSendSerieIterator(TestHttpResourceIteratorBase):
 
@@ -120,3 +129,13 @@ class TestSendSerieIterator(TestHttpResourceIteratorBase):
             method="get", config=self.config, session=self.session
         )
         self.check_resources(resource_iterator, 2, 500)
+
+    def test_error_reraise(self):
+        config = self.config.to_dict(protected=True, private=True)
+        config["resource_exception_reraise"] = True
+        args_list = [("500",), ("500",)]
+        kwargs_list = [{}, {}]
+        self.assertRaises(
+            DGResourceException,
+            lambda: list(send_serie_iterator(args_list, kwargs_list, method="get", config=config, session=self.session))
+        )

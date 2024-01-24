@@ -63,6 +63,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "global_purge_immediately": False,  # by default keep resources around
     "global_cache_only": False,
     "global_resource_exception_log_level": logging.DEBUG,
+    "global_resource_exception_reraise": False,
 
     "http_resource_continuation_limit": 1,
     "http_resource_interval_duration": 0,  # NB: milliseconds!
