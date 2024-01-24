@@ -1,4 +1,4 @@
-name: Postgres tests
+name: MariaDB tests
 
 on:
     [push, pull_request]
@@ -13,19 +13,17 @@ jobs:
                 python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
         services:
-            postgres:
-                image: postgres
+            mariadb:
+                image: mariadb:11.2
                 env:
-                    POSTGRES_USER: django
-                    POSTGRES_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
-                    POSTGRES_DB: datagrowth
+                    MARIADB_DATABASE: datagrowth
+                    MARIADB_USER: django
+                    MARIADB_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
+                    MARIADB_ROOT_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
                 ports:
-                    - 5432:5432
-                options: >-
-                    --health-cmd pg_isready
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
+                    - 3307:3306
+                    - 3306:3306
+                options: --health-cmd="healthcheck.sh --connect" --health-interval=10s --health-timeout=5s --health-retries=3
 
         steps:
             - uses: actions/checkout@v1
@@ -40,4 +38,4 @@ jobs:
                   python -m pip install tox tox-gh-actions
             - name: Tests
               run: |
-                  DJANGO_DEFAULT_DATABASE=postgres tox
+                  DJANGO_DEFAULT_DATABASE=mariadb DJANGO_MYSQL_USER=root tox
