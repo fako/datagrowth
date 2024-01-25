@@ -75,10 +75,13 @@ class DatasetBase(models.Model):
         }
 
     def get_task_definitions(self):
+        DatasetVersion = self.get_dataset_version_model()
+        Collection = DatasetVersion.get_collection_model()
+        Document = DatasetVersion.get_document_model()
         return {
-            "document": self.DOCUMENT_TASKS,
-            "collection": self.COLLECTION_TASKS,
-            "datasetversion": self.DATASET_VERSION_TASKS
+            Document._meta.model_name: self.DOCUMENT_TASKS,
+            Collection._meta.model_name: self.COLLECTION_TASKS,
+            DatasetVersion._meta.model_name: self.DATASET_VERSION_TASKS
         }
 
     @classmethod
