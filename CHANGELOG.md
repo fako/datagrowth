@@ -33,6 +33,7 @@ but MariaDB has been added as a test target and should also be capable of provid
 * The ``batch_size`` setting is now part of the default global configuration namespace.
 * The configuration ``async`` will no longer get patched to ``asynchronous`` to be compatible with Python >= 3.7.
   Instead supply ``asynchronous`` directly and replace all ``async`` occurrences.
+* ``load_config`` decorator no longer excepts default values. Use ``register_defaults`` instead.
 * When using ``ConfigurationType.supplement`` default values are now ignored when determining if values exist.
 * The ``pipeline`` attributes gets replaced by the ``task_results`` attributes for ``Document``, ``Collection`` and
   ``DatasetVersion``.
