@@ -1,4 +1,3 @@
-import warnings
 import argparse
 import hashlib
 from urllib.parse import parse_qsl
