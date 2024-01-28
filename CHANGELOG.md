@@ -39,6 +39,8 @@ but MariaDB has been added as a test target and should also be capable of provid
   ``DatasetVersion``.
 * Default property to write contributions to has become equal to the ``growth_phase`` and
   will be set in the ``derivatives`` field instead of ``properties``.
+* ``Resource`` class now exposes ``validate_input`` to override in child classes for input validation.
+  This validation strategy will replace JSONSchema based validation for performance reasons in the future.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
   Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
 * Importing ``DataStorage`` from ``datagrowth.datatypes.documents.db.base`` has to be replaced

@@ -180,7 +180,7 @@ class ShellResource(Resource):
         }
 
     def _create_command(self, *args, **kwargs):
-        self._validate_input(*args, **kwargs)
+        self.validate_input(*args, **kwargs)
 
         # First we format the command template
         formatter = string.Formatter()

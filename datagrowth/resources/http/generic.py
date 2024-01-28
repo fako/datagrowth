@@ -206,7 +206,7 @@ class HttpResource(Resource):
     # Override parameters method to set dynamic parameters
 
     def _create_request(self, method, *args, **kwargs):
-        self._validate_input(method, *args, **kwargs)
+        self.validate_input(method, *args, **kwargs)
         data = self.data(**kwargs) if not method == "get" else None
         headers = requests.utils.default_headers()
         headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
@@ -302,7 +302,7 @@ class HttpResource(Resource):
         assert method in ["get", "post", "put", "head"], \
             "{} is not a supported resource method.".format(request.get("method"))  # FEATURE: allow all methods
         if validate_input:
-            self._validate_input(
+            self.validate_input(
                 method,
                 *request.get("args", tuple()),
                 **request.get("kwargs", {})
