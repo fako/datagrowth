@@ -39,6 +39,10 @@ but MariaDB has been added as a test target and should also be capable of provid
   ``DatasetVersion``.
 * Default property to write contributions to has become equal to the ``growth_phase`` and
   will be set in the ``derivatives`` field instead of ``properties``.
+* If ``ResourceGrowthProcessor`` encounters multiple ``Resources`` per ``Document`` or
+  if a single ``Resource`` yields multiple results. Then the ``reduce_contributions`` method will be called to
+  determine how contribution data from ``Resources`` should compliment ``Document`` data. The default is to only use
+  the first result that comes from ``Resources`` in order to be backward compatible.
 * ``Resource`` class now exposes ``validate_input`` to override in child classes for input validation.
   This validation strategy will replace JSONSchema based validation for performance reasons in the future.
 * Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
