@@ -254,6 +254,8 @@ class TestHttpImageResourceInterface(TestCase):
 
 class TestFileResourceDeleteHandler(TestCase):
 
+    fixtures = ["test-http-image-resource-mock"]
+
     @patch("datagrowth.resources.http.files.default_storage.delete", return_value=None)
     def test_file_resource_delete_handler(self, storage_delete_mock):
         # Delete content

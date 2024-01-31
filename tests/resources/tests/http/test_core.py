@@ -21,11 +21,11 @@ from datagrowth.configuration.types import ConfigurationType
 
 from project.mocks.data import MOCK_DATA
 from resources.models import HttpResourceMock
-from resources.tests.base import ResourceTestMixin
+from resources.tests import base as resources_test_base
 from resources.mocks.requests import get_erroneous_requests_mock
 
 
-class TestHttpResource(ResourceTestMixin):
+class TestHttpResource(resources_test_base.ResourceTestMixin):
 
     fixtures = ["test-http-resource-mock"]
 

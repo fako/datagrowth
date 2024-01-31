@@ -19,11 +19,11 @@ from datagrowth.resources import ShellResource
 from datagrowth.configuration.types import ConfigurationType
 
 from resources.models import ShellResourceMock
-from resources.tests.base import ResourceTestMixin
+from resources.tests import base as resources_test_base
 from resources.mocks.subprocess import SubprocessResult
 
 
-class TestShellResource(ResourceTestMixin):
+class TestShellResource(resources_test_base.ResourceTestMixin):
 
     fixtures = ["test-http-resource-mock"]
 
