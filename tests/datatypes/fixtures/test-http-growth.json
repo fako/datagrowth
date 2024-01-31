@@ -96,7 +96,7 @@
 },
 {
     "fields": {
-        "body": "[{\"value\": \"nested value 2\", \"extra\": \"test 2\"}]",
+        "body": "[{\"value\": \"nested value 2\", \"extra\": \"test 2\", \"next\": 1}]",
         "status": 200,
         "head": {"content-type":"application/json"},
         "modified_at": "2015-05-12T18:45:22.105Z",
@@ -109,5 +109,21 @@
     },
     "model": "resources.httpresourcemock",
     "pk": 8
+},
+{
+    "fields": {
+        "body": "[{\"value\": \"continued value 2\", \"extra\": \"test 3\"}]",
+        "status": 200,
+        "head": {"content-type":"application/json"},
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": {"url":"http://localhost:8000/en/?param=1&q=extra2&next=1","args":["en","extra2"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
+        "uri": "localhost:8000/en/?next=1&param=1&q=extra2",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpresourcemock",
+    "pk": 9
 }
 ]

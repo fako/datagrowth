@@ -1,4 +1,5 @@
 import logging
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
@@ -217,16 +218,50 @@ class TestHttpGrowthProcessor(TestCase):
         processor(self.collection.documents)
         self.assertEqual(self.collection.documents.count(), 3)
         for ix, document in enumerate(self.collection.documents.all()):
-            self.assertEqual(document.derivatives, {"test": {"extra": f"test {ix}", "value": f"nested value {ix}"}})
+            expected_data = {"test": {"extra": f"test {ix}", "value": f"nested value {ix}"}}
+            if ix == 2:  # one resource specifies a next request and here we take that into account
+                expected_data["test"]["next"] = 1
+            self.assertEqual(document.derivatives, expected_data)
         self.assert_batch_and_process_results()
 
-    def test_asynchronous_update(self):
-        self.skipTest("Redis should get enabled")
-        processor = HttpGrowthProcessor({
-            "datatypes_app_label": "datatypes",
-            "batch_size": 2
-        })
-        processor(self.collection.documents)
+    def test_synchronous_multi_contributions(self):
+
+        def reduce_contributions(obj, contributions):
+            result = ""
+            for contribution in contributions:
+                result += contribution["extra"] + " & "
+            result = result.strip(" &")
+            return {
+                "extra": result
+            }
+
+        with patch.object(HttpGrowthProcessor, "reduce_contributions", reduce_contributions):
+            processor = HttpGrowthProcessor({
+                "growth_phase": "test",
+                "datatypes_app_label": "datatypes",
+                "batch_size": 2,
+                "asynchronous": False,
+                "retrieve_data": {
+                    "resource": "resources.httpresourcemock",
+                    "method": "get",
+                    "args": ["$.resource"],
+                    "kwargs": {},
+                    "continuation_limit": 2,
+                },
+                "contribute_data": {
+                    "objective": {
+                        "@": "$.0",
+                        "extra": "$.extra"
+                    }
+                }
+            })
+            processor(self.collection.documents)
         self.assertEqual(self.collection.documents.count(), 3)
-        self.assertEqual(Batch.objects.count(), 2)
-        self.assertEqual(ProcessResult.objects.count(), 3)
+        for ix, document in enumerate(self.collection.documents.all()):
+            expected_data = {"test": {"extra": f"test {ix}"}}
+            if ix == 2:
+                # This resource specifies a next request and resource values get concatenated by the reduce method.
+                # So we reflect that here in the expectation.
+                expected_data["test"]["extra"] += " & test 3"
+            self.assertEqual(document.derivatives, expected_data)
+        self.assert_batch_and_process_results()

@@ -1,5 +1,6 @@
 import logging
 from time import sleep
+from collections import defaultdict
 
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
@@ -23,6 +24,9 @@ class ResourceGrowthProcessor(GrowthProcessor):
         super().__init__(config)
         resource_app_label, resource_model = self.config.retrieve_data["resource"].split(".")
         self.result_type = ContentType.objects.get_by_natural_key(resource_app_label, resource_model)
+
+    def reduce_contributions(self, contributions):
+        return contributions[0]
 
     def resource_is_empty(self, resource):
         return False
@@ -74,27 +78,37 @@ class ResourceGrowthProcessor(GrowthProcessor):
         attempts = 0
         while attempts < 3:
 
-            documents = []
+            result_resources = defaultdict(list)
             for process_result in batch.processresult_set.filter(result_id__isnull=False):
-                result = process_result.result
+                result_resources[process_result.document].append(process_result.result)
+
+            documents = []
+            for document, resources in result_resources.items():
+                main = resources[0]
                 # Write results to the task_results
-                process_result.document.task_results[growth_phase] = {
-                    "success": result.success,
-                    "resource": f"{result._meta.app_label}.{result._meta.model_name}",
-                    "id": result.id
+                document.task_results[growth_phase] = {
+                    "success": all([rsc.success for rsc in resources]),
+                    "resource": f"{main._meta.app_label}.{main._meta.model_name}",
+                    "id": main.id,
+                    "ids": [rsc.id for rsc in resources]
                 }
                 # Possibly "apply" the Resource to the Document to allow custom updates
                 if self.config.apply_resource_to:
-                    process_result.document.apply_resource(process_result.result)
+                    if len(resources) > 1:
+                        log.warning("Skipping a number of apply_resource calls for multiple resources result")
+                    document.apply_resource(main)
 
-                documents.append(process_result.document)
+                documents.append(document)
                 # Write data to the Document
-                extract_processor, extract_method = \
-                    ProcessorFactory(contribution_processor).build_with_callable(config)
-                contributions = list(extract_method(result)) if not self.resource_is_empty(result) else []
+                extract_processor, extract_method = ProcessorFactory(contribution_processor).build_with_callable(config)
+                contributions = []
+                for resource in resources:
+                    if self.resource_is_empty(resource):
+                        continue
+                    contributions += list(extract_method(resource))
                 if len(contributions):
-                    contribution = contributions.pop(0)
-                    field_attribute = getattr(process_result.document, contribution_field)
+                    contribution = self.reduce_contributions(contributions)
+                    field_attribute = getattr(document, contribution_field)
                     if contribution_property is None:
                         field_attribute.update(contribution)
                     else:
