@@ -52,7 +52,7 @@ def cancel_document_tasks(label: str, documents: List[Union[int, DocumentBase]])
         document.pending_at = None
         document.finished_at = now()
         stopped.append(document)
-    storages.Document.objects.bulk_update(stopped, ["pending_at", "finished_at", "pipeline"])
+    storages.Document.objects.bulk_update(stopped, ["pending_at", "finished_at", "task_results"])
 
 
 def start_document_tasks(documents: List[DocumentBase], asynchronous: bool = True) -> None:
