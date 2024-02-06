@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Type, Union
+from typing import TYPE_CHECKING, Any, Type, Union, Optional
 if TYPE_CHECKING:
     from datagrowth.datatypes.datasets.db.dataset import DatasetBase
 
@@ -57,3 +57,9 @@ class DataStorages:
         elif hasattr(instance, "dataset"):
             storages.dataset = instance.dataset
         return storages
+
+    @property
+    def app_label(self) -> Optional[str]:
+        if not self.model:
+            return
+        return self.model._meta.app_label
