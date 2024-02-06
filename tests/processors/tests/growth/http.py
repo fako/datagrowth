@@ -8,6 +8,7 @@ from datagrowth.configuration import register_defaults
 from datagrowth.processors import HttpGrowthProcessor
 
 from datatypes.models import Collection, Batch, ProcessResult
+from resources.models import HttpResourceMock
 
 
 class TestHttpGrowthProcessor(TestCase):
@@ -92,6 +93,33 @@ class TestHttpGrowthProcessor(TestCase):
         self.assertEqual(self.collection.documents.count(), 3)
         for ix, document in enumerate(self.collection.documents.all()):
             self.assertEqual(document.properties["results"], {"extra": f"test {ix}"})
+        self.assert_batch_and_process_results()
+
+    def test_synchronous_merge_into_field(self):
+        processor = HttpGrowthProcessor({
+            "growth_phase": "test",
+            "datatypes_app_label": "datatypes",
+            "batch_size": 2,
+            "asynchronous": False,
+            "to_property": "properties/",
+            "retrieve_data": {
+                "resource": "resources.httpresourcemock",
+                "method": "get",
+                "args": ["$.resource"],
+                "kwargs": {},
+            },
+            "contribute_data": {
+                "objective": {
+                    "@": "$.0",
+                    "extra": "$.extra"
+                }
+            }
+        })
+        processor(self.collection.documents)
+        self.assertEqual(self.collection.documents.count(), 3)
+        for ix, document in enumerate(self.collection.documents.all()):
+            self.assertIn("extra", document.properties)
+            self.assertEqual(document.properties["extra"], f"test {ix}")
         self.assert_batch_and_process_results()
 
     def test_synchronous_depends_on(self):
@@ -264,4 +292,33 @@ class TestHttpGrowthProcessor(TestCase):
                 # So we reflect that here in the expectation.
                 expected_data["test"]["extra"] += " & test 3"
             self.assertEqual(document.derivatives, expected_data)
+        self.assert_batch_and_process_results()
+
+    def test_synchronous_error_resources(self):
+        # Setting all Resources data into error state
+        HttpResourceMock.objects.all().update(status=500, body="")
+        # Actual test
+        processor = HttpGrowthProcessor({
+            "growth_phase": "test",
+            "datatypes_app_label": "datatypes",
+            "batch_size": 2,
+            "asynchronous": False,
+            "extractor": "ExtractProcessor.pass_resource_through",  # makes HttpGrowthProcessor deal with error values
+            "retrieve_data": {
+                "resource": "resources.httpresourcemock",
+                "method": "get",
+                "args": ["$.resource"],
+                "kwargs": {},
+            },
+            "contribute_data": {
+                "objective": {
+                    "@": "$.0",
+                    "extra": "$.extra"
+                }
+            }
+        })
+        processor(self.collection.documents)
+        self.assertEqual(self.collection.documents.count(), 3)
+        for ix, document in enumerate(self.collection.documents.all()):
+            self.assertEqual(document.derivatives, {}, "Expected no extracted data when Resources are in error")
         self.assert_batch_and_process_results()

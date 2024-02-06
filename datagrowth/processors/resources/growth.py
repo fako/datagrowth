@@ -1,12 +1,15 @@
+from typing import Callable, List
 import logging
 from time import sleep
 from collections import defaultdict
+from collections.abc import Generator
 
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 
 from datagrowth.configuration import create_config
+from datagrowth.resources.base import Resource
 from datagrowth.resources.http.tasks import send
 from datagrowth.resources.shell.tasks import run
 from datagrowth.processors import ProcessorFactory
@@ -65,6 +68,21 @@ class ResourceGrowthProcessor(GrowthProcessor):
             if creates:
                 self.ProcessResult.objects.bulk_create(creates)
 
+    def extract_contributions(self, extract_method: Callable, resource: Resource) -> List:
+        if self.resource_is_empty(resource):
+            return []
+        contribution = extract_method(resource)
+        if isinstance(contribution, Generator):
+            contribution = list(contribution)
+        if isinstance(contribution, dict):
+            return [contribution]
+        elif isinstance(contribution, list):
+            return contribution
+        elif contribution is None:
+            return []
+        else:
+            raise ValueError(f"Unknown contribution type: {type(contribution)}")
+
     def merge_batch(self, batch):
         growth_phase = self.config.growth_phase
         config = create_config("extract_processor", self.config.contribute_data)
@@ -103,13 +121,14 @@ class ResourceGrowthProcessor(GrowthProcessor):
                 extract_processor, extract_method = ProcessorFactory(contribution_processor).build_with_callable(config)
                 contributions = []
                 for resource in resources:
-                    if self.resource_is_empty(resource):
-                        continue
-                    contributions += list(extract_method(resource))
+                    extraction = self.extract_contributions(extract_method, resource)
+                    contributions += extraction
                 if len(contributions):
                     contribution = self.reduce_contributions(contributions)
                     field_attribute = getattr(document, contribution_field)
                     if contribution_property is None:
+                        # Usually this doesn't occur, because it's recommended to write contributions to a specific key.
+                        # However we keep this option for backward compatability.
                         field_attribute.update(contribution)
                     else:
                         field_attribute[contribution_property] = contribution
