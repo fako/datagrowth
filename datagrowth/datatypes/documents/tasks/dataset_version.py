@@ -11,7 +11,7 @@ from datagrowth.datatypes.documents.tasks.base import (load_pending_data_storage
 
 
 @app.task(
-    name="harvest_dataset_version",
+    name="growth.harvest_dataset_version",
     base=DatabaseConnectionResetTask,
     autoretry_for=(DGPendingDataStorage,),
     retry_kwargs={"max_retries": 5, "countdown": 5 * 60}
