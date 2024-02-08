@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from datagrowth.datatypes.datasets.constants import GrowthState
+
 from datatypes.models import DatasetVersion, Collection, Document
 from project.entities.constants import SEED_DEFAULTS
 
@@ -14,6 +16,14 @@ class BaseDatasetTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.dataset = cls.dataset_model.objects.create(signature=cls.signature)
+
+    def assert_dataset_finish(self, use_current_dataset_version=True, expected_state=GrowthState.COMPLETE,
+                              expected_strategy=None):
+        expected_strategy = expected_strategy or self.dataset.GROWTH_STRATEGY
+        dataset_version = self.dataset.versions.filter(is_current=use_current_dataset_version).last()
+        self.assertEqual(dataset_version.version, self.dataset.version)
+        self.assertEqual(dataset_version.state, expected_state)
+        self.assertEqual(dataset_version.growth_strategy, expected_strategy)
 
     def assert_initial_containers(self, dataset_versions=0, collections=0):
         self.assertEqual(DatasetVersion.objects.count(), dataset_versions)

@@ -61,9 +61,11 @@ class DatasetVersionBase(DataStorage):
         return True
 
     def finish_processing(self, current_time: datetime = None, commit: bool = True):
-        if self.evaluate_dataset_version() and self.growth_strategy != GrowthStrategy.STACK:
+        is_success = self.evaluate_dataset_version()
+        if is_success and self.growth_strategy != GrowthStrategy.STACK:
             type(self).objects.all().update(is_current=False)
             self.is_current = True
+        self.state = GrowthState.COMPLETE if is_success else GrowthState.ERROR
         super().finish_processing(current_time=current_time, commit=commit)
 
     @property
@@ -79,7 +81,8 @@ class DatasetVersionBase(DataStorage):
         instance = cls(
             dataset=dataset,
             growth_strategy=dataset.GROWTH_STRATEGY,
-            task_definitions=dataset.get_task_definitions()
+            task_definitions=dataset.get_task_definitions(),
+            version=dataset.version
         )
         instance.clean()
         return instance
