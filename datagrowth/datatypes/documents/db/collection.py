@@ -361,6 +361,9 @@ class CollectionBase(DataStorage):
         if self.dataset_version:
             self.dataset_version.influence(self)
 
+    def __str__(self):
+        return self.name if self.name else super().__str__()
+
     class Meta:
         abstract = True
         get_latest_by = "id"
