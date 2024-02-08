@@ -15,6 +15,7 @@ class TestInitialDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
         self.dataset.grow(self.entity_type, asynchronous=False)
         self.assert_initial_grow_success(dataset_versions=1, collections=1, documents=20)
         self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=20)
+        self.assert_dataset_finish()
 
     def test_growth_limit(self):
         # This test sets the limit to 3.
@@ -22,6 +23,7 @@ class TestInitialDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
         self.dataset.grow(self.entity_type, asynchronous=False, limit=3)
         self.assert_initial_grow_success(dataset_versions=1, collections=1, documents=5)
         self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=5)
+        self.assert_dataset_finish()
 
     def test_seeding_error(self):
         self.dataset.grow("does_not_exist", asynchronous=False)
@@ -46,6 +48,7 @@ class TestInitialDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
                 }
             }
         })
+        self.assert_dataset_finish()
 
     def test_task_error(self):
         with override_settings(TEST_CHECK_DOI_FAILURE_IDENTITIES=["1"]):
@@ -63,6 +66,7 @@ class TestInitialDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
             },
             "seeding": {}
         })
+        self.assert_dataset_finish()
 
 
 class TestContinuationDatasetReviseStrategy(test_cases.BaseDatasetTestCase):

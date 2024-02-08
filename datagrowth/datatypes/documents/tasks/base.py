@@ -45,7 +45,7 @@ def validate_pending_data_storages(instances: Union[List[DataStorage], DataStora
             pending.append(instance)
     update_fields = ["pending_at", "finished_at"]
     if issubclass(model, DatasetVersionBase):
-        update_fields += ["is_current", "errors"]
+        update_fields += ["is_current", "errors", "state"]
     model.objects.bulk_update(finished, update_fields)
     return pending
 
