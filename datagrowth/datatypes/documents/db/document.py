@@ -187,6 +187,13 @@ class DocumentBase(DataStorage):
         if self.identity and isinstance(self.identity, str) and len(self.identity) > identity_max_length:
             self.identity = self.identity[:identity_max_length]
 
+    def __str__(self):
+        if self.identity:
+            return self.identity
+        if self.reference:
+            return f"{self.reference} ({self.id})"
+        return super().__str__()
+
     class Meta:
         abstract = True
         get_latest_by = "id"
