@@ -245,7 +245,8 @@ class DatasetBase(models.Model):
         return current_version
 
     def dispatch_growth(self, dataset_version, *args, asynchronous=True, retry=False, seeds=None,
-                        limit=None) -> Optional[GroupResult]:
+                        limit=None, data=None) -> Optional[GroupResult]:
+
         # Decide on whether to start the growth or exit, because a growth is already in progress
         if dataset_version.state == GrowthState.GROWING:
             raise DGGrowthUnfinished()
@@ -273,8 +274,8 @@ class DatasetBase(models.Model):
             # Create the signatures for dispatching
             grow_signature = grow_collection.s(
                 label, collection.id, *args,
-                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit,
-                config=self.config.to_dict(protected=True, private=True)
+                asynchronous=asynchronous, seeds=seeds, limit=seeding_limit, data=data,
+                config=self.config.to_dict(protected=True, private=True),
             )
             grow_signatures.append(grow_signature)
 
@@ -284,7 +285,7 @@ class DatasetBase(models.Model):
             task()
 
     def grow(self, *args, growth_strategy=None, asynchronous=True, retry=False, seeds=None,
-             limit=None) -> Optional[GroupResult]:
+             limit=None, data=None) -> Optional[GroupResult]:
         # Set argument defaults
         growth_strategy = growth_strategy or self.GROWTH_STRATEGY
         dataset_version_filters = {} if growth_strategy == GrowthStrategy.STACK else {"is_current": True}
@@ -312,7 +313,8 @@ class DatasetBase(models.Model):
             asynchronous=asynchronous,
             retry=retry,
             seeds=seeds,
-            limit=limit
+            limit=limit,
+            data=data
         )
 
     def handle_seeding_error(self, collection, exception):

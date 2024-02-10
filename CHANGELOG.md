@@ -101,10 +101,10 @@ v0.19
 * Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * ``Document.update`` will now use properties as update data instead of content
-when giving another ``Document`` as data argument.
+  when giving another ``Document`` as data argument.
 * Deprecates ``Collection.init_document`` in favour of ``Collection.build_document`` for consistency in naming.
 * ``Document.output_from_content`` will now return lists instead of mapping generators when giving multiple arguments.
-The convenience of lists is more important here than memory footprint which will be minimal anyway.
+  The convenience of lists is more important here than memory footprint which will be minimal anyway.
 * Makes ``Document.output_from_content`` pass along content if values are not a JSON path.
 * Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``
