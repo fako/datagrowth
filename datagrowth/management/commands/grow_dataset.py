@@ -1,6 +1,7 @@
 import logging
 from time import sleep
 
+from datagrowth.configuration.serializers import DecodeConfigAction as DecodeDataAction
 from datagrowth.management.base import DatasetCommand
 from datagrowth.datatypes.datasets.constants import GrowthStrategy
 
@@ -22,6 +23,7 @@ class Command(DatasetCommand):
         parser.add_argument('-i', '--initial-seeder', type=str, nargs="?")
         parser.add_argument('-t', '--timeout', type=int, default=60*60*24)
         parser.add_argument('-w', '--wait-interval', type=int, default=10)
+        parser.add_argument('-d', '--data', type=str, action=DecodeDataAction, nargs="?", default={})
 
     def get_datasets(self):
         raise TypeError("It is impossible to grow multiple datasets at the same time.")
@@ -32,12 +34,13 @@ class Command(DatasetCommand):
         limit = options["limit"]
         retry = options["retry"]
         seeds = options["initial_seeder"]
+        data = options["data"]
         timeout = options["timeout"]
         wait_interval = options["wait_interval"]
 
         group_result = dataset.grow(
             *args,
-            growth_strategy=growth_strategy, asynchronous=asynchronous, limit=limit, retry=retry, seeds=seeds
+            growth_strategy=growth_strategy, asynchronous=asynchronous, limit=limit, retry=retry, seeds=seeds, data=data
         )
 
         ready = not asynchronous or not group_result

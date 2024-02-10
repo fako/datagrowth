@@ -105,7 +105,8 @@ def start_collection_tasks(collection: CollectionBase, start_time: datetime, asy
 @app.task(name="growth.grow_collection", base=DatabaseConnectionResetTask)
 @load_config()
 def grow_collection(config: ConfigurationType, label: str, collection_id: int, *args, asynchronous: bool = True,
-                    seeds: Union[List[Dict], str] = None, limit: int = None):
+                    seeds: Union[List[Dict], str] = None, limit: int = None, data: dict = None):
+    data = data or {}
     current_time = now()
     storages = DataStorages.load_instances(label, collection_id)
     collection = storages.instance
@@ -136,7 +137,7 @@ def grow_collection(config: ConfigurationType, label: str, collection_id: int, *
         factories = storages.dataset.get_seeding_factories()
         seeding_factory = factories[collection.name]
         seeding_processor = seeding_factory.build(config=config, collection=collection, initial=seeds)
-        seeding = seeding_processor(*args)
+        seeding = seeding_processor(*args, **data)
 
     log.info(f"Starting seeding: {label}, {collection.name}")
     count = 0
