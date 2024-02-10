@@ -171,6 +171,7 @@ class CollectionBase(DataStorage):
             yield Document.objects.bulk_create(additions, batch_size=batch_size)
 
         if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+            print("Updating based on modified_at", modified_at)
             collection.modified_at = modified_at
             collection.save()
 
@@ -253,6 +254,7 @@ class CollectionBase(DataStorage):
             yield updates + additions
 
         if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+            print("Updating based on modified_at", modified_at)
             collection.modified_at = modified_at
             collection.save()
 
