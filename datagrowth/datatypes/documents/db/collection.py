@@ -16,6 +16,9 @@ from datagrowth.utils import ibatch, reach, is_hashable
 from .base import DataStorage
 
 
+NO_MODIFICATION = object()
+
+
 class CollectionBase(DataStorage):
 
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -106,7 +109,8 @@ class CollectionBase(DataStorage):
         :param data: The data to use for the inserts
         :param reset: (optional) whether to delete existing data or not (no by default)
         :param collection: (optional) a collection instance to add the data to (default: self)
-        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now).
+            Alternatively the NO_MODIFICATION sentient object can be passed to prevent alteration of modified_at.
         :return: A list of created instances.
         """
         batches = self.add_batches(
@@ -128,7 +132,8 @@ class CollectionBase(DataStorage):
         :param batch_size: The amount of objects to load in memory and insert at once
         :param reset: (optional) whether to delete existing data or not (no by default)
         :param collection: (optional) a collection instance to add the data to (default: self)
-        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now).
+            Alternatively the NO_MODIFICATION sentient object can be passed to prevent alteration of modified_at.
         :return: An iterator of batches with created instances.
         """
         batch_size = batch_size or datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
@@ -170,7 +175,8 @@ class CollectionBase(DataStorage):
             additions = prepare_additions(additions)
             yield Document.objects.bulk_create(additions, batch_size=batch_size)
 
-        if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+        if modified_at is not NO_MODIFICATION and \
+                collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
             collection.modified_at = modified_at
             collection.save()
 
@@ -184,7 +190,8 @@ class CollectionBase(DataStorage):
         :param data: The data to use for the upsert
         :param by_property: The property to identify a Document with
         :param collection: (optional) a collection instance to upsert the data to (default: self)
-        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now).
+            Alternatively the NO_MODIFICATION sentient object can be passed to prevent alteration of modified_at.
         :return: A list of updated or created instances.
         """
         batches = self.update_batches(
@@ -207,7 +214,8 @@ class CollectionBase(DataStorage):
         :param by_property: The property to identify a Document with
         :param batch_size: The amount of objects to load in memory and insert at once
         :param collection: (optional) a collection instance to upsert the data to (default: self)
-        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now)
+        :param modified_at: (optional) the datetime to use as modified_at value for the collection (default: now).
+            Alternatively the NO_MODIFICATION sentient object can be passed to prevent alteration of modified_at.
         :return: An iterator of batches with updated or created instances.
         """
         batch_size = batch_size or datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
@@ -249,10 +257,11 @@ class CollectionBase(DataStorage):
                 if lookup_value not in exists:
                     additions += sources
             if len(additions):
-                additions = self.add(additions, collection=collection, modified_at=modified_at)
+                additions = self.add(additions, collection=collection, modified_at=NO_MODIFICATION)
             yield updates + additions
 
-        if collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
+        if modified_at is not NO_MODIFICATION and \
+                collection.modified_at.replace(microsecond=0) != modified_at.replace(microsecond=0):
             collection.modified_at = modified_at
             collection.save()
 

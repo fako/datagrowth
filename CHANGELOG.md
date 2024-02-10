@@ -31,6 +31,8 @@ v0.19
   check for equality between ``Documents`` before adding or updating. This makes it possible to skip insert/updates in
   particular cases by overriding ``Document.__eq__``. ``Collection.add`` and ``Collection.add_batches`` require
   input as a list for this to work to prevent unexpected excessive memory usage.
+* When using ``Collection.add_batches`` or ``Collection.update_batches`` a ``NO_MODIFICATION`` object can be passed
+  as ``modified_at`` parameter to prevent updating ``Collection.modified_at`` with these (repeating) calls.
 * Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * ``Document.update`` will now use properties as update data instead of content
