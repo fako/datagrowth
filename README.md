@@ -1,4 +1,4 @@
-[![datagrowth workflow](https://github.com/fako/datagrowth/actions/workflows/tests.yml/badge.svg)](https://github.com/fako/datagrowth/actions) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/datagrowth.svg)](https://pypi.python.org/pypi/datagrowth/) [![GPLv3 license](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://github.com/fako/datagrowth/blob/master/LICENSE)
+[![datagrowth workflow](https://github.com/fako/datagrowth/actions/workflows/postgres.yml/badge.svg)](https://github.com/fako/datagrowth/actions) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/datagrowth.svg)](https://pypi.python.org/pypi/datagrowth/) [![GPLv3 license](https://img.shields.io/badge/License-LGPLv3-blue.svg)](https://github.com/fako/datagrowth/blob/master/LICENSE)
 
 DATAGROWTH
 ==========
