@@ -26,6 +26,7 @@ SECRET_KEY = '3lnh8%e5ao$n+(%jngyg0@ugf05g3-ysk502=oud%goodzrix$'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "localhost",
     "testserver"
 ]
 
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
 
     'datagrowth',
 
+    'project',
     'configuration',
     'utils',
     'resources',
@@ -89,6 +91,7 @@ POSTGRES_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 MYSQL_USER = os.environ.get('DJANGO_MYSQL_USER', 'django')
 MYSQL_PASSWORD = 'LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK'
 
+DEFAULT_DATABASE = os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')
 DATABASES_MATRIX = {
     'postgres': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -107,10 +110,21 @@ DATABASES_MATRIX = {
         'OPTIONS': {
             'charset': 'utf8mb4'
         }
+    },
+    'mariadb': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'datagrowth',
+        'USER': MYSQL_USER,
+        'PASSWORD': MYSQL_PASSWORD,
+        'HOST': '127.0.0.1',
+        'PORT': '3307',
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        }
     }
 }
 DATABASES = {
-    'default': DATABASES_MATRIX[os.environ.get('DJANGO_DEFAULT_DATABASE', 'postgres')]
+    'default': DATABASES_MATRIX[DEFAULT_DATABASE]
 }
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
@@ -134,6 +148,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Celery
+# https://docs.celeryproject.org/en/v5.3.6/
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_WORKER_HIJACK_ROOT_LOGGER = True
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 50
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -154,7 +179,39 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# Logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'datagrowth': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': True
+        },
+    },
+}
+
+
 # Datagrowth settings
 
 DATAGROWTH_MEDIA_ROOT = MEDIA_ROOT = os.path.join(BASE_DIR, "data", "media")
 DATAGROWTH_API_VERSION = 1
+
+
+# Test variables
+
+TEST_CHECK_DOI_FAILURE_IDENTITIES = []

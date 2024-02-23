@@ -8,6 +8,73 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.20
+-----
+
+This update is the first Datagrowth version that includes the ``DatasetVersion`` model.
+The implementation of that model can be a steep change over current implementation.
+However it's not required to implement Datagrowth's ``DatasetVersion`` to update to v0.20.
+Instead you can run your own ``DatasetVersion`` which should implement ``influence`` or set the
+``dataset_version`` attribute to None for ``Collection`` and ``Document``
+if you don't want to use any ``DatasetVersion``.
+
+Another note of caution is that due to the way Django implements ``bulk_create``
+it's not possible to access ``Document.id`` on MySQL databases when using ``HttpSeedingProcessor``
+or any other code that relies on ``Collection.update`` or ``Collection.update_batches``.
+Highly recommended to use Postgres when knowing the ``Document.id`` is important directly after bulk creation,
+but MariaDB has been added as a test target and should also be capable of providing the ``Document.id`` in these cases.
+
+* Minimal version for Celery is now 5.x.
+* Minimal version for jsonschema is now 4.20.0, but jsonschema draft version remains 4.
+* ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
+  to ``global_datatypes_app_label`` and ``global_datatype_models``.
+* The ``extractor``, ``depends_on``, ``to_property`` and ``apply_to_resource`` configurations are now
+  part of the ``growth_processor`` namespace.
+* The ``batch_size`` setting is now part of the default global configuration namespace.
+* The configuration ``async`` will no longer get patched to ``asynchronous`` to be compatible with Python >= 3.7.
+  Instead supply ``asynchronous`` directly and replace all ``async`` occurrences.
+* ``load_config`` decorator no longer excepts default values. Use ``register_defaults`` instead.
+* When using ``ConfigurationType.supplement`` default values are now ignored when determining if values exist.
+* The ``pipeline`` attributes gets replaced by the ``task_results`` attributes for ``Document``, ``Collection`` and
+  ``DatasetVersion``.
+* Default property to write contributions to has become equal to the ``growth_phase`` and
+  will be set in the ``derivatives`` field instead of ``properties``.
+* If ``ResourceGrowthProcessor`` encounters multiple ``Resources`` per ``Document`` or
+  if a single ``Resource`` yields multiple results. Then the ``reduce_contributions`` method will be called to
+  determine how contribution data from ``Resources`` should compliment ``Document`` data. The default is to only use
+  the first result that comes from ``Resources`` in order to be backward compatible.
+* ``Resource`` class now exposes ``validate_input`` to override in child classes for input validation.
+  This validation strategy will replace JSONSchema based validation for performance reasons in the future.
+* Adds a ``TestClientResource`` that allows to create ``Resources`` that connect to Django views which return test data.
+  Especially useful when testing Datagrowth components that take ``HttpResources`` as arguments.
+* Importing ``DataStorage`` from ``datagrowth.datatypes.documents.db.base`` has to be replaced
+  with importing from ``datagrowth.datatypes.storage``.
+* The ``DataStorages`` dataclass has been added to manage typing for dynamically loaded ``DataStorage`` models.
+* The ``DatasetVersion.task_definitions`` field holds dictionaries per ``DataStorage`` model that specifies,
+  which tasks should run for which model.
+* The ``DatasetVersion.errors`` field has a ``seeding`` and ``tasks`` field where some basic error information is kept
+  for debugging purposes.
+* A ``DatasetVersion`` will influence its ``Collections`` and ``Documents``.
+  ``Collections`` may set ``DatasetVersion`` for ``Documents`` and facilitate ``DatasetVersion`` influence for them.
+* Task definitions given to ``DatasetVersion`` propagate to ``Collection`` and ``Document``
+  through the influence method.
+* The ``Dataset.create_dataset_version`` method will create a non-pending ``DatasetVersion``
+  with the default ``GROWTH_STRATEGY`` and ``DatasetVersion.tasks`` set.
+  It also creates a default non-pending ``Collection`` with ``Collection.tasks`` set.
+  Customize defaults by setting ``DOCUMENT_TASKS``, ``COLLECTION_TASKS``, ``DATASET_VERSION_TASKS``,
+  ``COLLECTION_IDENTIFIER``, ``COLLECTION_REFEREE`` and ``DATASET_VERSION_MODEL``.
+  Or override ``Dataset.get_collection_factories``, ``Dataset.get_seeding_factories`` and/or
+  ``Dataset.get_task_definitions`` for more control.
+* ``Document.invalidate_task`` will now always set ``pending_at`` and ``finished_at`` attributes,
+  regardless of whether tasks have run before.
+* The ``content`` of a Document now contains output from ``derivatives`` through ``Document.get_derivatives_content``.
+* Calling ``validate_pending_data_storages`` now may update ``DatasetVersion.is_current`` and ``DatasetVersion.errors``.
+* Commands inheriting from ``DatasetCommand`` that expect ``Community`` compliant objects,
+  should set ``cast_as_community`` to True on the Command class and rename ``handle_dataset`` to ``handle_community``.
+* Unlike the legacy ``Community`` model a ``Dataset`` has a unique signature. If the signature of a ``Dataset`` matches
+  an existing ``Dataset`` the ``growth`` method will create a new ``DatasetVersion`` instead of a different ``Dataset``.
+
+
 v0.19
 -----
 
@@ -36,10 +103,10 @@ v0.19
 * Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * ``Document.update`` will now use properties as update data instead of content
-when giving another ``Document`` as data argument.
+  when giving another ``Document`` as data argument.
 * Deprecates ``Collection.init_document`` in favour of ``Collection.build_document`` for consistency in naming.
 * ``Document.output_from_content`` will now return lists instead of mapping generators when giving multiple arguments.
-The convenience of lists is more important here than memory footprint which will be minimal anyway.
+  The convenience of lists is more important here than memory footprint which will be minimal anyway.
 * Makes ``Document.output_from_content`` pass along content if values are not a JSON path.
 * Allows ``Document.output_from_content`` to use different starting characters for replacement JSON paths.
 * ``ConfigurationField.contribute_to_class`` will first call the ``TextField.contribute_to_class``

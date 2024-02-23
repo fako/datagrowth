@@ -2,4 +2,6 @@ from datagrowth.datatypes import DocumentBase
 
 
 class Document(DocumentBase):
-    pass
+
+    def apply_resource(self, resource):
+        self.reference = resource.status

@@ -13,7 +13,7 @@ from django.utils.timezone import make_aware
 
 from datagrowth import settings as datagrowth_settings
 from datagrowth.utils import ibatch, reach, is_hashable
-from .base import DataStorage
+from datagrowth.datatypes.storage import DataStorage
 
 
 NO_MODIFICATION = object()
@@ -21,14 +21,11 @@ NO_MODIFICATION = object()
 
 class CollectionBase(DataStorage):
 
+    dataset_version = models.ForeignKey("DatasetVersion", null=True, blank=True, on_delete=models.CASCADE)
+
     name = models.CharField(max_length=255, null=True, blank=True)
     identifier = models.CharField(max_length=255, null=True, blank=True)
     referee = models.CharField(max_length=255, null=True, blank=True)
-
-    @classmethod
-    def get_document_model(cls):
-        # This method should use "Document" with local app label and get_model function to load the model
-        return apps.get_model("{}.Document".format(cls._meta.app_label))
 
     @property
     def documents(self):
@@ -47,7 +44,7 @@ class CollectionBase(DataStorage):
             document.clean()  # this gets handles by Document.build, but not by the legacy Collection.init_document
             return document
         Document = self.get_document_model()
-        return Document.build(data, collection=collection)
+        return Document.build(data, collection=collection or self)
 
     @property
     def document_update_fields(self):
@@ -56,7 +53,10 @@ class CollectionBase(DataStorage):
 
         :return list: field names
         """
-        return ["properties", "identity", "reference", "modified_at"]
+        return [
+            "properties", "derivatives", "task_results", "identity", "reference",
+            "modified_at", "pending_at", "finished_at"
+        ]
 
     @classmethod
     def validate(cls, data, schema):
@@ -140,8 +140,8 @@ class CollectionBase(DataStorage):
         collection = collection or self
         modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
-        assert isinstance(data, (Iterator, list, tuple, dict, Document)), \
-            f"Collection.add expects data to be formatted as iteratable, dict or {type(Document)} not {type(data)}"
+        assert isinstance(data, (Iterator, list, tuple,)), \
+            f"Collection.add expects data to be formatted as sequential iterable not {type(data)}"
 
         if reset:
             self.documents.all().delete()
@@ -349,11 +349,20 @@ class CollectionBase(DataStorage):
             document.identity = reach("$." + self.identifier, document.properties)
         if self.referee:
             document.reference = reach("$." + self.referee, document.properties)
+        if self.dataset_version:
+            self.dataset_version.influence(document)
         return document
 
     def to_file(self, file_path):
         with open(file_path, "w") as json_file:
             json.dump(list(self.content), json_file, cls=DjangoJSONEncoder)
+
+    def clean(self):
+        if self.dataset_version:
+            self.dataset_version.influence(self)
+
+    def __str__(self):
+        return self.name if self.name else super().__str__()
 
     class Meta:
         abstract = True

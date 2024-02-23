@@ -41,6 +41,7 @@ DATAGROWTH_KALDI_NL_BASE_PATH = getattr(settings, "DATAGROWTH_KALDI_NL_BASE_PATH
 DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGURATION", {
     # Global configurations that control multiple classes
     "global_asynchronous": True,  # by default offload to celery where possible
+    "global_batch_size": 100,
     "global_sample_size": 0,
     "global_datatypes_app_label": None,
     "global_datatype_models": {
@@ -83,6 +84,11 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
 
     "google_api_key": getattr(settings, 'GOOGLE_API_KEY', ''),
     "google_cx": getattr(settings, 'GOOGLE_CX', ''),
+
+    "growth_processor_extractor": "ExtractProcessor.extract_from_resource",
+    "growth_processor_depends_on": None,
+    "growth_processor_to_property": None,
+    "growth_processor_apply_resource_to": [],
 
     "rank_processor_batch_size": 1000,
     "rank_processor_result_size": 20,

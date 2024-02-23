@@ -90,7 +90,7 @@ class ConfigurationType(object):
             else:
                 setattr(self, key, value)
 
-    def _get_configuration(self, config):
+    def _get_configuration(self, config, exclude_defaults=False):
         """
         This function tries to find configurations on self other than configurations set as direct attributes.
 
@@ -105,6 +105,7 @@ class ConfigurationType(object):
         NB: if you haven't set self._namespace it will default to self._global_prefix
 
         :param config: (string) name of the configuration to search for
+        :param exclude_defaults: (bool) whether to look for configuration in defaults or not
         :return: (mixed) the configuration variable
         """
         shielded_key = '_' + config
@@ -116,14 +117,14 @@ class ConfigurationType(object):
             return self.__dict__[shielded_key]
         elif variable_key in self.__dict__:
             return self.__dict__[variable_key]
-        elif config == "asynchronous" and "async" in self.__dict__:  # migration for Python 3.7+
-            return self.__dict__["async"]
 
         # Lazy load the default configuration from settings to allow apps to register their own defaults
         if self._defaults is None:
             self._defaults = DATAGROWTH_DEFAULT_CONFIGURATION
 
-        if namespace_attr in self._defaults:
+        if exclude_defaults:
+            pass
+        elif namespace_attr in self._defaults:
             return self._defaults[namespace_attr]
         elif global_attr in self._defaults:
             return self._defaults[global_attr]
@@ -188,7 +189,8 @@ class ConfigurationType(object):
         """
         supplement = {}
         for key, value in other.items():
-            if key not in self:
+            cleaned_key = self.clean_key(key)
+            if key not in self.__dict__ and self._get_configuration(cleaned_key, exclude_defaults=True) is None:
                 supplement[key] = value
         if supplement:
             self.update(supplement)
@@ -205,8 +207,6 @@ class ConfigurationType(object):
         for key, value in self.__dict__.items():
             if key == '_defaults':
                 continue
-            if key == 'async':
-                key = 'asynchronous'
             if key.startswith('_'):
                 if (private and key in self._private) or (protected and key not in self._private):
                     yield key, value

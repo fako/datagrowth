@@ -85,7 +85,7 @@ class HttpResourceMock(HttpResource):
             args = (self.config.source_language,) + args
         elif method == "get":
             args = (self.config.source_language,) + args
-        return super(HttpResourceMock, self).send(method, *args, **kwargs)
+        return super().send(method, *args, **kwargs)
 
     def auth_parameters(self):
         return {
@@ -101,6 +101,8 @@ class HttpResourceMock(HttpResource):
     def next_parameters(self):
         content_type, data = self.content
         try:
+            if isinstance(data, list):
+                data = data[0]
             nxt = data["next"]
         except (KeyError, TypeError):
             return {}

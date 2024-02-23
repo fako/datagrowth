@@ -4,12 +4,11 @@ from unittest.mock import patch, MagicMock, NonCallableMagicMock
 from datetime import date
 from types import GeneratorType
 
-from django.test import TestCase
-
+from datatypes.tests import data_storage
 from datatypes.models import Collection, Document
 
 
-class TestCollection(TestCase):
+class TestCollection(data_storage.DataStorageTestCase):
 
     fixtures = ["test-data-storage"]
 
@@ -62,7 +61,7 @@ class TestCollection(TestCase):
                 app_label = "testing_apps"
         collection_test = CollectionTest()
         collection_test.id = 1
-        with patch("datagrowth.datatypes.documents.db.base.reverse") as reverse_mock:
+        with patch("datagrowth.datatypes.storage.reverse") as reverse_mock:
             url = collection_test.url
             reverse_mock.assert_called_once_with("v1:testing-apps:collection-test-content", args=[1])
 
@@ -93,8 +92,8 @@ class TestCollection(TestCase):
         docs, doc_ids = self.get_docs_list_and_ids(value="value 3")
         today = date.today()
         created_at = self.instance2.created_at
-        with self.assertNumQueries(3):
-            # Query 1: reset
+        with self.assertNumQueries(5):
+            # Query 1, 2, 3: reset
             # Query 2: insert documents
             # Query 3: update modified_at
             self.instance2.add(docs, reset=True)
@@ -140,7 +139,7 @@ class TestCollection(TestCase):
         for doc in docs:
             doc.id = None
         # Documents should get added in two batches
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(6):
             add_batches = self.instance2.add_batches(docs, reset=True, batch_size=20)
             self.assertIsInstance(add_batches, GeneratorType)
             for batch in add_batches:
@@ -172,10 +171,10 @@ class TestCollection(TestCase):
         docs.append(docs[1])  # adds a Document instance as a duplicate
         today = date.today()
         created_at = self.instance2.created_at
-        with self.assertNumQueries(3):
-            # Query 1: reset
-            # Query 2: insert documents
-            # Query 3: update modified_at
+        with self.assertNumQueries(5):
+            # Query 1-3: reset
+            # Query 4: insert documents
+            # Query 5: update modified_at
             self.instance2.add(docs, reset=True)
         self.assertEqual(influence_method.call_count, 5)
         self.assertEqual(self.instance2.documents.count(), 5)
@@ -193,10 +192,10 @@ class TestCollection(TestCase):
         docs.append(docs[1])  # adds a Document instance as a duplicate
         today = date.today()
         created_at = self.instance2.created_at
-        with self.assertNumQueries(3):
-            # Query 1: reset
-            # Query 2: insert documents
-            # Query 3: update modified_at
+        with self.assertNumQueries(5):
+            # Query 1-3: reset
+            # Query 4: insert documents
+            # Query 5: update modified_at
             self.instance2.add((doc for doc in docs), reset=True)
         self.assertEqual(
             influence_method.call_count, 6,

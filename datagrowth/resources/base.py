@@ -1,3 +1,4 @@
+import warnings
 import logging
 from datetime import timedelta
 
@@ -97,40 +98,35 @@ class Resource(models.Model):
         """
         return getattr(settings, "CELERY_TASK_DEFAULT_QUEUE", "celery")
 
-    @property
-    def content(self):
-        """
-        This method typically gets overwritten for different resource types.
-        It should return the content_type and data from the resource.
-
-        :return: content_type, data
-        """
-        raise NotImplementedError("Missing implementation for content property on {}".format(self.__class__.__name__))
-
-    @property
-    def success(self):
-        """
-        This method typically gets overwritten for different resource types.
-        It should indicate the success of the data gathering.
-
-        :return: (bool)
-        """
-        raise NotImplementedError("Missing implementation for content property on {}".format(self.__class__.__name__))
-
     #######################################################
     # RESOURCE ABSTRACTION
     #######################################################
     # A set of methods and properties shared by resources
     # This interface often needs source specific overrides
 
+    def _validate_input(self, *args, **kwargs):
+        warnings.warn(
+            "Calling legacy _validate_input method for Resource, while it isn't implemented. "
+            "No input validation occurred.",
+            RuntimeWarning
+        )
+
+    def validate_input(self, *args, **kwargs):
+        for schema in ["SCHEMA", "GET_SCHEMA", "POST_SCHEMA"]:
+            if hasattr(self, schema):
+                break
+        else:
+            # Legacy validation methods are not available, but validate_input hasn't been overridden either
+            raise NotImplementedError(f"Missing implementation for validate_input method on {self.__class__.__name__}")
+        # Dealing with a legacy validation setup. Passing schema's to JSONSchema draft 4.
+        self._validate_input(*args, **kwargs)
+
     def handle_errors(self):
         """
         Overwrite this method to handle resource specific error cases.
         Usually you'd raise a particular ``DGResourceException`` to indicate particular errors.
         """
-        raise NotImplementedError(
-            "Missing implementation for handle_errors method on {}".format(self.__class__.__name__)
-        )
+        raise NotImplementedError(f"Missing implementation for handle_errors method on {self.__class__.__name__}")
 
     def variables(self, *args):
         """
@@ -141,4 +137,24 @@ class Resource(models.Model):
         :param args: (tuple) the positional arguments given as input to the resource
         :return: (dict) a dictionary with the input variables as values
         """
-        raise NotImplementedError("Missing implementation for variables method on {}".format(self.__class__.__name__))
+        raise NotImplementedError(f"Missing implementation for variables method on {self.__class__.__name__}")
+
+    @property
+    def content(self):
+        """
+        This method typically gets overwritten for different resource types.
+        It should return the content_type and data from the resource.
+
+        :return: content_type, data
+        """
+        raise NotImplementedError(f"Missing implementation for content property on {self.__class__.__name__}")
+
+    @property
+    def success(self):
+        """
+        This method typically gets overwritten for different resource types.
+        It should indicate the success of the data gathering.
+
+        :return: (bool)
+        """
+        raise NotImplementedError(f"Missing implementation for content property on {self.__class__.__name__}")

@@ -1,0 +1,398 @@
+[
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "config": "{\"test_flag\": true}",
+        "signature": "setting1=const&test"
+    },
+    "model": "datatypes.Dataset",
+    "pk": 1
+},
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
+        "signature": "test"
+    },
+    "model": "datatypes.Dataset",
+    "pk": 2
+},
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "pending_at": "2015-06-05T16:17:54.436Z",
+        "finished_at": null,
+        "is_current": false,
+        "version": "0.0.1",
+        "state": "Growing",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 2,
+        "tasks": {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {},
+        "derivatives": {}
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 1
+},
+{
+    "fields": {
+        "name": "test",
+        "identifier": "id",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "pending_at": null,
+        "finished_at": null,
+        "dataset_version": 1,
+        "tasks": {
+            "collection_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {},
+        "derivatives": {}
+    },
+    "model": "datatypes.collection",
+    "pk": 1
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 0","id":1},
+        "collection": 1,
+        "dataset_version": 1,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-02T10:01:47.572Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
+    "pk": 1
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 1","id":2},
+        "collection": 1,
+        "dataset_version": 1,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-02T10:01:47.572Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": false
+            }
+        },
+        "derivatives": {}
+    },
+    "model": "datatypes.document",
+    "pk": 2
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 2","id":3},
+        "collection": 1,
+        "dataset_version": 1,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": "2015-06-02T10:01:47.572Z",
+        "finished_at": null,
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {},
+        "derivatives": {}
+    },
+    "model": "datatypes.document",
+    "pk": 3
+},
+{
+    "fields": {
+        "created_at": "2014-06-05T16:17:54.000Z",
+        "modified_at": "2014-06-05T16:17:54.000Z",
+        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\", \"setting1\": \"const\"}",
+        "signature": "setting1=const&test-multiple"
+    },
+    "model": "datatypes.Dataset",
+    "pk": 3
+},
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Complete",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 3,
+        "tasks": {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "dataset_version_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "dataset_version_task": {
+                "test": "test"
+            }
+        }
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 2
+},
+{
+    "fields": {
+        "name": "setting1=const&test-multiple",
+        "identifier": "id",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "dataset_version": 2,
+        "tasks": {
+            "collection_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "collection_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "collection_task": {
+                "test": "test"
+            }
+        }
+    },
+    "model": "datatypes.collection",
+    "pk": 2
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 0","id":4},
+        "collection": 2,
+        "dataset_version": 2,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
+    "pk": 4
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 1","id":5},
+        "collection": 2,
+        "dataset_version": 2,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
+    "pk": 5
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 2","id":6},
+        "collection": 2,
+        "dataset_version": 2,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T17:17:54.436Z",
+        "tasks": {
+            "check_doi": {
+                "depends_on": [
+                    "$.state",
+                    "$.doi"
+                ],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "check_doi": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "check_doi": {
+                "doi": "ok"
+            }
+        }
+    },
+    "model": "datatypes.document",
+    "pk": 6
+},
+{
+    "fields": {
+        "created_at": "2016-06-05T16:17:54.000Z",
+        "modified_at": "2016-06-05T16:17:54.000Z",
+        "config": "{\"objective\": {\"@\": \"$.dict.list\", \"value\":\"$\", \"#context\":\"$.dict.test\"}, \"resource\": \"HttpResourceMock\"}",
+        "signature": "setting1=const&test-empty"
+    },
+    "model": "datatypes.Dataset",
+    "pk": 4
+},
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T16:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Seeding",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 4,
+        "tasks": {
+            "dataset_version_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "dataset_version_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "dataset_version_task": {
+                "test": "test"
+            }
+        }
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 3
+},
+{
+    "fields": {
+        "name": "setting1=const&test-empty",
+        "identifier": "id",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "pending_at": null,
+        "finished_at": "2015-06-05T16:17:54.436Z",
+        "dataset_version": 3,
+        "tasks": {
+            "collection_task": {
+                "depends_on": [],
+                "checks": [],
+                "resources": []
+            }
+        },
+        "task_results": {
+            "collection_task": {
+                "success": true
+            }
+        },
+        "derivatives": {
+            "collection_task": {
+                "test": "test"
+            }
+        }
+    },
+    "model": "datatypes.collection",
+    "pk": 3
+}
+]

@@ -43,3 +43,31 @@ class DGHttpWarning300(DGResourceException):
 
 class DGResourceDoesNotExist(DGResourceException):
     pass
+
+
+class DGGrowthException(Exception):
+    pass
+
+
+class DGGrowthUnfinished(DGGrowthException):
+    pass
+
+
+class DGGrowthFrozen(DGGrowthException):
+    pass
+
+
+class DGGrowthError(DGGrowthException):
+    pass
+
+
+class DGPendingDataStorage(Exception):
+    pass
+
+
+class DGPendingDocuments(DGPendingDataStorage):
+    pass
+
+
+class DGPendingCollections(DGPendingDataStorage):
+    pass

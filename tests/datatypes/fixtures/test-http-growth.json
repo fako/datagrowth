@@ -1,0 +1,129 @@
+[
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "config": "{\"test_flag\": true}",
+        "signature": "setting1=const&test"
+    },
+    "model": "datatypes.Dataset",
+    "pk": 1
+},
+{
+    "fields": {
+        "created_at": "2015-06-05T16:17:54.436Z",
+        "modified_at": "2015-06-05T16:17:54.436Z",
+        "is_current": true,
+        "version": "0.0.1",
+        "state": "Growing",
+        "dataset_type": ["datatypes", "dataset"],
+        "dataset_id": 1
+    },
+    "model": "datatypes.DatasetVersion",
+    "pk": 1
+},
+{
+    "fields": {
+        "name": "Collection 3",
+        "created_at": "2015-06-04T11:31:27.940Z",
+        "modified_at": "2015-06-04T11:34:06.960Z",
+        "dataset_version": 1
+    },
+    "model": "datatypes.collection",
+    "pk": 3
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 0","resource":"extra0"},
+        "collection": 3,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
+    },
+    "model": "datatypes.document",
+    "pk": 3
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 1","resource":"extra1"},
+        "collection": 3,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
+    },
+    "model": "datatypes.document",
+    "pk": 4
+},
+{
+    "fields": {
+        "properties": {"context":"nested value","value":"nested value 2","resource":"extra2"},
+        "collection": 3,
+        "modified_at": "2015-06-02T10:01:47.572Z",
+        "created_at": "2015-06-02T10:00:20.247Z"
+    },
+    "model": "datatypes.document",
+    "pk": 5
+},
+{
+    "fields": {
+        "body": "[{\"value\": \"nested value 0\", \"extra\": \"test 0\"}]",
+        "status": 200,
+        "head": {"content-type":"application/json"},
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": {"url":"http://localhost:8000/en/?param=1&q=extra0","args":["en","extra0"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
+        "uri": "localhost:8000/en/?meta=extra0&param=1&q=extra0",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpresourcemock",
+    "pk": 6
+},
+{
+    "fields": {
+        "body": "[{\"value\": \"nested value 1\", \"extra\": \"test 1\"}]",
+        "status": 200,
+        "head": {"content-type":"application/json"},
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": {"url":"http://localhost:8000/en/?param=1&q=extra1","args":["en","extra1"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
+        "uri": "localhost:8000/en/?meta=extra1&param=1&q=extra1",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpresourcemock",
+    "pk": 7
+},
+{
+    "fields": {
+        "body": "[{\"value\": \"nested value 2\", \"extra\": \"test 2\", \"next\": 1}]",
+        "status": 200,
+        "head": {"content-type":"application/json"},
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": {"url":"http://localhost:8000/en/?param=1&q=extra2","args":["en","extra2"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
+        "uri": "localhost:8000/en/?meta=extra2&param=1&q=extra2",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpresourcemock",
+    "pk": 8
+},
+{
+    "fields": {
+        "body": "[{\"value\": \"continued value 2\", \"extra\": \"test 3\"}]",
+        "status": 200,
+        "head": {"content-type":"application/json"},
+        "modified_at": "2015-05-12T18:45:22.105Z",
+        "created_at": "2015-05-12T18:45:22.105Z",
+        "request": {"url":"http://localhost:8000/en/?param=1&q=extra2&next=1","args":["en","extra2"],"headers":{"Accept":"application/json"},"kwargs":{},"data":{},"method":"get"},
+        "uri": "localhost:8000/en/?next=1&param=1&q=extra2",
+        "data_hash": "",
+        "config": "{}",
+        "purge_at": null
+    },
+    "model": "resources.httpresourcemock",
+    "pk": 9
+}
+]

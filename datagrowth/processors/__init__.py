@@ -1,2 +1,4 @@
 from .base import Processor, QuerySetProcessor, ProcessorFactory
-from .input import ExtractProcessor
+from .growth import GrowthProcessor
+from .input import ExtractProcessor, HttpSeedingProcessor, SeedingProcessorFactory
+from .resources.growth import HttpGrowthProcessor

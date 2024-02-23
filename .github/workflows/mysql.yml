@@ -1,0 +1,40 @@
+name: MySQL tests
+
+on:
+    [push, pull_request]
+
+jobs:
+    build:
+
+        runs-on: ubuntu-latest
+        strategy:
+            max-parallel: 4
+            matrix:
+                python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_DATABASE: datagrowth
+                    MYSQL_USER: django
+                    MYSQL_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
+                    MYSQL_ROOT_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
+                ports:
+                    - 3306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v5
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies
+              run: |
+                  sudo apt-get install -y libxml2-dev libxslt1-dev python3-dev
+                  python -m pip install --upgrade pip
+                  python -m pip install tox tox-gh-actions
+            - name: Tests
+              run: |
+                  DJANGO_DEFAULT_DATABASE=mysql DJANGO_MYSQL_USER=root tox

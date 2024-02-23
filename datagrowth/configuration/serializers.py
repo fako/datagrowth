@@ -1,4 +1,3 @@
-import warnings
 import argparse
 import hashlib
 from urllib.parse import parse_qsl
@@ -6,20 +5,13 @@ from urllib.parse import parse_qsl
 from .types import ConfigurationType
 
 
-def load_config(defaults=None):
+def load_config():
     """
     This decorator will turn the value of any keyword arguments named "config" into a ConfigurationType.
     The decorated function will get the configuration as its first argument.
 
-    :param defaults: (dict) which should be used as default for inserted configuration.
     :return: ConfigurationType
     """
-    if defaults is not None:
-        warnings.warn(
-            "Specifying defaults for load_config has been deprecated. "
-            "Use register_defaults to set configuration defaults at runtime",
-            DeprecationWarning
-        )
 
     def wrap(func):
         def config_func(*args, **kwargs):
@@ -28,7 +20,7 @@ def load_config(defaults=None):
                 raise TypeError("load_config decorator expects a config kwarg.")
             if not isinstance(config, dict):
                 return func(config, *args, **kwargs)
-            config_instance = ConfigurationType.from_dict(config, defaults)
+            config_instance = ConfigurationType.from_dict(config)
             return func(config_instance, *args, **kwargs)
         return config_func
     return wrap

@@ -1,7 +1,6 @@
 import requests
 
 from datagrowth.configuration import ConfigurationType
-from datagrowth.processors.base import Processor
 
 
 def load_session():
@@ -15,7 +14,11 @@ def load_session():
     :return:
     """
     def wrap(func):
+
         def session_func(config, *args, **kwargs):
+
+            from datagrowth.processors.base import Processor  # prevents circular imports
+
             assert isinstance(config, ConfigurationType), \
                 "load_session expects a fully prepared ConfigurationType for config"
             session_injection = kwargs.pop("session", None)

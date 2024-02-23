@@ -1,7 +1,7 @@
 # This file intends to pin down dependencies to their minimal version
 # Lower dependencies may work, but is not actively tested against
 djangorestframework==3.14.0
-jsonschema==2.6.0
+jsonschema==4.20.0
 lxml==4.9.3
 beautifulsoup4==4.8.0
 urlobject==2.4.3
@@ -10,6 +10,7 @@ psycopg2-binary==2.9.6
 mysqlclient==1.4.4
 Pillow==10.0.0
 tqdm==4.31.1
+celery==5.3.6
 
 # Running tests and quality tools
 invoke==2.2.0

@@ -1,13 +1,13 @@
 from unittest.mock import patch
 from datetime import date
 
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from datatypes.tests import data_storage
 from datatypes.models import Document, Collection
 
 
-class TestDocument(TestCase):
+class TestDocument(data_storage.DataStorageTestCase):
 
     fixtures = ["test-data-storage"]
 
@@ -51,9 +51,34 @@ class TestDocument(TestCase):
                 app_label = "testing_apps"
         document_test = DocumentTest()
         document_test.id = 1
-        with patch("datagrowth.datatypes.documents.db.base.reverse") as reverse_mock:
+        with patch("datagrowth.datatypes.storage.reverse") as reverse_mock:
             url = document_test.url
             reverse_mock.assert_called_once_with("v1:testing-apps:document-test-content", args=[1])
+
+    def test_content(self):
+        # Standard content
+        self.assertEqual(self.instance.content, {
+            "value": "0",
+            "nested": "nested value 0",
+            "context": "nested value",
+            "_id": 1
+        })
+        # Content with derivatives set
+        self.instance.derivatives = {
+            "task_1": {
+                "task_1_result": "test"
+            },
+            "new_context": {
+                "context": "new"
+            }
+        }
+        self.assertEqual(self.instance.content, {
+            "value": "0",
+            "nested": "nested value 0",
+            "context": "new",
+            "task_1_result": "test",
+            "_id": 1
+        })
 
     @patch("datagrowth.datatypes.DocumentBase.output_from_content")
     def test_output(self, output_from_content):
