@@ -178,7 +178,7 @@ class TestHttpImageResourceInterface(TestCase):
         self.assertFalse(instance.session.send.called, "Should not make request for invalid URL")
         self.assertEqual(instance.status, 404)
         self.assertEqual(instance.head, {})
-        self.assertEqual(instance.body, None)
+        self.assertEqual(instance.body, "")
         self.assertTrue(instance.request["cancel"])
         # Invalid request preset
         self.test_get_request["args"] = tuple()

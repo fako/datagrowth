@@ -468,6 +468,11 @@ class HttpResource(Resource):
         assert self.request and isinstance(self.request, dict), \
             "Trying to make request before having a valid request dictionary."
 
+        if self.request.get("cancel", False):
+            error_code = self.status or 113
+            self.set_error(error_code, connection_error=True)
+            return
+
         method = self.request.get("method")
         form_data = self.request.get("data") if not method == "get" else None
         form_data, files = self._format_data(form_data)

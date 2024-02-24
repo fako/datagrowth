@@ -22,7 +22,7 @@ from datagrowth.configuration.types import ConfigurationType
 from project.mocks.data import MOCK_DATA
 from resources.models import HttpResourceMock
 from resources.tests import base as resources_test_base
-from resources.mocks.requests import get_erroneous_requests_mock
+from resources.mocks.requests import get_erroneous_requests_mock, MockRequests
 
 
 class TestHttpResource(resources_test_base.ResourceTestMixin):
@@ -287,6 +287,51 @@ class TestHttpResource(resources_test_base.ResourceTestMixin):
             "Expected three errors to call sleep five times during backoff procedure"
         )
         self.assertEqual(sleep_mock.call_args_list[0], call(0))
+
+    def test_request_cancel(self):
+        MockRequests.send.reset()
+        request = {"cancel": True}
+        # Testing with default status code
+        instance = self.get_test_instance(MockRequests)
+        instance.request = request
+        instance._send()
+        self.assertEqual(instance.status, 113)
+        self.assertEqual(instance.head, {})
+        self.assertEqual(instance.body, "")
+        self.assertFalse(MockRequests.send.called)
+        # Testing with custom status code
+        instance = self.get_test_instance(MockRequests)
+        instance.status = 1
+        instance.request = request
+        instance._send()
+        self.assertEqual(instance.status, 1, "Expected Resource to take on non-default status when it's supplied")
+        self.assertEqual(instance.head, {})
+        self.assertEqual(instance.body, "")
+        self.assertFalse(MockRequests.send.called)
+
+    def test_request_no_cancel(self):
+        test_url = "http://localhost:8000/test/"
+        content_header = {
+            "Accept": "application/json",
+            "Connection": "keep-alive",
+            "Accept-Encoding": "gzip, deflate"
+        }
+        request = {
+            "args": tuple(),
+            "kwargs": {},
+            "method": "get",
+            "url": test_url,
+            "headers": content_header,
+            "data": {},
+            "cancel": False  # testing no cancellation
+        }
+        instance = self.get_test_instance(MockRequests)
+        instance.request = request
+        instance._send()
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.body)
+        self.assertTrue(instance.head)
+        self.assertTrue(MockRequests.send.called)
 
     @patch("datagrowth.resources.http.generic.sleep")
     def test_get_request_connection_error_no_backoff_delay(self, sleep_mock):
