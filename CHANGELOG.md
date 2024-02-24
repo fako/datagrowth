@@ -128,6 +128,7 @@ v0.19
 * Adds the ``Collection.reload_document_ids`` method to be able to load ``Document.id`` after ``bulk_create``.
 * For consistent ``Resource`` serialization adds ``serialize_resources`` and ``update_serialized_resources``.
 * Experimental support for ``ResourceFixturesMixin`` that can be used to load resource content through fixture files.
+* Cancelling a ``HttpFileResource`` will result in an empty body instead of a body of None.
 
 
 v0.18

@@ -49,11 +49,6 @@ class HttpFileResource(URLResource):
         }
     }
 
-    def _send(self):
-        if self.request["cancel"]:
-            return
-        super()._send()
-
     def _create_request(self, method, *args, **kwargs):
         cancel_request = False
         try:
