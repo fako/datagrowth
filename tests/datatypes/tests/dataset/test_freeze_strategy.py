@@ -26,3 +26,6 @@ class TestContinuationDatasetFreezeStrategy(TestCase):
 
     def test_growth_revise(self):
         self.skipTest("not implemented")
+
+    def test_new_task_definition(self):
+        self.skipTest("not implemented")

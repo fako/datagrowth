@@ -89,3 +89,6 @@ class TestContinuationDatasetReviseStrategy(test_cases.BaseDatasetTestCase):
 
     def test_growth_reset(self):
         self.skipTest("not implemented")
+
+    def test_new_task_definition(self):
+        self.skipTest("not implemented")

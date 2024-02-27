@@ -26,3 +26,6 @@ class TestContinuationDatasetResetStrategy(TestCase):
 
     def test_seeding_error(self):
         self.skipTest("not implemented")
+
+    def test_new_task_definition(self):
+        self.skipTest("not implemented")
