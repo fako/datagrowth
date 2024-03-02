@@ -154,6 +154,9 @@ class CollectionBase(DataStorage):
                 prepared.append(document)
             elif isinstance(initial_data, Document):
                 document = self.build_document(initial_data.properties, collection=collection)
+                if hasattr(initial_data, "task_results"):
+                    document.task_results = initial_data.task_results
+                    document.derivatives = initial_data.derivatives
                 prepared.append(document)
             else:  # type is list
                 for instance in initial_data:
