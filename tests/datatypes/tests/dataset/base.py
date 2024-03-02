@@ -38,8 +38,10 @@ class BaseDatasetTestCase(TestCase):
             collection.finish_processing(current_time=finished_at)
             for batch in document_generator(cls.entity_type, documents_per_collection, 20, collection):
                 for doc in batch:
+                    doc.task_results = {"check_doi": {"success": True}}
+                    doc.derivatives = {"check_doi": {"check_doi": {"doi": "ok"}}}
                     doc.finish_processing(current_time=finished_at, commit=False)
-                Document.objects.bulk_update(batch, ["pending_at", "finished_at"])
+                Document.objects.bulk_update(batch, ["task_results", "derivatives", "pending_at", "finished_at"])
 
     @staticmethod
     def prepare_documents(**kwargs):
@@ -85,22 +87,26 @@ class BaseDatasetTestCase(TestCase):
         dataset_version = self.dataset.get_current_dataset_version()
         return dataset_version.documents.all()
 
-    def assert_grow_success(self, dataset_versions=0, collections=0, documents=0):
+    def assert_grow_success(self, dataset_versions=0, collections=0, documents=0, no_tasks=False):
         documents_queryset = self.assert_datastorage_containers(dataset_versions, collections)
         self.assertEqual(Document.objects.count(), documents)
         for document in documents_queryset:
             self.assertIsNone(document.pending_at)
             self.assertIsNotNone(document.finished_at)
             self.assertEqual(document.properties.keys(), SEED_DEFAULTS[self.entity_type].keys())
-            self.assertEqual(document.task_results, {"check_doi": {"success": True}})
-            self.assertEqual(document.derivatives, {
-                "check_doi": {"check_doi": {"doi": "ok"}}
-            })
+            if no_tasks:
+                self.assertEqual(document.task_results, {})
+                self.assertEqual(document.derivatives, {})
+            else:
+                self.assertEqual(document.task_results, {"check_doi": {"success": True}})
+                self.assertEqual(document.derivatives, {
+                    "check_doi": {"check_doi": {"doi": "ok"}}
+                })
 
-    def assert_initial_grow_failure(self, dataset_versions=0, collections=0, documents=0, error_documents=0):
-        self.assert_datastorage_containers(dataset_versions, collections)
+    def assert_grow_failure(self, dataset_versions=0, collections=0, documents=0, error_documents=0):
+        documents_queryset = self.assert_datastorage_containers(dataset_versions, collections)
         self.assertEqual(Document.objects.filter(task_results__check_doi__success=True).count(), documents)
-        for success_document in Document.objects.filter(task_results__check_doi__success=True):
+        for success_document in documents_queryset.filter(task_results__check_doi__success=True):
             self.assertIsNone(success_document.pending_at)
             self.assertIsNotNone(success_document.finished_at)
             self.assertEqual(success_document.properties.keys(), SEED_DEFAULTS[self.entity_type].keys())
@@ -109,7 +115,7 @@ class BaseDatasetTestCase(TestCase):
                 "check_doi": {"check_doi": {"doi": "ok"}}
             })
         self.assertEqual(Document.objects.filter(task_results__check_doi__success=False).count(), error_documents)
-        for failure_document in Document.objects.filter(task_results__check_doi__success=False):
+        for failure_document in documents_queryset.filter(task_results__check_doi__success=False):
             self.assertIsNone(failure_document.pending_at)
             self.assertIsNotNone(failure_document.finished_at)
             self.assertEqual(failure_document.properties.keys(), SEED_DEFAULTS[self.entity_type].keys())
@@ -123,3 +129,12 @@ class BaseDatasetTestCase(TestCase):
         self.assertEqual(dataset_version_set.count(), dataset_versions)
         self.assertEqual(collection_set.count(), collections)
         self.assertEqual(document_set.count(), documents)
+
+    def assert_document_dispatch(self, data_storage_dispatch_mock, expected_identities):
+        self.assertTrue(data_storage_dispatch_mock.call_count, "Expected Document tasks to get dispatched")
+        identities = []
+        for call in data_storage_dispatch_mock.call_args_list:
+            args, kwargs = call
+            self.assertEqual(args[0], "datatypes.document", "Expected datastorage dispatch to be for Documents.")
+            identities += [doc.identity for doc in args[1:]]
+        self.assertEqual(identities, expected_identities, "Some expected Document identities were not dispatched.")
