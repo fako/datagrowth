@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime, timedelta
 
 from django.test import TestCase
@@ -30,7 +31,8 @@ class BaseDatasetTestCase(TestCase):
     ###########################
 
     @classmethod
-    def create_historic_dataset_version(cls, documents_per_collection: int = 20, finished_at: datetime | None = None):
+    def create_historic_dataset_version(cls, documents_per_collection: int = 20,
+                                        finished_at: Optional[datetime] = None):
         finished_at = finished_at or (now() - timedelta(days=1))
         cls.historic_dataset_version = cls.dataset.create_dataset_version()
         cls.historic_dataset_version.finish_processing(current_time=finished_at)
