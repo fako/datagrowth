@@ -62,10 +62,9 @@ class BaseDatasetTestCase(TestCase):
     # Assertions
     ###########################
 
-    def assert_dataset_finish(self, use_current_dataset_version=True, expected_state=GrowthState.COMPLETE,
-                              expected_strategy=None):
+    def assert_dataset_finish(self, expected_state=GrowthState.COMPLETE, expected_strategy=None):
         expected_strategy = expected_strategy or self.dataset.GROWTH_STRATEGY
-        dataset_version = self.dataset.versions.filter(is_current=use_current_dataset_version).last()
+        dataset_version = self.dataset.versions.filter(is_current=self.use_current_version).last()
         self.assertEqual(dataset_version.version, self.dataset.version)
         self.assertEqual(dataset_version.state, expected_state)
         self.assertEqual(dataset_version.growth_strategy, expected_strategy)
