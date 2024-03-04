@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime, timedelta
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils.timezone import now
 
 from datagrowth.datatypes.datasets.constants import GrowthState
@@ -9,9 +9,10 @@ from datagrowth.datatypes.datasets.constants import GrowthState
 from datatypes.models import DatasetVersion, Collection, Document
 from project.entities.constants import SEED_DEFAULTS
 from project.entities.generators import document_generator
+from resources.models import EntityListResource
 
 
-class BaseDatasetTestCase(TestCase):
+class BaseDatasetGrowthTestCase(TestCase):
 
     dataset_model = None
     signature = None
@@ -139,3 +140,63 @@ class BaseDatasetTestCase(TestCase):
             self.assertEqual(args[0], "datatypes.document", "Expected datastorage dispatch to be for Documents.")
             identities += [doc.identity for doc in args[1:]]
         self.assertEqual(identities, expected_identities, "Some expected Document identities were not dispatched.")
+
+
+class InitialDatasetGrowthTestCase(BaseDatasetGrowthTestCase):
+
+    def test_growth_success(self):
+        self.dataset.grow(self.entity_type, asynchronous=False)
+        self.assert_grow_success(dataset_versions=1, collections=1, documents=20)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=20)
+        self.assert_dataset_finish()
+
+    def test_growth_limit(self):
+        # This test sets the limit to 3.
+        # However the batch_size is 5 and therefor we expect to grow 5 Documents.
+        self.dataset.grow(self.entity_type, asynchronous=False, limit=3)
+        self.assert_grow_success(dataset_versions=1, collections=1, documents=5)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=5)
+        self.assert_dataset_finish()
+
+    def test_seeding_error(self):
+        self.dataset.grow("does_not_exist", asynchronous=False)
+        self.assert_grow_success(dataset_versions=1, collections=1, documents=0)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=0)
+        entity_list_resource = EntityListResource.objects.last()
+        dataset_version = DatasetVersion.objects.first()
+        self.assertEqual(dataset_version.errors, {
+            "tasks":  {
+                "check_doi": {
+                    "fail": 0,
+                    "skipped": 0,
+                    "success": 0
+                }
+            },
+            "seeding": {
+                "resources.entitylistresource": {
+                    "id": entity_list_resource.id,
+                    "ids": [entity_list_resource.id],
+                    "success": False,
+                    "resource": "resources.entitylistresource"
+                }
+            }
+        })
+        self.assert_dataset_finish()
+
+    def test_task_error(self):
+        with override_settings(TEST_CHECK_DOI_FAILURE_IDENTITIES=["1"]):
+            self.dataset.grow(self.entity_type, asynchronous=False)
+        self.assert_grow_failure(dataset_versions=1, collections=1, documents=19, error_documents=1)
+        self.assert_dataset_output(self.dataset, dataset_versions=1, collections=1, documents=20)
+        dataset_version = DatasetVersion.objects.first()
+        self.assertEqual(dataset_version.errors, {
+            "tasks": {
+                "check_doi": {
+                    "fail": 1,
+                    "skipped": 0,
+                    "success": 19
+                }
+            },
+            "seeding": {}
+        })
+        self.assert_dataset_finish()
