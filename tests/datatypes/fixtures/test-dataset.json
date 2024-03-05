@@ -38,7 +38,33 @@
             }
         },
         "task_results": {},
-        "derivatives": {}
+        "derivatives": {},
+        "task_definitions": {
+            "document": {
+                "check_doi": {
+                    "depends_on": [
+                        "$.state",
+                        "$.doi"
+                    ],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "collection": {
+                "collection_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "datasetversion": {
+                "dataset_version_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
+            }
+        }
     },
     "model": "datatypes.DatasetVersion",
     "pk": 1
@@ -188,6 +214,32 @@
         "derivatives": {
             "dataset_version_task": {
                 "test": "test"
+            }
+        },
+        "task_definitions": {
+            "document": {
+                "check_doi": {
+                    "depends_on": [
+                        "$.state",
+                        "$.doi"
+                    ],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "collection": {
+                "collection_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "datasetversion": {
+                "dataset_version_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
             }
         }
     },
@@ -359,6 +411,32 @@
         "derivatives": {
             "dataset_version_task": {
                 "test": "test"
+            }
+        },
+        "task_definitions": {
+            "document": {
+                "check_doi": {
+                    "depends_on": [
+                        "$.state",
+                        "$.doi"
+                    ],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "collection": {
+                "collection_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
+            },
+            "datasetversion": {
+                "dataset_version_task": {
+                    "depends_on": [],
+                    "checks": [],
+                    "resources": []
+                }
             }
         }
     },

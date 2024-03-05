@@ -186,25 +186,38 @@ class DatasetBase(models.Model):
         dataset_version.task_results = {}
         dataset_version.derivatives = {}
         dataset_version.save()
+        document_tasks = dataset_version.task_definitions[Document._meta.model_name]
 
         for batch in ibatch(dataset_version.documents.all(), batch_size=100):
             documents = []
             invalid_document_ids = []
             for document in batch:
-                for task in document.tasks.keys():
+                for task in document_tasks.keys():
                     result = document.task_results.get(task, {})
                     if not result.get("success"):
                         document.invalidate_task(task, current_time=current_time)
                 if self.weed_document(document):
                     invalid_document_ids.append(document.id)
                 else:
+                    document.tasks = document_tasks
                     documents.append(document)
             Document.objects.filter(id__in=invalid_document_ids).delete()
-            Document.objects.bulk_update(documents, ["task_results", "derivatives", "pending_at", "finished_at"])
+            Document.objects.bulk_update(
+                documents, ["task_results", "derivatives", "pending_at", "finished_at", "tasks"]
+            )
 
-        dataset_version.collections.update(pending_at=None, finished_at=None, task_results={}, derivatives={})
+        Collection = DatasetVersion.get_collection_model()
+        collection_tasks = dataset_version.task_definitions[Collection._meta.model_name]
+        dataset_version.collections.update(
+            pending_at=None, finished_at=None, task_results={}, derivatives={}, tasks=collection_tasks
+        )
 
         return dataset_version
+
+    def get_current_dataset_version(self, growth_strategy=None):
+        growth_strategy = growth_strategy or self.GROWTH_STRATEGY
+        dataset_version_filters = {} if growth_strategy == GrowthStrategy.STACK else {"is_current": True}
+        return self.versions.filter(**dataset_version_filters).last()
 
     #######################################################
     # DATASET GROWTH
@@ -232,7 +245,7 @@ class DatasetBase(models.Model):
         return False
 
     def prepare_growth(self, growth_strategy, current_version=None, retry=False):
-        if not current_version or growth_strategy in [GrowthStrategy.RESET, GrowthStrategy.STACK]:
+        if not current_version or (growth_strategy in [GrowthStrategy.RESET, GrowthStrategy.STACK] and not retry):
             current_version = self.create_dataset_version()
             current_version = self.prepare_dataset_version(current_version)
         elif retry:
@@ -288,8 +301,7 @@ class DatasetBase(models.Model):
              limit=None, data=None) -> Optional[GroupResult]:
         # Set argument defaults
         growth_strategy = growth_strategy or self.GROWTH_STRATEGY
-        dataset_version_filters = {} if growth_strategy == GrowthStrategy.STACK else {"is_current": True}
-        current_version = self.versions.filter(**dataset_version_filters).last()
+        current_version = self.get_current_dataset_version(growth_strategy)
 
         # Decide on growth preparation
         # After this current_version should never be None and any new DatasetVersions will be PENDING.

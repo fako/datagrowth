@@ -100,6 +100,8 @@ v0.19
   input as a list for this to work to prevent unexpected excessive memory usage.
 * When using ``Collection.add_batches`` or ``Collection.update_batches`` a ``NO_MODIFICATION`` object can be passed
   as ``modified_at`` parameter to prevent updating ``Collection.modified_at`` with these (repeating) calls.
+* The ``Collection.add_batches`` will copy ``task_results`` and ``derivatives`` fields from
+  input ``Documents`` if they exist.
 * Uses ``Collection.document_update_fields`` to determine which fields to update in ``bulk_update`` calls by Collection.
 * Adds ``Document.build`` to support creating a ``Document`` from raw data.
 * ``Document.update`` will now use properties as update data instead of content

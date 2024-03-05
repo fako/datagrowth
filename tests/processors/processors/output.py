@@ -10,10 +10,10 @@ class MockProcessor(Processor):
 class MockNumberProcessor(MockProcessor):
 
     def number_documents(self, documents):
-        def number_individual(individual, number):
-            individual["number"] = number
-            return individual
-        return (number_individual(individual, idx+1) for idx, individual in enumerate(documents))
+        def set_number(document, number):
+            document["number"] = number
+            return document
+        return (set_number(doc, idx+1) for idx, doc in enumerate(documents))
 
 
 class MockFilterProcessor(MockProcessor):

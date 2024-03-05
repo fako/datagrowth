@@ -1,14 +1,10 @@
 from collections import OrderedDict
 
 from datagrowth.datatypes import DatasetBase, DatasetVersionBase, GrowthStrategy
-from datagrowth.processors import QuerySetProcessor, ProcessorFactory
+from datagrowth.processors import ProcessorFactory
 
 from project.entities.constants import PAPER_DEFAULTS
 from processors.processors import MockNumberProcessor
-
-
-class StubHarvestProcessor(QuerySetProcessor):
-    pass
 
 
 class DatasetVersion(DatasetVersionBase):

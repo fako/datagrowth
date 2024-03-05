@@ -35,4 +35,4 @@ def document_generator(entity: Entities, size: int, batch_size: int,
     ]
     for batch in ibatch(documents, batch_size=batch_size):
         Document.objects.bulk_create(batch)
-        yield batch
+        yield collection.reload_document_ids(batch)

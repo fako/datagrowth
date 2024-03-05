@@ -76,6 +76,8 @@ class ResourceGrowthProcessor(GrowthProcessor):
             contribution = list(contribution)
         if isinstance(contribution, dict):
             return [contribution]
+        if isinstance(contribution, (str, int, float,)):
+            return [{"value": contribution}]
         elif isinstance(contribution, list):
             return contribution
         elif contribution is None:

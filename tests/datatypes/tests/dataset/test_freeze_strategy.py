@@ -1,16 +1,13 @@
 from django.test import TestCase
 
+from datatypes.tests.dataset import base as test_cases
+from datatypes.models import FrozenDataset
 
-class TestInitialDatasetFreezeStrategy(TestCase):
 
-    def test_growth_success(self):
-        self.skipTest("not implemented")
-
-    def test_growth_limit(self):
-        self.skipTest("not implemented")
-
-    def test_seeding_error(self):
-        self.skipTest("not implemented")
+class TestInitialDatasetFreezeStrategy(test_cases.InitialDatasetGrowthTestCase):
+    dataset_model = FrozenDataset
+    signature = "setting1=const&test"
+    entity_type = "paper"
 
 
 class TestContinuationDatasetFreezeStrategy(TestCase):
@@ -25,4 +22,7 @@ class TestContinuationDatasetFreezeStrategy(TestCase):
         self.skipTest("not implemented")
 
     def test_growth_revise(self):
+        self.skipTest("not implemented")
+
+    def test_new_task_definition(self):
         self.skipTest("not implemented")

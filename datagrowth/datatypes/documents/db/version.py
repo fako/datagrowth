@@ -50,9 +50,18 @@ class DatasetVersionBase(DataStorage):
         for model_name, model_task_definitions in self.task_definitions.items():
             model = apps.get_model(self._meta.app_label, model_name)
             for task_name, task_definition in model_task_definitions.items():
-                success = model.objects.filter(**{f"task_results__{task_name}__success": True}).count()
-                fail = model.objects.filter(**{f"task_results__{task_name}__success": False}).count()
-                skipped = model.objects.filter(**{f"task_results__{task_name}__isnull": True}).count()
+                success_filters = {f"task_results__{task_name}__success": True}
+                if hasattr(model, "dataset_version_id"):
+                    success_filters.update({"dataset_version_id": self.id})
+                success = model.objects.filter(**success_filters).count()
+                fail_filters = {f"task_results__{task_name}__success": False}
+                if hasattr(model, "dataset_version_id"):
+                    fail_filters.update({"dataset_version_id": self.id})
+                fail = model.objects.filter(**fail_filters).count()
+                skipped_filters = {f"task_results__{task_name}__isnull": True}
+                if hasattr(model, "dataset_version_id"):
+                    skipped_filters.update({"dataset_version_id": self.id})
+                skipped = model.objects.filter(**skipped_filters).count()
                 self.errors["tasks"][task_name] = {
                     "success": success,
                     "fail": fail,
