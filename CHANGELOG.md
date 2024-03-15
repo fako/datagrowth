@@ -36,6 +36,10 @@ if you don't want to use any ``DatasetVersion``.
   The value for this key is always an empty dictionary. Any ``to_property`` configuration will write to this dictionary.
   Otherwise contributions get merged into the dictionary.  It's still possible to write to ``properties`` without
   adding special ``growth_phase`` keys for backward compatability.
+* Contributions to ``Documents`` gathered through ``ExtractProcessor.pass_resource_through``
+  may consist of simple values. If ``to_property`` is set these values will be available under that property.
+  Otherwise the simple values get added to a dictionary with one "value" key and
+  this dictionary gets merged like normal.
 * If ``ResourceGrowthProcessor`` encounters multiple ``Resources`` per ``Document`` or
   if a single ``Resource`` yields multiple results. Then the ``reduce_contributions`` method will be called to
   determine how contribution data from ``Resources`` should compliment ``Document`` data. The default is to only use

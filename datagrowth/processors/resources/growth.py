@@ -75,14 +75,15 @@ class ResourceGrowthProcessor(GrowthProcessor):
         contribution = extract_method(resource)
         if isinstance(contribution, Generator):
             contribution = list(contribution)
-        if isinstance(contribution, dict):
-            return [contribution]
-        if isinstance(contribution, (str, int, float,)):
-            return [{"value": contribution}]
-        elif isinstance(contribution, list):
+
+        if isinstance(contribution, list):
             return contribution
         elif contribution is None:
             return []
+        elif isinstance(contribution, dict) or allow_simple_values:
+            return [contribution]
+        elif isinstance(contribution, (str, int, float,)):
+            return [{"value": contribution}]
         else:
             raise ValueError(f"Unknown contribution type: {type(contribution)}")
 

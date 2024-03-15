@@ -349,3 +349,25 @@ class TestHttpGrowthProcessor(TestCase):
         for ix, document in enumerate(self.collection.documents.all()):
             self.assertEqual(document.derivatives, {}, "Expected no extracted data when Resources are in error")
         self.assert_batch_and_process_results()
+
+    def test_synchronous_simple_type_contributions(self):
+        HttpResourceMock.objects.all().update(body="\"simple value\"")
+        processor = HttpGrowthProcessor({
+            "growth_phase": "test",
+            "datatypes_app_label": "datatypes",
+            "batch_size": 2,
+            "asynchronous": False,
+            "extractor": "ExtractProcessor.pass_resource_through",
+            "retrieve_data": {
+                "resource": "resources.httpresourcemock",
+                "method": "get",
+                "args": ["$.resource"],
+                "kwargs": {},
+            },
+            "contribute_data": {}
+        })
+        processor(self.collection.documents)
+        self.assertEqual(self.collection.documents.count(), 3)
+        for document in self.collection.documents.all():
+            self.assertEqual(document.derivatives, {"test": {"value": "simple value"}})
+        self.assert_batch_and_process_results()
