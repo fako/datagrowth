@@ -18,12 +18,6 @@ Instead you can run your own ``DatasetVersion`` which should implement ``influen
 ``dataset_version`` attribute to None for ``Collection`` and ``Document``
 if you don't want to use any ``DatasetVersion``.
 
-Another note of caution is that due to the way Django implements ``bulk_create``
-it's not possible to access ``Document.id`` on MySQL databases when using ``HttpSeedingProcessor``
-or any other code that relies on ``Collection.update`` or ``Collection.update_batches``.
-Highly recommended to use Postgres when knowing the ``Document.id`` is important directly after bulk creation,
-but MariaDB has been added as a test target and should also be capable of providing the ``Document.id`` in these cases.
-
 * Minimal version for Celery is now 5.x.
 * Minimal version for jsonschema is now 4.20.0, but jsonschema draft version remains 4.
 * ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
