@@ -34,7 +34,8 @@ class DatasetCommand(BaseCommand):
         self.cast_as_community = options.pop("cast_as_community")
         self.model = apps.get_model(options.pop("dataset"))
         self.config = options["config"]
-        signature = getattr(self, "signature") or self.model().get_signature_from_input(*args, **self.config)
+        signature = getattr(self, "signature") or \
+            self.model(config=self.config).get_signature_from_input(*args, **self.config)
         self.signature = signature or None
         return options
 
