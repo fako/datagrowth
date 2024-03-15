@@ -95,6 +95,33 @@ class TestHttpGrowthProcessor(TestCase):
             self.assertEqual(document.properties["results"], {"extra": f"test {ix}"})
         self.assert_batch_and_process_results()
 
+    def test_synchronous_to_derivatives_property(self):
+        processor = HttpGrowthProcessor({
+            "growth_phase": "test",
+            "datatypes_app_label": "datatypes",
+            "batch_size": 2,
+            "asynchronous": False,
+            "to_property": "results",
+            "retrieve_data": {
+                "resource": "resources.httpresourcemock",
+                "method": "get",
+                "args": ["$.resource"],
+                "kwargs": {},
+            },
+            "contribute_data": {
+                "objective": {
+                    "@": "$.0",
+                    "extra": "$.extra"
+                }
+            }
+        })
+        processor(self.collection.documents)
+        self.assertEqual(self.collection.documents.count(), 3)
+        for ix, document in enumerate(self.collection.documents.all()):
+            self.assertEqual(document.derivatives["test"], {"results": {"extra": f"test {ix}"}})
+            self.assertEqual(document.content["results"], {"extra": f"test {ix}"})
+        self.assert_batch_and_process_results()
+
     def test_synchronous_merge_into_field(self):
         processor = HttpGrowthProcessor({
             "growth_phase": "test",

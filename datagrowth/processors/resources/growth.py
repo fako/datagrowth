@@ -68,7 +68,8 @@ class ResourceGrowthProcessor(GrowthProcessor):
             if creates:
                 self.ProcessResult.objects.bulk_create(creates)
 
-    def extract_contributions(self, extract_method: Callable, resource: Resource) -> List:
+    def extract_contributions(self, extract_method: Callable, resource: Resource,
+                              allow_simple_values: bool = False) -> List:
         if self.resource_is_empty(resource):
             return []
         contribution = extract_method(resource)
@@ -90,7 +91,7 @@ class ResourceGrowthProcessor(GrowthProcessor):
         config = create_config("extract_processor", self.config.contribute_data)
         contribution_processor = self.config.extractor
         contribution_field = "derivatives"
-        contribution_property = self.config.to_property or growth_phase
+        contribution_property = self.config.to_property
         if contribution_property and "/" in contribution_property:
             contribution_field, contribution_property = contribution_property.split("/")
             contribution_property = contribution_property or None
@@ -123,16 +124,30 @@ class ResourceGrowthProcessor(GrowthProcessor):
                 extract_processor, extract_method = ProcessorFactory(contribution_processor).build_with_callable(config)
                 contributions = []
                 for resource in resources:
-                    extraction = self.extract_contributions(extract_method, resource)
+                    extraction = self.extract_contributions(
+                        extract_method, resource,
+                        allow_simple_values=bool(contribution_property)
+                    )
                     contributions += extraction
                 if len(contributions):
+                    # Prepare contributions and field to write the data
                     contribution = self.reduce_contributions(contributions)
                     field_attribute = getattr(document, contribution_field)
-                    if contribution_property is None:
+                    if contribution_field == "derivatives" and growth_phase not in field_attribute:
+                        field_attribute[growth_phase] = {}
+                    # Write data based on configuration
+                    if contribution_field == "derivatives" and contribution_property:
+                        # Writing to property within growth phase derivatives data
+                        field_attribute[growth_phase][contribution_property] = contribution
+                    elif contribution_field == "derivatives":
+                        # Merge contributions into derivatives by growth phase
+                        field_attribute[growth_phase].update(contribution)
+                    elif contribution_property is None:
                         # Usually this doesn't occur, because it's recommended to write contributions to a specific key.
                         # However we keep this option for backward compatability.
                         field_attribute.update(contribution)
                     else:
+                        # Writing to property within field that is not the derivatives field
                         field_attribute[contribution_property] = contribution
 
             # We'll be locking the Documents for update to prevent accidental overwrite of parallel results
