@@ -12,7 +12,6 @@ def load_config():
 
     :return: ConfigurationType
     """
-
     def wrap(func):
         def config_func(*args, **kwargs):
             config = kwargs.pop("config", {})

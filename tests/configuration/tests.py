@@ -349,6 +349,11 @@ class TestLoadConfigDecorator(TestCase):
             config=self.config.to_dict(protected=True, private=True)
         )
         self.assertIsInstance(test_config, ConfigurationType)
+        self.assertIsNone(
+            test_config._defaults,
+            "Expected load_config to initialize without default. "
+            "Use register_defaults to set defaults for load_config decorator."
+        )
         self.assertEqual(test_config._namespace, "name")
         self.assertIn("_test3", test_config._private)
         self.assertEqual(self.config.test, "public")

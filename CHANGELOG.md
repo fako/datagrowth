@@ -132,6 +132,7 @@ v0.19
 * For consistent ``Resource`` serialization adds ``serialize_resources`` and ``update_serialized_resources``.
 * Experimental support for ``ResourceFixturesMixin`` that can be used to load resource content through fixture files.
 * Cancelling a ``HttpFileResource`` will result in an empty body instead of a body of None.
+* Removes ``load_config`` defaults parameter.
 
 
 v0.18
