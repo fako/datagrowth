@@ -4,11 +4,33 @@ from django.core.management.base import CommandError
 from django.core.management.commands.loaddata import Command as LoadDataCommand
 from django.core import serializers
 
+from datagrowth.configuration import register_defaults
 from datagrowth.resources.http import HttpResource
 from datagrowth.resources.shell import ShellResource
 
 
-class ResourceFixturesMixin:
+class EnableGlobalCacheMixin:
+
+    noCache = False
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        if not cls.noCache:
+            register_defaults("global", {
+                "cache_only": True
+            })
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        if not cls.noCache:
+            register_defaults("global", {
+                "cache_only": False
+            })
+        super().tearDownClass()
+
+
+class ResourceFixturesMixin(EnableGlobalCacheMixin):
 
     resource_fixtures = []
 
