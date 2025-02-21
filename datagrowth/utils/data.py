@@ -1,3 +1,5 @@
+from typing import Any, Union, Callable
+
 import re
 import copy
 
@@ -5,7 +7,8 @@ import copy
 JSON_MIMETYPE_PATTERN = re.compile("application/(.*)json")
 
 
-def reach(path, data):
+def reach(path: Union[str, None], data: Any,
+          default: any = None, default_factory: Union[Callable[[], Any], None] = None) -> Any:
     """
     Reach takes a path and data structure. It will return the value from the data structure belonging to the path.
 
@@ -27,7 +30,9 @@ def reach(path, data):
 
     :param path: (str) a key path starting with ``$`` to find in the data structure
     :param data: (dict, list or tuple) a data structure to search
-    :return: value corresponding to path in data structure or None
+    :param default: (any) default value to return if no value was found, defaults to None
+    :param default_factory: (callable) factory for default value to return if no value was found
+    :return: value corresponding to path in data structure or the default
     """
 
     if path == "$":
@@ -41,7 +46,13 @@ def reach(path, data):
     if path is None:
         return data
     if not isinstance(data, (dict, list, tuple)):
-        raise TypeError("Reach needs dict, list or tuple as input, got {} instead".format(type(data)))
+        raise TypeError(f"Reach needs dict, list or tuple as input, got {type(data)} instead")
+
+    # Then we validate inputs for defaults
+    if default is not None and default_factory is not None:
+        raise ValueError("Reach can't compute a default value if default and default_factory are both specified.")
+    if default_factory and not isinstance(default_factory, Callable):
+        raise TypeError("Reach expects default_factory to be a Callable.")
 
     # We make a copy of the input for later reference
     root = copy.deepcopy(data)
@@ -59,9 +70,10 @@ def reach(path, data):
     except (IndexError, KeyError, TypeError):
         pass
 
-    # We try the path as key/index or return None.
+    # We try the path as key/index or return the default.
     path = int(path) if path.isdigit() else path
-    return root[path] if path in root else None
+    default_value = default_factory() if default_factory is not None else default
+    return root[path] if path in root else default_value
 
 
 def override_dict(parent, child):
