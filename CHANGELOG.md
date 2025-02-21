@@ -63,6 +63,7 @@ The convenience of lists is more important here than memory footprint which will
 * Experimental support for ``ResourceFixturesMixin`` that can be used to load resource content through fixture files.
 * Cancelling a ``HttpFileResource`` will result in an empty body instead of a body of None.
 * Removes ``load_config`` defaults parameter.
+* Adds optional defaults to ``reach`` function when path can't be found in the given data structure.
 
 
 v0.18

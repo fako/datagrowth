@@ -32,9 +32,19 @@ class TestPythonReach(TestCase):
 
     def test_key_with_dots(self):
         self.assertEqual(reach("$.dotted.key", self.test_dict), self.test_dict["dotted.key"])
+        self.assertEqual(reach("$.dotted.key", self.test_dict, default="default"), self.test_dict["dotted.key"])
+        self.assertEqual(
+            reach("$.dotted.key", self.test_dict, default_factory=list),
+            self.test_dict["dotted.key"]
+        )
 
     def test_invalid_key(self):
         self.assertEqual(reach("$.does.not.exist", self.test_dict), None)
+        self.assertEqual(reach("$.does.not.exist", self.test_dict, default="default"), "default")
+        self.assertEqual(reach("$.does.not.exist", self.test_dict, default_factory=dict), {})
+        self.assertEqual(reach("$.99", self.test_list), None)
+        self.assertEqual(reach("$.99", self.test_list, default="default"), "default")
+        self.assertEqual(reach("$.99", self.test_list, default_factory=list), [])
 
     def test_none_and_dollar_key(self):
         self.assertEqual(reach(None, self.test_dict), self.test_dict)
@@ -43,23 +53,20 @@ class TestPythonReach(TestCase):
         self.assertEqual(reach("$", self.test_list), self.test_list)
 
     def test_invalid_data(self):
-        try:
+        with self.assertRaises(TypeError, msg="Reach did not raise after getting invalid data input"):
             reach("$.irrelevant", "invalid-input")
-            self.fail("Reach did not throw a TypeError after getting invalid data input")
-        except TypeError:
-            pass
 
     def test_invalid_path(self):
-        try:
+        with self.assertRaises(ValueError, msg="Reach did not raise after getting path with invalid start"):
             reach("dict.test", self.test_dict)
-            self.fail("Reach did not throw a ValueError after getting path with invalid start")
-        except ValueError:
-            pass
-        try:
+        with self.assertRaises(ValueError, msg="Reach did not raise after getting invalid path"):
             reach("$.", self.test_dict)
-            self.fail("Reach did not throw a ValueError after getting invalid path")
-        except ValueError:
-            pass
+
+    def test_invalid_default(self):
+        msg = "Expected Reach to raise when both default and default_factory are specified"
+        with self.assertRaises(ValueError, msg=msg):
+            reach("$.list.0", self.test_dict, default="default", default_factory=list)
+        self.assertRaises(TypeError, reach, "$.list.0", self.test_dict, default_factory="not_a_callable")
 
 
 class TestOverrideDict(TestCase):
