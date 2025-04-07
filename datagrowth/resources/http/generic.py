@@ -75,6 +75,11 @@ class HttpResource(Resource):
     # with the external resource.
     # Success and content are convenient to handle the results
 
+    def extract(self, *args, **kwargs):
+        method = args[0]
+        args = args[1:] if len(args) > 1 else []
+        return self.send(method, *args, **kwargs)
+
     def send(self, method, *args, **kwargs):
         """
         This method handles the gathering of data and updating the model based on the resource configuration.

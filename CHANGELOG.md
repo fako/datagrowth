@@ -74,6 +74,13 @@ if you don't want to use any ``DatasetVersion``.
   should set ``cast_as_community`` to True on the Command class and rename ``handle_dataset`` to ``handle_community``.
 * Unlike the legacy ``Community`` model a ``Dataset`` has a unique signature. If the signature of a ``Dataset`` matches
   an existing ``Dataset`` the ``growth`` method will create a new ``DatasetVersion`` instead of a different ``Dataset``.
+* The ``Resource`` class now specifies an abstract ``extract`` method to adhere to the strategy pattern more explicitly
+and harmonize naming with ETL terminology.
+* To fit better into ETL terminology ``ExtractProcessor`` now also has an alias named ``TransformProcessor``.
+In the same spirit the ``extract`` method has a ``transform`` alias
+and ``extract_from_resource`` a ``transform_resource`` alias.
+* Using configurations with "extract" in their name remain unchanged for now,
+until impact on changing them has been assessed.
 
 
 v0.19

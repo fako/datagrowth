@@ -59,6 +59,12 @@ class TestShellResource(resources_test_base.ResourceTestMixin):
         ShellResourceMock.VARIABLES = self.DEFAULT_VARIABLES
         ShellResourceMock.transform = self.DEFAULT_TRANSFORM
 
+    @patch("datagrowth.resources.shell.generic.ShellResource.run")
+    def test_extract(self, run_mock):
+        resource = self.instance.extract("test", test="test")
+        self.assertIsNotNone(resource)
+        run_mock.assert_called_with("test", ".", test="test")
+
     def test_configuration(self):
         self.assertIsInstance(self.instance.config, ConfigurationType)
 

@@ -65,6 +65,15 @@ class TestHttpResource(resources_test_base.ResourceTestMixin):
         if "Content-Type" in self.instance.HEADERS:
             del self.instance.HEADERS["Content-Type"]
 
+    @patch("datagrowth.resources.http.generic.HttpResource.send")
+    def test_extract(self, send_mock):
+        resource = self.instance.extract("get", "test", test="test")
+        self.assertIsNotNone(resource)
+        send_mock.assert_called_with("get", "en", "test", test="test")
+        send_mock.reset()
+        resource = self.instance.extract("get", test="test")
+        self.assertIsNotNone(resource)
+
     def test_configuration(self):
         self.assertIsInstance(self.instance.config, ConfigurationType)
 

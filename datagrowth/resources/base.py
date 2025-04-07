@@ -60,6 +60,9 @@ class Resource(models.Model):
     # A set of methods and properties shared by resources
     # This interface allows to generically handle data
 
+    def extract(self, *args, **kwargs):
+        raise NotImplementedError(f"Extract strategy not implemented for {self.__class__.__name__}.")
+
     def close(self):
         """
         This convenience method handles both the clean and save step for saving models.

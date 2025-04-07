@@ -56,6 +56,9 @@ class ShellResource(Resource):
     # Success and content are to handle the results
     # Override transform to manipulate command results
 
+    def extract(self, *args, **kwargs):
+        return self.run(*args, **kwargs)
+
     def run(self, *args, **kwargs):
         """
         This method handles the gathering of data and updating the model based on the resource configuration.

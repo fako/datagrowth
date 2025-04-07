@@ -92,24 +92,37 @@ class ExtractProcessor(Processor):
         :param resource: (Resource) any resource
         :return: (list) extracted objects from the Resource data
         """
-        return self.extract(*resource.content)
+        return self.transform(*resource.content)
+
+    def transform_resource(self, resource):
+        """
+        This is the most common way to transform data with this class.
+        It takes a ``Resource`` (which is a source of data) and tries to transform it immediately.
+
+        :param resource: (Resource) any resource
+        :return: (list) extracted objects from the Resource data
+        """
+        return self.transform(*resource.content)
 
     def extract(self, content_type, data):
-        """
-        Call this method to start extracting from the input data based on the objective.
+        return self.transform(content_type, data)
 
-        If your content_type is not supported by the extractor you could inherit from this class
+    def transform(self, content_type, data):
+        """
+        Call this method to start transforming from the input data based on the objective.
+
+        If your content_type is not supported by the transformer you could inherit from this class
         and write your own method.
         A content type of application/pdf would try to call an ``application_pdf`` method on this class
         passing it the data as an argument.
-        The objective will be available as ``self.objective`` on the instance.
+        The objective will be available as ``self.config.objective`` on the instance.
 
         :param content_type: (content type) The content type of the input data
-        :param data: (varies) The input data to extract from
-        :return: (list) extracted objects
+        :param data: (varies) The input data to transform
+        :return: (list) transformed objects
         """
         assert self.config.objective, \
-            "ExtractProcessor.extract expects an objective to extract in the configuration."
+            "TransformProcessor.transform expects an objective to transform in the configuration."
         if content_type is None:
             return []
         if is_json_mimetype(content_type):
@@ -119,7 +132,7 @@ class ExtractProcessor(Processor):
         if method is not None:
             return method(data)
         else:
-            raise TypeError("Extract processor does not support content_type {}".format(content_type))
+            raise TypeError(f"Transform processor does not support content_type {content_type}")
 
     def application_json(self, data):
         context = {}

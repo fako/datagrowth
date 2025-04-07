@@ -1,5 +1,5 @@
 from .base import TestProcessorBase, TestDatagrowthProcessorDjangoConfig
-from .extraction import TestExtractProcessor
+from .extraction import TestTransformProcessor
 from .iterators import TestContentIteratorWithSendIterator, TestContentIteratorWithSendSerieIterator
 from .growth.http import TestHttpGrowthProcessor
 from .seeding.simple import TestSimpleHttpSeedingProcessor, TestSimpleDeltaHttpSeedingProcessor
