@@ -10,7 +10,7 @@ ipdb==0.13.9
 Sphinx==2.4.4
 sphinx-rtd-theme==0.1.8
 wheel==0.38.1
-setuptools==65.5.1
+setuptools==70.0.0
 redis==5.0.1
 
 # Add the current project as a package
