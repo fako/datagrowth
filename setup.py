@@ -24,7 +24,7 @@ setuptools.setup(
         ]
     ),
     install_requires=[
-        "Django>=3.2",
+        "Django>=4.2",
         "celery",
         "jsonschema>=4.20.0",
         "lxml",
@@ -34,16 +34,16 @@ setuptools.setup(
         "Pillow>=8",
         "tqdm",
     ],
-    python_requires="~=3.8",
+    python_requires="~=3.9",
     include_package_data=True,
     classifiers=(
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
-        "Framework :: Django :: 3.2",
+        "Programming Language :: Python :: 3.13",
         "Framework :: Django :: 4.2",
+        "Framework :: Django :: 5.2",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Operating System :: OS Independent",
     ),

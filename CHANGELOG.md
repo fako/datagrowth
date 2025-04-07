@@ -18,6 +18,8 @@ Instead you can run your own ``DatasetVersion`` which should implement ``influen
 ``dataset_version`` attribute to None for ``Collection`` and ``Document``
 if you don't want to use any ``DatasetVersion``.
 
+* Adds support for Python 3.13 and removes support for 3.8.
+* Removes support for Django 3.2 and adds support for Django 5.2.
 * Minimal version for Celery is now 5.x.
 * Minimal version for jsonschema is now 4.20.0, but jsonschema draft version remains 4.
 * ``global_pipeline_app_label`` and ``global_pipeline_models`` configurations have been renamed
