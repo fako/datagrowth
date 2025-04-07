@@ -31,7 +31,7 @@ setuptools.setup(
         "beautifulsoup4",
         "urlobject",
         "requests",
-        "Pillow>=8",
+        "Pillow>=11",
         "tqdm",
     ],
     python_requires="~=3.9",
