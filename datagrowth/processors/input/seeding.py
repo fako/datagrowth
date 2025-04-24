@@ -3,10 +3,10 @@ from copy import deepcopy
 from collections import OrderedDict
 from requests import Session
 
-from datagrowth.datatypes import CollectionBase
+from datagrowth.datatypes.documents.db.collection import CollectionBase
 from datagrowth.configuration import create_config, ConfigurationType
 from datagrowth.resources.http.iterators import send_serie_iterator
-from datagrowth.processors import Processor, ProcessorFactory
+from datagrowth.processors.base import Processor, ProcessorFactory
 from datagrowth.processors.input.iterators import content_iterator
 from datagrowth.utils import ibatch
 
