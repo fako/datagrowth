@@ -35,3 +35,12 @@ class DataStorageTestCase(TestCase):
 
     def test_invalidate_tasks(self):
         self.skipTest("to be tested")
+
+    def test_clear_task_result(self):
+        self.skipTest("to be tested")
+
+    def test_prepare_processing(self):
+        self.skipTest("to be tested")
+
+    def test_finish_processing(self):
+        self.skipTest("to be tested")

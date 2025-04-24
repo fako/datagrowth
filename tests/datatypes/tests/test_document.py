@@ -2,9 +2,11 @@ from unittest.mock import patch
 from datetime import date
 
 from django.core.exceptions import ValidationError
+from django.utils.timezone import now
 
 from datatypes.tests import data_storage
 from datatypes.models import Document, Collection
+from resources.models import HttpResourceMock
 
 
 class TestDocument(data_storage.DataStorageTestCase):
@@ -209,6 +211,91 @@ class TestDocument(data_storage.DataStorageTestCase):
         self.assertEqual(instance.properties["context"], "nested value")
         self.assertEqual(instance.properties["nested"], "nested value 0")
         self.assertNotIn("extra", instance.properties)
+
+    def test_update_resource_reset(self):
+        # Setup a fake task with an associated resource
+        mock_resource = HttpResourceMock.objects.create(uri="http://localhost")
+        self.instance.tasks["test_task"] = {
+            "depends_on": ["$.value"],
+            "checks": [],
+            "resources": []
+        }
+        self.instance.task_results = {
+            "test_task": {
+                "success": True,
+                "resource": "resources.httpresourcemock",
+                "id": mock_resource.id,
+                "ids": [mock_resource.id]
+            }
+        }
+        self.instance.pending_at = None
+        self.instance.finished_at = now()
+        self.instance.save()
+        content = self.instance.update({"value": "-1", "extra": "extra"})
+        # Asserts for the update call
+        created_at = self.instance.created_at
+        today = date.today()
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertNotEqual(self.instance.modified_at.date, today)
+        self.assertEqual(content["value"], "-1")
+        self.assertEqual(content["context"], "nested value")
+        self.assertEqual(content["nested"], "nested value 0")
+        self.assertEqual(content["extra"], "extra")
+        instance = Document.objects.get(id=1)
+        self.assertEqual(instance.properties["value"], "-1")
+        self.assertEqual(instance.properties["context"], "nested value")
+        self.assertEqual(instance.properties["nested"], "nested value 0")
+        self.assertEqual(instance.properties["extra"], "extra")
+        self.assertTrue(instance.pending_at)
+        self.assertIsNone(instance.finished_at)
+        # Assert Resource reset
+        self.assertFalse(
+            HttpResourceMock.objects.filter(id=mock_resource.id).exists(),
+            "Expected Resource to get deleted"
+        )
+
+    def test_update_skip_task_invalidation(self):
+        # Setup a fake task with an associated resource
+        mock_resource = HttpResourceMock.objects.create(uri="http://localhost")
+        self.instance.tasks["test_task"] = {
+            "depends_on": ["$.value"],
+            "checks": [],
+            "resources": []
+        }
+        self.instance.task_results = {
+            "test_task": {
+                "success": True,
+                "resource": "resources.httpresourcemock",
+                "id": mock_resource.id,
+                "ids": [mock_resource.id]
+            }
+        }
+        self.instance.pending_at = None
+        self.instance.finished_at = now()
+        self.instance.save()
+        # Start the test
+        content = self.instance.update({"value": "-1", "extra": "extra"}, skip_task_invalidation=True)
+        # Asserts for the update call
+        created_at = self.instance.created_at
+        today = date.today()
+        self.assertEqual(self.instance.created_at, created_at)
+        self.assertNotEqual(self.instance.modified_at.date, today)
+        self.assertEqual(content["value"], "-1")
+        self.assertEqual(content["context"], "nested value")
+        self.assertEqual(content["nested"], "nested value 0")
+        self.assertEqual(content["extra"], "extra")
+        instance = Document.objects.get(id=1)
+        self.assertEqual(instance.properties["value"], "-1")
+        self.assertEqual(instance.properties["context"], "nested value")
+        self.assertEqual(instance.properties["nested"], "nested value 0")
+        self.assertEqual(instance.properties["extra"], "extra")
+        self.assertIsNone(instance.pending_at)
+        self.assertTrue(instance.finished_at)
+        # Assert Resource reset has not taken place
+        self.assertTrue(
+            HttpResourceMock.objects.filter(id=mock_resource.id).exists(),
+            "Expected no Resources to get deleted"
+        )
 
     @patch("jsonschema.validate")
     def test_validate(self, jsonschema_validate):

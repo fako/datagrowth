@@ -194,7 +194,9 @@ class DatasetBase(models.Model):
             for document in batch:
                 for task in document_tasks.keys():
                     result = document.task_results.get(task, {})
-                    if not result.get("success"):
+                    if not result:
+                        document.prepare_processing(current_time=current_time)
+                    elif not result.get("success"):
                         document.invalidate_task(task, current_time=current_time)
                 if self.weed_document(document):
                     invalid_document_ids.append(document.id)
