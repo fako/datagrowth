@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=64.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datagrowth"
+dynamic = ["version"]
+description = "Data engineering tools to create data mash ups using Django"
+authors = [
+    {name = "Fako Berkers", email = "email@fakoberkers.nl"}
+]
+readme = "README.md"
+requires-python = "~=3.9"
+license = {text = "GNU Lesser General Public License v3 (LGPLv3)"}
+classifiers = [
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.2",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "Django>=4.2",
+    "celery",
+    "jsonschema>=4.20.0",
+    "lxml",
+    "beautifulsoup4",
+    "urlobject",
+    "requests",
+    "Pillow>=11",
+    "tqdm",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/fako/datagrowth"
+"Bug Tracker" = "https://github.com/fako/datagrowth/issues"
+
+[tool.setuptools]
+include-package-data = true
+packages = {find = {exclude = ["core", "core.*", "docs", "docs.*", "sources", "sources.*"]}}
+
+[tool.setuptools.dynamic]
+version = {attr = "datagrowth.version.VERSION"}
