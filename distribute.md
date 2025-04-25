@@ -8,7 +8,7 @@ By running ```tox``` in the root of this repository.
 Then run the following to create distribution artefacts inside the ```dist``` folder.
 
 ```bash
-python3 setup.py sdist bdist_wheel
+python -m build
 ```
 
 Now upload the generated artefacts with

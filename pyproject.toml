@@ -6,12 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "datagrowth"
 dynamic = ["version"]
 description = "Data engineering tools to create data mash ups using Django"
+maintainers = [
+    {name = "Fako Berkers", email = "email@fakoberkers.nl"}
+]
 authors = [
     {name = "Fako Berkers", email = "email@fakoberkers.nl"}
 ]
 readme = "README.md"
 requires-python = "~=3.9"
-license = {text = "GNU Lesser General Public License v3 (LGPLv3)"}
+license = "LGPL-3.0-only"
 classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -20,7 +23,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.2",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Operating System :: OS Independent",
 ]
 dependencies = [
