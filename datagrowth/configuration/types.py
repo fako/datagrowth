@@ -242,9 +242,11 @@ class ConfigurationType(object):
         """
         item = self.clean_key(item)
 
-        if "default" in kwargs or len(args):
-            default = kwargs.get("default", args[0])
+        if "default" in kwargs:
+            default = kwargs.get("default")
             return getattr(self, item, default)
+        elif len(args):
+            return getattr(self, item, args[0])
         else:
             return getattr(self, item)
 
