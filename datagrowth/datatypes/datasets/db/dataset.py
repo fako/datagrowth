@@ -14,7 +14,6 @@ from datagrowth.exceptions import DGGrowthUnfinished, DGGrowthFrozen
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
 from datagrowth.datatypes.documents.tasks.collection import grow_collection
-from datagrowth.processors import HttpSeedingProcessor, SeedingProcessorFactory
 from datagrowth.resources.utils import update_serialized_resources
 from datagrowth.version import VERSION
 from datagrowth.utils import ibatch, get_dumps_path, object_to_disk, queryset_to_disk, objects_from_disk
@@ -64,6 +63,7 @@ class DatasetBase(models.Model):
 
     def get_seeding_factories(self):
         assert self.SEEDING_PHASES, "Expected Dataset to specify SEEDING_PHASES"
+        from datagrowth.processors.input.seeding import HttpSeedingProcessor, SeedingProcessorFactory
         return {
             self.signature: SeedingProcessorFactory(HttpSeedingProcessor, self.SEEDING_PHASES)
         }
@@ -194,7 +194,9 @@ class DatasetBase(models.Model):
             for document in batch:
                 for task in document_tasks.keys():
                     result = document.task_results.get(task, {})
-                    if not result.get("success"):
+                    if not result:
+                        document.prepare_processing(current_time=current_time)
+                    elif not result.get("success"):
                         document.invalidate_task(task, current_time=current_time)
                 if self.weed_document(document):
                     invalid_document_ids.append(document.id)

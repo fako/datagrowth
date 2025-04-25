@@ -1,4 +1,5 @@
-from .base import Processor, QuerySetProcessor, ProcessorFactory
-from .growth import GrowthProcessor
-from .input import ExtractProcessor, TransformProcessor, HttpSeedingProcessor, SeedingProcessorFactory
-from .resources.growth import HttpGrowthProcessor
+from datagrowth.processors.base import Processor, QuerySetProcessor, ProcessorFactory
+from datagrowth.processors.growth import GrowthProcessor
+from datagrowth.processors.input import (ExtractProcessor, TransformProcessor, HttpSeedingProcessor,
+                                         SeedingProcessorFactory)
+from datagrowth.processors.resources.growth import HttpGrowthProcessor

@@ -70,24 +70,26 @@ class DocumentBase(DataStorage):
             django_exception.schema = exc.schema
             raise django_exception
 
-    def update(self, data, commit=True):
+    def update(self, data, commit=True, skip_task_invalidation=False):
         """
         Update the properties with new data.
 
         :param data: The data to use for the update
         :param commit: Whether to commit new values to the database or not
+        :param skip_task_invalidation: Whether to invalidate tasks based on incoming data
         :return: Updated content
         """
         content = data.properties if isinstance(data, DocumentBase) else data
         current_time = now()
 
-        # See if pipeline task need to re-run due to changes
-        for dependency_key, task_names in self.get_property_dependencies().items():
-            current_value = reach(dependency_key, self.properties)
-            update_value = reach(dependency_key, content)
-            if current_value != update_value:
-                for task in task_names:
-                    self.invalidate_task(task, current_time=current_time)
+        # See if tasks need to re-run due to changes
+        if not skip_task_invalidation:
+            for dependency_key, task_names in self.get_property_dependencies().items():
+                current_value = reach(dependency_key, self.properties)
+                update_value = reach(dependency_key, content)
+                if current_value != update_value:
+                    for task in task_names:
+                        self.invalidate_task(task, current_time=current_time)
 
         self.properties.update(content)
         self.clean()

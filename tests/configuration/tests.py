@@ -257,6 +257,10 @@ class TestConfigurationType(TestCase):
         self.assertEqual(self.config.get("test5", "does-not-exist"), "does-not-exist")
         self.assertEqual(self.config.get("test5", 0), 0)
         self.assertEqual(self.config.get("test5", None), None)
+        # Default kwarg fallback
+        self.assertEqual(self.config.get("test5", default="does-not-exist"), "does-not-exist")
+        self.assertEqual(self.config.get("test5", default=0), 0)
+        self.assertEqual(self.config.get("test5", default=None), None)
         # Test fallbacks of legacy async configurations
         self.assertEqual(self.empty.get("asynchronous", None), True)  # global default should exist
         # Namespace configuration (with a list default)

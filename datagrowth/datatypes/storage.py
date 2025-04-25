@@ -88,7 +88,7 @@ class DataStorage(models.Model):
                 # Dependencies based on content we skip in this abstract method (where content is not always available)
                 if dependency.startswith("$"):
                     continue
-                # Dependencies based on other tasks are checked through the pipeline attribute
+                # Dependencies based on other tasks are checked through the task_results attribute
                 if not self.task_results.get(dependency, {}).get("success"):
                     has_met_dependencies = False
                     break
@@ -105,11 +105,29 @@ class DataStorage(models.Model):
                     property_dependencies[dependency].append(task_name)
         return property_dependencies
 
+    def clear_task_result(self, task_name: str):
+        task_result = self.task_results.get(task_name)
+        if task_result is None:
+            return
+        if (resource := task_result.get("resource")) and task_result.get("success"):
+            app_label, model_name = resource.split(".")
+            resource_model = apps.get_model(app_label, model_name)
+            resource_model.objects.filter(id=task_result.get("id")).delete()
+        del self.task_results[task_name]
+        return
+
     def invalidate_task(self, task_name: str, current_time: datetime = None, commit: bool = False) -> None:
+        is_invalidated = False
         if task_name in self.task_results:
-            del self.task_results[task_name]
+            is_invalidated = True
+            self.clear_task_result(task_name)
         if task_name in self.derivatives:
+            is_invalidated = True
             del self.derivatives[task_name]
+        if is_invalidated:
+            self.prepare_processing(current_time=current_time, commit=commit)
+
+    def prepare_processing(self, current_time: datetime = None, commit: bool = True):
         self.pending_at = current_time or now()
         self.finished_at = None
         if commit:
