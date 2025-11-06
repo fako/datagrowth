@@ -1,10 +1,10 @@
-import os
 import re
 import hashlib
 import json
 from copy import copy, deepcopy
 from urllib.parse import urlencode
 from time import sleep
+from pathlib import Path
 
 import requests
 import jsonschema
@@ -360,11 +360,27 @@ class HttpResource(Resource):
         if data is None:
             return None, None
         files = {}
+
+        # This part reads a single FILE_DATA_KEY and returns the bytes at the file path to use in the request.
+        if self.config.force_data_file_to_payload:
+            assert len(self.FILE_DATA_KEYS) == 1, \
+                "Expected exactly one FILE_DATA_KEYS to point to the file key that needs to become the payload."
+            file_key = self.FILE_DATA_KEYS[0]
+            relative_file_path = data.get(file_key)
+            if relative_file_path is None:
+                return None, None
+            file_path = Path(datagrowth_settings.DATAGROWTH_MEDIA_ROOT) / relative_file_path
+            with open(file_path, "rb") as bytes_file:
+                file_bytes = bytes_file.read()
+            return file_bytes, None
+
+        # This part iterates over all FILE_DATA_KEYS and returns bytes suitable for multi-form-format.
         for file_key in self.FILE_DATA_KEYS:
             relative_path = data.get(file_key, None)
             if relative_path:
-                file_path = os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, relative_path)
-                files[file_key] = open(file_path, "rb")
+                file_path = Path(datagrowth_settings.DATAGROWTH_MEDIA_ROOT) / relative_path
+                with open(file_path, "rb") as bytes_file:
+                    files[file_key] = (file_path.name, bytes_file.read(),)
         data = {key: value for key, value in data.items() if key not in files}  # data copy without "files"
         files = files or None
         return data, files
