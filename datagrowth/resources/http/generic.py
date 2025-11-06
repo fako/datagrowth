@@ -215,7 +215,7 @@ class HttpResource(Resource):
         data = self.data(**kwargs) if not method == "get" else None
         headers = requests.utils.default_headers()
         headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
-        headers.update(self.headers())
+        headers.update(self.headers(*args, **kwargs))
         request = {
             "args": args,
             "kwargs": kwargs,
@@ -236,14 +236,16 @@ class HttpResource(Resource):
         url = url.set_query_params(params)
         return str(url)
 
-    def headers(self):
+    def headers(self, *args, **kwargs):
         """
         Returns the dictionary that should be used as headers for the request the resource will make.
         By default this is the dictionary from the ``HEADERS`` attribute.
 
+        :param args: keyword arguments from the input (ignored by default)
+        :param kwargs: keyword arguments from the input (ignored by default)
         :return: (dict) a dictionary representing HTTP headers
         """
-        return self.HEADERS
+        return dict(self.HEADERS)
 
     def parameters(self, **kwargs):
         """
