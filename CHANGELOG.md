@@ -8,6 +8,13 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.21
+-----
+
+* Makes admin listings of Resources more useful during debugging by exposing ``status`` as a filter.
+* Allows args and kwargs passed to ``extract`` to modify the ``HttpResource`` headers.
+
+
 v0.20
 -----
 
