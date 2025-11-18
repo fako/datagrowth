@@ -1,7 +1,7 @@
 import os
 import json
 
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from datagrowth.configuration import create_config
 from datagrowth.resources.testing import ResourceFixturesMixin
@@ -25,6 +25,11 @@ class TestResourceFixtureLoading(ResourceFixturesMixin, TestCase):
     def test_global_cache_enabled(self):
         defaults_config = create_config("global", {})
         self.assertTrue(defaults_config.cache_only)
+
+    @skipUnlessDBFeature("supports_sequence_reset")
+    def test_resource_fixtures_sequence_reset(self):
+        created = HttpResourceMock.objects.create(uri="http://localhost/sequence-check")
+        self.assertGreater(created.id, 1)
 
 
 class TestResourceFixtureLoadingNoCache(ResourceFixturesMixin, TestCase):
