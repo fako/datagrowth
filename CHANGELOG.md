@@ -13,6 +13,8 @@ v0.21
 
 * Makes admin listings of Resources more useful during debugging by exposing ``status`` as a filter.
 * Allows args and kwargs passed to ``extract`` to modify the ``HttpResource`` headers.
+* Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
+Good for snapshot testing.
 
 
 v0.20
