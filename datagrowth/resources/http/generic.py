@@ -257,7 +257,9 @@ class HttpResource(Resource):
         :param kwargs: variables returned by the variables method (ignored by default)
         :return: (dict) a dictionary representing HTTP query parameters
         """
-        return self.PARAMETERS
+        if self.PARAMETERS is None:  # some HttpResources like URLResource disallow PARAMETERS
+            return None
+        return dict(self.PARAMETERS)
 
     def data(self, **kwargs):
         """
