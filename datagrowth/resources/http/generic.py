@@ -168,6 +168,16 @@ class HttpResource(Resource):
         """
         return self.send("put", *args, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        """
+        This method calls ``send`` with "patch" as a method. See the ``send`` method for more information.
+
+        :param args: arguments that will get merged into the URI_TEMPLATE
+        :param kwargs: keywords arguments that will get send as data
+        :return: HttpResource
+        """
+        return self.send("patch", *args, **kwargs)
+
     @property
     def success(self):
         """
@@ -308,7 +318,7 @@ class HttpResource(Resource):
         assert isinstance(request, dict), "Request should be a dictionary."
         method = request.get("method")
         assert method, "Method should not be falsy."
-        assert method in ["get", "post", "put", "head"], \
+        assert method in ["get", "post", "put", "head", "patch"], \
             "{} is not a supported resource method.".format(request.get("method"))  # FEATURE: allow all methods
         if validate_input:
             self.validate_input(
