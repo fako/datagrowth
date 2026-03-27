@@ -10,6 +10,9 @@ tqdm==4.66.3
 celery==5.3.6
 invoke==2.2.0
 
+# LLM dependencies (optional until further notice)
+pydantic==2.12.5
+
 # Running tests and quality tools
 pytest==7.4.3
 pytest-xdist==3.5.0

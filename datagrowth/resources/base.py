@@ -71,17 +71,6 @@ class Resource(models.Model):
         self.clean()
         self.save()
 
-    def retain(self, retainer):
-        """
-        Links any Django model unto a ``GenericRelation`` upon a resource.
-        Any resources retained this way will not get deleted from cache.
-        This is convenient to save any context that can help during debugging.
-
-        :param retainer: (model) the model retaining the resource
-        """
-        self.retainer = retainer
-        self.close()
-
     @classmethod
     def get_name(cls):
         """
@@ -91,38 +80,11 @@ class Resource(models.Model):
         """
         return cls._meta.model_name
 
-    @classmethod
-    def get_queue_name(cls):
-        """
-        Returns the queue name that background tasks should dispatch to.
-        By default it returns the default Django Celery queue name.
-
-        :return: (str) queue name
-        """
-        return getattr(settings, "CELERY_TASK_DEFAULT_QUEUE", "celery")
-
     #######################################################
     # RESOURCE ABSTRACTION
     #######################################################
     # A set of methods and properties shared by resources
     # This interface often needs source specific overrides
-
-    def _validate_input(self, *args, **kwargs):
-        warnings.warn(
-            "Calling legacy _validate_input method for Resource, while it isn't implemented. "
-            "No input validation occurred.",
-            RuntimeWarning
-        )
-
-    def validate_input(self, *args, **kwargs):
-        for schema in ["SCHEMA", "GET_SCHEMA", "POST_SCHEMA"]:
-            if hasattr(self, schema):
-                break
-        else:
-            # Legacy validation methods are not available, but validate_input hasn't been overridden either
-            raise NotImplementedError(f"Missing implementation for validate_input method on {self.__class__.__name__}")
-        # Dealing with a legacy validation setup. Passing schema's to JSONSchema draft 4.
-        self._validate_input(*args, **kwargs)
 
     def handle_errors(self):
         """
@@ -161,3 +123,52 @@ class Resource(models.Model):
         :return: (bool)
         """
         raise NotImplementedError(f"Missing implementation for content property on {self.__class__.__name__}")
+
+    #######################################################
+    # RESOURCE DEPRECATION
+    #######################################################
+    # A set of methods and properties shared by resources
+    # This interface is generally not used in projects or has suboptimal implementations
+    # and is considered depcrecated.
+
+    def retain(self, retainer):
+        """
+        Links any Django model unto a ``GenericRelation`` upon a resource.
+        Any resources retained this way will not get deleted from cache.
+        This is convenient to save any context that can help during debugging.
+
+        :param retainer: (model) the model retaining the resource
+        """
+        warnings.warn("Retaining Resources has been deprecated", DeprecationWarning)
+        self.retainer = retainer
+        self.close()
+
+    @classmethod
+    def get_queue_name(cls):
+        """
+        Returns the queue name that background tasks should dispatch to.
+        By default it returns the default Django Celery queue name.
+
+        :return: (str) queue name
+        """
+        warnings.warn("Resources queue names have been deprecated", DeprecationWarning)
+        return getattr(settings, "CELERY_TASK_DEFAULT_QUEUE", "celery")
+
+    def _validate_input(self, *args, **kwargs):
+        warnings.warn(
+            "Calling legacy _validate_input method for Resource, while it isn't implemented. "
+            "No input validation occurred.",
+            RuntimeWarning
+        )
+
+    def validate_input(self, *args, **kwargs):
+        # Validating with JSON Schema is suboptimal and pending deprecation.
+        # Instead it is encouraged to validate using Pydantic.
+        for schema in ["SCHEMA", "GET_SCHEMA", "POST_SCHEMA"]:
+            if hasattr(self, schema):
+                break
+        else:
+            # Legacy validation methods are not available, but validate_input hasn't been overridden either
+            raise NotImplementedError(f"Missing implementation for validate_input method on {self.__class__.__name__}")
+        # Dealing with a legacy validation setup. Passing schema's to JSONSchema draft 4.
+        self._validate_input(*args, **kwargs)
