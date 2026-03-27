@@ -10,7 +10,7 @@ ipython==8.10.0
 ipdb==0.13.9
 Sphinx==2.4.4
 sphinx-rtd-theme==0.1.8
-wheel==0.38.1
+wheel==0.46.2
 setuptools==78.1.1
 redis==5.0.1
 
