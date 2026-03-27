@@ -24,8 +24,10 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', 'datagrowth')))
 sys.path.insert(0, os.path.abspath(os.path.join('..', 'tests')))
 sys.path.insert(0, os.path.abspath(os.path.join('..')))
 
-# setup django settings
-os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.project.settings'
+# Setup django settings
+# Use the same module as tests/manage.py to avoid importing tests.project,
+# whose package __init__ triggers Celery app initialization during setup.
+os.environ['DJANGO_SETTINGS_MODULE'] = 'project.settings'
 
 from datagrowth.version import VERSION
 package_info = {
@@ -279,4 +281,4 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
