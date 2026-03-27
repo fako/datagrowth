@@ -1,10 +1,10 @@
-import os
 import re
 import hashlib
 import json
 from copy import copy, deepcopy
 from urllib.parse import urlencode
 from time import sleep
+from pathlib import Path
 
 import requests
 import jsonschema
@@ -168,6 +168,16 @@ class HttpResource(Resource):
         """
         return self.send("put", *args, **kwargs)
 
+    def patch(self, *args, **kwargs):
+        """
+        This method calls ``send`` with "patch" as a method. See the ``send`` method for more information.
+
+        :param args: arguments that will get merged into the URI_TEMPLATE
+        :param kwargs: keywords arguments that will get send as data
+        :return: HttpResource
+        """
+        return self.send("patch", *args, **kwargs)
+
     @property
     def success(self):
         """
@@ -215,7 +225,7 @@ class HttpResource(Resource):
         data = self.data(**kwargs) if not method == "get" else None
         headers = requests.utils.default_headers()
         headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
-        headers.update(self.headers())
+        headers.update(self.headers(*args, **kwargs))
         request = {
             "args": args,
             "kwargs": kwargs,
@@ -236,14 +246,16 @@ class HttpResource(Resource):
         url = url.set_query_params(params)
         return str(url)
 
-    def headers(self):
+    def headers(self, *args, **kwargs):
         """
         Returns the dictionary that should be used as headers for the request the resource will make.
         By default this is the dictionary from the ``HEADERS`` attribute.
 
+        :param args: keyword arguments from the input (ignored by default)
+        :param kwargs: keyword arguments from the input (ignored by default)
         :return: (dict) a dictionary representing HTTP headers
         """
-        return self.HEADERS
+        return dict(self.HEADERS)
 
     def parameters(self, **kwargs):
         """
@@ -255,7 +267,9 @@ class HttpResource(Resource):
         :param kwargs: variables returned by the variables method (ignored by default)
         :return: (dict) a dictionary representing HTTP query parameters
         """
-        return self.PARAMETERS
+        if self.PARAMETERS is None:  # some HttpResources like URLResource disallow PARAMETERS
+            return None
+        return dict(self.PARAMETERS)
 
     def data(self, **kwargs):
         """
@@ -304,7 +318,7 @@ class HttpResource(Resource):
         assert isinstance(request, dict), "Request should be a dictionary."
         method = request.get("method")
         assert method, "Method should not be falsy."
-        assert method in ["get", "post", "put", "head"], \
+        assert method in ["get", "post", "put", "head", "patch"], \
             "{} is not a supported resource method.".format(request.get("method"))  # FEATURE: allow all methods
         if validate_input:
             self.validate_input(
@@ -358,11 +372,27 @@ class HttpResource(Resource):
         if data is None:
             return None, None
         files = {}
+
+        # This part reads a single FILE_DATA_KEY and returns the bytes at the file path to use in the request.
+        if self.config.force_data_file_to_payload:
+            assert len(self.FILE_DATA_KEYS) == 1, \
+                "Expected exactly one FILE_DATA_KEYS to point to the file key that needs to become the payload."
+            file_key = self.FILE_DATA_KEYS[0]
+            relative_file_path = data.get(file_key)
+            if relative_file_path is None:
+                return None, None
+            file_path = Path(datagrowth_settings.DATAGROWTH_MEDIA_ROOT) / relative_file_path
+            with open(file_path, "rb") as bytes_file:
+                file_bytes = bytes_file.read()
+            return file_bytes, None
+
+        # This part iterates over all FILE_DATA_KEYS and returns bytes suitable for multi-form-format.
         for file_key in self.FILE_DATA_KEYS:
             relative_path = data.get(file_key, None)
             if relative_path:
-                file_path = os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, relative_path)
-                files[file_key] = open(file_path, "rb")
+                file_path = Path(datagrowth_settings.DATAGROWTH_MEDIA_ROOT) / relative_path
+                with open(file_path, "rb") as bytes_file:
+                    files[file_key] = (file_path.name, bytes_file.read(),)
         data = {key: value for key, value in data.items() if key not in files}  # data copy without "files"
         files = files or None
         return data, files

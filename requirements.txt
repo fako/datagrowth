@@ -8,8 +8,8 @@ twine==6.1.0
 build==1.2.2.post1
 ipython==8.10.0
 ipdb==0.13.9
-Sphinx==2.4.4
-sphinx-rtd-theme==0.1.8
+Sphinx==7.4.7
+sphinx-rtd-theme==2.0.0
 wheel==0.46.2
 setuptools==78.1.1
 redis==5.0.1

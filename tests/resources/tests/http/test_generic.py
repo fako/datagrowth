@@ -117,6 +117,28 @@ class TestHttpResourceInterface(TestCase):
         })
         self.assertEqual(preq.body, expected_body)
 
+    def assert_call_args_post_single_file_payload(self, call_args, term):
+        expected_url = "http://localhost:8000/en/?q={}&key=oehhh&auth=1&param=1&meta={}".format(term, term)
+        args, kwargs = call_args
+        preq = args[0]
+        self.assertTrue(preq.url.startswith("http://localhost:8000/en/?"))
+        self.assertIn("q={}".format(term), preq.url)
+        self.assertIn("key=oehhh", preq.url)
+        self.assertIn("auth=1", preq.url)
+        self.assertIn("param=1", preq.url)
+        self.assertIn("meta={}".format(term), preq.url)
+        self.assertEqual(len(expected_url), len(preq.url))
+        self.assert_agent_header(preq, "DataGrowth (test)")
+        self.assertNotIn("multipart/form-data", preq.headers.get("Content-Type", ""))
+        self.assertEqual(preq.headers, {
+            "Content-Length": str(len(b"a test text file\n")),
+            "Accept": "application/json",
+            "Connection": "keep-alive",
+            "Accept-Encoding": "gzip, deflate",
+            "Authorization": "Bearer oehhh"
+        })
+        self.assertEqual(preq.body, b"a test text file\n")
+
     @patch("datagrowth.resources.http.generic.sleep")
     def test_send_get_request(self, sleep_mock):
         # Make a new request and store it.
@@ -284,6 +306,20 @@ class TestHttpResourceInterface(TestCase):
         self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
         instance.save()
         self.assert_call_args_post(instance.session.send.call_args, "new4", is_form=True)
+        self.assertEqual(instance.head, self.content_type_header)
+        self.assertEqual(instance.body, json.dumps(MOCK_DATA))
+        self.assertEqual(instance.status, 200)
+        self.assertTrue(instance.id)
+        self.assertTrue(instance.data_hash)
+        self.assertEqual(instance.request["backoff_delay"], 0)
+
+    def test_send_post_request_single_file_payload(self):
+        # Make a new request containing a file and send file bytes as payload.
+        instance = self.model(config={"force_data_file_to_payload": True}).post(query="new5", file="text-file.txt")
+        self.assertIsNone(instance.id, "HttpResource used cache when it should have retrieved with requests")
+        instance.save()
+        self.assertEqual(instance.session.send.call_count, 1)
+        self.assert_call_args_post_single_file_payload(instance.session.send.call_args, "new5")
         self.assertEqual(instance.head, self.content_type_header)
         self.assertEqual(instance.body, json.dumps(MOCK_DATA))
         self.assertEqual(instance.status, 200)

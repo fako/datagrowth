@@ -1,10 +1,15 @@
+from typing import Type
 import os
+from collections import defaultdict
 
 from django.core.management.base import CommandError
 from django.core.management.commands.loaddata import Command as LoadDataCommand
 from django.core import serializers
+from django.core.management.color import no_style
+from django.db import connection
 
 from datagrowth.configuration import register_defaults
+from datagrowth.resources.base import Resource
 from datagrowth.resources.http import HttpResource
 from datagrowth.resources.shell import ShellResource
 
@@ -33,6 +38,8 @@ class EnableGlobalCacheMixin:
 class ResourceFixturesMixin(EnableGlobalCacheMixin):
 
     resource_fixtures = []
+
+    _loaded_resource_ids = defaultdict(list)
 
     @classmethod
     def read_resource_attribute_fixture(cls, fixture_dir, resource, attribute):
@@ -88,5 +95,17 @@ class ResourceFixturesMixin(EnableGlobalCacheMixin):
                             else:
                                 raise TypeError(f"Unexpected Resource type for loading content: {type(obj.object)}")
                             obj.save()
+                            cls._loaded_resource_ids[obj.object.__class__].append(obj.object.id)
                 except CommandError:
                     pass
+
+        # Reset sequences for all touched models so future inserts with id=None get a PK in line with the sequence
+        with connection.cursor() as cursor:
+            for sql in connection.ops.sequence_reset_sql(no_style(), list(cls._loaded_resource_ids.keys())):
+                cursor.execute(sql)
+
+    @classmethod
+    def print_new_resources(cls, resource_type: Type[Resource]) -> None:
+        ids = cls._loaded_resource_ids.get(resource_type, [])
+        new_data = serializers.serialize("json", resource_type.objects.exclude(id__in=ids), indent=4)
+        print(new_data)

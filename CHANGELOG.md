@@ -8,6 +8,16 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.21
+-----
+
+* Makes admin listings of Resources more useful during debugging by exposing ``status`` as a filter.
+* Allows args and kwargs passed to ``extract`` to modify the ``HttpResource`` headers.
+* Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
+Good for snapshot testing.
+* Copies ``HttpResource.PARAMETERS`` before returning it when creating a URI. This makes the parameter constant immutable and might have unexpected effects if other code depends on mutability.
+
+
 v0.20
 -----
 
