@@ -27,7 +27,7 @@ class ConfigurationType:
 
     :param defaults: (dict) that should hold default configurations as items
         or None to load defaults from settings at runtime
-    :param namespace: (string) prefix to search default configurations with
+    :param namespace: (string or list[string]) prefix(es) to search default configurations with
     :param private: (list) keys that are considered as private
     :return: None
     """
@@ -35,27 +35,30 @@ class ConfigurationType:
     _private_defaults: list[str] = ["_private", "_defaults", "_namespace"]
     _global_prefix: str = "global"
 
-    def __init__(self, defaults: dict[str, Any] | None = None, namespace: str = "global",
+    def __init__(self, defaults: dict[str, Any] | None = None, namespace: str | list[str] = "global",
                  private: Sequence[str] = ("_private", "_defaults", "_namespace",)) -> None:
         """
         Initiates the ConfigurationType by checking arguments and setting logically private attributes
 
         :param defaults: (dict) that should hold default configurations as items
             or None to load defaults from settings at runtime
-        :param namespace: (string) prefix to search default configurations with
+        :param namespace: (string or list[string]) prefix(es) to search default configurations with
         :param private: (list) keys that are considered as private
         :return: None
         """
         assert isinstance(defaults, dict) or defaults is None, \
             "Defaults should be a dict which values are the configuration defaults or None."
-        assert isinstance(namespace, str), \
-            "Namespaces should be a string that acts as a prefix for finding configurations."
+        assert isinstance(namespace, str) or isinstance(namespace, list), \
+            "Namespaces should be a string or list of strings that act as prefixes for finding configurations."
+        if isinstance(namespace, list):
+            assert all(isinstance(ns, str) for ns in namespace), \
+                "All namespace items should be strings."
         assert isinstance(private, (list, tuple,)), \
             "Private should be a list or tuple of private configurations."
 
         super(ConfigurationType, self).__init__()
         self._defaults = defaults
-        self._namespace = namespace
+        self._namespace = [namespace] if isinstance(namespace, str) else list(namespace)
         self._private = copy(self._private_defaults)
         for prv in private:
             if not prv:
@@ -92,13 +95,13 @@ class ConfigurationType:
 
         It will first try to append a _ to the configuration to see if the configuration is protected/private.
         Then it will append a $ to the configuration to see if it is configuration from user input
-        Then it will prefix the configuration with self._namespace
+        Then it will prefix the configuration with each entry in self._namespace in order
         and see if it exists on the defaults object as an attribute.
         If the configuration still isn't found it will prefix with self._global_prefix
         and look again for that as an attribute on defaults object.
         Finally it will raise a ConfigurationNotFoundError if the configuration is not there.
 
-        NB: if you haven't set self._namespace it will default to self._global_prefix
+        NB: if you haven't set self._namespace it will default to [self._global_prefix]
 
         :param config: (string) name of the configuration to search for
         :param exclude_defaults: (bool) whether to look for configuration in defaults or not
@@ -106,9 +109,6 @@ class ConfigurationType:
         """
         shielded_key = '_' + config
         variable_key = '$' + config
-        namespace_attr = self._namespace + '_' + config
-        global_attr = self._global_prefix + '_' + config
-
         if shielded_key in self.__dict__:
             return self.__dict__[shielded_key]
         elif variable_key in self.__dict__:
@@ -119,15 +119,20 @@ class ConfigurationType:
             self._defaults = DATAGROWTH_DEFAULT_CONFIGURATION
 
         if exclude_defaults:
-            pass
-        elif namespace_attr in self._defaults:
-            return self._defaults[namespace_attr]
-        elif global_attr in self._defaults:
-            return self._defaults[global_attr]
-        else:
-            raise ConfigurationNotFoundError(
-                "Tried to retrieve '{}' in config and namespace '{}', without results.".format(config, self._namespace)
-            )
+            return None
+
+        namespaces = list(self._namespace)
+        if self._global_prefix not in namespaces:
+            namespaces.append(self._global_prefix)
+
+        for namespace in namespaces:
+            namespace_attr = namespace + "_" + config
+            if namespace_attr in self._defaults:
+                return self._defaults[namespace_attr]
+
+        raise ConfigurationNotFoundError(
+            "Tried to retrieve '{}' in config and namespace '{}', without results.".format(config, self._namespace)
+        )
 
     def to_dict(self, protected: bool = False, private: bool = False) -> dict[str, Any]:
         """
@@ -267,7 +272,7 @@ class ConfigurationProperty(object):
     You can change this by passing a name to the storage_attribute parameter
     All other parameters get passed to the ConfigurationType class.
 
-    :param namespace: (string) prefix to search default configurations with
+    :param namespace: (string or list[string]) prefix(es) to search default configurations with
     :param private: (list) keys that are considered as private for this property
     :param defaults: (dict) should hold default configurations as items
         or None to load defaults from settings at runtime (the default)
@@ -276,12 +281,13 @@ class ConfigurationProperty(object):
     :return: ConfigurationType
     """
 
-    def __init__(self, namespace: str = "global", private: Sequence[str] | None = None,
+    def __init__(self, namespace: str | list[str] = "global", private: Sequence[str] | None = None,
                  defaults: dict[str, Any] | None = None, storage_attribute: str | None = None) -> None:
         """
         Runs some checks to create a ConfigurationType successfully upon first access of the property.
 
-        :param namespace: (string) prefix to search default configurations with (defaults to "global" namespace)
+        :param namespace: (string or list[string]) prefix(es) to search default configurations with
+            (defaults to "global" namespace)
         :param private: (list) keys that are considered as private for this property
         :param defaults: (dict) should hold default configurations as items
             or None to load defaults from settings at runtime (the default)
@@ -291,7 +297,12 @@ class ConfigurationProperty(object):
         """
         self._storage_attribute = storage_attribute or "_config"
         self._defaults = defaults
-        self._namespace = namespace
+        assert isinstance(namespace, str) or isinstance(namespace, list), \
+            "Namespaces should be a string or list of strings that act as prefixes for finding configurations."
+        if isinstance(namespace, list):
+            assert all(isinstance(ns, str) for ns in namespace), \
+                "All namespace items should be strings."
+        self._namespace = [namespace] if isinstance(namespace, str) else list(namespace)
         self._private = private or []
 
     def __get__(self, obj: Any, cls: type | None = None) -> "ConfigurationProperty | ConfigurationType":

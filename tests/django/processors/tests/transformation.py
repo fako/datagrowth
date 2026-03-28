@@ -137,8 +137,8 @@ class TestTransformProcessor(TestCase):
             issubclass(TransformProcessor, ExtractProcessor),
             "TransformProcessor should be an alias for ExtractProcessor."
         )
-        self.assertEqual(ExtractProcessor.config._namespace, "extract_processor")
-        self.assertEqual(TransformProcessor.config._namespace, "transform_processor")
+        self.assertEqual(ExtractProcessor.config._namespace, ["extract_processor"])
+        self.assertEqual(TransformProcessor.config._namespace, ["transform_processor"])
         json_prc = self.get_json_processor()
         self.assertEqual(
             list(json_prc.transform("application/json", self.json_records)),

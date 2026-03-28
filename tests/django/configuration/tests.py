@@ -36,7 +36,7 @@ class TestConfigurationType(TestCase):
         # Therefore defaults are not loaded until first access
         instance = ConfigurationType()
         self.assertEqual(instance._defaults, None)
-        self.assertEqual(instance._namespace, ConfigurationType._global_prefix)
+        self.assertEqual(instance._namespace, [ConfigurationType._global_prefix])
         self.assertEqual(instance._private, ConfigurationType._private_defaults)
         purge_immediately = instance.purge_immediately  # this loads the defaults
         self.assertFalse(purge_immediately)
@@ -44,7 +44,7 @@ class TestConfigurationType(TestCase):
         # Implicit init with defaults
         instance = ConfigurationType(defaults=MOCK_CONFIGURATION)
         self.assertEqual(instance._defaults, MOCK_CONFIGURATION)
-        self.assertEqual(instance._namespace, ConfigurationType._global_prefix)
+        self.assertEqual(instance._namespace, [ConfigurationType._global_prefix])
         self.assertEqual(instance._private, ConfigurationType._private_defaults)
         purge_immediately = instance.purge_immediately  # this won't load defaults as defaults got set
         self.assertFalse(purge_immediately)
@@ -52,7 +52,7 @@ class TestConfigurationType(TestCase):
         # Explicit init with double private key
         instance = ConfigurationType(namespace="name", private=["_test", "_test", "oops"], defaults=MOCK_CONFIGURATION)
         self.assertEqual(instance._defaults, MOCK_CONFIGURATION)
-        self.assertEqual(instance._namespace, "name")
+        self.assertEqual(instance._namespace, ["name"])
         self.assertEqual(instance._private, ConfigurationType._private_defaults + ["_test", "_oops"])
 
     def test_attribute_access(self):
@@ -358,7 +358,7 @@ class TestLoadConfigDecorator(TestCase):
             "Expected load_config to initialize without default. "
             "Use register_defaults to set defaults for load_config decorator."
         )
-        self.assertEqual(test_config._namespace, "name")
+        self.assertEqual(test_config._namespace, ["name"])
         self.assertIn("_test3", test_config._private)
         self.assertEqual(self.config.test, "public")
         self.assertEqual(self.config.test2, "protected")
@@ -432,7 +432,7 @@ class TestCreateConfig(TestCase):
         })
         self.assertIsNone(test_config._defaults)
         self.assertIsInstance(test_config, ConfigurationType)
-        self.assertEqual(test_config._namespace, "name")
+        self.assertEqual(test_config._namespace, ["name"])
         self.assertEqual(test_config.test4, "namespaced default")
         self.assertEqual(test_config._defaults, DATAGROWTH_DEFAULT_CONFIGURATION)
 
