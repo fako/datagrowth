@@ -8,8 +8,8 @@ services:
       POSTGRES_DB: datagrowth
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - ./tests/project/databases/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
-      - ./tests/project/databases/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tests/databases/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./tests/databases/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - postgres-datagrowth:/var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -22,8 +22,8 @@ services:
       MYSQL_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
       MYSQL_DATABASE: datagrowth
     volumes:
-      - ./tests/project/databases/mysql/conf.d:/etc/mysql/conf.d
-      - ./tests/project/databases/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tests/databases/mysql/conf.d:/etc/mysql/conf.d
+      - ./tests/databases/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mysql-datagrowth:/var/lib/mysql
     ports:
       - "3306:3306"
@@ -36,8 +36,8 @@ services:
       MARIADB_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
       MARIADB_DATABASE: datagrowth
     volumes:
-      - ./tests/project/databases/mariadb/conf.d:/etc/mysql/conf.d
-      - ./tests/project/databases/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tests/databases/mariadb/conf.d:/etc/mysql/conf.d
+      - ./tests/databases/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mariadb-datagrowth:/var/lib/mysql
     ports:
       - "3307:3306"
