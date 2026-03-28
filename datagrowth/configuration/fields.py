@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from django.db.models import fields
 from django.forms import fields as form_fields
@@ -11,7 +12,7 @@ class ConfigurationFormField(form_fields.CharField):
     """
     This form field correctly serializes the configuration inside of text area's when saving an (admin) form.
     """
-    def to_python(self, value):
+    def to_python(self, value: Any) -> Any:
         if isinstance(value, str):
             try:
                 return json.loads(value)
@@ -43,8 +44,8 @@ class ConfigurationField(fields.TextField):
 
     form_class = ConfigurationFormField
 
-    def __init__(self, namespace="global", private=("_private", "_namespace", "_defaults",),
-                 config_defaults=None, *args, **kwargs):
+    def __init__(self, namespace: str = "global", private: tuple[str, ...] = ("_private", "_namespace", "_defaults",),
+                 config_defaults: dict[str, Any] | None = None, *args: Any, **kwargs: Any) -> None:
         """
         Stores its arguments for later use by contribute_to_class.
         The arguments are passed directly to the ConfigurationType class by the  contribute_to_class method.
@@ -56,20 +57,20 @@ class ConfigurationField(fields.TextField):
         self._private = private
         self._defaults = config_defaults
 
-    def contribute_to_class(self, cls, name, private_only=False, **kwargs):
+    def contribute_to_class(self, cls: type, name: str, private_only: bool = False, **kwargs: Any) -> None:
         super(ConfigurationField, self).contribute_to_class(cls, name)
         configuration_property = ConfigurationProperty(
             storage_attribute=name,
-            defaults=getattr(cls, 'CONFIG_DEFAULTS', self._defaults),
-            namespace=getattr(cls, 'CONFIG_NAMESPACE', self._namespace),
-            private=getattr(cls, 'CONFIG_PRIVATE', self._private)
+            defaults=getattr(cls, "CONFIG_DEFAULTS", self._defaults),
+            namespace=getattr(cls, "CONFIG_NAMESPACE", self._namespace),
+            private=getattr(cls, "CONFIG_PRIVATE", self._private)
         )
         setattr(cls, name, configuration_property)
 
-    def from_db_value(self, value, expression, connection):
+    def from_db_value(self, value: str, expression: Any, connection: Any) -> dict[str, Any]:
         return json.loads(value)
 
-    def to_python(self, value):
+    def to_python(self, value: Any) -> Any:
         if isinstance(value, str):
             try:
                 return json.loads(value)
@@ -77,20 +78,20 @@ class ConfigurationField(fields.TextField):
                 raise ValidationError("Enter valid JSON: " + value)
         return value
 
-    def get_prep_value(self, value):
+    def get_prep_value(self, value: Any) -> str:
         if value is None:
             return "{}"
         if not isinstance(value, dict):
             value = value.to_dict(private=True, protected=True)
         return json.dumps(value)
 
-    def value_from_object(self, obj):
+    def value_from_object(self, obj: Any) -> str | None:
         value = super(ConfigurationField, self).value_from_object(obj)
         if self.null and value is None:
             return None
         return json.dumps(value.to_dict(private=True, protected=True))
 
-    def formfield(self, **kwargs):
+    def formfield(self, **kwargs: Any) -> Any:
         if "form_class" not in kwargs:
             kwargs["form_class"] = self.form_class
         field = super(ConfigurationField, self).formfield(**kwargs)

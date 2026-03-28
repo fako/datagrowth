@@ -1,2 +1,0 @@
-from datagrowth.settings import (DATAGROWTH_DEFAULT_CONFIGURATION,
-                                 DATAGROWTH_DEFAULT_CONFIGURATION as DEFAULT_CONFIGURATION)

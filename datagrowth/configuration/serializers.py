@@ -1,19 +1,25 @@
 import argparse
+from functools import wraps
 import hashlib
+from typing import Any, Callable, TypeVar
 from urllib.parse import parse_qsl
 
-from .types import ConfigurationType
+from datagrowth.configuration.types import ConfigurationType
 
 
-def load_config():
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def load_config() -> Callable[[F], F]:
     """
     This decorator will turn the value of any keyword arguments named "config" into a ConfigurationType.
     The decorated function will get the configuration as its first argument.
 
-    :return: ConfigurationType
+    :return: Wrapped function
     """
-    def wrap(func):
-        def config_func(*args, **kwargs):
+    def wrap(func: F) -> F:
+        @wraps(func)
+        def config_func(*args: Any, **kwargs: Any) -> Any:
             config = kwargs.pop("config", {})
             if not config:
                 raise TypeError("load_config decorator expects a config kwarg.")
@@ -21,7 +27,7 @@ def load_config():
                 return func(config, *args, **kwargs)
             config_instance = ConfigurationType.from_dict(config)
             return func(config_instance, *args, **kwargs)
-        return config_func
+        return config_func  # type: ignore[return-value]
     return wrap
 
 
@@ -32,12 +38,13 @@ class DecodeConfigAction(argparse.Action):
     a configuration.
     """
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace, values: str,
+                 option_string: str | None = None) -> None:
         values = dict(parse_qsl(values))
         setattr(namespace, self.dest, values)
 
 
-def get_standardized_configuration(configuration, as_hash=True):
+def get_standardized_configuration(configuration: ConfigurationType, as_hash: bool = True) -> str:
     """
     Given a configuration this function will return a string that represents that configuration.
     The representation is always the same for the same configuration.

@@ -1,5 +1,5 @@
-import warnings
 from copy import copy
+from typing import Any, Iterator, Mapping, Sequence
 
 from datagrowth.settings import DATAGROWTH_DEFAULT_CONFIGURATION
 
@@ -8,7 +8,7 @@ class ConfigurationNotFoundError(AttributeError):
     pass
 
 
-class ConfigurationType(object):
+class ConfigurationType:
     """
     This type is the interface to configurations. Configurations are accessible as attributes.
     So a configuration named `my_config` will be accessible with `config.my_config`.
@@ -29,13 +29,14 @@ class ConfigurationType(object):
         or None to load defaults from settings at runtime
     :param namespace: (string) prefix to search default configurations with
     :param private: (list) keys that are considered as private
-    :return: ConfigurationType
+    :return: None
     """
 
-    _private_defaults = ["_private", "_defaults", "_namespace"]
-    _global_prefix = "global"
+    _private_defaults: list[str] = ["_private", "_defaults", "_namespace"]
+    _global_prefix: str = "global"
 
-    def __init__(self, defaults=None, namespace="global", private=("_private", "_defaults", "_namespace",)):
+    def __init__(self, defaults: dict[str, Any] | None = None, namespace: str = "global",
+                 private: Sequence[str] = ("_private", "_defaults", "_namespace",)) -> None:
         """
         Initiates the ConfigurationType by checking arguments and setting logically private attributes
 
@@ -64,12 +65,7 @@ class ConfigurationType(object):
             if prv not in self._private:
                 self._private.append(prv)
 
-    def set_configuration(self, new):
-        warnings.warn("ConfigurationType.set_configuration is deprecated "
-                      "in favor of the more Pythonic ConfigurationType.update", DeprecationWarning)
-        self.update(new)
-
-    def update(self, new):
+    def update(self, new: dict[str, Any] | None) -> None:
         """
         Will update any configurations given through new.
         This method sets attributes on itself named after the configurations.
@@ -90,7 +86,7 @@ class ConfigurationType(object):
             else:
                 setattr(self, key, value)
 
-    def _get_configuration(self, config, exclude_defaults=False):
+    def _get_configuration(self, config: str, exclude_defaults: bool = False) -> Any:
         """
         This function tries to find configurations on self other than configurations set as direct attributes.
 
@@ -133,7 +129,7 @@ class ConfigurationType(object):
                 "Tried to retrieve '{}' in config and namespace '{}', without results.".format(config, self._namespace)
             )
 
-    def to_dict(self, protected=False, private=False):
+    def to_dict(self, protected: bool = False, private: bool = False) -> dict[str, Any]:
         """
         Will return the current configuration in dict form.
         By default it will return all attributes except those that are considered protected or private.
@@ -148,7 +144,7 @@ class ConfigurationType(object):
         return dict(self.items(protected=protected, private=private))
 
     @classmethod
-    def from_dict(cls, config, defaults=None):
+    def from_dict(cls, config: dict[str, Any], defaults: dict[str, Any] | None = None) -> "ConfigurationType":
         """
         Creates a configuration using a dictionary.
         The dictionary should hold the appropriate _private and _namespace values.
@@ -178,7 +174,7 @@ class ConfigurationType(object):
         instance.update(config)
         return instance
 
-    def supplement(self, other):
+    def supplement(self, other: dict[str, Any]) -> None:
         """
         This method updates the configuration with keys from other
         if the configuration key does not exist in the configuration already.
@@ -195,7 +191,7 @@ class ConfigurationType(object):
         if supplement:
             self.update(supplement)
 
-    def items(self, protected=False, private=False):
+    def items(self, protected: bool = False, private: bool = False) -> Iterator[tuple[str, Any]]:
         """
         Iterates over all configurations in a (key, value,) manner.
         It allows to skip over protected and private configurations, which happens by default.
@@ -214,7 +210,7 @@ class ConfigurationType(object):
                 yield key, value
 
     @staticmethod
-    def clean_key(key):
+    def clean_key(key: str) -> str:
         """
         Strips characters from the input key that have a special meaning to the configuration type.
         Namely '$' and '_'.
@@ -226,11 +222,11 @@ class ConfigurationType(object):
             return key[1:]
         return key
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str) -> Any:
         item = self.clean_key(item)
         return self._get_configuration(item)
 
-    def get(self, item, *args, **kwargs):
+    def get(self, item: str, *args: Any, **kwargs: Any) -> Any:
         """
         Getter for configuration item.
         When the configuration key is not found it raises a ConfigurationNotFoundError unless default is specified.
@@ -250,7 +246,7 @@ class ConfigurationType(object):
         else:
             return getattr(self, item)
 
-    def __contains__(self, item):
+    def __contains__(self, item: str) -> bool:
         item = self.clean_key(item)
         try:
             getattr(self, item)
@@ -258,7 +254,7 @@ class ConfigurationType(object):
             return False
         return True
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.to_dict(protected=True))
 
 
@@ -280,8 +276,8 @@ class ConfigurationProperty(object):
     :return: ConfigurationType
     """
 
-    def __init__(self, namespace="global", private=None, defaults=None,
-                 storage_attribute=None):
+    def __init__(self, namespace: str = "global", private: Sequence[str] | None = None,
+                 defaults: dict[str, Any] | None = None, storage_attribute: str | None = None) -> None:
         """
         Runs some checks to create a ConfigurationType successfully upon first access of the property.
 
@@ -298,7 +294,7 @@ class ConfigurationProperty(object):
         self._namespace = namespace
         self._private = private or []
 
-    def __get__(self, obj, cls=None):
+    def __get__(self, obj: Any, cls: type | None = None) -> "ConfigurationProperty | ConfigurationType":
         if obj is None:  # happens with system checks
             return self
         elif self._storage_attribute not in obj.__dict__ or not obj.__dict__[self._storage_attribute]:
@@ -309,7 +305,7 @@ class ConfigurationProperty(object):
             )
         return obj.__dict__[self._storage_attribute]
 
-    def __set__(self, obj, new):
+    def __set__(self, obj: Any, new: "ConfigurationType | dict[str, Any]") -> None:
         if self._storage_attribute not in obj.__dict__:
             obj.__dict__[self._storage_attribute] = ConfigurationType(
                 defaults=self._defaults,
@@ -324,7 +320,7 @@ class ConfigurationProperty(object):
             obj.__dict__[self._storage_attribute].update(new)
 
 
-def create_config(namespace, configuration):
+def create_config(namespace: str, configuration: dict[str, Any]) -> ConfigurationType:
     """
     Use this function to quickly create a configuration.
     You need to specify under which namespace the configuration should search for defaults.
@@ -344,7 +340,7 @@ def create_config(namespace, configuration):
     return config
 
 
-def register_defaults(namespace, configuration):
+def register_defaults(namespace: str, configuration: Mapping[str, Any]) -> None:
     """
     This function updates a global configuration defaults object with your own defaults.
     That way an application can set defaults at runtime during a configure stage like the Django apps ready hook.
