@@ -59,10 +59,17 @@ class ConfigurationField(fields.TextField):
 
     def contribute_to_class(self, cls: type, name: str, private_only: bool = False, **kwargs: Any) -> None:
         super(ConfigurationField, self).contribute_to_class(cls, name)
+        namespaces = [
+            base.__dict__["CONFIG_NAMESPACE"]
+            for base in cls.__mro__
+            if "CONFIG_NAMESPACE" in base.__dict__
+        ]
+        if not namespaces:
+            namespaces = [self._namespace]
         configuration_property = ConfigurationProperty(
             storage_attribute=name,
             defaults=getattr(cls, "CONFIG_DEFAULTS", self._defaults),
-            namespace=getattr(cls, "CONFIG_NAMESPACE", self._namespace),
+            namespace=namespaces,
             private=getattr(cls, "CONFIG_PRIVATE", self._private)
         )
         setattr(cls, name, configuration_property)
