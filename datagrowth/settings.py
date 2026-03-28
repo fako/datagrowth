@@ -47,52 +47,31 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
         "process_result": "ProcessResult",
         "batch": "Batch"
     },
-    # Legacy global pipeline configuration, use datatype configurations instead
-    "global_pipeline_app_label": None,
-    "global_pipeline_models": {
-        "document": "Document",
-        "process_result": "ProcessResult",
-        "batch": "Batch"
-    },
     # Resources specific "global" configurations
-    "global_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
     "global_purge_after": {},
     "global_purge_immediately": False,  # by default keep resources around
     "global_cache_only": False,
     "global_resource_exception_log_level": logging.DEBUG,
     "global_resource_exception_reraise": False,
-
+    # HttpResource configurations
+    "http_resource_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
     "http_resource_continuation_limit": 1,
     "http_resource_interval_duration": 0,  # NB: milliseconds!
     "http_resource_concat_args_size": 0,
     "http_resource_concat_args_symbol": "|",
-    # TODO: these two configurations should be http_resource, not global
-    "global_allow_redirects": True,
-    "global_backoff_delays": [2, 4, 8, 16],
-    "global_force_data_file_to_payload": False,
-
+    "http_resource_allow_redirects": True,
+    "http_resource_backoff_delays": [2, 4, 8, 16],
+    "http_resource_force_data_file_to_payload": False,
+    # ShellResource configurations
     "shell_resource_interval_duration": 0,  # NB: milliseconds!
-
-    "wikipedia_wiki_country": "en",
-    "wikipedia_wiki_query_param": "titles",
-    "wikipedia_wiki_full_extracts": False,
-    "wikipedia_wiki_domain": "en.wikipedia.org",
-    "wikipedia_wiki_show_categories": "!hidden",
-
-    "google_api_key": getattr(settings, 'GOOGLE_API_KEY', ''),
-    "google_cx": getattr(settings, 'GOOGLE_CX', ''),
-
+    # Data gathering and transformation configurations
     "growth_processor_extractor": "ExtractProcessor.extract_from_resource",
     "growth_processor_depends_on": None,
     "growth_processor_to_property": None,
     "growth_processor_apply_resource_to": [],
-
-    "rank_processor_batch_size": 1000,
-    "rank_processor_result_size": 20,
-
     "extract_processor_extract_from_object_values": False,
     "transform_processor_extract_from_object_values": False,
-
+    # MicroserviceResource configurations
     "micro_service_connections": {
         "image_recognition": {
             "protocol": "http",

@@ -54,6 +54,7 @@ class HttpResource(Resource):
     body = models.TextField(default=None, null=True, blank=True)
 
     # Class constants that determine behavior
+    CONFIG_NAMESPACE = "http_resource"
     URI_TEMPLATE = ""
     PARAMETERS = {}
     DATA = {}

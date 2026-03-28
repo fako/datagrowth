@@ -21,6 +21,8 @@ Good for snapshot testing.
 * Copies ``HttpResource.PARAMETERS`` before returning it when creating a URI. This makes the parameter constant immutable and might have unexpected effects if other code depends on mutability.
 * Removes ``ShellResource`` classes meant to interface with Kaldi.
 * Makes ``ConfigurationField`` look at ``CONFIG_NAMESPACE`` of parent classes as well as the class that uses that field. This introduces inheritance for configurations.
+* ``HttpResource`` now uses ``http_resource`` as its main namespace. The configurations ``global_user_agent``, ``global_allow_redirects``, ``global_backoff_delays`` and ``global_force_data_file_to_payload`` all use ``http_resource`` as prefix instead of ``global``.
+* Cleans up other default configurations that were no longer in use like: google, wikipedia and rank_processor namespace configurations.
 
 
 v0.20

@@ -8,8 +8,10 @@ class ResourcesConfig(AppConfig):
 
     def ready(self):
         register_defaults("global", {
-            "user_agent": "DataGrowth (test)",
             "source_language": "en"
+        })
+        register_defaults("http_resource", {
+            "user_agent": "DataGrowth (test)"
         })
         register_defaults("mock", {"secret": "oehhh"})
         register_defaults("micro_service", {
