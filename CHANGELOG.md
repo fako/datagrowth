@@ -19,6 +19,7 @@ That version aims to add ``PromptResource``, but also overhauls some internals t
 * Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
 Good for snapshot testing.
 * Copies ``HttpResource.PARAMETERS`` before returning it when creating a URI. This makes the parameter constant immutable and might have unexpected effects if other code depends on mutability.
+* Removes ``ShellResource`` classes meant to interface with Kaldi.
 
 
 v0.20
