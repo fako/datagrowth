@@ -1,4 +1,6 @@
-from typing import Protocol, Any, Self
+from typing import Protocol, Any, Self, TypeVar
+
+from datagrowth.signatures import Signature
 
 
 class ResourceProtocol(Protocol):
@@ -51,4 +53,23 @@ class ResourceProtocol(Protocol):
         Override this method to handle resource specific error cases.
         Usually you'd raise a particular ``DGResourceException`` to indicate particular errors.
         """
+        ...
+
+
+ResourceSignatureType = TypeVar("ResourceSignatureType", bound=Signature, contravariant=True)
+ResourceType = TypeVar("ResourceType", bound=ResourceProtocol, covariant=True)
+
+
+class ResourceStorageProtocol(Protocol[ResourceSignatureType, ResourceType]):
+
+    def save(self, resource: ResourceType) -> None:
+        ...
+
+    def load(self, signature: ResourceSignatureType) -> ResourceType:
+        ...
+
+
+class ResourceExtractorProtocol(Protocol[ResourceSignatureType, ResourceType]):
+
+    def extract(self, signature: ResourceSignatureType) -> ResourceType:
         ...
