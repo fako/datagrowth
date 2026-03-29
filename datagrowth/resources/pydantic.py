@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Self
+from typing import Any, ClassVar, Iterable, Self
 from uuid import uuid4
 from datetime import datetime, timedelta
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, field_serializer, model_validator
 
+from datagrowth.configuration import ConfigurationType
 from datagrowth.tags import Tag
 from datagrowth.signatures import Signature
 from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceStorageProtocol
@@ -38,6 +39,7 @@ class Result(BaseModel):
 
 class Resource(BaseModel):
 
+    NAMESPACE: ClassVar[str | Iterable[str] | None] = "resource"
     STORAGE: ClassVar[str | None] = None
     EXTRACTOR: ClassVar[str | None] = None
 
@@ -46,6 +48,7 @@ class Resource(BaseModel):
 
     id: UUID4 = Field(default_factory=uuid4)
     type: Tag | None = Field(default=None)
+    config: ConfigurationType | None = None
     signature: Signature | None = None
     result: Result | None = None
 
@@ -88,6 +91,52 @@ class Resource(BaseModel):
     #####################
     # Pydantic plumbing
     #####################
+
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
+
+    @classmethod
+    def _get_config_namespaces(cls) -> list[str]:
+        namespaces: list[str] = []
+        for klass in cls.mro():
+            namespace = klass.__dict__.get("NAMESPACE")
+            if namespace is None:
+                continue
+            namespace_values = [namespace] if isinstance(namespace, str) else list(namespace)
+            for value in namespace_values:
+                if value and value not in namespaces:
+                    namespaces.append(value)
+        return namespaces or ["global"]
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_config(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+
+        data = dict(data)
+        raw_config = data.get("config")
+        if raw_config is None:
+            data["config"] = ConfigurationType(namespace=cls._get_config_namespaces())
+        elif isinstance(raw_config, dict):
+            config = ConfigurationType(namespace=cls._get_config_namespaces())
+            config.update(raw_config)
+            data["config"] = config
+        elif not isinstance(raw_config, ConfigurationType):
+            raise TypeError(
+                f"Resource config expects a dict, ConfigurationType or None. Got {type(raw_config)}"
+            )
+        return data
+
+    @field_serializer("config")
+    def serialize_config(self, config: ConfigurationType | None, info: Any) -> dict[str, Any] | None:
+        if config is None:
+            return None
+        context = info.context or {}
+        protected = bool(context.get("config_protected", False))
+        private = bool(context.get("config_private", False))
+        return config.to_dict(protected=protected, private=private)
 
     def _equality_key(self) -> tuple:
         # Include type if it matters for identity
