@@ -15,6 +15,7 @@ This update introduces LLM tools to the Datagrowth package and separates the pac
 
 * To install Datagrowth you need to add to ``datagrowth.django.apps.DatagrowthConfig`` to ``INSTALLED_APPS``.
 * ``ConfigurationFormField`` is no longer exposed as a form to be used outside of the admin for ``ConfigurationField``.
+* The ``datagrowth.admin`` module has been moved to ``datagrowth.django.admin``.
 
 
 v0.21
