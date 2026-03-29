@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.timezone import make_aware
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.utils import ibatch, reach, is_hashable
 from datagrowth.datatypes.storage import DataStorage
 
@@ -136,7 +136,7 @@ class CollectionBase(DataStorage):
             Alternatively the NO_MODIFICATION sentient object can be passed to prevent alteration of modified_at.
         :return: An iterator of batches with created instances.
         """
-        batch_size = batch_size or datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
+        batch_size = batch_size or DATAGROWTH_CONFIGURATION.MAX_BATCH_SIZE
         collection = collection or self
         modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()
@@ -221,7 +221,7 @@ class CollectionBase(DataStorage):
             Alternatively the NO_MODIFICATION sentient object can be passed to prevent alteration of modified_at.
         :return: An iterator of batches with updated or created instances.
         """
-        batch_size = batch_size or datagrowth_settings.DATAGROWTH_MAX_BATCH_SIZE
+        batch_size = batch_size or DATAGROWTH_CONFIGURATION.MAX_BATCH_SIZE
         collection = collection or self
         modified_at = modified_at or make_aware(datetime.now())
         Document = collection.get_document_model()

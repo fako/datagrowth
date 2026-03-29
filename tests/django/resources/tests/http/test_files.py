@@ -13,7 +13,7 @@ from django.core.files.images import ImageFile
 from django.core.files.storage import default_storage
 from django.core.exceptions import ValidationError
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.resources import HttpResource, HttpFileResource, file_resource_delete_handler
 from datagrowth.exceptions import DGResourceDoesNotExist, DGHttpError40X
 
@@ -66,7 +66,7 @@ class TestHttpImageResourceInterface(TestCase):
         self.assertEqual(len(args), 2)
         file_path = args[0]
         fd = args[1]
-        self.assertEqual(file_path, os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, expected_file_path))
+        self.assertEqual(file_path, os.path.join(DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT, expected_file_path))
         self.assertIsInstance(fd, ImageFile)
         self.assertEqual(fd.width, 10)
         self.assertEqual(fd.height, 10)

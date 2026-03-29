@@ -20,7 +20,7 @@ from django.db.models import JSONField
 from django.test import Client
 from django.urls import reverse
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.resources.base import Resource
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X, DGResourceDoesNotExist
 from datagrowth.utils import is_json_mimetype
@@ -382,7 +382,7 @@ class HttpResource(Resource):
             relative_file_path = data.get(file_key)
             if relative_file_path is None:
                 return None, None
-            file_path = Path(datagrowth_settings.DATAGROWTH_MEDIA_ROOT) / relative_file_path
+            file_path = Path(DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT) / relative_file_path
             with open(file_path, "rb") as bytes_file:
                 file_bytes = bytes_file.read()
             return file_bytes, None
@@ -391,7 +391,7 @@ class HttpResource(Resource):
         for file_key in self.FILE_DATA_KEYS:
             relative_path = data.get(file_key, None)
             if relative_path:
-                file_path = Path(datagrowth_settings.DATAGROWTH_MEDIA_ROOT) / relative_path
+                file_path = Path(DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT) / relative_path
                 with open(file_path, "rb") as bytes_file:
                     files[file_key] = (file_path.name, bytes_file.read(),)
         data = {key: value for key, value in data.items() if key not in files}  # data copy without "files"
@@ -530,8 +530,8 @@ class HttpResource(Resource):
             try:
                 response = self.session.send(
                     preq,
-                    proxies=datagrowth_settings.DATAGROWTH_REQUESTS_PROXIES,
-                    verify=datagrowth_settings.DATAGROWTH_REQUESTS_VERIFY,
+                    proxies=DATAGROWTH_CONFIGURATION.HTTP_RESOURCE_REQUESTS_PROXIES,
+                    verify=DATAGROWTH_CONFIGURATION.HTTP_RESOURCE_REQUESTS_VERIFY,
                     timeout=self.timeout,
                     allow_redirects=self.config.allow_redirects
                 )

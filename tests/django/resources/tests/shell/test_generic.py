@@ -8,7 +8,7 @@ from unittest.mock import patch, call
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.resources import ShellResource
 from datagrowth.exceptions import DGResourceDoesNotExist
 
@@ -41,7 +41,7 @@ class TestShellResourceInterface(TestCase):
         self.assertEqual(kwargs["stdout"], -1)
         self.assertEqual(kwargs["stderr"], -1)
         self.assertEqual(kwargs["env"], {"environment": "production"})
-        self.assertEqual(kwargs["cwd"], datagrowth_settings.DATAGROWTH_MEDIA_ROOT)
+        self.assertEqual(kwargs["cwd"], DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT)
 
     def test_http_resource_instance(self):
         # A basic check to assure that HttpResource "core" functionality gets checked for the class under test

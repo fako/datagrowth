@@ -42,7 +42,7 @@ class TikaResource(ShellResource):
         "{}"
     ]
     CONTENT_TYPE = "application/json"
-    DIRECTORY_SETTING = "DATAGROWTH_BIN_DIR"
+    DIRECTORY_SETTING = "shell_resource_bin_dir"
 
     @property
     def content(self):

@@ -11,7 +11,7 @@ from django.core.files.storage import default_storage
 from django.core.files import File
 from django.core.files.images import ImageFile
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.resources.http.generic import URLResource
 
 
@@ -88,7 +88,7 @@ class HttpFileResource(URLResource):
         :return:
         """
         return "{}.{}".format(
-            now.strftime(datagrowth_settings.DATAGROWTH_DATETIME_FORMAT),
+            now.strftime(DATAGROWTH_CONFIGURATION.DATETIME_FORMAT),
             original
         )
 
@@ -109,7 +109,7 @@ class HttpFileResource(URLResource):
         file_hash = hasher.hexdigest()
         # Constructing file path
         file_path = os.path.join(
-            datagrowth_settings.DATAGROWTH_MEDIA_ROOT,
+            DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT,
             self._meta.app_label,
             "downloads",
             file_hash[0], file_hash[1:3]  # this prevents huge (problematic) directory listings
@@ -132,7 +132,7 @@ class HttpFileResource(URLResource):
         file_name = self._save_file(self.request["url"], response.content)
         self.head = dict(response.headers)
         self.status = response.status_code
-        self.body = file_name.replace(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, "").lstrip(os.sep)
+        self.body = file_name.replace(DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT, "").lstrip(os.sep)
 
     def transform(self, file):
         """

@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 
 
 MOCK_DATA = {
@@ -91,5 +91,5 @@ MOCK_SCRAPE_DATA = [
     {'text': u'test 3', 'link': '/test3', 'page': 'Test'}
 ]
 
-with open(os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, "image-file.png"), "rb") as img:
+with open(os.path.join(DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT, "image-file.png"), "rb") as img:
     MOCK_FILE_DATA = img.read()

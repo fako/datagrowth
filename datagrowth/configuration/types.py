@@ -107,6 +107,7 @@ class ConfigurationType:
         :param exclude_defaults: (bool) whether to look for configuration in defaults or not
         :return: (mixed) the configuration variable
         """
+        config = str(config).lower()
         shielded_key = '_' + config
         variable_key = '$' + config
         if shielded_key in self.__dict__:

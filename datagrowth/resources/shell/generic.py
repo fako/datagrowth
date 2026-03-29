@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.db.models import JSONField
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.resources.base import Resource
 from datagrowth.exceptions import DGShellError, DGResourceDoesNotExist
 
@@ -43,6 +43,11 @@ class ShellResource(Resource):
     VARIABLES = {}
     DIRECTORY_SETTING = None
     CONTENT_TYPE = "text/plain"
+    DIRECTORY_SETTING_COMPATIBILITY_KEYS = {
+        "DATAGROWTH_DATA_DIR": "global_data_dir",
+        "DATAGROWTH_MEDIA_ROOT": "web_media_root",
+        "DATAGROWTH_BIN_DIR": "shell_resource_bin_dir",
+    }
 
     SCHEMA = {
         "arguments": {},
@@ -310,7 +315,10 @@ class ShellResource(Resource):
         cwd = None
         env = self.environment(*self.command.get("args"), **self.command.get("kwargs"))
         if self.DIRECTORY_SETTING:
-            cwd = getattr(datagrowth_settings, self.DIRECTORY_SETTING)
+            directory_configuration = self.DIRECTORY_SETTING_COMPATIBILITY_KEYS.get(
+                self.DIRECTORY_SETTING, self.DIRECTORY_SETTING
+            )
+            cwd = getattr(DATAGROWTH_CONFIGURATION, directory_configuration)
         results = subprocess.run(
             cmd,
             stdin=subprocess.PIPE,

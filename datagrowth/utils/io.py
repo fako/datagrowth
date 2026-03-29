@@ -3,7 +3,7 @@ from tqdm import tqdm
 
 from django.core.serializers import serialize, deserialize
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.utils.iterators import ibatch
 
 
@@ -18,7 +18,7 @@ def get_model_path(app_label, model_type=""):
     :param model_type: (str) an optional model type that can further group models within apps
     :return: path to models directory without a trailing slash
     """
-    return os.path.join(datagrowth_settings.DATAGROWTH_DATA_DIR, app_label, model_type).rstrip(os.sep)
+    return os.path.join(DATAGROWTH_CONFIGURATION.DATA_DIR, app_label, model_type).rstrip(os.sep)
 
 
 def get_media_path(app_label, media_type="", absolute=True):
@@ -34,13 +34,13 @@ def get_media_path(app_label, media_type="", absolute=True):
     :return: path to media directory without a trailing slash
     """
     if absolute:
-        return os.path.join(datagrowth_settings.DATAGROWTH_MEDIA_ROOT, app_label, media_type).rstrip(os.sep)
+        return os.path.join(DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT, app_label, media_type).rstrip(os.sep)
     else:
         return os.path.join(app_label, media_type).rstrip(os.sep)
 
 
 def get_dumps_path(model):
-    return os.path.join(datagrowth_settings.DATAGROWTH_DATA_DIR, model._meta.app_label, "dumps", model.get_name())
+    return os.path.join(DATAGROWTH_CONFIGURATION.DATA_DIR, model._meta.app_label, "dumps", model.get_name())
 
 
 def queryset_to_disk(queryset, dump_file, batch_size=100, progress_bar=True):

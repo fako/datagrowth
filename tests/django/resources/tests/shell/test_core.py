@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 
-from datagrowth import settings as datagrowth_settings
+from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 from datagrowth.exceptions import DGShellError
 from datagrowth.resources import ShellResource
 from datagrowth.configuration.types import ConfigurationType
@@ -137,7 +137,7 @@ class TestShellResource(resources_test_base.ResourceTestMixin):
         self.assertEqual(kwargs["stdout"], -1)
         self.assertEqual(kwargs["stderr"], -1)
         self.assertEqual(kwargs["env"], {"environment": "production"})
-        self.assertEqual(kwargs["cwd"], datagrowth_settings.DATAGROWTH_MEDIA_ROOT)
+        self.assertEqual(kwargs["cwd"], DATAGROWTH_CONFIGURATION.WEB_MEDIA_ROOT)
         # Make sure that response fields are set to something and do not remain None
         self.assertEqual(self.instance.stdout, "out")
         self.assertEqual(self.instance.stderr, "err")
