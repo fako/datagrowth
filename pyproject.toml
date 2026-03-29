@@ -43,7 +43,10 @@ dependencies = [
 
 [tool.setuptools]
 include-package-data = true
-packages = {find = {exclude = ["core", "core.*", "docs", "docs.*", "sources", "sources.*"]}}
+packages = {find = {exclude = ["docs", "docs.*", "tests", "tests.*", "venv", "venv.*"]}}
+
+[tool.setuptools.package-data]
+datagrowth = ["datagrowth.yml"]
 
 [tool.setuptools.dynamic]
 version = {attr = "datagrowth.version.VERSION"}
