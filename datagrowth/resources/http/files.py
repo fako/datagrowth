@@ -3,7 +3,7 @@ from io import BytesIO
 import hashlib
 from PIL import Image
 from urlobject import URLObject
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 import requests
 
 from django.core.exceptions import ValidationError
@@ -101,7 +101,7 @@ class HttpFileResource(URLResource):
         name, extension = os.path.splitext(head)
         if not extension:
             extension = ".html"
-        now = datetime.now(UTC)
+        now = datetime.now(timezone.utc)
         file_name = self.get_file_name(name, now)
         # Hashing the file name
         hasher = hashlib.md5()
