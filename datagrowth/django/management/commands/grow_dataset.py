@@ -4,7 +4,7 @@ from time import sleep
 from django.core.management import CommandError
 
 from datagrowth.configuration.serializers import DecodeConfigAction as DecodeDataAction
-from datagrowth.management.base import DatasetCommand
+from datagrowth.django.management.base import DatasetCommand
 from datagrowth.datatypes.datasets.constants import GrowthStrategy, GrowthState
 
 

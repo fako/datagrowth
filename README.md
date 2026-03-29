@@ -28,6 +28,8 @@ You can install Datagrowth by running
 pip install datagrowth
 ```
 
+And then add ``datagrowth.django.apps.DatagrowthConfig`` to ``INSTALLED_APPS``.
+
 
 Getting started
 ---------------

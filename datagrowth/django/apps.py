@@ -1,5 +1,6 @@
 import importlib
 import inspect
+from pathlib import Path
 
 from django.apps import AppConfig, apps
 
@@ -10,6 +11,9 @@ from datagrowth.processors.base import Processor
 class DatagrowthConfig(AppConfig):
 
     name = "datagrowth"
+    label = "datagrowth"
+    path = str(Path(__file__).resolve().parent)
+    verbose_name = "Datagrowth"
 
     def ready(self) -> None:
         self.load_processors()

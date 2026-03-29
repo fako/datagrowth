@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
 
-    'datagrowth',
+    'datagrowth.django.apps.DatagrowthConfig',
 
     'project',
     'configuration',
