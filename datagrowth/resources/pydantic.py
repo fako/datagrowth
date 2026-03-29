@@ -1,10 +1,27 @@
-from typing import Any, Self
+from __future__ import annotations
+
+from typing import Any, ClassVar, Self
 from uuid import uuid4
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field, UUID4
 
 from datagrowth.tags import Tag
 from datagrowth.signatures import Signature
+from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceStorageProtocol
+
+
+def build_storage(kind: str) -> ResourceStorageProtocol | None:
+    # Placeholder resolver: concrete storage implementations can be registered later.
+    if kind in {"", "none"}:
+        return None
+    raise NotImplementedError(f"Unsupported storage backend: {kind}")
+
+
+def build_extractor(kind: str) -> ResourceExtractorProtocol | None:
+    # Placeholder resolver: concrete extractor implementations can be registered later.
+    if kind in {"", "none"}:
+        return None
+    raise NotImplementedError(f"Unsupported extractor backend: {kind}")
 
 
 class Result(BaseModel):
@@ -21,6 +38,12 @@ class Result(BaseModel):
 
 class Resource(BaseModel):
 
+    STORAGE: ClassVar[str | None] = None
+    EXTRACTOR: ClassVar[str | None] = None
+
+    storage: ClassVar[ResourceStorageProtocol | None] = None
+    extractor: ClassVar[ResourceExtractorProtocol | None] = None
+
     id: UUID4 = Field(default_factory=uuid4)
     type: Tag | None = Field(default=None)
     signature: Signature | None = None
@@ -34,10 +57,21 @@ class Resource(BaseModel):
     # Publib interface
     #####################
 
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        cls.storage = build_storage(cls.STORAGE or "none")
+        cls.extractor = build_extractor(cls.EXTRACTOR or "none")
+
     def extract(self, *args: Any, **kwargs: Any) -> Self:
-        raise NotImplementedError(f"{self.__class__.__name__} does not implement the extract method.")
+        if self.extractor is None:
+            raise NotImplementedError(
+                f"{self.__class__.__name__} does not specify an extractor or implement the extract method."
+            )
+        return self.extractor.extract(self.signature)
 
     def close(self) -> Self:
+        if self.storage is not None:
+            self.storage.save(self)
         return self
 
     @property
