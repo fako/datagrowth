@@ -72,18 +72,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "extract_processor_extract_from_object_values": False,
     "transform_processor_extract_from_object_values": False,
     # MicroserviceResource configurations
-    "micro_service_connections": {
-        "image_recognition": {
-            "protocol": "http",
-            "host": "localhost:2000",
-            "path": "/predict/"
-        },
-        "clothing_type_recognition": {
-            "protocol": "http",
-            "host": "localhost:2001",
-            "path": "/predict/"
-        }
-    }
+    "micro_service_connections": {}
 })
 
 
