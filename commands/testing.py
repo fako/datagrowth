@@ -23,7 +23,7 @@ def run(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False):
     assert not test_method or test_file, "Can't specify a test method without specifying the test file"
 
     # Run pytest command
-    with ctx.cd(Path("tests", "django")):
+    with ctx.cd(Path("tests", "django_project")):
         ctx.run(
             f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag}",
             echo=True, pty=True
