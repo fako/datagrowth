@@ -1,0 +1,4 @@
+-r dependencies.txt
+
+Django==4.2.29
+pytest-django==4.7.0

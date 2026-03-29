@@ -1,18 +1,5 @@
-# First the dependencies
-Django==4.2.29
--r dependencies.txt
-
-# Development packages
-tox==4.6.4
-twine==6.1.0
-build==1.2.2.post1
-ipython==8.10.0
-ipdb==0.13.9
-Sphinx==7.4.7
-sphinx-rtd-theme==2.0.0
-wheel==0.46.2
-setuptools==78.1.1
-redis==5.0.1
+-r requirements/django.txt
+-r requirements/development.txt
 
 # Add the current project as a package
 -e .
