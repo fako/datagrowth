@@ -5,7 +5,7 @@ from django.db.models import fields
 from django.forms import fields as form_fields
 from django.core.exceptions import ValidationError
 
-from .types import ConfigurationProperty
+from datagrowth.configuration.types import ConfigurationProperty
 
 
 class ConfigurationFormField(form_fields.CharField):

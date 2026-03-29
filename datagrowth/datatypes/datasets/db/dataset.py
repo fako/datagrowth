@@ -8,8 +8,8 @@ from django.utils.timezone import now
 from django.contrib.contenttypes.fields import GenericRelation
 from celery import group
 from celery.canvas import GroupResult  # for type checking only
+from datagrowth.django.fields import ConfigurationField
 
-from datagrowth.configuration import ConfigurationField
 from datagrowth.exceptions import DGGrowthUnfinished, DGGrowthFrozen
 from datagrowth.datatypes.storage import DataStorageFactory
 from datagrowth.datatypes.datasets.constants import GrowthState, GrowthStrategy
