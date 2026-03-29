@@ -49,7 +49,19 @@ class TestConfigurationLoaders(TestCase):
             configured=True,
             DATAGROWTH_UNKNOWN="django-unknown",
         )
+        with patch.dict(os.environ, {"DATAGROWTH_UNKNOWN": "env-unknown"}, clear=True):
+            with self.assertLogs("datagrowth", level="WARNING") as warnings:
+                configuration = build_default_configuration(
+                    project_location=None,
+                    django_settings=django_settings,
+                )
 
+        self.assertNotIn("global_unknown", configuration)
+        warning_text = "\n".join(warnings.output)
+        self.assertIn("invoke env", warning_text)
+        self.assertIn("django settings", warning_text)
+
+    def test_project_keys_extend_allowlist(self) -> None:
         with TemporaryDirectory() as temporary_directory:
             project_file = Path(temporary_directory) / "datagrowth.yml"
             project_file.write_text(
@@ -60,18 +72,12 @@ class TestConfigurationLoaders(TestCase):
                 ]),
                 encoding="utf-8",
             )
-            with patch.dict(os.environ, {"DATAGROWTH_UNKNOWN": "env-unknown"}, clear=True):
-                with self.assertLogs("datagrowth", level="WARNING") as warnings:
-                    configuration = build_default_configuration(
-                        project_location=Path(temporary_directory),
-                        django_settings=django_settings,
-                    )
+            configuration = build_default_configuration(
+                project_location=Path(temporary_directory),
+                django_settings=SimpleNamespace(configured=True),
+            )
 
-        self.assertNotIn("global_unknown", configuration)
-        warning_text = "\n".join(warnings.output)
-        self.assertIn("invoke project", warning_text)
-        self.assertIn("invoke env", warning_text)
-        self.assertIn("django settings", warning_text)
+        self.assertEqual(configuration.get("unknown_namespace_value"), 1)
 
     def test_missing_default_key_disables_proper_and_plain_overrides(self) -> None:
         django_settings = SimpleNamespace(

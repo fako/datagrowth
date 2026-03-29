@@ -90,6 +90,25 @@ def _flatten_package_defaults(defaults: Mapping[str, Any]) -> dict[str, Any]:
     return flattened
 
 
+def _infer_project_allowed_keys(project_config: Mapping[str, Any]) -> set[str]:
+    inferred: set[str] = set()
+
+    def walk(node: Any, path: tuple[str, ...]) -> None:
+        if hasattr(node, "items") and callable(getattr(node, "items")):
+            for key, value in node.items():
+                walk(value, path + (str(key).lower(),))
+            return
+        if not path:
+            return
+        if len(path) == 1:
+            inferred.add("global_{}".format(path[0]))
+            return
+        inferred.add("_".join(path[:2]))
+
+    walk(project_config, tuple())
+    return inferred
+
+
 def _normalize_namespaced(config: Mapping[str, Any], allowed_keys: set[str], source: str) -> dict[str, Any]:
     """
     Normalize nested configuration to the namespaced flat keys datagrowth uses.
@@ -300,7 +319,9 @@ def build_default_configuration(project_location: Path | Literal["AUTODISCOVER"]
     )
     package_defaults = _flatten_package_defaults(nested_defaults)
     package_defaults["http_resource_user_agent"] = "DataGrowth (v{})".format(VERSION)
+    project_allowed_keys = _infer_project_allowed_keys(getattr(invoke_config, "_project", {}))
     allowed_keys = set(package_defaults.keys())
+    allowed_keys.update(project_allowed_keys)
 
     # Warn on source-specific unknown keys and identify which keys invoke actually overrides.
     project_layer = _normalize_namespaced(getattr(invoke_config, "_project", {}), allowed_keys, "invoke project")
