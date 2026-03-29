@@ -11,12 +11,11 @@ if TYPE_CHECKING:
         URLResource,
         file_resource_delete_handler,
     )
-    from datagrowth.resources.shell import ShellResource, TikaResource
+    from datagrowth.resources.shell import ShellResource
 
 
 __all__ = [
     "ShellResource",
-    "TikaResource",
     "HttpResource",
     "HttpFileResource",
     "HttpImageResource",
