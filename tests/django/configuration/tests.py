@@ -4,9 +4,9 @@ from copy import deepcopy
 
 from django.test import TestCase
 
+from datagrowth.configuration.defaults import DATAGROWTH_DEFAULT_CONFIGURATION
 from datagrowth.configuration import (ConfigurationType, ConfigurationNotFoundError, ConfigurationProperty, load_config,
-                                      get_standardized_configuration, DATAGROWTH_DEFAULT_CONFIGURATION,
-                                      create_config, register_defaults)
+                                      get_standardized_configuration, create_config, register_defaults)
 
 
 MOCK_CONFIGURATION = deepcopy(DATAGROWTH_DEFAULT_CONFIGURATION)
