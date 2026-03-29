@@ -121,6 +121,10 @@ class ConfigurationType:
         if exclude_defaults:
             return None
 
+        # Allow direct access to defaults for fully namespaced keys
+        if config in self._defaults:
+            return self._defaults[config]
+
         namespaces = list(self._namespace)
         if self._global_prefix not in namespaces:
             namespaces.append(self._global_prefix)
