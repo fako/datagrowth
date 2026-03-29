@@ -43,10 +43,20 @@ dependencies = [
 
 [tool.setuptools]
 include-package-data = true
-packages = {find = {exclude = ["docs", "docs.*", "tests", "tests.*", "venv", "venv.*"]}}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["datagrowth*"]
+namespaces = false
+exclude = ["tests*", "docs*", "venv*", "mvenv*", "build*", "dist*", "requirements*", "commands*"]
 
 [tool.setuptools.package-data]
 datagrowth = ["datagrowth.yml"]
 
 [tool.setuptools.dynamic]
 version = {attr = "datagrowth.version.VERSION"}
+
+[tool.basedpyright]
+typeCheckingMode = "off"
+reportMissingImports = "none"
+reportMissingModuleSource = "none"
