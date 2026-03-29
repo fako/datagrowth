@@ -23,6 +23,8 @@ Good for snapshot testing.
 * Makes ``ConfigurationField`` look at ``CONFIG_NAMESPACE`` of parent classes as well as the class that uses that field. This introduces inheritance for configurations.
 * ``HttpResource`` now uses ``http_resource`` as its main namespace. The configurations ``global_user_agent``, ``global_allow_redirects``, ``global_backoff_delays`` and ``global_force_data_file_to_payload`` all use ``http_resource`` as prefix instead of ``global``.
 * Cleans up other default configurations that were no longer in use like: google, wikipedia and rank_processor namespace configurations.
+* The [Invoke](https://www.pyinvoke.org/index.html) library has become a new dependency to load configs and execute shell commands in the future.
+* Use a datagrowth.yml file in your cwd to override defaults instead of specifying ``DATAGROWTH_DEFAULT_CONFIGURATION`` in settings or from the library directly.
 
 
 v0.20

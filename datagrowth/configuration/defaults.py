@@ -1,0 +1,5 @@
+from datagrowth.configuration.loaders import build_default_configuration
+
+
+DATAGROWTH_DEFAULT_CONFIGURATION = build_default_configuration()
+DEFAULT_CONFIGURATION = DATAGROWTH_DEFAULT_CONFIGURATION

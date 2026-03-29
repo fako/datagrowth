@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Any, Iterator, Mapping, Sequence
 
-from datagrowth.settings import DATAGROWTH_DEFAULT_CONFIGURATION
+from datagrowth.configuration.defaults import DATAGROWTH_DEFAULT_CONFIGURATION
 
 
 class ConfigurationNotFoundError(AttributeError):

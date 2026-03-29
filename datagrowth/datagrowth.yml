@@ -1,0 +1,54 @@
+global:
+  datetime_format: "%Y%m%d%H%M%S%f"
+  asynchronous: true
+  batch_size: 100
+  max_batch_size: 100
+  sample_size: 0
+  datatypes_app_label: null
+  datatype_models:
+    document: "Document"
+    collection: "Collection"
+    dataset_version: "DatasetVersion"
+    process_result: "ProcessResult"
+    batch: "Batch"
+  data_dir: null
+  purge_after: {}
+  purge_immediately: false
+  cache_only: false
+  resource_exception_log_level: 10
+  resource_exception_reraise: false
+
+http_resource:
+  requests_proxies: null
+  requests_verify: true
+  user_agent: null
+  continuation_limit: 1
+  interval_duration: 0
+  concat_args_size: 0
+  concat_args_symbol: "|"
+  allow_redirects: true
+  backoff_delays: [2, 4, 8, 16]
+  force_data_file_to_payload: false
+
+shell_resource:
+  interval_duration: 0
+  bin_dir: null
+
+growth_processor:
+  extractor: "ExtractProcessor.extract_from_resource"
+  depends_on: null
+  to_property: null
+  apply_resource_to: []
+
+extract_processor:
+  extract_from_object_values: false
+
+transform_processor:
+  extract_from_object_values: false
+
+micro_service:
+  connections: {}
+
+web:
+  api_version: 1
+  media_root: null

@@ -36,8 +36,10 @@ DATAGROWTH_MAX_BATCH_SIZE = getattr(settings, "DATAGROWTH_MAX_BATCH_SIZE", 100)
 
 DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGURATION", {
     # Global configurations that control multiple classes
+    "global_datetime_format": DATAGROWTH_DATETIME_FORMAT,
     "global_asynchronous": True,  # by default offload to celery where possible
     "global_batch_size": 100,
+    "global_max_batch_size": DATAGROWTH_MAX_BATCH_SIZE,
     "global_sample_size": 0,
     "global_datatypes_app_label": None,
     "global_datatype_models": {
@@ -47,6 +49,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
         "process_result": "ProcessResult",
         "batch": "Batch"
     },
+    "global_data_dir": DATAGROWTH_DATA_DIR,
     # Resources specific "global" configurations
     "global_purge_after": {},
     "global_purge_immediately": False,  # by default keep resources around
@@ -54,6 +57,8 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "global_resource_exception_log_level": logging.DEBUG,
     "global_resource_exception_reraise": False,
     # HttpResource configurations
+    "http_resource_requests_proxies": DATAGROWTH_REQUESTS_PROXIES,
+    "http_resource_requests_verify": DATAGROWTH_REQUESTS_VERIFY,
     "http_resource_user_agent": "DataGrowth (v{})".format(DATAGROWTH_VERSION),
     "http_resource_continuation_limit": 1,
     "http_resource_interval_duration": 0,  # NB: milliseconds!
@@ -64,6 +69,7 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "http_resource_force_data_file_to_payload": False,
     # ShellResource configurations
     "shell_resource_interval_duration": 0,  # NB: milliseconds!
+    "shell_resource_bin_dir": DATAGROWTH_BIN_DIR,
     # Data gathering and transformation configurations
     "growth_processor_extractor": "ExtractProcessor.extract_from_resource",
     "growth_processor_depends_on": None,
@@ -72,7 +78,10 @@ DATAGROWTH_DEFAULT_CONFIGURATION = getattr(settings, "DATAGROWTH_DEFAULT_CONFIGU
     "extract_processor_extract_from_object_values": False,
     "transform_processor_extract_from_object_values": False,
     # MicroserviceResource configurations
-    "micro_service_connections": {}
+    "micro_service_connections": {},
+    # Web configurations when exposing Datagrowth functionality through for instance Django
+    "web_api_version": DATAGROWTH_API_VERSION,
+    "web_media_root": DATAGROWTH_MEDIA_ROOT,
 })
 
 
