@@ -20,6 +20,11 @@ class ResourcesConfig(AppConfig):
                     "protocol": "http",
                     "host": "localhost:8000",
                     "path": "/service"
+                },
+                "tika": {
+                    "protocol": "http",
+                    "host": "localhost:9998",
+                    "path": "/rmeta/text"
                 }
             }
         })

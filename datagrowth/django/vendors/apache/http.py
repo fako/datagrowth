@@ -2,32 +2,26 @@ from typing import Any
 from pathlib import Path
 import json
 
-from django.conf import settings
 from django.db import models
-from datagrowth.configuration import DEFAULT_CONFIGURATION
-from datagrowth.utils.data import override_dict
-
-from datagrowth.resources.http import HttpResource
 
 
-class HttpTikaResource(HttpResource):
+from datagrowth.resources.http import MicroServiceResource
+
+
+class HttpTikaResource(MicroServiceResource):
 
     pdf_id = models.UUIDField(null=True, blank=True, db_index=True)
 
-    CONFIG_DEFAULTS = override_dict(DEFAULT_CONFIGURATION, {  # can be managed by inheritance now
-        "http_resource_force_data_file_to_payload": True
-    })
+    MICRO_SERVICE = "tika"
+    CONFIG_NAMESPACE = "tika_resource"
     FILE_DATA_KEYS = ["document"]
-
-    @property
-    def URI_TEMPLATE(self) -> str:
-        return f"{settings.TIKA_HOST}/rmeta/{settings.TIKA_RETURN_TYPE}"
 
     def variables(self, *args: Any) -> dict[str, Any]:
         args = args or (self.request.get("args") if self.request else tuple())
+        has_connection_args = len(args) >= 3
         return {
-            "url": [],
-            "mode": args[0] if len(args) else "structure"
+            "url": list(args[:3]) if has_connection_args else [],
+            "mode": args[3] if len(args) > 3 else (args[0] if len(args) else "structure"),
         }
 
     def parameters(self, mode: Any, **kwargs: Any) -> dict[str, str]:
@@ -88,7 +82,16 @@ class HttpTikaResource(HttpResource):
         if not has_marked_content or self.request["headers"].get("X-Tika-PDFextractMarkedContent") == "true":
             return None
 
-        request: dict[str, Any] = self._create_request("put", "semantic", **self.request["kwargs"])
+        request_args = self.request.get("args", tuple()) if self.request else tuple()
+        if len(request_args) >= 3:
+            connection_args = tuple(request_args[:3])
+        else:
+            connection_args = (
+                self.connection["protocol"],
+                self.connection["host"],
+                self.connection["path"],
+            )
+        request: dict[str, Any] = self._create_request("put", *connection_args, "semantic", **self.request["kwargs"])
         return request
 
     #######################################################

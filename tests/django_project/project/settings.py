@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'resources',
     'processors',
     'datatypes',
+    'vendors',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,99 @@
+[
+{
+    "model": "vendors.mocktikaresource",
+    "pk": 1,
+    "fields": {
+        "uri": "localhost:9998/rmeta/text",
+        "status": 200,
+        "config": "{\"_namespace\": [\"tika_resource\", \"micro_service\", \"http_resource\"], \"_private\": [\"_private\", \"_defaults\", \"_namespace\"]}",
+        "created_at": "2025-11-11T09:34:53.790Z",
+        "modified_at": "2025-11-11T09:34:53.790Z",
+        "purge_at": null,
+        "retainer_type": null,
+        "retainer_id": null,
+        "data_hash": "8ec56f215ff2f6058f38b27c6d266514f31b1fae",
+        "request": {
+            "url": "http://localhost:9998/rmeta/text",
+            "args": [
+                "http",
+                "localhost:9998",
+                "/rmeta/text"
+            ],
+            "data": {
+                "document": "media/test.pdf"
+            },
+            "kwargs": {
+                "document": "file://media/test.pdf"
+            },
+            "method": "put",
+            "headers": {
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "User-Agent": "DataGrowth (v0.21.0); python-requests/2.33.0",
+                "Accept-Encoding": "gzip, deflate",
+                "X-Tika-PDFextractMarkedContent": "false"
+            },
+            "backoff_delay": false
+        },
+        "head": {
+            "date": "Tue, 11 Nov 2025 09:34:53 GMT",
+            "vary": "Accept-Encoding",
+            "server": "Jetty(11.0.26)",
+            "content-type": "application/json",
+            "content-encoding": "gzip",
+            "transfer-encoding": "chunked"
+        },
+        "body": "tika-plain-01.json",
+        "pdf_id": "2bf2aaba-058f-411d-a833-19418f10ac11"
+    }
+},
+{
+    "model": "vendors.mocktikaresource",
+    "pk": 2,
+    "fields": {
+        "uri": "localhost:9998/rmeta/text?mode=semantic",
+        "status": 200,
+        "config": "{\"_namespace\": [\"tika_resource\", \"micro_service\", \"http_resource\"], \"_private\": [\"_private\", \"_defaults\", \"_namespace\"]}",
+        "created_at": "2025-11-11T09:34:53.846Z",
+        "modified_at": "2025-11-11T09:34:53.848Z",
+        "purge_at": null,
+        "retainer_type": null,
+        "retainer_id": null,
+        "data_hash": "8ec56f215ff2f6058f38b27c6d266514f31b1fae",
+        "request": {
+            "url": "http://localhost:9998/rmeta/text?mode=semantic",
+            "args": [
+                "http",
+                "localhost:9998",
+                "/rmeta/text",
+                "semantic"
+            ],
+            "data": {
+                "document": "media/test.pdf"
+            },
+            "kwargs": {
+                "document": "file://media/test.pdf"
+            },
+            "method": "put",
+            "headers": {
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+                "User-Agent": "DataGrowth (v0.21.0); python-requests/2.33.0",
+                "Accept-Encoding": "gzip, deflate",
+                "X-Tika-PDFextractMarkedContent": "true"
+            },
+            "backoff_delay": false
+        },
+        "head": {
+            "date": "Tue, 11 Nov 2025 09:34:53 GMT",
+            "vary": "Accept-Encoding",
+            "server": "Jetty(11.0.26)",
+            "content-type": "application/json",
+            "content-encoding": "gzip",
+            "transfer-encoding": "chunked"
+        },
+        "body": "tika-semantic-01.json",
+        "pdf_id": "2bf2aaba-058f-411d-a833-19418f10ac11"
+    }
+}
+]

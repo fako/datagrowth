@@ -1,13 +1,9 @@
+# Please note that tests/django_project/resources/apps.py will override any configurations here.
+# Individual tests may also call register_defaults to override settings.
+
 mock_processor:
   include_odd: false
   include_even: false
 
 shell_resource:
   bin_dir: /project/bin
-
-micro_service:
-  connections:
-    mock_service:
-      protocol: "http"
-      host: "localhost:2000"
-      path: "/service/"
