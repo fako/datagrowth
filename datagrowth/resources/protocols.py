@@ -56,16 +56,16 @@ class ResourceProtocol(Protocol):
         ...
 
 
-ResourceSignatureType = TypeVar("ResourceSignatureType", bound=Signature, contravariant=True)
-ResourceType = TypeVar("ResourceType", bound=ResourceProtocol, covariant=True)
+ResourceSignatureType = TypeVar("ResourceSignatureType", bound=Signature)
+ResourceType = TypeVar("ResourceType", bound=ResourceProtocol)
 
 
-class ResourceStorageProtocol(Protocol[ResourceSignatureType, ResourceType]):
+class ResourceStorageProtocol(Protocol[ResourceType]):
 
     def save(self, resource: ResourceType) -> None:
         ...
 
-    def load(self, signature: ResourceSignatureType) -> ResourceType:
+    def load(self, signature: Signature) -> ResourceType | None:
         ...
 
 

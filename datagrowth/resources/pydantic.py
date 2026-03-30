@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Iterable, Self
+from typing import Any, ClassVar, Iterable, Self, Generic, cast
 from uuid import uuid4
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field, UUID4, field_serializer, model_validator
@@ -8,17 +8,18 @@ from pydantic import BaseModel, Field, UUID4, field_serializer, model_validator
 from datagrowth.configuration import ConfigurationType
 from datagrowth.tags import Tag
 from datagrowth.signatures import Signature
-from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceStorageProtocol
+from datagrowth.resources.protocols import (ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol,
+                                            ResourceType)
 
 
-def build_storage(kind: str) -> ResourceStorageProtocol | None:
+def build_storage(kind: str) -> ResourceStorageProtocol[ResourceSignatureType, ResourceType] | None:
     # Placeholder resolver: concrete storage implementations can be registered later.
     if kind in {"", "none"}:
         return None
     raise NotImplementedError(f"Unsupported storage backend: {kind}")
 
 
-def build_extractor(kind: str) -> ResourceExtractorProtocol | None:
+def build_extractor(kind: str) -> ResourceExtractorProtocol[ResourceSignatureType, ResourceType] | None:
     # Placeholder resolver: concrete extractor implementations can be registered later.
     if kind in {"", "none"}:
         return None
@@ -37,19 +38,19 @@ class Result(BaseModel):
     }
 
 
-class Resource(BaseModel):
+class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     NAMESPACE: ClassVar[str | Iterable[str] | None] = "resource"
     STORAGE: ClassVar[str | None] = None
     EXTRACTOR: ClassVar[str | None] = None
 
-    storage: ClassVar[ResourceStorageProtocol | None] = None
-    extractor: ClassVar[ResourceExtractorProtocol | None] = None
+    storage: ClassVar[ResourceStorageProtocol["Resource[ResourceSignatureType]"] | None] = None
+    extractor: ClassVar[ResourceExtractorProtocol[ResourceSignatureType, "Resource[ResourceSignatureType]"] | None] = None  # noqa: E501
 
     id: UUID4 = Field(default_factory=uuid4)
     type: Tag | None = Field(default=None)
     config: ConfigurationType | None = None
-    signature: Signature | None = None
+    signature: ResourceSignatureType | None = None
     result: Result | None = None
 
     status: int = 0
@@ -66,11 +67,21 @@ class Resource(BaseModel):
         cls.extractor = build_extractor(cls.EXTRACTOR or "none")
 
     def extract(self, *args: Any, **kwargs: Any) -> Self:
+        # Validate the inputs to arrive at a base Signature
+        validated_signature = self.validate_inputs(*args, **kwargs)
+        # Try to look up the Signature in storage
+        if self.storage is not None:
+            loaded_resource = self.storage.load(validated_signature)
+            if loaded_resource is not None:
+                return cast(Self, loaded_resource)
+        # Attempt extracting data from the remote as prescribed by prepare_signature method
         if self.extractor is None:
             raise NotImplementedError(
                 f"{self.__class__.__name__} does not specify an extractor or implement the extract method."
             )
-        return self.extractor.extract(self.signature)
+        signature = self.prepare_signature(validated_signature)
+        self.signature = signature
+        return cast(Self, self.extractor.extract(signature))
 
     def close(self) -> Self:
         if self.storage is not None:
@@ -87,6 +98,12 @@ class Resource(BaseModel):
             return None, None
         data = self.result.body if self.success else self.result.errors
         return self.result.content_type, data
+
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> Signature:
+        raise NotImplementedError
+
+    def prepare_signature(self, signature: Signature) -> ResourceSignatureType:
+        raise NotImplementedError
 
     #####################
     # Pydantic plumbing
