@@ -1,5 +1,5 @@
 -r dependencies.txt
 
-Django==4.2.29
+Django==5.2.12
 djangorestframework==3.15.2
 pytest-django==4.7.0

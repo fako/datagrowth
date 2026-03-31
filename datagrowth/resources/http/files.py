@@ -62,6 +62,8 @@ class HttpFileResource(URLResource):
             cancel_request = True
         headers = requests.utils.default_headers()
         headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
+        if "Accept-Encoding" in headers and headers["Accept-Encoding"].endswith("zstd"):
+            headers["Accept-Encoding"] = headers["Accept-Encoding"].replace(", zstd", "")
         headers.update(self.headers())
         return self.validate_request({
             "args": args,

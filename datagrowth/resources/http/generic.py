@@ -226,6 +226,9 @@ class HttpResource(Resource):
         data = self.data(**kwargs) if not method == "get" else None
         headers = requests.utils.default_headers()
         headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
+        # Remove encoding that Python 3.14 adds to the defaults, but isn't cross-version viable
+        if "Accept-Encoding" in headers and headers["Accept-Encoding"].endswith("zstd"):
+            headers["Accept-Encoding"] = headers["Accept-Encoding"].replace(", zstd", "")
         headers.update(self.headers(*args, **kwargs))
         request = {
             "args": args,

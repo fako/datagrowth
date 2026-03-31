@@ -14,6 +14,8 @@ v0.21
 This update is a minor update that prepares for a LLM-version of this library.
 That version aims to add ``PromptResource``, but also overhauls some internals to keep development sustainable for the foreseeable future. Expect this version and its minor updates to cleanup some deprecated code as well as add minor tweaks to make transitioning to the new version easier.
 
+* Adds support for Python 3.14 and removes support for 3.10 and 3.11.
+* Removes support for Django 4.2.
 * Makes admin listings of Resources more useful during debugging by exposing ``status`` as a filter.
 * Allows args and kwargs passed to ``extract`` to modify the ``HttpResource`` headers.
 * Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
