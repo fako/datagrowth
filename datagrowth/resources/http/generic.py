@@ -226,6 +226,9 @@ class HttpResource(Resource):
         data = self.data(**kwargs) if not method == "get" else None
         headers = requests.utils.default_headers()
         headers["User-Agent"] = "{}; {}".format(self.config.user_agent, headers["User-Agent"])
+        # Remove encoding that Python 3.14 adds to the defaults, but isn't cross-version viable
+        if "Accept-Encoding" in headers and headers["Accept-Encoding"].endswith("zstd"):
+            headers["Accept-Encoding"] = headers["Accept-Encoding"].replace(", zstd", "")
         headers.update(self.headers(*args, **kwargs))
         request = {
             "args": args,
@@ -600,13 +603,6 @@ class HttpResource(Resource):
         super(HttpResource, self).__init__(*args, **kwargs)
 
     def clean(self):
-        # Legacy HttpResource instances may have a JSON string as request and head
-        # We parse that JSON to actual data here
-        if isinstance(self.request, str):
-            self.request = json.loads(self.request)
-        if isinstance(self.head, str):
-            self.head = json.loads(self.head)
-        # Actual cleaning implementation
         if self.request and not self.uri:
             uri_request = self.request_without_auth()
             self.uri = self.uri_from_url(uri_request.get("url"))

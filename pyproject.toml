@@ -13,19 +13,17 @@ authors = [
     {name = "Fako Berkers", email = "email@fakoberkers.nl"}
 ]
 readme = "README.md"
-requires-python = "~=3.10"
+requires-python = "~=3.12"
 license = "LGPL-3.0-only"
 classifiers = [
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Framework :: Django :: 4.2",
+    "Programming Language :: Python :: 3.14",
     "Framework :: Django :: 5.2",
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "Django>=4.2",
+    "Django>=5.2",
     "celery",
     "jsonschema>=4.20.0",
     "lxml",

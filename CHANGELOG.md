@@ -14,6 +14,8 @@ v0.21
 This update is a minor update that prepares for a LLM-version of this library.
 That version aims to add ``PromptResource``, but also overhauls some internals to keep development sustainable for the foreseeable future. Expect this version and its minor updates to cleanup some deprecated code as well as add minor tweaks to make transitioning to the new version easier.
 
+* Adds support for Python 3.14 and removes support for 3.10 and 3.11.
+* Removes support for Django 4.2.
 * Makes admin listings of Resources more useful during debugging by exposing ``status`` as a filter.
 * Allows args and kwargs passed to ``extract`` to modify the ``HttpResource`` headers.
 * Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
@@ -26,6 +28,7 @@ Good for snapshot testing.
 * The [Invoke](https://www.pyinvoke.org/index.html) library has become a new dependency to load configs and execute shell commands in the future.
 * Use a datagrowth.yml file in your cwd to override defaults instead of specifying ``DATAGROWTH_DEFAULT_CONFIGURATION`` in settings or patching the library directly.
 * Read access to ``DATAGROWTH_DEFAULT_CONFIGURATION`` and ``DEFAULT_CONFIGURATION`` is no longer recommended. Use ``datagrowth.configuration.DATAGROWTH_CONFIGURATION`` instead. But access is still possible when needed at ``datagrowth.configuration.defaults``.
+* No longer implicitly converts JSON strings on ``HttpResource.request`` and ``HttpResource.head`` to dictionaries.
 
 
 v0.20
