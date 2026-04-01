@@ -612,24 +612,10 @@ class TestHttpResource(resources_test_base.ResourceTestMixin):
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
         self.assertEqual(self.instance.data_hash, "")
         self.assertIsNone(self.instance.purge_at)
-        # Request JSON
-        self.instance.request = json.dumps(self.test_get_request)
-        self.instance.clean()
-        self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
-        self.assertEqual(self.instance.data_hash, "")
-        self.assertIsNone(self.instance.purge_at)
 
     def test_clean_post(self):
         # Request dict
         self.instance.request = self.test_post_request
-        self.instance.clean()
-        self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
-        self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")
-        self.assertIsNone(self.instance.purge_at)
-        # Request JSON
-        self.instance.uri = None
-        self.instance.data_hash = None
-        self.instance.request = json.dumps(self.test_post_request)
         self.instance.clean()
         self.assertEqual(self.instance.uri, "localhost:8000/en/?q=test")
         self.assertEqual(self.instance.data_hash, "c6ce96ff340b2fa4ead97ae01efa7fe20ca727bb")

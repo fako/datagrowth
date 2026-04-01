@@ -28,6 +28,7 @@ Good for snapshot testing.
 * The [Invoke](https://www.pyinvoke.org/index.html) library has become a new dependency to load configs and execute shell commands in the future.
 * Use a datagrowth.yml file in your cwd to override defaults instead of specifying ``DATAGROWTH_DEFAULT_CONFIGURATION`` in settings or patching the library directly.
 * Read access to ``DATAGROWTH_DEFAULT_CONFIGURATION`` and ``DEFAULT_CONFIGURATION`` is no longer recommended. Use ``datagrowth.configuration.DATAGROWTH_CONFIGURATION`` instead. But access is still possible when needed at ``datagrowth.configuration.defaults``.
+* No longer implicitly converts JSON strings on ``HttpResource.request`` and ``HttpResource.head`` to dictionaries.
 
 
 v0.20
