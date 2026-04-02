@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import inspect
-from typing import Union, Callable, Tuple, Dict, Type
+from collections.abc import Callable
+from typing import Any
 
 from django.apps import apps
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType
+from datagrowth.protocols import ProcessorProtocol
 
 
 class ArgumentsTypes:
-    NORMAL = 'normal'
-    BATCH = 'batch'
+    NORMAL = "normal"
+    BATCH = "batch"
 
 
 class Processor:
@@ -23,17 +27,17 @@ class Processor:
     """
 
     DEFAULT_ARGS_TYPE = ArgumentsTypes.NORMAL
-    ARGS_NORMAL_METHODS = []
-    ARGS_BATCH_METHODS = []
+    ARGS_NORMAL_METHODS: list[str] = []
+    ARGS_BATCH_METHODS: list[str] = []
 
     config = ConfigurationProperty()
 
-    def __init__(self, config):
+    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
         assert isinstance(config, (dict, ConfigurationType)), "Processor expects to get a configuration."
         self.config = config
 
     @staticmethod
-    def get_processor_components(processor_definition):
+    def get_processor_components(processor_definition: str) -> tuple[str, str]:
         try:
             processor_name, method_name = processor_definition.split(".")
             return processor_name, method_name
@@ -44,7 +48,7 @@ class Processor:
             )
 
     @staticmethod
-    def create_processor(processor_name, config):
+    def create_processor(processor_name: str, config: ConfigurationType | dict[str, Any]) -> "ProcessorProtocol":
         """
         This method will load the Processor class given by name and instantiate it with the given configuration.
 
@@ -59,17 +63,18 @@ class Processor:
             )
         return processor_class(config=config)
 
-    def get_processor_method(self, method_name):
+    def get_processor_method(self, method_name: str) -> tuple[Callable[..., Any], str]:
         if method_name in self.ARGS_NORMAL_METHODS:
             args_type = ArgumentsTypes.NORMAL
         elif method_name in self.ARGS_BATCH_METHODS:
             args_type = ArgumentsTypes.BATCH
         else:
             args_type = self.DEFAULT_ARGS_TYPE
-        return getattr(self, method_name), args_type
+        method = getattr(self, method_name)
+        return method, args_type
 
     @staticmethod
-    def get_processor_class(processor_name):
+    def get_processor_class(processor_name: str) -> type["ProcessorProtocol"] | None:
         """
         This method will load the Processor class given by name and return it.
         If the Processor does not exist in an installed app it will return None instead
@@ -87,8 +92,9 @@ class QuerySetProcessor(Processor):
 
 class ProcessorFactory:
 
-    def __init__(self, processor: Union[Type[Processor], str], defaults: Dict = None, method: str = None):
-        self.defaults = defaults or {}
+    def __init__(self, processor: type[Processor] | str, defaults: dict[str, Any] | None = None,
+                 method: str | None = None) -> None:
+        self.defaults: dict[str, Any] = defaults or {}
         if isinstance(processor, str):
             processor_name, method_name = Processor.get_processor_components(processor)
             self.processor = Processor.get_processor_class(processor_name)
@@ -99,7 +105,8 @@ class ProcessorFactory:
         else:
             raise TypeError("Expected a Processor or name and method of a Processor to build")
 
-    def build(self, config: Union[ConfigurationType, dict] = None, **kwargs) -> Processor:
+    def build(self, config: ConfigurationType | dict[str, Any] | None = None,
+              **kwargs: Any) -> "ProcessorProtocol":
         config = config or {}
         if isinstance(config, ConfigurationType):
             config.supplement(self.defaults)
@@ -107,8 +114,9 @@ class ProcessorFactory:
             config.update(self.defaults)
         return self.processor(config)
 
-    def build_with_callable(self, config: Union[ConfigurationType, dict] = None, asynchronous: bool = False,
-                            **kwargs) -> Tuple[Processor, Callable]:
+    def build_with_callable(self, config: ConfigurationType | dict[str, Any] | None = None,
+                            asynchronous: bool = False,
+                            **kwargs: Any) -> tuple["ProcessorProtocol", Callable[..., Any] | "ProcessorProtocol"]:
         prc = self.build(config=config, **kwargs)
         clb = getattr(prc, self.method) if self.method else prc
         if asynchronous:

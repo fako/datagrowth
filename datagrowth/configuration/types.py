@@ -268,7 +268,7 @@ class ConfigurationType:
         return str(self.to_dict(protected=True))
 
 
-class ConfigurationProperty(object):
+class ConfigurationProperty:
     """
     Initialize this class to place a configuration property upon another class.
     The property will be of the ConfigurationType described below.
