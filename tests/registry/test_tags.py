@@ -1,6 +1,6 @@
 import pytest
 
-from datagrowth.tags import TagRegistry, Tag
+from datagrowth.registry.types import TagRegistry, Tag
 
 
 @pytest.fixture

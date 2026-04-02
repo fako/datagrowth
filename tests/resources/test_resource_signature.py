@@ -1,6 +1,6 @@
 import pytest
 
-from datagrowth.tags import Tag
+from datagrowth.registry import Tag
 from datagrowth.signatures import Signature
 from datagrowth.resources.pydantic import Resource
 from copy import deepcopy

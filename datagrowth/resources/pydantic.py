@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel, Field, UUID4, field_serializer, model_validator
 
 from datagrowth.configuration import ConfigurationType
-from datagrowth.tags import Tag
+from datagrowth.registry import Tag
 from datagrowth.signatures import Signature
 from datagrowth.resources.protocols import (ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol,
                                             ResourceType)
