@@ -28,22 +28,26 @@ class Tag(BaseModel):
 
 
 @dataclass
-class TagRegistry:
+class Registry:
     tags: dict[str, Tag]
 
+    #######################################################
+    # TAGS
+    #######################################################
+
     @classmethod
-    def from_tags(cls, tags: list[Tag]) -> TagRegistry:
-        return TagRegistry(
+    def from_tags(cls, tags: list[Tag]) -> Registry:
+        return Registry(
             tags={str(tag): tag for tag in tags}
         )
 
-    def register(self, tag: str | Tag) -> Tag:
+    def register_tag(self, tag: str | Tag) -> Tag:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
         self.tags[str(tag)] = tag
         return tag
 
-    def unregister(self, tag: str | Tag) -> None:
+    def unregister_tag(self, tag: str | Tag) -> None:
         if isinstance(tag, Tag):
             tag = str(tag)
         del self.tags[tag]

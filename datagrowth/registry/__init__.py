@@ -1,1 +1,1 @@
-from datagrowth.registry.types import Tag
+from datagrowth.registry.types import Registry, Tag
