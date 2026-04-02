@@ -1,8 +1,33 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+import importlib
+from dataclasses import dataclass, field
 
 from pydantic import BaseModel
+
+
+def _import_class(path: str) -> type:
+    """
+    Helper function that takes a qualname of a class and imports it.
+    Will indicate where the import path breaks when errors occur.
+    """
+    parts = path.split(".")
+    for index in range(len(parts) - 1, 0, -1):
+        module_name = ".".join(parts[:index])
+        attr_path = parts[index:]
+        try:
+            module = importlib.import_module(module_name)
+        except ModuleNotFoundError as error:
+            if error.name == module_name:
+                continue
+            raise
+        clazz = module
+        for attribute in attr_path:
+            clazz = getattr(clazz, attribute)
+        if not isinstance(clazz, type):
+            raise TypeError(f"Expected class import from path '{path}', got {type(clazz)}")
+        return clazz
+    raise ImportError(f"Could not import class path '{path}'")
 
 
 class Tag(BaseModel):
@@ -20,6 +45,14 @@ class Tag(BaseModel):
         category, value = string.split(":")
         return cls(category=category, value=value)
 
+    #####################
+    # Pydantic plumbing
+    #####################
+
+    model_config = {
+        "frozen": True
+    }
+
     def __str__(self) -> str:
         return f"{self.category}:{self.value}"
 
@@ -29,11 +62,12 @@ class Tag(BaseModel):
 
 @dataclass
 class Registry:
-    tags: dict[str, Tag]
+    tags: dict[str, Tag] = field(default_factory=dict)
+    classes: dict[Tag, str] = field(default_factory=dict)
 
-    #######################################################
-    # TAGS
-    #######################################################
+    #####################
+    # Tags
+    #####################
 
     @classmethod
     def from_tags(cls, tags: list[Tag]) -> Registry:
@@ -57,3 +91,24 @@ class Registry:
 
     def tags_by_value(self, value: str) -> list[Tag]:
         return [tag for tag in self.tags.values() if tag.value == value]
+
+    #####################
+    # Classes
+    #####################
+
+    def register_class(self, tag: str | Tag, clazz: type) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        tag = self.register_tag(tag)
+        self.classes[tag] = f"{clazz.__module__}.{clazz.__qualname__}"
+        return tag
+
+    def unregister_class(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        del self.classes[tag]
+
+    def get_class(self, tag: str | Tag) -> type:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        return _import_class(self.classes[tag])
