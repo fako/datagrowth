@@ -4,6 +4,7 @@ import inspect
 from django.apps import AppConfig, apps
 
 from datagrowth.registry import DATAGROWTH_REGISTRY
+from datagrowth.processors.base import Processor
 
 
 class DatagrowthConfig(AppConfig):
@@ -14,7 +15,6 @@ class DatagrowthConfig(AppConfig):
         self.load_processors()
 
     def load_processors(self) -> None:
-        from datagrowth.processors.base import Processor
 
         DATAGROWTH_REGISTRY.clear_category("processor")
         registered_names: set[str] = set()
@@ -22,7 +22,15 @@ class DatagrowthConfig(AppConfig):
         for app_config in apps.get_app_configs():
             try:
                 processor_module = importlib.import_module(app_config.module.__name__ + ".processors")
-                for name, attr in processor_module.__dict__.items():
+                module_items = dict(processor_module.__dict__)
+                for export_name in getattr(processor_module, "__all__", []):
+                    if export_name in module_items:
+                        continue
+                    try:
+                        module_items[export_name] = getattr(processor_module, export_name)
+                    except AttributeError:
+                        continue
+                for name, attr in module_items.items():
                     if name in registered_names and name not in datagrowth_names:
                         raise RuntimeError("The {} Processor is being loaded twice".format(name))
                     if inspect.isclass(attr) and issubclass(attr, Processor):

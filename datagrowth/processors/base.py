@@ -4,8 +4,7 @@ import inspect
 from collections.abc import Callable
 from typing import Any
 
-from django.apps import apps
-
+from datagrowth.registry import DATAGROWTH_REGISTRY
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 from datagrowth.protocols import ProcessorProtocol
 
@@ -63,8 +62,10 @@ class Processor:
         :param processor_name: (str) the Processor to load
         :return: (class or None) the Processor class
         """
-        datagrowth_config = apps.get_app_config("datagrowth")
-        return datagrowth_config.get_processor_class(processor_name)
+        try:
+            return DATAGROWTH_REGISTRY.get_class(f"processor:{processor_name}")
+        except KeyError:
+            return None
 
 
 class ProcessorFactory:
