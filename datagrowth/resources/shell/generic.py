@@ -38,6 +38,7 @@ class ShellResource(Resource):
     stderr = models.TextField(default=None, null=True, blank=True)
 
     # Class constants that determine behavior
+    CONFIG_NAMESPACE = "shell_resource"
     CMD_TEMPLATE = []
     FLAGS = {}
     VARIABLES = {}

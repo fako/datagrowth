@@ -1,4 +1,4 @@
-global:
+global:  # treat all settings below global as-if they are defined at root level
   datetime_format: "%Y%m%d%H%M%S%f"
   asynchronous: true
   batch_size: 100

@@ -23,10 +23,16 @@ Good for snapshot testing.
 * Copies ``HttpResource.PARAMETERS`` before returning it when creating a URI. This makes the parameter constant immutable and might have unexpected effects if other code depends on mutability.
 * Removes ``ShellResource`` classes meant to interface with Kaldi.
 * Makes ``ConfigurationField`` look at ``CONFIG_NAMESPACE`` of parent classes as well as the class that uses that field. This introduces inheritance for configurations.
-* ``HttpResource`` now uses ``http_resource`` as its main namespace. The configurations ``global_user_agent``, ``global_allow_redirects``, ``global_backoff_delays`` and ``global_force_data_file_to_payload`` all use ``http_resource`` as prefix instead of ``global``.
+* ``HttpResource`` now uses ``http_resource`` as its main namespace.
+* The configurations ``global_user_agent``, ``global_allow_redirects``, ``global_backoff_delays`` and ``global_force_data_file_to_payload`` all use ``http_resource`` as prefix instead of ``global``.
+* The ``DATAGROWTH_REQUESTS_PROXIES`` and ``DATAGROWTH_REQUESTS_VERIFY`` Django settings continue to work, but will be replaced with ``http_resource_requests_proxies`` and `` http_resource_requests_verify``.
+* ``ShellResource`` now uses ``shell_resource`` as its main namespace.
+* The ``DATAGROWTH_BIN_DIR`` Django setting was replaced with ``shell_resource_bin_dir``, but gets set to ``DATAGROWTH_BIN_DIR`` for the foreseeable future.
 * Cleans up other default configurations that were no longer in use like: google, wikipedia and rank_processor namespace configurations.
 * The [Invoke](https://www.pyinvoke.org/index.html) library has become a new dependency to load configs and execute shell commands in the future.
 * Use a datagrowth.yml file in your cwd to override defaults instead of specifying ``DATAGROWTH_DEFAULT_CONFIGURATION`` in settings or patching the library directly.
+* The datagrowth.yml file dictates names of Django settings. You can control any configuration through the following settings naming convention: ``DATAGROWTH_{UPPERCASE_NAME}``.
+* The ``DATAGROWTH_MEDIA_ROOT`` Django setting continues to work, but will at some point get replaced by ``DATAGROWTH_WEB_MEDIA_ROOT``.
 * Read access to ``DATAGROWTH_DEFAULT_CONFIGURATION`` and ``DEFAULT_CONFIGURATION`` is no longer recommended. Use ``datagrowth.configuration.DATAGROWTH_CONFIGURATION`` instead. But access is still possible when needed at ``datagrowth.configuration.defaults``.
 * No longer implicitly converts JSON strings on ``HttpResource.request`` and ``HttpResource.head`` to dictionaries.
 * The ``Community`` dataset type has long been deprecated and has now been removed.
