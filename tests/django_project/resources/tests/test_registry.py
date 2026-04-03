@@ -1,7 +1,42 @@
 from django.test import TestCase
+from django.apps import apps
 
 from datagrowth.registry import Registry
-from resources.models import HttpResourceMock
+from datagrowth.registry import DATAGROWTH_REGISTRY
+from resources.models import (
+    EntityDetailResource,
+    EntityIdListResource,
+    EntityListResource,
+    HttpImageResourceMock,
+    HttpResourceMock,
+    MicroServiceResourceMock,
+    ShellResourceMock,
+    URLResourceMock,
+)
+
+
+class TestDatagrowthResourceDjangoConfig(TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.config = apps.get_app_config("datagrowth")
+        self.expected_resources = {
+            "resources.httpresourcemock": HttpResourceMock,
+            "resources.urlresourcemock": URLResourceMock,
+            "resources.httpimageresourcemock": HttpImageResourceMock,
+            "resources.microserviceresourcemock": MicroServiceResourceMock,
+            "resources.shellresourcemock": ShellResourceMock,
+            "resources.entitylistresource": EntityListResource,
+            "resources.entityidlistresource": EntityIdListResource,
+            "resources.entitydetailresource": EntityDetailResource,
+        }
+
+    def test_load_resources(self):
+        self.config.load_resources()
+        resource_tags = DATAGROWTH_REGISTRY.tags_by_category("resource")
+        self.assertEqual(len(resource_tags), len(self.expected_resources))
+        for tag_value, expected_class in self.expected_resources.items():
+            self.assertEqual(DATAGROWTH_REGISTRY.get_class(f"resource:{tag_value}"), expected_class)
 
 
 class TestResourceRegistry(TestCase):

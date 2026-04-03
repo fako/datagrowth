@@ -13,6 +13,7 @@ class DatagrowthConfig(AppConfig):
 
     def ready(self) -> None:
         self.load_processors()
+        self.load_resources()
 
     def load_processors(self) -> None:
 
@@ -40,6 +41,19 @@ class DatagrowthConfig(AppConfig):
                         datagrowth_names.add(name)
             except ImportError:
                 continue
+
+    def load_resources(self) -> None:
+        from datagrowth.resources.base import Resource
+
+        DATAGROWTH_REGISTRY.clear_category("resource")
+        for app_config in apps.get_app_configs():
+            for model in app_config.get_models():
+                if not issubclass(model, Resource):
+                    continue
+                if model._meta.abstract:
+                    continue
+                tag = f"resource:{model._meta.app_label}.{model._meta.model_name}"
+                DATAGROWTH_REGISTRY.register_resource(tag, model)
 
     def get_processor_class(self, name: str) -> type | None:
         try:
