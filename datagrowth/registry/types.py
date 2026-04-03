@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel
 
 from datagrowth.protocols import ProcessorProtocol
+from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.configuration import ConfigurationType, create_config
 
 
@@ -128,7 +129,8 @@ class Registry:
     #####################
 
     @staticmethod
-    def _normalize_config(namespace: str, config: ConfigurationType | dict | None) -> ConfigurationType | None:
+    def _normalize_config(namespace: str | list[str],
+                          config: ConfigurationType | dict | None) -> ConfigurationType | None:
         if not config:
             return None
         elif isinstance(config, ConfigurationType):
@@ -183,3 +185,49 @@ class Registry:
         overrides = self._normalize_config(namespace, overrides) or {}
         config = self.get_configuration(tag, overrides)
         return processor(config=config)
+
+    #####################
+    # Resources
+    #####################
+
+    @staticmethod
+    def _get_resource_namespace(resource: type[ResourceProtocol]) -> list[str]:
+        legacy_namespace = getattr(resource, "CONFIG_NAMESPACE", None)
+        namespace = getattr(resource, "NAMESPACE", legacy_namespace)
+        if namespace is None:
+            raise ValueError("Can't register Resources that do not specify either NAMESPACE or CONFIG_NAMESPACE")
+        elif isinstance(namespace, str):
+            namespace = [namespace]
+        return namespace
+
+    def register_resource(self, tag: str | Tag, resource: type[ResourceProtocol],
+                          config: ConfigurationType | dict | None = None) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "resource":
+            raise ValueError(f"Expected a tag with 'resource' category but found '{tag.category}'")
+        self.register_class(tag, resource)
+        namespace = self._get_resource_namespace(resource)
+        config = self._normalize_config(namespace, config)
+        if config:
+            self.configurations[tag] = config
+        return tag
+
+    def unregister_resource(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "resource":
+            raise ValueError(f"Expected a tag with 'resource' category but found '{tag.category}'")
+        del self.classes[tag]
+        self.configurations.pop(tag, None)
+
+    def get_resource(self, tag: str | Tag, overrides: ConfigurationType | dict | None = None) -> ResourceProtocol:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "resource":
+            raise ValueError(f"Expected a tag with 'resource' category but found '{tag.category}'")
+        resource = cast(ResourceProtocol, _import_class(self.classes[tag]))
+        namespace = self._get_resource_namespace(resource)
+        overrides = self._normalize_config(namespace, overrides) or {}
+        config = self.get_configuration(tag, overrides)
+        return resource(config=config)
