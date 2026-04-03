@@ -29,6 +29,7 @@ Good for snapshot testing.
 * Use a datagrowth.yml file in your cwd to override defaults instead of specifying ``DATAGROWTH_DEFAULT_CONFIGURATION`` in settings or patching the library directly.
 * Read access to ``DATAGROWTH_DEFAULT_CONFIGURATION`` and ``DEFAULT_CONFIGURATION`` is no longer recommended. Use ``datagrowth.configuration.DATAGROWTH_CONFIGURATION`` instead. But access is still possible when needed at ``datagrowth.configuration.defaults``.
 * No longer implicitly converts JSON strings on ``HttpResource.request`` and ``HttpResource.head`` to dictionaries.
+* The ``Community`` dataset type has long been deprecated and has now been removed.
 
 
 v0.20

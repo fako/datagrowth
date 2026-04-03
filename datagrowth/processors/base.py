@@ -10,11 +10,6 @@ from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 from datagrowth.protocols import ProcessorProtocol
 
 
-class ArgumentsTypes:
-    NORMAL = "normal"
-    BATCH = "batch"
-
-
 class Processor:
     """
     This class is the base class for all processors.
@@ -25,10 +20,6 @@ class Processor:
     This is useful when you want to transfer the ``Processor`` without transferring the actual callables,
     because most transportation formats (like JSON) don't support callables.
     """
-
-    DEFAULT_ARGS_TYPE = ArgumentsTypes.NORMAL
-    ARGS_NORMAL_METHODS: list[str] = []
-    ARGS_BATCH_METHODS: list[str] = []
 
     config = ConfigurationProperty()
 
@@ -63,16 +54,6 @@ class Processor:
             )
         return processor_class(config=config)
 
-    def get_processor_method(self, method_name: str) -> tuple[Callable[..., Any], str]:
-        if method_name in self.ARGS_NORMAL_METHODS:
-            args_type = ArgumentsTypes.NORMAL
-        elif method_name in self.ARGS_BATCH_METHODS:
-            args_type = ArgumentsTypes.BATCH
-        else:
-            args_type = self.DEFAULT_ARGS_TYPE
-        method = getattr(self, method_name)
-        return method, args_type
-
     @staticmethod
     def get_processor_class(processor_name: str) -> type["ProcessorProtocol"] | None:
         """
@@ -84,10 +65,6 @@ class Processor:
         """
         datagrowth_config = apps.get_app_config("datagrowth")
         return datagrowth_config.get_processor_class(processor_name)
-
-
-class QuerySetProcessor(Processor):
-    pass
 
 
 class ProcessorFactory:

@@ -1,9 +1,8 @@
 from django.test import TestCase
 from django.apps import apps
 
-from datagrowth.processors import (Processor, QuerySetProcessor, ExtractProcessor, GrowthProcessor, HttpGrowthProcessor,
+from datagrowth.processors import (Processor, ExtractProcessor, GrowthProcessor, HttpGrowthProcessor,
                                    HttpSeedingProcessor, TransformProcessor)
-from datagrowth.processors.base import ArgumentsTypes
 from processors.processors import ProcessorMock, MockNumberProcessor, MockFilterProcessor
 from datatypes.processors import DataProcessor
 
@@ -18,7 +17,6 @@ class TestDatagrowthProcessorDjangoConfig(TestCase):
             "Processor": Processor,
             "ExtractProcessor": ExtractProcessor,
             "TransformProcessor": TransformProcessor,
-            "QuerySetProcessor": QuerySetProcessor,
             "GrowthProcessor": GrowthProcessor,
             "HttpGrowthProcessor": HttpGrowthProcessor,
             "HttpSeedingProcessor": HttpSeedingProcessor,
@@ -81,17 +79,6 @@ class TestProcessorBase(TestCase):
             self.fail("Processor.create_processor did not raise when getting invalid processor name")
         except AssertionError:
             pass
-
-    def test_get_processor_method(self):
-        method, method_type = self.processor.get_processor_method("normal_method")
-        self.assertEqual(method, self.processor.normal_method)
-        self.assertEqual(method_type, ArgumentsTypes.NORMAL)
-        method, method_type = self.processor.get_processor_method("batch_method")
-        self.assertEqual(method, self.processor.batch_method)
-        self.assertEqual(method_type, ArgumentsTypes.BATCH)
-        method, method_type = self.processor.get_processor_method("default_method")
-        self.assertEqual(method, self.processor.default_method)
-        self.assertEqual(method_type, self.processor.DEFAULT_ARGS_TYPE)
 
     def test_get_processor_class(self):
         self.assertEqual(Processor.get_processor_class("Processor"), Processor)
