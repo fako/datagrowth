@@ -13,7 +13,7 @@ from datagrowth.registry import Tag
 from datagrowth.exceptions import DGHttpError40X, DGHttpError50X
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
 from datagrowth.resources.http.pydantic import HttpResource
-from datagrowth.resources.http.signature import HttpMode, HttpSignature
+from datagrowth.resources.http.signature import HttpAuth, HttpMode, HttpSignature
 from datagrowth.resources.pydantic import Result
 
 
@@ -29,6 +29,17 @@ class HttpResourceMock(HttpResource):
         "Accept": "application/json"
     }
     MODE: ClassVar[HttpMode] = HttpMode.JSON
+
+
+class HttpResourceAuthMock(HttpResourceMock):
+
+    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_auth_mock")
+
+    def auth_headers(self) -> dict[str, str]:
+        return {"Authorization": "Bearer super-secret-token"}
+
+    def auth_parameters(self) -> dict[str, str]:
+        return {"api_key": "super-secret-key"}
 
 
 def make_response(status_code: int, body: bytes | str, headers: dict[str, str] | None = None) -> Response:
@@ -82,6 +93,22 @@ def test_validate_inputs_rejects_invalid_url_placeholders(resource: HttpResource
         resource.validate_inputs("get", "books")
 
 
+def test_validate_inputs_includes_auth_but_excludes_it_from_dump(mocked_session: Mock) -> None:
+    resource = HttpResourceAuthMock()
+    assert isinstance(resource.extractor, RequestsExtractor)
+    resource.extractor.set_session(mocked_session)
+    signature = resource.validate_inputs("get", "books", slug="python", page="2")
+
+    assert signature.auth == HttpAuth(
+        headers={"Authorization": "Bearer super-secret-token"},
+        parameters={"api_key": "super-secret-key"},
+    )
+    dumped_signature = signature.model_dump()
+    assert "auth" not in dumped_signature
+    assert "super-secret-token" not in str(dumped_signature)
+    assert "super-secret-key" not in str(dumped_signature)
+
+
 def test_resource_extract_get_uses_requests_extractor(resource: HttpResourceMock, mocked_session: Mock) -> None:
     mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
 
@@ -102,6 +129,30 @@ def test_resource_extract_get_uses_requests_extractor(resource: HttpResourceMock
     prepared_request = mocked_session.send.call_args.args[0]
     assert prepared_request.method == "GET"
     assert prepared_request.url == "https://example.com/books/python?source=tests&page=1"
+
+
+def test_resource_extract_applies_auth_to_request_not_signature_dump(mocked_session: Mock) -> None:
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    resource = HttpResourceAuthMock()
+    assert isinstance(resource.extractor, RequestsExtractor)
+    resource.extractor.set_session(mocked_session)
+    resource.extractor.config.update({
+        "backoff_delays": [],
+        "requests_proxies": None,
+        "requests_verify": True,
+        "allow_redirects": True,
+        "timeout": 30,
+        "user_agent": "DataGrowth (test)",
+    })
+
+    extracted_resource = resource.extract("get", "books", slug="python", page="1")
+
+    assert extracted_resource.signature is not None
+    dumped_signature = extracted_resource.signature.model_dump()
+    assert "auth" not in dumped_signature
+    prepared_request = mocked_session.send.call_args.args[0]
+    assert prepared_request.headers["Authorization"] == "Bearer super-secret-token"
+    assert prepared_request.url == "https://example.com/books/python?source=tests&page=1&api_key=super-secret-key"
 
 
 def test_resource_success_property_depends_on_http_status(resource: HttpResourceMock) -> None:

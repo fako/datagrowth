@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from time import sleep
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
 
@@ -48,10 +49,25 @@ class RequestsExtractor:
         if "Accept-Encoding" in headers and headers["Accept-Encoding"].endswith("zstd"):
             headers["Accept-Encoding"] = headers["Accept-Encoding"].replace(", zstd", "")
         headers.update(signature.headers)
+        if signature.auth and signature.auth.headers:
+            headers.update(signature.auth.headers)
+        # Add authentication to parameters
+        request_url = signature.url
+        if signature.auth and signature.auth.parameters:
+            split_url = urlsplit(request_url)
+            params = dict(parse_qsl(split_url.query, keep_blank_values=True))
+            params.update(signature.auth.parameters)
+            request_url = urlunsplit((
+                split_url.scheme,
+                split_url.netloc,
+                split_url.path,
+                urlencode(params, doseq=True),
+                split_url.fragment,
+            ))
         # Make request based on library
         request_kwargs: dict[str, Any] = {
             "method": signature.method,
-            "url": signature.url,
+            "url": request_url,
             "headers": dict(headers),
         }
         if signature.method.lower() != "get" and signature.mode != HttpMode.NONE:

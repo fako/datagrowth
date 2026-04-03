@@ -5,7 +5,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.registry import Tag
-from datagrowth.resources.http.signature import Signature, HttpSignature, HttpMode
+from datagrowth.resources.http.signature import Signature, HttpAuth, HttpSignature, HttpMode
 from datagrowth.resources.pydantic import Resource
 
 
@@ -172,6 +172,30 @@ class HttpResource(Resource[HttpSignature]):
         return normalized_url
 
     #####################
+    # Auth
+    #####################
+
+    def auth_headers(self) -> dict[str, str]:
+        """
+        Returns the dictionary that should be used as authentication headers for the request the resource will make.
+        Override this method in your own class to add authentication.
+        By default this method returns an empty dictionary meaning there are no authentication headers.
+
+        :return: (dict) dictionary with headers to add to requests
+        """
+        return {}
+
+    def auth_parameters(self) -> dict[str, str]:
+        """
+        Returns the dictionary that should be used as authentication parameters for the request the resource will make.
+        Override this method in your own class to add authentication.
+        By default this method returns an empty dictionary meaning there are no authentication parameters.
+
+        :return: (dict) dictionary with parameters to add to requests
+        """
+        return {}
+
+    #####################
     # Resource protocol
     #####################
 
@@ -179,6 +203,7 @@ class HttpResource(Resource[HttpSignature]):
         method = args[0]
         url_arguments = args[1:] if len(args) > 1 else []
         url, data_arguments = self._create_url(*url_arguments, **kwargs)
+        auth = HttpAuth(headers=self.auth_headers(), parameters=self.auth_parameters())
         return HttpSignature(
             uri=self.uri_from_url(url),
             args=args,
@@ -187,6 +212,7 @@ class HttpResource(Resource[HttpSignature]):
             method=method,
             url=url,
             headers=self.headers(*args, **kwargs),
+            auth=auth if auth.headers or auth.parameters else None,
             mode=self.MODE,
         )
 
