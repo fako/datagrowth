@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel
 
 from datagrowth.protocols import ProcessorProtocol
-from datagrowth.resources.protocols import ResourceProtocol
+from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceProtocol, ResourceStorageProtocol
 from datagrowth.configuration import ConfigurationType, create_config
 
 
@@ -260,3 +260,76 @@ class Registry:
         overrides = self._normalize_config(namespace, overrides) or {}
         config = self.get_configuration(tag, overrides)
         return resource(config=config)
+
+    #####################
+    # Storages
+    #####################
+
+    def register_storage(self, tag: str | Tag, storage: type[ResourceStorageProtocol],
+                         config: ConfigurationType | dict | None = None) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "storage":
+            raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
+        self.register_class(tag, storage)
+        namespace = storage.config._namespace
+        config = self._normalize_config(namespace, config)
+        if config:
+            self.configurations[tag] = config
+        return tag
+
+    def unregister_storage(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "storage":
+            raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
+        del self.classes[tag]
+        self.configurations.pop(tag, None)
+
+    def get_storage(self, tag: str | Tag, overrides: ConfigurationType | dict | None = None) -> ResourceStorageProtocol:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "storage":
+            raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
+        storage = cast(ResourceStorageProtocol, _import_class(self.classes[tag]))
+        namespace = storage.config._namespace
+        overrides = self._normalize_config(namespace, overrides) or {}
+        config = self.get_configuration(tag, overrides)
+        return storage(config=config)
+
+    #####################
+    # Extractors
+    #####################
+
+    def register_extractor(self, tag: str | Tag, extractor: type[ResourceExtractorProtocol],
+                           config: ConfigurationType | dict | None = None) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "extractor":
+            raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
+        self.register_class(tag, extractor)
+        namespace = extractor.config._namespace
+        config = self._normalize_config(namespace, config)
+        if config:
+            self.configurations[tag] = config
+        return tag
+
+    def unregister_extractor(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "extractor":
+            raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
+        del self.classes[tag]
+        self.configurations.pop(tag, None)
+
+    def get_extractor(self, tag: str | Tag,
+                      overrides: ConfigurationType | dict | None = None) -> ResourceExtractorProtocol:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "extractor":
+            raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
+        extractor = cast(ResourceExtractorProtocol, _import_class(self.classes[tag]))
+        namespace = extractor.config._namespace
+        overrides = self._normalize_config(namespace, overrides) or {}
+        config = self.get_configuration(tag, overrides)
+        return extractor(config=config)

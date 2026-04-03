@@ -1,6 +1,7 @@
 from typing import Protocol, Any, Self, TypeVar
 
 from datagrowth.signatures import Signature
+from datagrowth.configuration import ConfigurationType
 
 
 class ResourceProtocol(Protocol):
@@ -8,6 +9,8 @@ class ResourceProtocol(Protocol):
     A set of methods and properties shared by Resources.
     This protocol gets used throughout Datagrowth to allow generic data ETL.
     """
+
+    config: ConfigurationType
 
     def close(self) -> Self:
         """
@@ -62,6 +65,8 @@ ResourceType = TypeVar("ResourceType", bound=ResourceProtocol)
 
 class ResourceStorageProtocol(Protocol[ResourceType]):
 
+    config: ConfigurationType
+
     def save(self, resource: ResourceType) -> None:
         ...
 
@@ -70,6 +75,8 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
 
 
 class ResourceExtractorProtocol(Protocol[ResourceSignatureType, ResourceType]):
+
+    config: ConfigurationType
 
     def extract(self, signature: ResourceSignatureType) -> ResourceType:
         ...
