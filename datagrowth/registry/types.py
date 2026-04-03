@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from typing import cast
 import importlib
 from dataclasses import dataclass, field
-
 from pydantic import BaseModel
+
+from datagrowth.protocols import ProcessorProtocol
+from datagrowth.configuration import ConfigurationType, create_config
 
 
 def _import_class(path: str) -> type:
@@ -43,7 +46,7 @@ class Tag(BaseModel):
         assert string.count(":") == 1, \
             "Expected Tag string to contain a single semicolon separating categories and values"
         category, value = string.split(":")
-        return cls(category=category, value=value)
+        return cls(category=category.lower(), value=value.lower())
 
     #####################
     # Pydantic plumbing
@@ -64,6 +67,7 @@ class Tag(BaseModel):
 class Registry:
     tags: dict[str, Tag] = field(default_factory=dict)
     classes: dict[Tag, str] = field(default_factory=dict)
+    configurations: dict[Tag, ConfigurationType] = field(default_factory=dict)
 
     #####################
     # Tags
@@ -112,3 +116,64 @@ class Registry:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
         return _import_class(self.classes[tag])
+
+    #####################
+    # Configurations
+    #####################
+
+    @staticmethod
+    def _normalize_config(namespace: str, config: ConfigurationType | dict | None) -> ConfigurationType | None:
+        if not config:
+            return None
+        elif isinstance(config, ConfigurationType):
+            return config
+        return create_config(namespace, config)
+
+    def get_configuration(self, tag: str | Tag, overrides: ConfigurationType | None = None) -> ConfigurationType | dict:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        base = self.configurations.get(tag)
+        if not base and overrides is None:
+            raise KeyError(f"{tag} does not have a registered configuration")
+        elif not base:
+            return overrides
+        config = create_config(base._namespace, base.to_dict(private=True, protected=True))
+        if overrides:
+            config.update(overrides.to_dict(protected=True))
+        return config
+
+    #####################
+    # Processors
+    #####################
+
+    def register_processor(self, tag: str | Tag, processor: ProcessorProtocol,
+                           config: ConfigurationType | dict | None = None) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "processor":
+            raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
+        self.register_class(tag, processor)
+        namespace = processor.config._namespace
+        config = self._normalize_config(namespace, config)
+        if config:
+            self.configurations[tag] = config
+        return tag
+
+    def unregister_processor(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "processor":
+            raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
+        del self.classes[tag]
+        self.configurations.pop(tag, None)
+
+    def get_processor(self, tag: str | Tag, overrides: ConfigurationType | dict | None = None) -> ProcessorProtocol:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "processor":
+            raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
+        processor = cast(ProcessorProtocol, _import_class(self.classes[tag]))
+        namespace = processor.config._namespace
+        overrides = self._normalize_config(namespace, overrides) or {}
+        config = self.get_configuration(tag, overrides)
+        return processor(config=config)

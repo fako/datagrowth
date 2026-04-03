@@ -36,6 +36,16 @@ def test_unregister_tag(registry: Registry) -> None:
     assert len(registry.tags) == 1
 
 
+def test_tag_from_string_lowercase() -> None:
+    tag = Tag.from_string("Test:Value")
+    assert tag.category == "test"
+    assert tag.value == "value"
+    tag = Tag.from_string("TEST:VALUE")
+    assert tag.category == "test"
+    assert tag.value == "value"
+    assert str(tag) == "test:value"
+
+
 def test_tags_by_category(registry: Registry) -> None:
     test_tags = registry.tags_by_category("test")
     assert test_tags == [
