@@ -40,7 +40,7 @@ class Result(BaseModel):
 
 class Resource(BaseModel, Generic[ResourceSignatureType]):
 
-    NAMESPACE: ClassVar[str | Iterable[str] | None] = "resource"
+    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource")
     STORAGE: ClassVar[str | None] = None
     EXTRACTOR: ClassVar[str | None] = None
 
@@ -120,10 +120,9 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             namespace = klass.__dict__.get("NAMESPACE")
             if namespace is None:
                 continue
-            namespace_values = [namespace] if isinstance(namespace, str) else list(namespace)
-            for value in namespace_values:
-                if value and value not in namespaces:
-                    namespaces.append(value)
+            namespace_tags = [namespace] if isinstance(namespace, Tag) else list(namespace)
+            for tag in namespace_tags:
+                namespaces.append(tag.value)
         return namespaces or ["global"]
 
     @model_validator(mode="before")

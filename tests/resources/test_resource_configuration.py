@@ -1,16 +1,17 @@
 import pytest
 
 from datagrowth.configuration import ConfigurationType
+from datagrowth.registry import Tag
 from datagrowth.resources.pydantic import Resource
 
 
 @pytest.fixture
 def mock_resource_class() -> type[Resource]:
     class ParentMockResource(Resource):
-        NAMESPACE = "parent_resource"
+        NAMESPACE = Tag(category="namespace", value="parent_resource")
 
     class MockResource(ParentMockResource):
-        NAMESPACE = ("mock_resource", "mock")
+        NAMESPACE = Tag(category="namespace", value="mock_resource")
 
     return MockResource
 
@@ -57,14 +58,13 @@ def test_resource_dump_can_include_protected_and_private_config() -> None:
 def test_resource_namespace_resolution_from_inheritance_chain(mock_resource_class: type[Resource]) -> None:
     assert mock_resource_class._get_config_namespaces() == [
         "mock_resource",
-        "mock",
         "parent_resource",
         "resource",
     ]
 
     resource = mock_resource_class()
     assert isinstance(resource.config, ConfigurationType)
-    assert resource.config._namespace == ["mock_resource", "mock", "parent_resource", "resource"]
+    assert resource.config._namespace == ["mock_resource", "parent_resource", "resource"]
 
 
 def test_resource_namespace_prefers_mock_override_over_parent(mock_resource_class: type[Resource]) -> None:
