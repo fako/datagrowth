@@ -67,6 +67,7 @@ class Tag(BaseModel):
 @dataclass
 class Registry:
     tags: dict[str, Tag] = field(default_factory=dict)
+    namespaces: set[Tag] = field(default_factory=set)
     classes: dict[Tag, str] = field(default_factory=dict)
     configurations: dict[Tag, ConfigurationType] = field(default_factory=dict)
 
@@ -102,6 +103,34 @@ class Registry:
             self.classes.pop(tag, None)
             self.configurations.pop(tag, None)
             del self.tags[str(tag)]
+
+    #####################
+    # Namespaces
+    #####################
+
+    def register_namespace(self, namespace: str | Tag) -> Tag:
+        if isinstance(namespace, str):
+            namespace = Tag.from_string(namespace)
+        if namespace.category != "namespace":
+            raise ValueError(f"Expected a tag with 'namespace' category but found '{namespace.category}'")
+        self.register_tag(namespace)
+        self.namespaces.add(namespace)
+        return namespace
+
+    def unregister_namespace(self, namespace: str | Tag) -> None:
+        if isinstance(namespace, str):
+            namespace = Tag.from_string(namespace)
+        if namespace.category != "namespace":
+            raise ValueError(f"Expected a tag with 'namespace' category but found '{namespace.category}'")
+        self.unregister_tag(namespace)
+        self.namespaces.remove(namespace)
+        return namespace
+
+    def get_namespace(self, namespace: str) -> Tag:
+        namespace = Tag.from_string(namespace)
+        if namespace not in self.namespaces:
+            raise KeyError(f"{namespace} is not registered as a namespace")
+        return namespace
 
     #####################
     # Classes
