@@ -1,29 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Iterable, Self, Generic, cast
+from typing import Any, ClassVar, Self, Generic, cast
 from uuid import uuid4
 from datetime import datetime, timedelta
-from pydantic import BaseModel, Field, UUID4, field_serializer, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, model_validator
 
 from datagrowth.configuration import ConfigurationType
-from datagrowth.registry import Tag
+from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
 from datagrowth.signatures import Signature
-from datagrowth.resources.protocols import (ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol,
-                                            ResourceType)
-
-
-def build_storage(kind: str) -> ResourceStorageProtocol[ResourceSignatureType, ResourceType] | None:
-    # Placeholder resolver: concrete storage implementations can be registered later.
-    if kind in {"", "none"}:
-        return None
-    raise NotImplementedError(f"Unsupported storage backend: {kind}")
-
-
-def build_extractor(kind: str) -> ResourceExtractorProtocol[ResourceSignatureType, ResourceType] | None:
-    # Placeholder resolver: concrete extractor implementations can be registered later.
-    if kind in {"", "none"}:
-        return None
-    raise NotImplementedError(f"Unsupported extractor backend: {kind}")
+from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol
 
 
 class Result(BaseModel):
@@ -41,11 +26,8 @@ class Result(BaseModel):
 class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource")
-    STORAGE: ClassVar[str | None] = None
-    EXTRACTOR: ClassVar[str | None] = None
-
-    storage: ClassVar[ResourceStorageProtocol["Resource[ResourceSignatureType]"] | None] = None
-    extractor: ClassVar[ResourceExtractorProtocol[ResourceSignatureType, "Resource[ResourceSignatureType]"] | None] = None  # noqa: E501
+    STORAGE: ClassVar[Tag | None] = None
+    EXTRACTOR: ClassVar[Tag | None] = None
 
     id: UUID4 = Field(default_factory=uuid4)
     type: Tag | None = Field(default=None)
@@ -57,14 +39,17 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     metadata: dict[str, Any] = Field(default_factory=dict)
     purge_at: datetime | None = Field(default_factory=lambda: datetime.now() + timedelta(days=30))
 
+    @property
+    def storage(self) -> ResourceStorageProtocol["Resource[ResourceSignatureType]"] | None:
+        return self._storage
+
+    @property
+    def extractor(self) -> ResourceExtractorProtocol[ResourceSignatureType, "Resource[ResourceSignatureType]"] | None:
+        return self._extractor
+
     #####################
     # Publib interface
     #####################
-
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
-        cls.storage = build_storage(cls.STORAGE or "none")
-        cls.extractor = build_extractor(cls.EXTRACTOR or "none")
 
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         # Validate the inputs to arrive at a base Signature
@@ -112,6 +97,14 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     model_config = {
         "arbitrary_types_allowed": True
     }
+
+    _storage: ResourceStorageProtocol["Resource[ResourceSignatureType]"] | None = PrivateAttr(default=None)
+    _extractor: ResourceExtractorProtocol[ResourceSignatureType, "Resource[ResourceSignatureType]"] | None = PrivateAttr(default=None)  # noqa: E501
+
+    def model_post_init(self, __context: Any) -> None:
+        cls = self.__class__
+        self._storage = DATAGROWTH_REGISTRY.get_storage(cls.STORAGE) if cls.STORAGE else None
+        self._extractor = DATAGROWTH_REGISTRY.get_extractor(cls.EXTRACTOR) if cls.EXTRACTOR else None
 
     @classmethod
     def _get_config_namespaces(cls) -> list[str]:
