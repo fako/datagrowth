@@ -4,6 +4,9 @@ from datagrowth.signatures import Signature
 from datagrowth.configuration import ConfigurationType
 
 
+ResourceSignatureType = TypeVar("ResourceSignatureType", bound=Signature)
+
+
 class ResourceProtocol(Protocol):
     """
     A set of methods and properties shared by Resources.
@@ -58,8 +61,13 @@ class ResourceProtocol(Protocol):
         """
         ...
 
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+        """
+        Override this method to turn inputs into a ResourceType specific signature to use for extraction.
+        """
+        ...
 
-ResourceSignatureType = TypeVar("ResourceSignatureType", bound=Signature)
+
 ResourceType = TypeVar("ResourceType", bound=ResourceProtocol)
 
 

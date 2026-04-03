@@ -51,12 +51,18 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     # Publib interface
     #####################
 
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__class__.__name__
+
     def extract(self, *args: Any, **kwargs: Any) -> Self:
-        # Validate the inputs to arrive at a base Signature
+        # Validate the inputs to arrive at a Signature used for extraction
         validated_signature = self.validate_inputs(*args, **kwargs)
         # Try to look up the Signature in storage
         if self.storage is not None:
-            loaded_resource = self.storage.load(validated_signature)
+            # Downgrade Signature to basic format and check against storage if extraction has taken place already
+            storage_signature = Signature(**validated_signature.model_dump(mode="json"))
+            loaded_resource = self.storage.load(storage_signature)
             if loaded_resource is not None:
                 return cast(Self, loaded_resource)
         # Attempt extracting data from the remote as prescribed by prepare_signature method
@@ -64,9 +70,19 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             raise NotImplementedError(
                 f"{self.__class__.__name__} does not specify an extractor or implement the extract method."
             )
-        signature = self.prepare_signature(validated_signature)
-        self.signature = signature
-        return cast(Self, self.extractor.extract(signature))
+        self.signature = validated_signature
+        extracted = self.extractor.extract(validated_signature)
+        if isinstance(extracted, self.__class__):
+            if not extracted.success:
+                extracted.handle_errors()
+            return cast(Self, extracted)
+        self.signature = extracted.signature
+        self.result = extracted.result
+        self.status = extracted.status
+        self.metadata = dict(extracted.metadata)
+        if not self.success:
+            self.handle_errors()
+        return self
 
     def close(self) -> Self:
         if self.storage is not None:
@@ -75,7 +91,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     @property
     def success(self) -> bool:
-        return True
+        raise NotImplementedError
 
     @property
     def content(self) -> tuple[str | None, Any]:
@@ -84,11 +100,11 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         data = self.result.body if self.success else self.result.errors
         return self.result.content_type, data
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> Signature:
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
         raise NotImplementedError
 
-    def prepare_signature(self, signature: Signature) -> ResourceSignatureType:
-        raise NotImplementedError
+    def handle_errors(self) -> None:
+        return None
 
     #####################
     # Pydantic plumbing

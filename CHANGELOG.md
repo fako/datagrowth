@@ -21,6 +21,7 @@ That version aims to add ``PromptResource``, but also overhauls some internals t
 * Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
 Good for snapshot testing.
 * Copies ``HttpResource.PARAMETERS`` before returning it when creating a URI. This makes the parameter constant immutable and might have unexpected effects if other code depends on mutability.
+* The ``HttpResource.handle_errors`` method no longer returns a boolean, but returns None instead.
 * Removes ``ShellResource`` classes meant to interface with Kaldi.
 * Makes ``ConfigurationField`` look at ``CONFIG_NAMESPACE`` of parent classes as well as the class that uses that field. This introduces inheritance for configurations.
 * ``HttpResource`` now uses ``http_resource`` as its main namespace.

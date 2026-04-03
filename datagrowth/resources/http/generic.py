@@ -572,7 +572,7 @@ class HttpResource(Resource):
             message = "{} > {} \n\n {}".format(class_name, self.status, self.body)
             raise DGHttpError40X(message, resource=self)
         else:
-            return True
+            return None
 
     @staticmethod
     def _get_data_key(request, headers=None):

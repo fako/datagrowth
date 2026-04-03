@@ -21,12 +21,14 @@ global:  # treat all settings below global as-if they are defined at root level
 http_resource:
   requests_proxies: null
   requests_verify: true
+  timeout: 30
   user_agent: null
   continuation_limit: 1
   interval_duration: 0
   concat_args_size: 0
   concat_args_symbol: "|"
   allow_redirects: true
+  allow_get_body: false
   backoff_delays: [2, 4, 8, 16]
   force_data_file_to_payload: false
 

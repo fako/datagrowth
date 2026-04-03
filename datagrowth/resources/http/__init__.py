@@ -1,4 +1,6 @@
-# This file implements a lazy loading pattern to prevent Django from being imported too often.
+from datagrowth.resources.http.extractors.requests import RequestsExtractor
+
+# Below this file implements a lazy loading pattern to prevent Django from being imported too often.
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:

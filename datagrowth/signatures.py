@@ -32,11 +32,11 @@ class Signature(BaseModel):
     def set_hash(cls, values: Any) -> Any:
         if isinstance(values, dict):
             uri = values.get("uri")
-            hash = values.get("hash")
+            hash_ = values.get("hash")
             data = values.get("data") or {}
-            if uri is None or hash is not None:
+            if uri is None or hash_ is not None:
                 return values
             # copy to avoid mutating caller's dict
             values = dict(values)
-            values["hash"] = cls._compute_hash(uri, data) or hash
+            values["hash"] = cls._compute_hash(uri, data) or hash_
         return values
