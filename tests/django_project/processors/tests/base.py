@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.apps import apps
 
+from datagrowth.registry import DATAGROWTH_REGISTRY
 from datagrowth.processors import (Processor, ExtractProcessor, GrowthProcessor, HttpGrowthProcessor,
                                    HttpSeedingProcessor, TransformProcessor)
 from processors.processors import ProcessorMock, MockNumberProcessor, MockFilterProcessor
@@ -29,7 +30,10 @@ class TestDatagrowthProcessorDjangoConfig(TestCase):
 
     def test_load_processors(self):
         self.config.load_processors()
-        self.assertEqual(self.config.processors, self.expected_processors)
+        processor_tags = DATAGROWTH_REGISTRY.tags_by_category("processor")
+        self.assertEqual(len(processor_tags), len(self.expected_processors))
+        for name, expected_class in self.expected_processors.items():
+            self.assertEqual(self.config.get_processor_class(name), expected_class)
 
     def test_get_processor_class(self):
         self.assertEqual(self.config.get_processor_class("Processor"), Processor)

@@ -96,6 +96,12 @@ class Registry:
     def tags_by_value(self, value: str) -> list[Tag]:
         return [tag for tag in self.tags.values() if tag.value == value]
 
+    def clear_category(self, category: str) -> None:
+        for tag in self.tags_by_category(category):
+            self.classes.pop(tag, None)
+            self.configurations.pop(tag, None)
+            del self.tags[str(tag)]
+
     #####################
     # Classes
     #####################

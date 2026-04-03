@@ -58,6 +58,17 @@ def test_tags_by_category(registry: Registry) -> None:
     ]
 
 
+def test_clear_category() -> None:
+    tags = Tag.from_strings("fruit:apple", "fruit:banana", "color:red", "color:blue")
+    registry = Registry.from_tags(tags)
+    registry.clear_category("fruit")
+    assert registry.tags_by_category("fruit") == []
+    assert "fruit:apple" not in registry.tags
+    assert "fruit:banana" not in registry.tags
+    assert "color:red" in registry.tags
+    assert "color:blue" in registry.tags
+
+
 def test_tags_by_value(registry: Registry) -> None:
     test_tags = registry.tags_by_value("value")
     assert test_tags == [
