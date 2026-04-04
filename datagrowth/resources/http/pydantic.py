@@ -2,7 +2,7 @@ from typing import Any, ClassVar
 
 from string import Formatter
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, HttpUrl
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.registry import Tag
@@ -256,3 +256,31 @@ class HttpResource(Resource[HttpSignature]):
             raise DGHttpError40X(message, resource=self)
         else:
             return None
+
+
+class URLResourceValidator(InputsValidator):
+    args: list[HttpUrl] = Field(min_length=1, max_length=1)
+    kwargs: dict[str, Any] = Field(default_factory=dict, min_length=0, max_length=0)
+
+
+class URLResource(HttpResource):
+
+    MODE = HttpMode.NONE
+
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
+        return URLResourceValidator(args=args, kwargs=kwargs)
+
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
+        url = str(args[0])
+        auth = HttpAuth(headers=self.auth_headers(), parameters={})
+        return HttpSignature(
+            uri=self.uri_from_url(url),
+            args=args,
+            kwargs=kwargs,
+            data=None,
+            method=HttpMethod.GET,
+            url=url,
+            headers=self.headers(*args, **kwargs),
+            auth=auth if auth.headers else None,
+            mode=self.MODE,
+        )
