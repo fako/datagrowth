@@ -6,12 +6,21 @@ from pathlib import Path
 import pytest
 
 from datagrowth.registry import Tag
-from datagrowth.resources.http.signature import HttpMode
+from datagrowth.resources.http.signature import HttpAuth, HttpMode
 from datagrowth.vendors.apache.tika.resources import HttpTikaResource
 
 
 class MockHttpTikaResource(HttpTikaResource):
     STORAGE: ClassVar[Tag] = Tag(category="storage", value="file_system")
+
+
+class MockHttpTikaResourceAuth(MockHttpTikaResource):
+
+    def auth_headers(self) -> dict[str, str]:
+        return {"Authorization": "Bearer micro-service-token"}
+
+    def auth_parameters(self) -> dict[str, str]:
+        return {"api_key": "micro-service-key"}
 
 
 @pytest.fixture
@@ -20,24 +29,34 @@ def resource() -> MockHttpTikaResource:
     return resource
 
 
-def test_validate_inputs_accepts_explicit_document_bytes(resource: HttpTikaResource) -> None:
+# ==============================
+# validate_inputs
+# ==============================
+
+
+def test_validate_inputs_accepts_explicit_document_bytes(resource: MockHttpTikaResource) -> None:
     inputs = resource.validate_inputs("semantic", document=b"pdf-bytes")
     assert inputs.args == ["put", "semantic"]
     assert inputs.kwargs["mode"] == "semantic"
     assert inputs.kwargs["document"] == b"pdf-bytes"
 
 
-def test_validate_inputs_rejects_multiple_sources(resource: HttpTikaResource) -> None:
+def test_validate_inputs_rejects_multiple_sources(resource: MockHttpTikaResource) -> None:
     with pytest.raises(ValueError, match="Exactly one of 'document', 'file', or 'url' must be set"):
         resource.validate_inputs(document=b"pdf-bytes", url="https://example.com/input.pdf")
 
 
-def test_validate_inputs_rejects_document_string(resource: HttpTikaResource) -> None:
+def test_validate_inputs_rejects_document_string(resource: MockHttpTikaResource) -> None:
     with pytest.raises(ValueError, match="document"):
         resource.validate_inputs(document="https://example.com/input.pdf")
 
 
-def test_prepare_inputs_uses_fetch_headers_for_url(resource: HttpTikaResource) -> None:
+# ==============================
+# prepare_inputs
+# ==============================
+
+
+def test_prepare_inputs_uses_fetch_headers_for_url(resource: MockHttpTikaResource) -> None:
     signature = resource.prepare_inputs("put", mode="semantic", url="https://example.com/input.pdf")
     assert signature.mode == HttpMode.BYTES
     assert signature.data == b"https://example.com/input.pdf"
@@ -46,7 +65,7 @@ def test_prepare_inputs_uses_fetch_headers_for_url(resource: HttpTikaResource) -
     assert signature.headers["fetchKey"] == "https://example.com/input.pdf"
 
 
-def test_prepare_inputs_sets_bytes_payload_for_document(resource: HttpTikaResource) -> None:
+def test_prepare_inputs_sets_bytes_payload_for_document(resource: MockHttpTikaResource) -> None:
     signature = resource.prepare_inputs("put", mode="structure", document=b"pdf-bytes")
     assert signature.mode == HttpMode.BYTES
     assert signature.data == b"pdf-bytes"
@@ -54,12 +73,36 @@ def test_prepare_inputs_sets_bytes_payload_for_document(resource: HttpTikaResour
     assert signature.headers["X-Tika-PDFextractMarkedContent"] == "false"
 
 
-def test_prepare_inputs_reads_bytes_payload_from_file(resource: HttpTikaResource, tmp_path: Path) -> None:
+def test_prepare_inputs_reads_bytes_payload_from_file(resource: MockHttpTikaResource, tmp_path: Path) -> None:
     file_path = tmp_path / "document.pdf"
     file_path.write_bytes(b"file-bytes")
     signature = resource.prepare_inputs("put", mode="structure", file=file_path)
     assert signature.mode == HttpMode.BYTES
     assert signature.data == b"file-bytes"
+
+
+# ==============================
+# prepare_inputs (auth)
+# ==============================
+
+
+def test_prepare_inputs_includes_auth_but_excludes_it_from_dump() -> None:
+    resource = MockHttpTikaResourceAuth()
+    signature = resource.prepare_inputs("put", mode="semantic", document=b"x")
+
+    assert signature.auth == HttpAuth(
+        headers={"Authorization": "Bearer micro-service-token"},
+        parameters={"api_key": "micro-service-key"},
+    )
+    dumped_signature = signature.model_dump()
+    assert "auth" not in dumped_signature
+    assert "micro-service-token" not in str(dumped_signature)
+    assert "micro-service-key" not in str(dumped_signature)
+
+
+# ==============================
+# extract
+# ==============================
 
 
 @pytest.mark.snapshots

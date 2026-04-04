@@ -7,10 +7,9 @@ import pytest
 import requests
 
 from datagrowth.configuration import ConfigurationType
-from datagrowth.registry import Tag
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
 from datagrowth.resources.http.pydantic import MicroServiceResource
-from datagrowth.resources.http.signature import HttpAuth, HttpMode, HttpSignature
+from datagrowth.resources.http.signature import HttpMode, HttpSignature
 
 
 class MockMicroTikaResource(MicroServiceResource):
@@ -20,17 +19,6 @@ class MockMicroTikaResource(MicroServiceResource):
         "Accept": "application/json",
     }
     MODE: ClassVar[HttpMode] = HttpMode.JSON
-
-
-class MockMicroTikaResourceAuth(MockMicroTikaResource):
-
-    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="micro_service_auth_mock")
-
-    def auth_headers(self) -> dict[str, str]:
-        return {"Authorization": "Bearer micro-service-token"}
-
-    def auth_parameters(self) -> dict[str, str]:
-        return {"api_key": "micro-service-key"}
 
 
 class MicroServiceUnknownName(MicroServiceResource):
@@ -161,29 +149,3 @@ def test_prepare_inputs_kwarg_overrides_connection_fields(resource: MockMicroTik
     signature = resource.prepare_inputs("get", protocol="https", host="tika.example.com", path="/custom")
 
     assert signature.url == "https://tika.example.com/custom"
-
-
-def test_prepare_inputs_includes_auth_but_excludes_it_from_dump(mocked_session: Mock) -> None:
-    config = ConfigurationType(namespace=["micro_service", "http_resource", "global"])
-    config.update({
-        "connections": {
-            "tika": {
-                "protocol": "http",
-                "host": "localhost:9998",
-                "path": "/rmeta/text",
-            },
-        },
-    })
-    resource = MockMicroTikaResourceAuth(config=config)
-    assert isinstance(resource.extractor, RequestsExtractor)
-    resource.extractor.set_session(mocked_session)
-    signature = resource.prepare_inputs("get")
-
-    assert signature.auth == HttpAuth(
-        headers={"Authorization": "Bearer micro-service-token"},
-        parameters={"api_key": "micro-service-key"},
-    )
-    dumped_signature = signature.model_dump()
-    assert "auth" not in dumped_signature
-    assert "micro-service-token" not in str(dumped_signature)
-    assert "micro-service-key" not in str(dumped_signature)
