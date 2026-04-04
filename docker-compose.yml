@@ -12,7 +12,7 @@ services:
       - ./tests/databases/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - postgres-datagrowth:/var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
 
   mysql:
     image: mysql:8.0
@@ -26,7 +26,7 @@ services:
       - ./tests/databases/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mysql-datagrowth:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
 
   mariadb:
     image: mariadb:11.2
@@ -40,13 +40,13 @@ services:
       - ./tests/databases/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mariadb-datagrowth:/var/lib/mysql
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
 
   redis:
     image: redis
     command: redis-server
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
 volumes:
   postgres-datagrowth:
