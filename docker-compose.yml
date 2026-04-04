@@ -48,6 +48,11 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
 
+  tika:
+    image: apache/tika:2.9.2.1
+    ports:
+      - "127.0.0.1:9998:9998"
+
 volumes:
   postgres-datagrowth:
     driver: local

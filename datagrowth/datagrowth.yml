@@ -36,6 +36,9 @@ shell_resource:
   interval_duration: 0
   bin_dir: null
 
+tika_resource:
+  force_data_file_to_payload: true
+
 storage:
   allow_read: true
   allow_write: true
