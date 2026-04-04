@@ -284,3 +284,33 @@ class URLResource(HttpResource):
             auth=auth if auth.headers else None,
             mode=self.MODE,
         )
+
+
+class MicroServiceResource(HttpResource):
+
+    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="micro_service")
+    MICRO_SERVICE: ClassVar[str | None] = None
+    URI_TEMPLATE: ClassVar[str] = "{protocol}://{host}{path}"
+
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
+        # Try to load micro service configuration and assert correctness
+        assert self.MICRO_SERVICE is not None, \
+            "You should specify a micro service name under the MICRO_SERVICE attribute"
+        connection = self.config.connections.get(self.MICRO_SERVICE, None)
+        assert connection is not None, \
+            '"{}" is an unknown micro service in the "connections" configuration. ' \
+            'Is it added through register_defaults?'.format(self.MICRO_SERVICE)
+        protocol = connection.get("protocol", None)
+        host = connection.get("host", None)
+        path = connection.get("path", None)
+        assert protocol, "A protocol should be specified in the micro service configuration."
+        assert host, "A host should be specified in the micro service configuration"
+        assert path, "A path should be specified in the micro service configuration"
+        # Build the signature for the micro service
+        micro_service_kwargs = {
+            "protocol": protocol,
+            "host": host,
+            "path": path,
+        }
+        micro_service_kwargs.update(**kwargs)
+        return super().prepare_inputs(*args, **micro_service_kwargs)
