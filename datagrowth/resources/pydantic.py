@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, mod
 
 from datagrowth.configuration import ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
-from datagrowth.signatures import Signature
+from datagrowth.signatures import Signature, InputsValidator
 from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol
 
 
@@ -57,11 +57,13 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         # Validate the inputs to arrive at a Signature used for extraction
-        validated_signature = self.validate_inputs(*args, **kwargs)
+        inputs = self.validate_inputs(*args, **kwargs)
+        signature = self.prepare_inputs(*inputs.args, **inputs.kwargs)
+
         # Try to look up the Signature in storage
         if self.storage is not None:
             # Downgrade Signature to basic format and check against storage if extraction has taken place already
-            storage_signature = Signature(**validated_signature.model_dump(mode="json"))
+            storage_signature = Signature(**signature.model_dump(mode="json"))
             loaded_resource = self.storage.load(storage_signature)
             if loaded_resource is not None:
                 return cast(Self, loaded_resource)
@@ -70,8 +72,8 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             raise NotImplementedError(
                 f"{self.__class__.__name__} does not specify an extractor or implement the extract method."
             )
-        self.signature = validated_signature
-        extracted = self.extractor.extract(validated_signature)
+        self.signature = signature
+        extracted = self.extractor.extract(signature)
         if isinstance(extracted, self.__class__):
             if not extracted.success:
                 extracted.handle_errors()
@@ -100,7 +102,10 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         data = self.result.body if self.success else self.result.errors
         return self.result.content_type, data
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
+        return InputsValidator(args=args, kwargs=kwargs)
+
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
         raise NotImplementedError
 
     def handle_errors(self) -> None:

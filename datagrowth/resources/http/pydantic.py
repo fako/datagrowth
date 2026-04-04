@@ -2,11 +2,23 @@ from typing import Any, ClassVar
 
 from string import Formatter
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from pydantic import Field, field_validator
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.registry import Tag
-from datagrowth.resources.http.signature import Signature, HttpAuth, HttpSignature, HttpMode
+from datagrowth.signatures import InputsValidator
+from datagrowth.resources.http.signature import HttpAuth, HttpSignature, HttpMode, HttpMethod
 from datagrowth.resources.pydantic import Resource
+
+
+class HttpResourceInputsValidator(InputsValidator):
+    args: list[Any] = Field(min_length=1)
+
+    @field_validator("args")
+    @classmethod
+    def validate_method(cls, args: list[Any]) -> list[Any]:
+        HttpMethod(args[0])
+        return args
 
 
 class HttpResource(Resource[HttpSignature]):
@@ -199,7 +211,10 @@ class HttpResource(Resource[HttpSignature]):
     # Resource protocol
     #####################
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> Signature:
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> HttpResourceInputsValidator:
+        return HttpResourceInputsValidator(args=args, kwargs=kwargs)
+
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
         method = args[0]
         url_arguments = args[1:] if len(args) > 1 else []
         url, data_arguments = self._create_url(*url_arguments, **kwargs)

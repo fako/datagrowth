@@ -1,6 +1,6 @@
 from typing import Protocol, Any, Self, TypeVar
 
-from datagrowth.signatures import Signature
+from datagrowth.signatures import Signature, InputsValidator
 from datagrowth.configuration import ConfigurationType
 
 
@@ -61,7 +61,13 @@ class ResourceProtocol(Protocol):
         """
         ...
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
+        """
+        Override this method to run a (Pydantic) validator against the inputs before they get processed.
+        """
+        ...
+
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
         """
         Override this method to turn inputs into a ResourceType specific signature to use for extraction.
         """

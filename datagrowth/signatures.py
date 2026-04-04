@@ -4,6 +4,11 @@ import json
 from pydantic import BaseModel, Field, model_validator
 
 
+class InputsValidator(BaseModel):
+    args: list[Any]
+    kwargs: dict[str, Any]
+
+
 class Signature(BaseModel):
     uri: str
     data: dict[str, Any] | None = Field(default=None)

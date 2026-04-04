@@ -9,6 +9,8 @@ import requests
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
 
+from pydantic import ValidationError
+
 from datagrowth.registry import Tag
 from datagrowth.exceptions import DGHttpError40X, DGHttpError50X
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
@@ -74,8 +76,32 @@ def resource(mocked_session: Mock) -> HttpResourceMock:
     return resource
 
 
-def test_validate_inputs_creates_http_signature_with_template_data(resource: HttpResourceMock) -> None:
-    signature = resource.validate_inputs("get", "books", slug="python", page="2")
+# ==============================
+# validate_inputs
+# ==============================
+
+def test_validate_inputs_accepts_supported_http_methods(resource: HttpResourceMock) -> None:
+    for method in ("get", "post", "put", "head", "patch"):
+        inputs = resource.validate_inputs(method, "books", slug="python", page="1")
+        assert inputs.args[0] == method
+
+
+def test_validate_inputs_rejects_unsupported_method(resource: HttpResourceMock) -> None:
+    with pytest.raises(ValidationError, match="args"):
+        resource.validate_inputs("delete", "books", slug="python", page="1")
+
+
+def test_validate_inputs_rejects_empty_call(resource: HttpResourceMock) -> None:
+    with pytest.raises(ValidationError, match="too_short"):
+        resource.validate_inputs()
+
+
+# ==============================
+# prepare_inputs
+# ==============================
+
+def test_prepare_inputs_creates_http_signature_with_template_data(resource: HttpResourceMock) -> None:
+    signature = resource.prepare_inputs("get", "books", slug="python", page="2")
 
     assert isinstance(signature, HttpSignature)
     assert signature.url == "https://example.com/books/python?source=tests&page=2"
@@ -85,19 +111,19 @@ def test_validate_inputs_creates_http_signature_with_template_data(resource: Htt
     assert signature.headers == {"Accept": "application/json"}
 
 
-def test_validate_inputs_rejects_invalid_url_placeholders(resource: HttpResourceMock) -> None:
+def test_prepare_inputs_rejects_invalid_url_placeholders(resource: HttpResourceMock) -> None:
     with pytest.raises(ValueError, match="expects exactly 1 positional args"):
-        resource.validate_inputs("get")
+        resource.prepare_inputs("get")
 
     with pytest.raises(KeyError, match="Missing URI_TEMPLATE variables: page, slug"):
-        resource.validate_inputs("get", "books")
+        resource.prepare_inputs("get", "books")
 
 
-def test_validate_inputs_includes_auth_but_excludes_it_from_dump(mocked_session: Mock) -> None:
+def test_prepare_inputs_includes_auth_but_excludes_it_from_dump(mocked_session: Mock) -> None:
     resource = HttpResourceAuthMock()
     assert isinstance(resource.extractor, RequestsExtractor)
     resource.extractor.set_session(mocked_session)
-    signature = resource.validate_inputs("get", "books", slug="python", page="2")
+    signature = resource.prepare_inputs("get", "books", slug="python", page="2")
 
     assert signature.auth == HttpAuth(
         headers={"Authorization": "Bearer super-secret-token"},
@@ -108,6 +134,10 @@ def test_validate_inputs_includes_auth_but_excludes_it_from_dump(mocked_session:
     assert "super-secret-token" not in str(dumped_signature)
     assert "super-secret-key" not in str(dumped_signature)
 
+
+# ==============================
+# extract
+# ==============================
 
 def test_resource_extract_get_uses_requests_extractor(resource: HttpResourceMock, mocked_session: Mock) -> None:
     mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
@@ -155,6 +185,36 @@ def test_resource_extract_applies_auth_to_request_not_signature_dump(mocked_sess
     assert prepared_request.url == "https://example.com/books/python?source=tests&page=1&api_key=super-secret-key"
 
 
+def test_resource_extract_post_sends_json_data(resource: HttpResourceMock, mocked_session: Mock) -> None:
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+
+    _ = resource.extract("post", "books", slug="python", page="1", query="django")
+
+    mocked_session.send.assert_called_once()
+    prepared_request = mocked_session.send.call_args.args[0]
+    assert prepared_request.method == "POST"
+    assert prepared_request.url == "https://example.com/books/python?source=tests&page=1"
+    assert json.loads(prepared_request.body.decode("utf-8")) == {"query": "django"}
+
+
+def test_resource_extract_retries_on_retryable_status(resource: HttpResourceMock, mocked_session: Mock) -> None:
+    assert isinstance(resource.extractor, RequestsExtractor)
+    resource.extractor.config.update({"backoff_delays": [0]})
+    mocked_session.send.side_effect = [
+        make_response(502, "{\"error\": true}"),
+        make_response(200, "{\"ok\": true}"),
+    ]
+
+    extracted_resource = resource.extract("get", "books", slug="python", page="1")
+
+    assert extracted_resource.status == 200
+    assert mocked_session.send.call_count == 2
+
+# ==============================
+# results, success, errors
+# ==============================
+
+
 def test_resource_success_property_depends_on_http_status(resource: HttpResourceMock) -> None:
     resource.status = 200
     resource.result = None
@@ -199,29 +259,3 @@ def test_resource_handle_errors_returns_true_for_success(resource: HttpResourceM
     resource.result = Result(content_type="application/json", body="{\"ok\": true}", errors=None)
 
     assert resource.handle_errors() is None
-
-
-def test_resource_extract_post_sends_json_data(resource: HttpResourceMock, mocked_session: Mock) -> None:
-    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
-
-    _ = resource.extract("post", "books", slug="python", page="1", query="django")
-
-    mocked_session.send.assert_called_once()
-    prepared_request = mocked_session.send.call_args.args[0]
-    assert prepared_request.method == "POST"
-    assert prepared_request.url == "https://example.com/books/python?source=tests&page=1"
-    assert json.loads(prepared_request.body.decode("utf-8")) == {"query": "django"}
-
-
-def test_resource_extract_retries_on_retryable_status(resource: HttpResourceMock, mocked_session: Mock) -> None:
-    assert isinstance(resource.extractor, RequestsExtractor)
-    resource.extractor.config.update({"backoff_delays": [0]})
-    mocked_session.send.side_effect = [
-        make_response(502, "{\"error\": true}"),
-        make_response(200, "{\"ok\": true}"),
-    ]
-
-    extracted_resource = resource.extract("get", "books", slug="python", page="1")
-
-    assert extracted_resource.status == 200
-    assert mocked_session.send.call_count == 2
