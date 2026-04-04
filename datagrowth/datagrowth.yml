@@ -15,7 +15,7 @@ global:  # treat all settings below global as-if they are defined at root level
   purge_after: {}
   purge_immediately: false
   cache_only: false
-  resource_exception_log_level: 10
+  resource_exception_log_level: 10  # debug, see: https://docs.python.org/3/library/logging.html#logging-levels
   resource_exception_reraise: false
 
 http_resource:
