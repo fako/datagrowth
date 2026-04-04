@@ -1,4 +1,5 @@
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
+from datagrowth.resources.storage.file_system import FileSystemStorage
 
 # Below this file implements a lazy loading pattern to prevent Django from being imported too often.
 from typing import TYPE_CHECKING, Any

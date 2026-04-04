@@ -36,6 +36,20 @@ shell_resource:
   interval_duration: 0
   bin_dir: null
 
+storage:
+  allow_read: true
+  allow_write: true
+  allow_save: true
+  allow_load: true
+  force_save: false
+  force_load: false
+  snapshots: false
+  directories:
+    tmp: ["/", "tmp"]
+    project: null
+    data: ["/", "tmp", "data"]
+    snapshots: ["/", "tmp", "snapshots"]
+
 growth_processor:
   extractor: "ExtractProcessor.extract_from_resource"
   depends_on: null

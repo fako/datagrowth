@@ -1,4 +1,5 @@
 from typing import Protocol, Any, Self, TypeVar
+from pathlib import PurePath
 
 from datagrowth.signatures import Signature, InputsValidator
 from datagrowth.configuration import ConfigurationType
@@ -81,10 +82,16 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
 
     config: ConfigurationType
 
-    def save(self, resource: ResourceType) -> None:
+    def save(self, resource: ResourceType) -> Signature:
         ...
 
     def load(self, signature: Signature) -> ResourceType | None:
+        ...
+
+    def read(self, path: PurePath) -> bytes | str:
+        ...
+
+    def write(self, data: bytes | str) -> PurePath:
         ...
 
 
