@@ -11,7 +11,7 @@ class InputsValidator(BaseModel):
 
 class Signature(BaseModel):
     uri: str
-    data: dict[str, Any] | None = Field(default=None)
+    data: dict[str, Any] | bytes | None = Field(default=None)
     hash: int = Field(default=0)
     args: tuple[Any, ...] = Field(default_factory=tuple)
     kwargs: dict[str, Any] = Field(default_factory=dict)
@@ -28,8 +28,26 @@ class Signature(BaseModel):
         return self.hash
 
     @staticmethod
-    def _compute_hash(uri: str, data: dict[str, Any]) -> int:
-        canonical = json.dumps({"uri": uri, "data": data}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    def _canonicalize_data(data: Any) -> Any:
+        if isinstance(data, bytes):
+            return {
+                "__type__": "bytes",
+                "sha256": hashlib.sha256(data).hexdigest(),
+                "length": len(data),
+            }
+        if isinstance(data, dict):
+            return {key: Signature._canonicalize_data(value) for key, value in data.items()}
+        if isinstance(data, list):
+            return [Signature._canonicalize_data(value) for value in data]
+        if isinstance(data, tuple):
+            return [Signature._canonicalize_data(value) for value in data]
+        return data
+
+    @staticmethod
+    def _compute_hash(uri: str, data: dict[str, Any] | bytes) -> int:
+        canonical_data = Signature._canonicalize_data(data)
+        canonical = json.dumps({"uri": uri, "data": canonical_data}, sort_keys=True, separators=(",", ":"),
+                               ensure_ascii=False)
         return int(hashlib.sha256(canonical.encode("utf-8")).hexdigest(), 16)
 
     @model_validator(mode="before")

@@ -63,6 +63,14 @@ def test_signature_respects_explicit_hash() -> None:
     assert s1.hash == explicit_hash
 
 
+def test_signature_hash_bytes_payload() -> None:
+    s1 = Signature(uri="example://resource", data=b"hello-world")
+    s2 = Signature(uri="example://resource", data=b"hello-world")
+    s3 = Signature(uri="example://resource", data=b"goodbye-world")
+    assert s1.hash == s2.hash
+    assert s1.hash != s3.hash
+
+
 def test_resource_eq_with_non_resource_returns_false(resource_tag: Tag) -> None:
     s1 = Signature(uri="example://resource", data={"a": 1})
     r1 = Resource(type=resource_tag, signature=s1)
