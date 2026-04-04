@@ -62,3 +62,32 @@ Always write these cases like this:
                  private: Sequence[str] = ("_private", "_defaults", "_namespace",)) -> None:
         ...
 ```
+
+
+Working on Resources
+--------------------
+
+When developing `Resource` integrations, follow this workflow:
+
+1) Live-first development
+- Use real-world input and a live dependency first (for example: local Tika, vendor API).
+- Keep tests on the normal `Resource.extract(...).close()` path while iterating.
+- Do not bypass the public extraction flow unless a test is explicitly about a lower-level helper.
+
+2) Assert contract behavior
+- Assert the behavior we care about for the resource contract (status, content shape, key metadata).
+- Prefer assertions that describe the boundary contract over implementation details.
+
+3) Snapshot lock-in (boundary isolation)
+- After behavior is correct, record snapshots with `invoke test.run --snapshots`.
+- In non-snapshot runs, tests should load from snapshots and avoid live calls.
+- Snapshot mode is for updating fixtures, not for changing normal assertion intent.
+
+4) Contract change workflow
+- If upstream contract changes, re-run with `--snapshots` to refresh captured responses.
+- Then update the `Resource` implementation/tests to match the new contract.
+
+Guardrails:
+- Do not rewrite tests to bypass `Resource.extract()` just to force an error path, unless explicitly requested.
+- Do not add `@pytest.mark.snapshots` to tests that are not part of snapshot recording/update workflow.
+- Keep snapshot and non-snapshot behavior explicit and aligned with the same public resource flow.

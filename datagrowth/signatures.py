@@ -1,7 +1,8 @@
 from typing import Any
+import base64
 import hashlib
 import json
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
 
 
 class InputsValidator(BaseModel):
@@ -26,6 +27,62 @@ class Signature(BaseModel):
 
     def __hash__(self) -> int:
         return self.hash
+
+    @staticmethod
+    def _encode_bytes_payload(value: Any) -> Any:
+        if isinstance(value, bytes):
+            return {
+                "__type__": "bytes",
+                "encoding": "base64",
+                "value": base64.b64encode(value).decode("ascii"),
+            }
+        if isinstance(value, dict):
+            return {key: Signature._encode_bytes_payload(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [Signature._encode_bytes_payload(item) for item in value]
+        if isinstance(value, tuple):
+            return [Signature._encode_bytes_payload(item) for item in value]
+        return value
+
+    @staticmethod
+    def _decode_bytes_payload(value: Any) -> Any:
+        if isinstance(value, dict):
+            if value.get("__type__") == "bytes":
+                encoded = value.get("value")
+                if not isinstance(encoded, str):
+                    raise TypeError("Serialized bytes payload should contain a base64 string value.")
+                return base64.b64decode(encoded.encode("ascii"))
+            return {key: Signature._decode_bytes_payload(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [Signature._decode_bytes_payload(item) for item in value]
+        return value
+
+    @field_serializer("data", when_used="json")
+    def serialize_data(self, data: dict[str, Any] | bytes | None) -> Any:
+        return self._encode_bytes_payload(data)
+
+    @field_serializer("kwargs", when_used="json")
+    def serialize_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        return self._encode_bytes_payload(kwargs)
+
+    @field_serializer("args", when_used="json")
+    def serialize_args(self, args: tuple[Any, ...]) -> list[Any]:
+        return self._encode_bytes_payload(args)
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def deserialize_data(cls, data: Any) -> Any:
+        return cls._decode_bytes_payload(data)
+
+    @field_validator("kwargs", mode="before")
+    @classmethod
+    def deserialize_kwargs(cls, kwargs: Any) -> Any:
+        return cls._decode_bytes_payload(kwargs)
+
+    @field_validator("args", mode="before")
+    @classmethod
+    def deserialize_args(cls, args: Any) -> Any:
+        return cls._decode_bytes_payload(args)
 
     @staticmethod
     def _canonicalize_data(data: Any) -> Any:

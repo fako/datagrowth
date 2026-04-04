@@ -1,0 +1,5 @@
+storage:
+  allow_save: false
+  directories:
+    data: "snapshots"
+    snapshots: "snapshots"

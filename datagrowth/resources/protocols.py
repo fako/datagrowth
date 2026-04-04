@@ -1,5 +1,5 @@
 from typing import Protocol, Any, Self, TypeVar
-from pathlib import PurePath
+from pathlib import Path
 
 from datagrowth.signatures import Signature, InputsValidator
 from datagrowth.configuration import ConfigurationType
@@ -88,10 +88,10 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
     def load(self, signature: Signature) -> ResourceType | None:
         ...
 
-    def read(self, path: PurePath) -> bytes | str:
+    def read(self, signature: Signature, filename: str) -> bytes | str:
         ...
 
-    def write(self, data: bytes | str) -> PurePath:
+    def write(self, signature: Signature, filename: str, data: bytes | str) -> Path:
         ...
 
 

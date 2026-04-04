@@ -75,18 +75,18 @@ def resource(mocked_session: Mock) -> HttpResourceMock:
 # ==============================
 
 
-def configure_storage(resource: HttpResourceMock, root: Path, snapshots: bool = False, allow_save: bool = True) -> None:
+def configure_storage(resource: HttpResourceMock, root: Path, snapshots: bool = False,
+                      allow_load: bool = True, allow_save: bool = True) -> None:
     assert isinstance(resource.storage, FileSystemStorage)
     resource.storage.config.update({
         "allow_read": True,
         "allow_write": True,
         "allow_save": allow_save,
-        "allow_load": True,
+        "allow_load": allow_load,
         "force_save": False,
         "force_load": False,
         "snapshots": snapshots,
         "directories": {
-            "tmp": str(root / "tmp"),
             "project": None,
             "data": str(root / "data"),
             "snapshots": str(root / "snapshots"),
@@ -102,10 +102,10 @@ def test_extract_close_saves_resource_in_data_directory(resource: HttpResourceMo
     extracted.close()
 
     assert extracted.signature is not None
-    save_path = tmp_path / "data" / "{}.json".format(extracted.signature.hash)
+    save_path = tmp_path / "data" / str(extracted.signature.hash) / "data.json"
     assert save_path.exists() is True
     assert save_path.read_text(encoding="utf-8") == extracted.model_dump_json(indent=4)
-    assert (tmp_path / "snapshots" / "{}.json".format(extracted.signature.hash)).exists() is False
+    assert (tmp_path / "snapshots" / str(extracted.signature.hash) / "data.json").exists() is False
 
 
 def test_extract_close_saves_resource_in_snapshots_directory(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
@@ -117,19 +117,24 @@ def test_extract_close_saves_resource_in_snapshots_directory(resource: HttpResou
     extracted.close()
 
     assert extracted.signature is not None
-    save_path = tmp_path / "snapshots" / "{}.json".format(extracted.signature.hash)
+    save_path = tmp_path / "snapshots" / str(extracted.signature.hash) / "data.json"
     assert save_path.exists() is True
     assert save_path.read_text(encoding="utf-8") == extracted.model_dump_json(indent=4)
-    assert (tmp_path / "data" / "{}.json".format(extracted.signature.hash)).exists() is False
+    assert (tmp_path / "data" / str(extracted.signature.hash) / "data.json").exists() is False
 
 
-def test_extract_close_respects_storage_allow_save(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+def test_extract_close_skips_save_when_storage_disallows_it(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
     mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
     configure_storage(resource, root=tmp_path, snapshots=False, allow_save=False)
 
     extracted = resource.extract("get", "books", slug="python", page="1")
-    with pytest.raises(PermissionError, match="allow_save=false"):
-        extracted.close()
+    extracted.close()
+
+    assert extracted.signature is not None
+    data_path = tmp_path / "data" / str(extracted.signature.hash) / "data.json"
+    snapshots_path = tmp_path / "snapshots" / str(extracted.signature.hash) / "data.json"
+    assert data_path.exists() is False
+    assert snapshots_path.exists() is False
 
 
 def test_extract_uses_file_system_cache_before_extractor(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
@@ -146,3 +151,117 @@ def test_extract_uses_file_system_cache_before_extractor(resource: HttpResourceM
     assert extracted.signature is not None
     assert cached.signature is not None
     assert cached.signature.hash == extracted.signature.hash
+
+
+def test_extract_allow_load_may_skip_file_system_cache(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.side_effect = [
+        make_response(200, "{\"ok\": true}"),
+        make_response(200, "{\"ok\": false}"),
+    ]
+    configure_storage(resource, root=tmp_path, allow_load=False)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    extracted.close()
+
+    refreshed = resource.extract("get", "books", slug="python", page="1")
+
+    assert mocked_session.send.call_count == 2
+    assert refreshed.result is not None
+    assert refreshed.result.body == "{\"ok\": false}"
+
+
+def test_storage_write_and_read_use_data_directory(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    file_path = resource.storage.write(extracted.signature, "payload.txt", "hello world")
+
+    assert file_path == tmp_path / "data" / str(extracted.signature.hash) / "payload.txt"
+    assert file_path.exists() is True
+    assert resource.storage.read(extracted.signature, "payload.txt") == "hello world"
+    assert (tmp_path / "snapshots" / str(extracted.signature.hash) / "payload.txt").exists() is False
+
+
+def test_storage_write_and_read_use_snapshots_directory(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=True)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    file_path = resource.storage.write(extracted.signature, "blob.bin", b"\xff\xfe")
+
+    assert file_path == tmp_path / "snapshots" / str(extracted.signature.hash) / "blob.bin"
+    assert file_path.exists() is True
+    assert resource.storage.read(extracted.signature, "blob.bin") == b"\xff\xfe"
+    assert (tmp_path / "data" / str(extracted.signature.hash) / "blob.bin").exists() is False
+
+
+def test_storage_write_rejects_absolute_filename(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    with pytest.raises(ValueError, match="relative path"):
+        resource.storage.write(extracted.signature, str(tmp_path / "absolute.txt"), "hello")
+
+
+def test_storage_read_rejects_absolute_filename(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    with pytest.raises(ValueError, match="relative path"):
+        resource.storage.read(extracted.signature, str(tmp_path / "absolute.txt"))
+
+
+def test_storage_write_rejects_nested_filename(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    with pytest.raises(ValueError, match="Nested paths"):
+        resource.storage.write(extracted.signature, "files/blob.bin", b"\xff\xfe")
+
+
+def test_storage_read_rejects_nested_filename(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    with pytest.raises(ValueError, match="Nested paths"):
+        resource.storage.read(extracted.signature, "files/blob.bin")
+
+
+def test_storage_write_rejects_reserved_data_json(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    with pytest.raises(ValueError, match="reserved"):
+        resource.storage.write(extracted.signature, "data.json", "{}")
+
+
+def test_storage_read_rejects_reserved_data_json(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    extracted.close()
+    assert extracted.signature is not None
+    with pytest.raises(ValueError, match="reserved"):
+        resource.storage.read(extracted.signature, "data.json")

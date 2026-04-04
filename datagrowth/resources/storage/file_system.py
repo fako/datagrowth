@@ -1,5 +1,4 @@
 import os
-from uuid import uuid4
 from typing import Any
 from pathlib import Path
 
@@ -65,11 +64,9 @@ class FileSystemStorage:
         if resource.signature is None:
             raise ValueError("Can't save resource without a signature.")
 
-        directory = self._resolve_directory("data")
-        if self.config.snapshots:
-            directory = self._resolve_directory("snapshots")
+        directory = self._get_storage_directory() / str(resource.signature.hash)
         directory.mkdir(parents=True, exist_ok=True)
-        path = directory / f"{resource.signature.hash}.json"
+        path = directory / "data.json"
         path.write_text(resource.model_dump_json(indent=4), encoding="utf-8")
         return resource.signature
 
@@ -77,34 +74,44 @@ class FileSystemStorage:
         if not self.config.allow_load:
             raise PermissionError("Loading resources is disabled by storage config (allow_load=false).")
 
-        directory = self._resolve_directory("data")
-        if self.config.snapshots:
-            directory = self._resolve_directory("snapshots")
-        path = directory / f"{signature.hash}.json"
+        path = self._get_storage_directory() / str(signature.hash) / "data.json"
         if not path.exists():
             return None
         return Resource[Signature].model_validate_json(path.read_text(encoding="utf-8"))
 
-    def read(self, path: Path) -> bytes | str:
+    def read(self, signature: Signature, filename: str) -> bytes | str:
         if not self.config.allow_read:
             raise PermissionError("Reading files is disabled by storage config (allow_read=false).")
 
-        tmp_directory = self._resolve_directory("tmp")
-        target = path if path.is_absolute() else tmp_directory / path
+        filename_path = Path(filename)
+        if filename_path.is_absolute():
+            raise ValueError("Filename must be a relative path in the signature directory.")
+        if filename_path.name != str(filename_path):
+            raise ValueError("Nested paths are not allowed in the signature directory.")
+        if filename_path.name == "data.json":
+            raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
+
+        target = self._get_storage_directory() / str(signature.hash) / filename_path.name
         data = target.read_bytes()
         try:
             return data.decode("utf-8")
         except UnicodeDecodeError:
             return data
 
-    def write(self, data: bytes | str) -> Path:
+    def write(self, signature: Signature, filename: str, data: bytes | str) -> Path:
         if not self.config.allow_write:
             raise PermissionError("Writing files is disabled by storage config (allow_write=false).")
 
-        tmp_directory = self._resolve_directory("tmp")
-        tmp_directory.mkdir(parents=True, exist_ok=True)
-        extension = ".txt" if isinstance(data, str) else ".bin"
-        path = tmp_directory / f"{uuid4().hex}{extension}"
+        filename_path = Path(filename)
+        if filename_path.is_absolute():
+            raise ValueError("Filename must be a relative path in the signature directory.")
+        if filename_path.name != str(filename_path):
+            raise ValueError("Nested paths are not allowed in the signature directory.")
+        if filename_path.name == "data.json":
+            raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
+
+        path = self._get_storage_directory() / str(signature.hash) / filename_path.name
+        path.parent.mkdir(parents=True, exist_ok=True)
         if isinstance(data, str):
             path.write_text(data, encoding="utf-8")
         else:

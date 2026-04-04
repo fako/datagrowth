@@ -55,7 +55,7 @@ class HttpTikaResource(MicroServiceResource):
         if url := kwargs.get("url"):
             headers.update({
                 "fetcherName": "http",
-                "fetchKey": url,
+                "fetchKey": str(url),
             })
         return headers
 
@@ -66,6 +66,9 @@ class HttpTikaResource(MicroServiceResource):
             raise TypeError("Expected document to be bytes when document input is used.")
         if file_path := kwargs.get("file"):
             return Path(file_path).read_bytes()
+        if url := kwargs.get("url"):
+            # Keep URL-mode signatures distinct by adding URL to the data. Tika will ignore this input.
+            return str(url).encode("utf-8")
         return None
 
     def handle_errors(self) -> None:

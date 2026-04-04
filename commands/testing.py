@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from invoke.tasks import task
 from invoke import Collection
@@ -8,8 +9,11 @@ from invoke import Collection
     "test_method": "An expression of which test methods to run",
     "warnings": "Whether to print warnings in the test report",
     "fail_fast": "Fails at first failing test when enabled",
+    "django": "Whether to run Django tests",
+    "snapshots": "Whether to store Resource snapshots instead of testing",
 })
-def run(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, django: bool = True) -> None:
+def run(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, django: bool = True,
+        snapshots: bool = False) -> None:
     """
     Runs the tests for the harvester
     """
@@ -22,6 +26,19 @@ def run(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, 
     # Assert that inputs make sense
     assert not test_method or test_file, "Can't specify a test method without specifying the test file"
 
+    # Run pytest command for generic functionality
+    with ctx.cd(Path("tests")):
+        test_env = dict(os.environ)
+        if snapshots:
+            test_env["DATAGROWTH_STORAGE_SNAPSHOTS"] = "1"
+            test_env["DATAGROWTH_STORAGE_ALLOW_LOAD"] = "0"
+            test_env["DATAGROWTH_STORAGE_ALLOW_SAVE"] = "1"
+        disable_django = "--ignore=django_project -p no:django"
+        ctx.run(
+            f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag} {disable_django}",
+            env=test_env, echo=True, pty=True
+        )
+
     # Run pytest command for Django functionality
     if django:
         with ctx.cd(Path("tests", "django_project")):
@@ -29,14 +46,6 @@ def run(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, 
                 f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag}",
                 echo=True, pty=True
             )
-
-    # Run pytest command for generic functionality
-    with ctx.cd(Path("tests")):
-        disable_django = "--ignore=django_project -p no:django"
-        ctx.run(
-            f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag} {disable_django}",
-            echo=True, pty=True
-        )
 
 
 test_collection = Collection("test", run)

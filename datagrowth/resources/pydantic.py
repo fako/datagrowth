@@ -63,15 +63,19 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         # Try to look up the Signature in storage
         if self.storage is not None:
             # Downgrade Signature to basic format and check against storage if extraction has taken place already
-            storage_signature = Signature(**signature.model_dump(mode="json"))
-            loaded_resource = self.storage.load(storage_signature)
-            if loaded_resource is not None:
-                return cast(Self, loaded_resource)
-        # Attempt extracting data from the remote as prescribed by prepare_signature method
+            if self.storage.config.allow_load:
+                storage_signature = Signature(**signature.model_dump(mode="json"))
+                loaded_resource = self.storage.load(storage_signature)
+                if loaded_resource is not None:
+                    return cast(Self, loaded_resource)
+
+        # Validate that extraction is actually allowed/possible
         if self.extractor is None:
             raise NotImplementedError(
                 f"{self.__class__.__name__} does not specify an extractor or implement the extract method."
             )
+
+        # Attempt extracting data from the remote as prescribed by prepare_signature method
         self.signature = signature
         extracted = self.extractor.extract(signature)
         if isinstance(extracted, self.__class__):
@@ -87,7 +91,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         return self
 
     def close(self) -> Self:
-        if self.storage is not None:
+        if self.storage is not None and self.storage.config.allow_save:
             self.storage.save(self)
         return self
 

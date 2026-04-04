@@ -66,7 +66,11 @@ transform_processor:
   extract_from_object_values: false
 
 micro_service:
-  connections: {}
+  connections:
+    tika:
+      protocol: "http"
+      host: "localhost:9998"
+      path: "/rmeta/text"
 
 web:
   api_version: 1
