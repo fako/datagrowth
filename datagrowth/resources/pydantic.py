@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Self, Generic, cast
 from uuid import uuid4
-from datetime import datetime, timedelta
-from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, model_validator
+from datetime import datetime, timedelta, timezone
+from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, field_validator, model_validator
 
 from datagrowth.configuration import ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
@@ -16,11 +16,18 @@ class Result(BaseModel):
     head: dict[str, str] = Field(default_factory=dict)
     body: str | None = None
     errors: str | None = None
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {
         "frozen": True
     }
+
+    @field_validator("created_at", mode="after")
+    @classmethod
+    def normalize_created_at(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
 
 
 class Resource(BaseModel, Generic[ResourceSignatureType]):

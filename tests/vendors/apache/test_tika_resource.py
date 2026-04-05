@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import ClassVar
 from pathlib import Path
 import pytest
@@ -116,7 +116,7 @@ def test_extract_file_input(resource: MockHttpTikaResource) -> None:
 
     assert extracted.signature is not None
     assert extracted.result is not None
-    assert extracted.result.created_at <= datetime.now()
+    assert extracted.result.created_at <= datetime.now(timezone.utc)
     assert extracted.status == 200
 
 
@@ -131,7 +131,7 @@ def test_extract_document_input(resource: MockHttpTikaResource) -> None:
 
     assert extracted.signature is not None
     assert extracted.result is not None
-    assert extracted.result.created_at <= datetime.now()
+    assert extracted.result.created_at <= datetime.now(timezone.utc)
     assert extracted.status == 200
 
 
@@ -145,7 +145,7 @@ def test_extract_url_input(resource: MockHttpTikaResource) -> None:
 
     assert extracted.signature is not None
     assert extracted.result is not None
-    assert extracted.result.created_at <= datetime.now()
+    assert extracted.result.created_at <= datetime.now(timezone.utc)
     assert extracted.status == 200
 
 
