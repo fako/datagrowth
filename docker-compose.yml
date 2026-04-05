@@ -8,8 +8,8 @@ services:
       POSTGRES_DB: datagrowth
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - ./tests/databases/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
-      - ./tests/databases/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tests/services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./tests/services/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - postgres-datagrowth:/var/lib/postgresql/data/pgdata
     ports:
       - "127.0.0.1:5432:5432"
@@ -22,8 +22,8 @@ services:
       MYSQL_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
       MYSQL_DATABASE: datagrowth
     volumes:
-      - ./tests/databases/mysql/conf.d:/etc/mysql/conf.d
-      - ./tests/databases/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tests/services/mysql/conf.d:/etc/mysql/conf.d
+      - ./tests/services/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mysql-datagrowth:/var/lib/mysql
     ports:
       - "127.0.0.1:3306:3306"
@@ -36,8 +36,8 @@ services:
       MARIADB_PASSWORD: LqjXVGnBkqdu7CWuC23jgSjb7EtCWnNK
       MARIADB_DATABASE: datagrowth
     volumes:
-      - ./tests/databases/mariadb/conf.d:/etc/mysql/conf.d
-      - ./tests/databases/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./tests/services/mariadb/conf.d:/etc/mysql/conf.d
+      - ./tests/services/mariadb/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - mariadb-datagrowth:/var/lib/mysql
     ports:
       - "127.0.0.1:3307:3306"
@@ -49,7 +49,11 @@ services:
       - "127.0.0.1:6379:6379"
 
   tika:
-    image: apache/tika:2.9.2.1
+    build:
+      dockerfile: "Dockerfile-tika"
+      context: "./tests/services/tika"
+    volumes:
+      - ./tests/services/tika/tika-config.xml:/config/tika-config.xml
     ports:
       - "127.0.0.1:9998:9998"
 

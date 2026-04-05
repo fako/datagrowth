@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+    <parsers>
+        <parser class="org.apache.tika.parser.DefaultParser"></parser>
+        <parser class="org.apache.tika.parser.pdf.PDFParser">
+            <params>
+                <!-- Use real PDF tags by default (if the PDF is exported as “tagged”) -->
+                <param name="extractMarkedContent" type="bool">true</param>
+                <!-- disable OCR at the PDF layer -->
+                <param name="ocrStrategy" type="string">no_ocr</param>
+            </params>
+        </parser>
+    </parsers>
+
+    <fetchers>
+        <fetcher class="org.apache.tika.pipes.fetcher.http.HttpFetcher">
+            <params>
+                <name>http</name>
+            </params>
+        </fetcher>
+    </fetchers>
+
+    <server>
+        <params>
+            <enableUnsecureFeatures>true</enableUnsecureFeatures>
+        </params>
+    </server>
+</properties>

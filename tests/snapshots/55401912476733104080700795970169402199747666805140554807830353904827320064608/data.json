@@ -1,0 +1,51 @@
+{
+    "id": "05176477-0977-4e21-b8e6-d353647ce5aa",
+    "type": null,
+    "config": {},
+    "signature": {
+        "uri": "localhost:9998/rmeta/text?mode=semantic",
+        "data": {
+            "__type__": "bytes",
+            "encoding": "base64",
+            "value": "aHR0cHM6Ly9qdXN0LWFzay5kYXRhLXNjb3BlLmNvbS9hY2NvdW50cy9sb2dpbi8="
+        },
+        "hash": 55401912476733104080700795970169402199747666805140554807830353904827320064608,
+        "args": [
+            "put"
+        ],
+        "kwargs": {
+            "protocol": "http",
+            "host": "localhost:9998",
+            "path": "/rmeta/text",
+            "mode": "semantic",
+            "document": null,
+            "file": null,
+            "url": "https://just-ask.data-scope.com/accounts/login/"
+        },
+        "method": "put",
+        "url": "http://localhost:9998/rmeta/text?mode=semantic",
+        "headers": {
+            "X-Tika-PDFextractMarkedContent": "true",
+            "fetcherName": "http",
+            "fetchKey": "https://just-ask.data-scope.com/accounts/login/"
+        },
+        "mode": "bytes"
+    },
+    "result": {
+        "content_type": "application/json",
+        "head": {
+            "date": "Sun, 05 Apr 2026 08:27:33 GMT",
+            "content-type": "application/json",
+            "content-encoding": "gzip",
+            "vary": "Accept-Encoding",
+            "transfer-encoding": "chunked",
+            "server": "Jetty(11.0.26)"
+        },
+        "body": "[{\"http-connection:target-ip-address\":\"45.135.58.129\",\"http-header:status-code\":\"200\",\"X-TIKA:Parsed-By-Full-Set\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.DefaultParser\",\"org.apache.tika.parser.html.JSoupParser\"],\"X-TIKA:content_handler\":\"ToTextContentHandler\",\"resourceName\":\"apache-tika-5466319890787854113.tmp\",\"X-TIKA:encodingDetector\":\"HtmlEncodingDetector\",\"http-connection:num-redirects\":\"0\",\"http-connection:target-url\":\"https://just-ask.data-scope.com/accounts/login/\",\"viewport\":\"width=device-width, initial-scale=1.0\",\"X-TIKA:Parsed-By\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.DefaultParser\",\"org.apache.tika.parser.html.JSoupParser\"],\"dc:title\":\"Log in | Just Ask\",\"Content-Encoding\":\"UTF-8\",\"X-TIKA:parse_time_millis\":\"3\",\"X-TIKA:embedded_depth\":\"0\",\"X-TIKA:content\":\"\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nLog in | Just Ask\\n\\n\\n    \\n\\n    \\n        \\n        \\n            Log in\\n\\n        \\n\\n\\n        \\n        \\n            \\n\\n            \\n                \\n\\n                \\n                \\n                    \\n                        Username\\n                    \\n                    \\n                    \\n                \\n\\n\\n                \\n                \\n                    \\n                        Password\\n                    \\n                    \\n                    \\n                \\n\\n\\n                \\n                \\n                \\n                    \\n                        \\n                        Remember Me\\n                    \\n                \\n\\n                \\n\\n                \\n                \\n\\n                \\n                \\n                    Log in\\n                \\n            \\n\\n\\n            \\n            \\n                \\n                    Forgot your password?\\n                \\n            \\n\\n        \\n\\n    \\n\\n\\n\\n\\n\",\"X-TIKA:detectedEncoding\":\"UTF-8\",\"Content-Length\":\"47\",\"http-header:content-type\":\"text/html; charset=utf-8\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html; charset=UTF-8\"}]",
+        "errors": null,
+        "created_at": "2026-04-05T10:27:33.727414"
+    },
+    "status": 200,
+    "metadata": {},
+    "purge_at": "2026-05-05T10:27:33.672287"
+}

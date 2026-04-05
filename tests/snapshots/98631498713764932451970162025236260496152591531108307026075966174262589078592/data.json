@@ -1,5 +1,5 @@
 {
-    "id": "e6c13e5a-69dd-4ad4-86eb-c039e74b9fb5",
+    "id": "cbdf17ba-8b01-41bd-927f-1cf2c6859384",
     "type": null,
     "config": {},
     "signature": {
@@ -14,34 +14,36 @@
             "host": "localhost:9998",
             "path": "/rmeta/text",
             "mode": "semantic",
-            "document": null,
+            "document": {
+                "__type__": "bytes",
+                "encoding": "base64",
+                "value": ""
+            },
             "file": null,
-            "url": "https://just-ask.data-scope.com/accounts/login/"
+            "url": null
         },
         "method": "put",
         "url": "http://localhost:9998/rmeta/text?mode=semantic",
         "headers": {
-            "X-Tika-PDFextractMarkedContent": "true",
-            "fetcherName": "http",
-            "fetchKey": "https://just-ask.data-scope.com/accounts/login/"
+            "X-Tika-PDFextractMarkedContent": "true"
         },
         "mode": "bytes"
     },
     "result": {
         "content_type": "application/json",
         "head": {
-            "date": "Sat, 04 Apr 2026 20:06:48 GMT",
+            "date": "Sun, 05 Apr 2026 08:27:33 GMT",
             "content-type": "application/json",
             "content-encoding": "gzip",
             "vary": "Accept-Encoding",
             "transfer-encoding": "chunked",
-            "server": "Jetty(9.4.54.v20240208)"
+            "server": "Jetty(11.0.26)"
         },
-        "body": "[{\"X-TIKA:EXCEPTION:container_exception\":\"org.apache.tika.exception.ZeroByteFileException: InputStream must have > 0 bytes\\n\\tat org.apache.tika.parser.AutoDetectParser.parse(AutoDetectParser.java:189)\\n\\tat org.apache.tika.parser.RecursiveParserWrapper.parse(RecursiveParserWrapper.java:164)\\n\\tat org.apache.tika.server.core.resource.TikaResource.parse(TikaResource.java:357)\\n\\tat org.apache.tika.server.core.resource.RecursiveMetadataResource.parseMetadata(RecursiveMetadataResource.java:80)\\n\\tat org.apache.tika.server.core.resource.RecursiveMetadataResource.parseMetadataToMetadataList(RecursiveMetadataResource.java:192)\\n\\tat org.apache.tika.server.core.resource.RecursiveMetadataResource.getMetadata(RecursiveMetadataResource.java:181)\\n\\tat jdk.internal.reflect.GeneratedMethodAccessor3.invoke(Unknown Source)\\n\\tat java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\\n\\tat java.base/java.lang.reflect.Method.invoke(Method.java:568)\\n\\tat org.apache.cxf.service.invoker.AbstractInvoker.performInvocation(AbstractInvoker.java:179)\\n\\tat org.apache.cxf.service.invoker.AbstractInvoker.invoke(AbstractInvoker.java:96)\\n\\tat org.apache.cxf.jaxrs.JAXRSInvoker.invoke(JAXRSInvoker.java:201)\\n\\tat org.apache.cxf.jaxrs.JAXRSInvoker.invoke(JAXRSInvoker.java:104)\\n\\tat org.apache.cxf.interceptor.ServiceInvokerInterceptor$1.run(ServiceInvokerInterceptor.java:59)\\n\\tat org.apache.cxf.interceptor.ServiceInvokerInterceptor.handleMessage(ServiceInvokerInterceptor.java:96)\\n\\tat org.apache.cxf.phase.PhaseInterceptorChain.doIntercept(PhaseInterceptorChain.java:307)\\n\\tat org.apache.cxf.transport.ChainInitiationObserver.onMessage(ChainInitiationObserver.java:121)\\n\\tat org.apache.cxf.transport.http.AbstractHTTPDestination.invoke(AbstractHTTPDestination.java:265)\\n\\tat org.apache.cxf.transport.http_jetty.JettyHTTPDestination.doService(JettyHTTPDestination.java:247)\\n\\tat org.apache.cxf.transport.http_jetty.JettyHTTPHandler.handle(JettyHTTPHandler.java:79)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:235)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1440)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:190)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1355)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:141)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:191)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:516)\\n\\tat org.eclipse.jetty.server.HttpChannel.lambda$handle$1(HttpChannel.java:487)\\n\\tat org.eclipse.jetty.server.HttpChannel.dispatch(HttpChannel.java:732)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:479)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:277)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:311)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:105)\\n\\tat org.eclipse.jetty.io.ChannelEndPoint$1.run(ChannelEndPoint.java:104)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:338)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:315)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:173)\\n\\tat org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:131)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:409)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:883)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:1034)\\n\\tat java.base/java.lang.Thread.run(Thread.java:840)\\n\",\"X-TIKA:parse_time_millis\":\"1\",\"X-TIKA:embedded_depth\":\"0\",\"Content-Length\":\"0\",\"Content-Type\":\"application/octet-stream\"}]",
+        "body": "[{\"X-TIKA:EXCEPTION:container_exception\":\"org.apache.tika.exception.ZeroByteFileException: InputStream must have > 0 bytes\\n\\tat org.apache.tika.parser.AutoDetectParser.parse(AutoDetectParser.java:191)\\n\\tat org.apache.tika.parser.RecursiveParserWrapper.parse(RecursiveParserWrapper.java:168)\\n\\tat org.apache.tika.server.core.resource.TikaResource.parse(TikaResource.java:365)\\n\\tat org.apache.tika.server.core.resource.RecursiveMetadataResource.parseMetadata(RecursiveMetadataResource.java:79)\\n\\tat org.apache.tika.server.core.resource.RecursiveMetadataResource.parseMetadataToMetadataList(RecursiveMetadataResource.java:179)\\n\\tat org.apache.tika.server.core.resource.RecursiveMetadataResource.getMetadata(RecursiveMetadataResource.java:172)\\n\\tat java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)\\n\\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\\n\\tat org.apache.cxf.service.invoker.AbstractInvoker.performInvocation(AbstractInvoker.java:179)\\n\\tat org.apache.cxf.service.invoker.AbstractInvoker.invoke(AbstractInvoker.java:96)\\n\\tat org.apache.cxf.jaxrs.JAXRSInvoker.invoke(JAXRSInvoker.java:200)\\n\\tat org.apache.cxf.jaxrs.JAXRSInvoker.invoke(JAXRSInvoker.java:103)\\n\\tat org.apache.cxf.interceptor.ServiceInvokerInterceptor$1.run(ServiceInvokerInterceptor.java:59)\\n\\tat org.apache.cxf.interceptor.ServiceInvokerInterceptor.handleMessage(ServiceInvokerInterceptor.java:96)\\n\\tat org.apache.cxf.phase.PhaseInterceptorChain.doIntercept(PhaseInterceptorChain.java:307)\\n\\tat org.apache.cxf.transport.ChainInitiationObserver.onMessage(ChainInitiationObserver.java:121)\\n\\tat org.apache.cxf.transport.http.AbstractHTTPDestination.invoke(AbstractHTTPDestination.java:267)\\n\\tat org.apache.cxf.transport.http_jetty.JettyHTTPDestination.doService(JettyHTTPDestination.java:244)\\n\\tat org.apache.cxf.transport.http_jetty.JettyHTTPHandler.handle(JettyHTTPHandler.java:80)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:122)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextHandle(ScopedHandler.java:223)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doHandle(ContextHandler.java:1381)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.nextScope(ScopedHandler.java:178)\\n\\tat org.eclipse.jetty.server.handler.ContextHandler.doScope(ContextHandler.java:1303)\\n\\tat org.eclipse.jetty.server.handler.ScopedHandler.handle(ScopedHandler.java:129)\\n\\tat org.eclipse.jetty.server.handler.ContextHandlerCollection.handle(ContextHandlerCollection.java:149)\\n\\tat org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:122)\\n\\tat org.eclipse.jetty.server.Server.handle(Server.java:563)\\n\\tat org.eclipse.jetty.server.HttpChannel$RequestDispatchable.dispatch(HttpChannel.java:1598)\\n\\tat org.eclipse.jetty.server.HttpChannel.dispatch(HttpChannel.java:753)\\n\\tat org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:501)\\n\\tat org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:287)\\n\\tat org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:314)\\n\\tat org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:100)\\n\\tat org.eclipse.jetty.io.SelectableChannelEndPoint$1.run(SelectableChannelEndPoint.java:53)\\n\\tat org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy.runTask(AdaptiveExecutionStrategy.java:421)\\n\\tat org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy.consumeTask(AdaptiveExecutionStrategy.java:390)\\n\\tat org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy.tryProduce(AdaptiveExecutionStrategy.java:277)\\n\\tat org.eclipse.jetty.util.thread.strategy.AdaptiveExecutionStrategy.run(AdaptiveExecutionStrategy.java:199)\\n\\tat org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:411)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool.runJob(QueuedThreadPool.java:969)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.doRunJob(QueuedThreadPool.java:1194)\\n\\tat org.eclipse.jetty.util.thread.QueuedThreadPool$Runner.run(QueuedThreadPool.java:1149)\\n\\tat java.base/java.lang.Thread.run(Thread.java:1583)\\n\",\"X-TIKA:parse_time_millis\":\"0\",\"X-TIKA:embedded_depth\":\"0\",\"Content-Length\":\"0\",\"Content-Type\":\"application/octet-stream\"}]",
         "errors": null,
-        "created_at": "2026-04-04T22:06:48.225974"
+        "created_at": "2026-04-05T10:27:33.732654"
     },
     "status": 200,
     "metadata": {},
-    "purge_at": "2026-05-04T22:06:48.218287"
+    "purge_at": "2026-05-05T10:27:33.728616"
 }
