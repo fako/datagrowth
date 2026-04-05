@@ -147,3 +147,20 @@ def test_extract_url_input(resource: MockHttpTikaResource) -> None:
     assert extracted.result is not None
     assert extracted.result.created_at <= datetime.now()
     assert extracted.status == 200
+
+
+@pytest.mark.snapshots
+def test_extract_none_document_triggers_zero_byte_exception(resource: MockHttpTikaResource) -> None:
+    extracted = resource.extract(mode="semantic", document=b"")
+    extracted.close()
+
+    if resource.storage is not None and resource.storage.config.snapshots:
+        pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
+
+    assert extracted.signature is not None
+    assert extracted.result is not None
+    assert extracted.status == 1
+    assert extracted.result.errors is not None
+    assert "Tika returned exceptions without extracted content" in extracted.result.errors
+    assert extracted.result.body is not None
+    assert "ZeroByteFileException" in extracted.result.errors

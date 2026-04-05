@@ -1,7 +1,9 @@
+import json
 from typing import Any, ClassVar
 
 from string import Formatter
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from bs4 import BeautifulSoup
 from pydantic import Field, field_validator, HttpUrl
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
@@ -9,6 +11,7 @@ from datagrowth.registry import Tag
 from datagrowth.signatures import InputsValidator
 from datagrowth.resources.http.signature import HttpAuth, HttpSignature, HttpMode, HttpMethod
 from datagrowth.resources.pydantic import Resource
+from datagrowth.utils import is_json_mimetype
 
 
 class HttpResourceInputsValidator(InputsValidator):
@@ -240,6 +243,22 @@ class HttpResource(Resource[HttpSignature]):
         """
         return self.status is not None and 200 <= self.status < 209
 
+    @property
+    def content(self) -> tuple[str | None, Any]:
+        if self.result is None:
+            return None, None
+        content_type = (self.result.content_type or "unknown/unknown").split(";", 1)[0].strip().lower()
+        body = self.result.body
+        if body is None:
+            return content_type, None
+        if is_json_mimetype(content_type):
+            return content_type, json.loads(body)
+        if content_type == "text/html":
+            return content_type, BeautifulSoup(body, "html.parser")
+        if content_type in {"text/xml", "application/xml"}:
+            return content_type, BeautifulSoup(body, "xml")
+        return content_type, body
+
     def handle_errors(self) -> None:
         """
         Raises exceptions upon error statuses
@@ -249,10 +268,10 @@ class HttpResource(Resource[HttpSignature]):
         class_name = self.__class__.__name__
         body = self.result.body if self.result and self.result.body is not None else ""
         if self.status >= 500:
-            message = "{} > {} \n\n {}".format(class_name, self.status, body)
+            message = f"{class_name} > {self.status} \n\n {body}"
             raise DGHttpError50X(message, resource=self)
         elif self.status >= 400:
-            message = "{} > {} \n\n {}".format(class_name, self.status, body)
+            message = f"{class_name} > {self.status} \n\n {body}"
             raise DGHttpError40X(message, resource=self)
         else:
             return None

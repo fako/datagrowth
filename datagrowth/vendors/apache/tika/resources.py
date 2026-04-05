@@ -73,18 +73,39 @@ class HttpTikaResource(MicroServiceResource):
 
     def handle_errors(self) -> None:
         super().handle_errors()
-        _, data = self.content
-        has_content = False
-        has_exception = False
-
-        for rsl in data:
-            has_content = has_content or bool(rsl.get("X-TIKA:content", None))
-            rsl_exceptions = dict(filter(lambda key: "X-TIKA:EXCEPTION:" in key, rsl.keys()))
-            has_exception = has_exception or len(rsl_exceptions) > 0
-
-        if has_content and has_exception:
-            self.status = 200
-        elif not has_content and not has_exception:
+        has_content, exception_messages = self._inspect_tika_content()
+        if has_content and exception_messages:
+            self.status = 207
+            exception_summary = ";\n".join(exception_messages)
+            self.result = self.result.model_copy(update={
+                "errors": f"Tika returned exceptions without extracted content:\n\n {exception_summary}",
+            })
+        elif not has_content and not exception_messages:
             self.status = 204
-        elif not has_content and has_exception:
+        elif not has_content and exception_messages:
             self.status = 1
+            exception_summary = ";\n".join(exception_messages)
+            self.result = self.result.model_copy(update={
+                "errors": f"Tika returned exceptions without extracted content:\n\n {exception_summary}",
+            })
+
+    #####################
+    # Helpers
+    #####################
+
+    def _inspect_tika_content(self) -> tuple[bool, list[str]]:
+        _, data = self.content
+        if not isinstance(data, list):
+            return False, []
+
+        has_content = False
+        exception_messages: list[str] = []
+        for result in data:
+            if not isinstance(result, dict):
+                continue
+            has_content = has_content or bool(result.get("X-TIKA:content", None))
+            result_exceptions = {key: value for key, value in result.items() if "X-TIKA:EXCEPTION:" in key}
+            for key, value in result_exceptions.items():
+                if isinstance(value, str) and value:
+                    exception_messages.append(f"{key}: {value.splitlines()[0]}")
+        return has_content, exception_messages

@@ -152,7 +152,7 @@ def test_resource_extract_get_uses_requests_extractor(resource: HttpResourceMock
     assert extracted_resource.result.body == "{\"ok\": true}"
     content_type, data = extracted_resource.content
     assert content_type == "application/json"
-    assert data == "{\"ok\": true}"
+    assert data == {"ok": True}
     assert extracted_resource.signature is not None
     assert extracted_resource.signature.url == "https://example.com/books/python?source=tests&page=1"
     mocked_session.send.assert_called_once()
@@ -225,7 +225,7 @@ def test_resource_success_property_depends_on_http_status(resource: HttpResource
     assert resource.success is False
 
 
-def test_resource_content_uses_errors_on_non_success(resource: HttpResourceMock) -> None:
+def test_resource_content_parses_body_on_non_success(resource: HttpResourceMock) -> None:
     resource.status = 404
     resource.result = Result(
         content_type="application/json",
@@ -235,7 +235,7 @@ def test_resource_content_uses_errors_on_non_success(resource: HttpResourceMock)
 
     content_type, data = resource.content
     assert content_type == "application/json"
-    assert data == "{\"error\": \"not found\"}"
+    assert data == {"ok": False}
 
 
 def test_resource_handle_errors_raises_40x(resource: HttpResourceMock) -> None:
