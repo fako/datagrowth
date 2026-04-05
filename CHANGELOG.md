@@ -17,6 +17,7 @@ That version aims to add ``PromptResource``, but also overhauls some internals t
 * Adds support for Python 3.14 and removes support for 3.10 and 3.11.
 * Removes support for Django 4.2.
 * Makes admin listings of Resources more useful during debugging by exposing ``status`` as a filter.
+* Adds a migration to add an index to ``Resource.status`` to allow faster filtering.
 * Allows args and kwargs passed to ``extract`` to modify the ``HttpResource`` headers.
 * Updates ``ResourceFixtureMixin`` to be able to print new ``Resources`` to the console at test time.
 Good for snapshot testing.

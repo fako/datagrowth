@@ -22,7 +22,7 @@ class Resource(models.Model):
 
     # Identification
     uri = models.CharField(max_length=255, db_index=True, default=None)
-    status = models.PositiveIntegerField(default=0)
+    status = models.PositiveIntegerField(default=0, db_index=True)
 
     # Configuration
     config = configuration.ConfigurationField()
