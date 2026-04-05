@@ -86,15 +86,13 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         self.signature = signature
         extracted = self.extractor.extract(signature)
         if isinstance(extracted, self.__class__):
-            if not extracted.success:
-                extracted.handle_errors()
+            extracted.handle_errors()
             return cast(Self, extracted)
         self.signature = extracted.signature
         self.result = extracted.result
         self.status = extracted.status
         self.metadata = dict(extracted.metadata)
-        if not self.success:
-            self.handle_errors()
+        self.handle_errors()
         return self
 
     def close(self) -> Self:
