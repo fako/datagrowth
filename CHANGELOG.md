@@ -30,6 +30,7 @@ Good for snapshot testing.
 * The ``DATAGROWTH_REQUESTS_PROXIES`` and ``DATAGROWTH_REQUESTS_VERIFY`` Django settings continue to work, but will be replaced with ``http_resource_requests_proxies`` and `` http_resource_requests_verify``.
 * ``ShellResource`` now uses ``shell_resource`` as its main namespace.
 * The ``DATAGROWTH_BIN_DIR`` Django setting was replaced with ``shell_resource_bin_dir``, but gets set to ``DATAGROWTH_BIN_DIR`` for the foreseeable future.
+* Copies ``HttpResource.VARIABLES`` before returning it when creating a commaned. This makes the variables constant immutable and might have unexpected effects if other code depends on mutability.
 * Cleans up other default configurations that were no longer in use like: google, wikipedia and rank_processor namespace configurations.
 * The [Invoke](https://www.pyinvoke.org/index.html) library has become a new dependency to load configs and execute shell commands in the future.
 * Use a datagrowth.yml file in your cwd to override defaults instead of specifying ``DATAGROWTH_DEFAULT_CONFIGURATION`` in settings or patching the library directly.

@@ -161,7 +161,7 @@ class ShellResource(Resource):
         if not self.VARIABLES:
             return None
         else:
-            return self.VARIABLES
+            return copy(self.VARIABLES)
 
     def debug(self):
         """
