@@ -38,6 +38,7 @@ Good for snapshot testing.
 * Read access to ``DATAGROWTH_DEFAULT_CONFIGURATION`` and ``DEFAULT_CONFIGURATION`` is no longer recommended. Use ``datagrowth.configuration.DATAGROWTH_CONFIGURATION`` instead. But access is still possible when needed at ``datagrowth.configuration.defaults``.
 * No longer implicitly converts JSON strings on ``HttpResource.request`` and ``HttpResource.head`` to dictionaries.
 * The ``Community`` dataset type has long been deprecated and has now been removed.
+* Removed ``get_standardized_configuration`` a configuration helper function that lost usefulness after Python 3.6 saw end of life.
 * Replaces the ``DatagrowthConfig.processors`` dictionary with a proper registry named ``DATAGROWTH_REGISTRY`` located at ``datagrowth.registry``.
 
 

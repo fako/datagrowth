@@ -1,6 +1,5 @@
 import argparse
 from functools import wraps
-import hashlib
 from typing import Any, Callable, TypeVar
 from urllib.parse import parse_qsl
 
@@ -42,23 +41,3 @@ class DecodeConfigAction(argparse.Action):
                  option_string: str | None = None) -> None:
         values = dict(parse_qsl(values))
         setattr(namespace, self.dest, values)
-
-
-def get_standardized_configuration(configuration: ConfigurationType, as_hash: bool = True) -> str:
-    """
-    Given a configuration this function will return a string that represents that configuration.
-    The representation is always the same for the same configuration.
-    Default configurations are not taken into account and neither are protected and private configurations.
-    Optionally this function can hash the representative string.
-
-    :param configuration: (ConfigurationType) the configuration to represent
-    :param as_hash: (bool) will return representation as a sha256 hash if True
-    :return:
-    """
-    sorted_by_keys = sorted(configuration.items(), key=lambda item: item[0])
-    standardized = "&".join("{}={}".format(key, value) for key, value in sorted_by_keys)
-    if not as_hash:
-        return standardized
-    hasher = hashlib.sha256()
-    hasher.update(bytes(standardized, encoding="utf-8"))
-    return hasher.hexdigest()

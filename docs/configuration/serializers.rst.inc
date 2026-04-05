@@ -31,18 +31,6 @@ Alternatively you can turn your own dictionary configuration into proper configu
 
     config = ConfigurationType.from_dict(dict_config)
 
-It's possible to get a hash value from a dictionary in such a way
-that identical configurations will generate identical hashes.
-This is useful if you need to retrieve models based on their configuration ::
-
-    from datagrowth.configuration import get_standardized_configuration
-
-    from your_app.models import YourModel
-
-    config = create_config("your_app", {
-        "bar": "definitely!"
-    })
-
 Last but not least it is possible to deserialize a configuration that is given to a Django command::
 
     from django.core.management.base import BaseCommand
