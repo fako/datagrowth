@@ -8,3 +8,4 @@ sphinx-rtd-theme==2.0.0
 wheel==0.46.2
 setuptools==78.1.1
 redis==5.0.1
+devtools==0.12.2
