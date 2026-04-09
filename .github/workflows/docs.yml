@@ -33,6 +33,7 @@ jobs:
 
             - name: Build docs
               run: |
+                  mkdir -p docs/_build
                   invoke docs.build
 
             - name: Add root redirect to current docs version
