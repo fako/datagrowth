@@ -321,19 +321,23 @@ class ConfigurationProperty:
             )
         return obj.__dict__[self._storage_attribute]
 
-    def __set__(self, obj: Any, new: "ConfigurationType | dict[str, Any]") -> None:
+    def __set__(self, obj: Any, new: "ConfigurationType | dict[str, Any] | None") -> None:
         if self._storage_attribute not in obj.__dict__:
             obj.__dict__[self._storage_attribute] = ConfigurationType(
                 defaults=self._defaults,
                 namespace=self._namespace,
                 private=self._private
             )
-        if isinstance(new, ConfigurationType):
-            obj.__dict__[self._storage_attribute].update(
-                new.to_dict(private=True, protected=True)
-            )
+        # Namespace comes from the owning class/property definition and should not be overridden
+        # by persisted payloads (e.g. DB fixtures) or external config dictionaries.
+        if new is None:
+            payload = {}
+        elif isinstance(new, ConfigurationType):
+            payload = new.to_dict(private=True, protected=True)
         else:
-            obj.__dict__[self._storage_attribute].update(new)
+            payload = dict(new)
+        payload.pop("_namespace", None)
+        obj.__dict__[self._storage_attribute].update(payload)
 
 
 def create_config(namespace: str, configuration: dict[str, Any]) -> ConfigurationType:

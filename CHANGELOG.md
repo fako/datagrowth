@@ -25,6 +25,7 @@ Good for snapshot testing.
 * The ``HttpResource.handle_errors`` method no longer returns a boolean, but returns None instead.
 * Removes ``ShellResource`` classes meant to interface with Kaldi.
 * Makes ``ConfigurationField`` look at ``CONFIG_NAMESPACE`` of parent classes as well as the class that uses that field. This introduces inheritance for configurations.
+* Always uses class hiarchy to determine namespaces. Stored namespace values inside ``ConfigurationField`` are now ignored. This may cause problems with manually edited Django fixtures, but should not cause problems in general.
 * ``HttpResource`` now uses ``http_resource`` as its main namespace.
 * The configurations ``global_user_agent``, ``global_allow_redirects``, ``global_backoff_delays`` and ``global_force_data_file_to_payload`` all use ``http_resource`` as prefix instead of ``global``.
 * The ``DATAGROWTH_REQUESTS_PROXIES`` and ``DATAGROWTH_REQUESTS_VERIFY`` Django settings continue to work, but will be replaced with ``http_resource_requests_proxies`` and `` http_resource_requests_verify``.

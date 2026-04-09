@@ -328,6 +328,24 @@ class TestConfigurationProperty(TestCase):
         self.assertEqual(self.holder2.property.test, "test")
         self.assertNotEqual(self.holder1.property, self.holder2.property)  # instances should not share configurations
 
+    def test_setter_ignores_namespace_from_dict(self):
+        self.property = {"_namespace": "global", "test": "test"}
+        self.assertEqual(self.property._namespace, ["name"])
+        self.assertEqual(self.property.test, "test")
+
+    def test_setter_ignores_namespace_from_configuration_type(self):
+        external = ConfigurationType(namespace="global", defaults=MOCK_CONFIGURATION)
+        external.update({"test": "test"})
+        self.property = external
+        self.assertEqual(self.property._namespace, ["name"])
+        self.assertEqual(self.property.test, "test")
+
+    def test_setter_ignores_none_payload(self):
+        self.property = {"test": "test"}
+        self.property = None
+        self.assertEqual(self.property._namespace, ["name"])
+        self.assertEqual(self.property.test, "test")
+
 
 class TestLoadConfigDecorator(TestCase):
 
