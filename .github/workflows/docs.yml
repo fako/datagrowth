@@ -14,6 +14,10 @@ on:
             version:
                 description: "Published docs version (optional override, e.g. 0.20.6)"
                 required: false
+            is_latest:
+                description: "Whether this publish should update latest"
+                required: false
+                default: "true"
 
 permissions:
     contents: write
@@ -71,7 +75,12 @@ jobs:
 
             - name: Prepare gh-pages content
               run: |
-                  invoke docs.publish --version "${{ steps.version.outputs.version }}" --built-version "${{ steps.version.outputs.built_version }}" --existing-root gh-pages-existing --target-root site
+                  IS_LATEST="${{ github.event.inputs.is_latest }}"
+                  LATEST_FLAG=""
+                  if [ -n "$IS_LATEST" ] && [ "$IS_LATEST" = "false" ]; then
+                    LATEST_FLAG="--no-is-latest"
+                  fi
+                  invoke docs.publish --version "${{ steps.version.outputs.version }}" --built-version "${{ steps.version.outputs.built_version }}" --existing-root gh-pages-existing --target-root site ${LATEST_FLAG}
 
             - name: Deploy to gh-pages branch
               uses: peaceiris/actions-gh-pages@v4
