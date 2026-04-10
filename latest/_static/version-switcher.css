@@ -1,0 +1,22 @@
+.dg-version-switcher {
+    margin: 0.75rem 0;
+    text-align: left;
+}
+
+.dg-version-switcher label {
+    color: #fcfcfc;
+    display: block;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+}
+
+.dg-version-switcher select {
+    background: #fff;
+    border: 0;
+    border-radius: 2px;
+    color: #404040;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.4rem;
+    width: 100%;
+}
