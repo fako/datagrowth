@@ -15,12 +15,6 @@ class FileSystemStorage:
 
     def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
         self.config = config
-        if getattr(self.config, "snapshots", False):
-            # Snapshots are an explicit persistence mode.
-            self.config.force_save = True
-        assert not (self.config.force_save and not self.config.allow_save), "Can't force_save when saves are not allowed."  # noqa: E501
-        assert not (self.config.force_load and not self.config.allow_load), "Can't force_load when loads are not allowed."  # noqa: E501
-        assert not self.config.force_save or not self.config.force_load, "Can't force_save and force_load at the same time."  # noqa: E501
 
     def _resolve_directory(self, key: str) -> Path:
         raw_directories = self.config.get("directories", {})

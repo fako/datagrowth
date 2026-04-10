@@ -83,8 +83,6 @@ def configure_storage(resource: HttpResourceMock, root: Path, snapshots: bool = 
         "allow_write": True,
         "allow_save": allow_save,
         "allow_load": allow_load,
-        "force_save": False,
-        "force_load": False,
         "snapshots": snapshots,
         "directories": {
             "project": None,

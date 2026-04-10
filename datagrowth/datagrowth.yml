@@ -44,8 +44,6 @@ storage:
   allow_write: true
   allow_save: true
   allow_load: true
-  force_save: false
-  force_load: false
   snapshots: false
   directories:
     tmp: ["/", "tmp"]

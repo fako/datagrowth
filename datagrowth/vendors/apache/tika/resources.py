@@ -21,7 +21,9 @@ class TikaInputsValidator(InputsValidator):
         # Ensure that exactly one of document, file, or url is set, not more than one, and at least one.
         set_fields = [field for field in ("document", "file", "url") if getattr(self, field) is not None]
         if len(set_fields) != 1:
-            raise ValueError("Exactly one of 'document', 'file', or 'url' must be set (got: {}).".format(", ".join(set_fields)))  # noqa: E501
+            raise ValueError(
+                "Exactly one of 'document', 'file', or 'url' must be set (got: {}).".format(", ".join(set_fields))
+            )
         # Dump inputs into the kwargs for further processing by HttpSignature
         self.kwargs = self.model_dump(exclude={"args", "kwargs"})
         return self
