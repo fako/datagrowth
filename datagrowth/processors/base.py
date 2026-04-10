@@ -41,10 +41,6 @@ class Processor:
     def create_processor(processor_name: str, config: ConfigurationType | dict[str, Any]) -> "ProcessorProtocol":
         """
         This method will load the Processor class given by name and instantiate it with the given configuration.
-
-        :param processor_name: (str) the Processor to load
-        :param config: (ConfigurationType or dict) the configuration to instantiate the Processor with
-        :return:
         """
         processor_class = Processor.get_processor_class(processor_name)
         if processor_class is None:
@@ -58,9 +54,6 @@ class Processor:
         """
         This method will load the Processor class given by name and return it.
         If the Processor does not exist in an installed app it will return None instead
-
-        :param processor_name: (str) the Processor to load
-        :return: (class or None) the Processor class
         """
         try:
             return DATAGROWTH_REGISTRY.get_class(f"processor:{processor_name}")

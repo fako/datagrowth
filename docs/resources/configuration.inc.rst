@@ -5,6 +5,7 @@ Configuration
 You can adjust how a ``Resource`` retrieves data by using some configuration options.
 See the `configuration`__ section to learn more on how to set configuration defaults.
 Here we'll be explaining the available configurations by setting them directly only.
+For application wide defaults, use ``register_defaults``.
 
 .. _configuration_getting_started: ../configuration/index.html
 
@@ -46,20 +47,23 @@ There are a few configuration options that modify the cache behaviour. All examp
     resource = MyResource(config={
         "cache_only": True
     })
-    resource.get()  # this never makes a real request
+    resource.extract()  # this never makes a real request
 
 
 User Agent configuration
 ************************
 
-This configuration is only useful for ``HttpResource`` and child classes. It uses the "global" namespace ::
+This configuration is only useful for ``HttpResource`` and child classes. It uses the ``http_resource`` namespace ::
 
+    from datagrowth.configuration import create_config
     from example import MyResource
 
-    # This configuration sets the user agent for any request made by the Resource.
-    MyResource(config={
+    http_config = create_config("http_resource", {
         "user_agent": "My custom crawler User Agent"
     })
+
+    # This configuration sets the user agent for any request made by the Resource.
+    MyResource(config=http_config)
 
 
 Backoff Delays configuration
@@ -71,16 +75,21 @@ By default these sleep intervals which give the responding server some rest last
 After the final backoff delay interval the ``HttpResource`` will error
 and give up making the request if the server never responds.
 You can disable or modify this behaviour by setting the ``backoff_delays`` configuration
-It uses the "global" namespace ::
+It uses the ``http_resource`` namespace ::
 
+    from datagrowth.configuration import create_config
     from example import MyResource
 
-    # This configuration will let the HttpResource wait 1m and then 2m instead of the default amount of seconds.
-    minutes_backoff_delay = MyResource(config={
+    fast_retry_config = create_config("http_resource", {
         "backoff_delays": [60, 120]
     })
 
-    # You can also disable the backoff delay procedure.
-    no_backoff_delays = MyResource(config={
+    # This configuration will let the HttpResource wait 1m and then 2m instead of the default amount of seconds.
+    minutes_backoff_delay = MyResource(config=fast_retry_config)
+
+    no_retry_config = create_config("http_resource", {
         "backoff_delays": []
     })
+
+    # You can also disable the backoff delay procedure.
+    no_backoff_delays = MyResource(config=no_retry_config)

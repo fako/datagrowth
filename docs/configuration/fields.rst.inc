@@ -27,9 +27,8 @@ Then somewhere in your code you can initialise this model with a configuration d
     instance.save()  # stores your model with the configuration and namespace
 
 
-You can set defaults for ConfigurationField through the ``DATAGROWTH_DEFAULT_CONFIGURATION`` setting.
-Any keys in that dictionary need to get prefixed with ``foo_``.
-Or you can pass a dictionary without prefixes to the ``register_defaults`` function
+You can set defaults for ConfigurationField through the ``register_defaults`` function.
+Pass a dictionary without prefixes to ``register_defaults``
 with ``foo`` as the namespace argument.
 
 When models inherit from each other it is possible to change the namespace for the child class

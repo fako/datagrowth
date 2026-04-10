@@ -45,10 +45,6 @@ class HttpResource(Resource[HttpSignature]):
         """
         Returns the dictionary that should be used as headers for the request the resource will make.
         By default this is the dictionary from the ``HEADERS`` attribute.
-
-        :param args: keyword arguments from the input (ignored by default)
-        :param kwargs: keyword arguments from the input (ignored by default)
-        :return: (dict) a dictionary representing HTTP headers
         """
         return dict(self.HEADERS)
 
@@ -56,8 +52,6 @@ class HttpResource(Resource[HttpSignature]):
         """
         Returns the dictionary that should be added as HTTP query parameters for the request the resource will make.
         Add f-string syntax to the parameter keys or values to make them dynamic.
-
-        :return: (dict) a dictionary representing HTTP query parameters
         """
         if self.PARAMETERS is None:  # some HttpResources like URLResource disallow dynamic PARAMETERS
             return {}
@@ -68,9 +62,6 @@ class HttpResource(Resource[HttpSignature]):
         Returns the dictionary that will be used as HTTP body for the request the resource will make.
         By default this is the dictionary from the ``DATA`` attribute
         updated with the kwargs from the input from the ``send`` method.
-
-        :param kwargs: keyword arguments from the input
-        :return:
         """
         if self.DATA is None:  # some HttpResources like most GET centered resources disallow dynamic DATA
             return {}
@@ -104,10 +95,7 @@ class HttpResource(Resource[HttpSignature]):
            - Format with ``str.format(*args, **template_kwargs)``.
            - Return kwargs not used in named placeholder substitution.
 
-        Returns:
-            tuple[str, dict[str, Any]]:
-                - formatted URL
-                - unused kwargs (safe to pass to body/data construction)
+        Returns the formatted URL and unused kwargs (safe to pass to body/data construction).
         """
         # Add parameters to the URI_TEMPLATE to allow dynamic replacement
         split_url = urlsplit(self.URI_TEMPLATE)
@@ -169,9 +157,6 @@ class HttpResource(Resource[HttpSignature]):
         """
         Given a URL this method will strip the protocol and sort the parameters.
         That way a database lookup for a URL will always return URL's that logically match that URL.
-
-        :param url: the URL to normalize to URI
-        :return: a normalized URI suitable for lookups
         """
         split_url = urlsplit(url)
         params = sorted(parse_qsl(split_url.query, keep_blank_values=True), key=lambda item: item[0])
@@ -196,7 +181,6 @@ class HttpResource(Resource[HttpSignature]):
         Override this method in your own class to add authentication.
         By default this method returns an empty dictionary meaning there are no authentication headers.
 
-        :return: (dict) dictionary with headers to add to requests
         """
         return {}
 
@@ -206,7 +190,6 @@ class HttpResource(Resource[HttpSignature]):
         Override this method in your own class to add authentication.
         By default this method returns an empty dictionary meaning there are no authentication parameters.
 
-        :return: (dict) dictionary with parameters to add to requests
         """
         return {}
 
@@ -238,8 +221,6 @@ class HttpResource(Resource[HttpSignature]):
     def success(self) -> str:
         """
         Returns True if status is within HTTP success range
-
-        :return: Boolean
         """
         return self.status is not None and 200 <= self.status < 209
 

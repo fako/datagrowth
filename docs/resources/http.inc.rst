@@ -11,7 +11,7 @@ Basic usage
 The most basic usage for fetching data from a HTTP source is inheriting from ``URLResource``,
 which in turn inherits from ``HttpResource``. ::
 
-    from collections import Count
+    from collections import Counter
 
     from datagrowth.resources import URLResource
 
@@ -39,11 +39,11 @@ which in turn inherits from ``HttpResource``. ::
     # And as explained above the database has other advantages like storing data already retrieved.
     # The below does not make a request, but fetches results from the database.
     # It does this because above we saved a resource to the exact same request
-    data_source_cache = MyHTTPDataSource().get("https://example.com")
+    data_source_cache = MyHTTPDataSource().extract("get", "https://example.com")
 
     # Apart from GET you can also do POST.
-    # Any keyword arguments will be send as the body of the POST request.
-    data_source_post = MyHTTPDataSource().post("https://example.com", example=True)
+    # Any keyword arguments will be sent as the body of the POST request.
+    data_source_post = MyHTTPDataSource().extract("post", "https://example.com", example=True)
 
 
 Downloading files
@@ -56,7 +56,7 @@ To do this you use the ``HttpImageResource``::
     from datagrowth.resources import HttpImageResource
 
 
-    class MyHTTPImageSource(URLResource):
+    class MyHTTPImageSource(HttpImageResource):
         pass
 
     image_source = MyHTTPImageSource()
@@ -74,6 +74,7 @@ Customize requests
 ******************
 
 In most cases it isn't sufficient to simply pass URL's to ``URLResource`` or ``HttpImageResource``.
+For these URL based resources, call ``get`` and ``post`` directly.
 By setting some attributes you can customize how any ``HttpResource`` fetches data::
 
     from datagrowth.resources import HttpResource
@@ -86,11 +87,12 @@ By setting some attributes you can customize how any ``HttpResource`` fetches da
 
     data_source = MyHTTPDataSource()
     # The call below will make a request to https://example.com?query=my-query-terms
-    data_source.get("my-query-terms")
+    data_source.extract("get", "my-query-terms")
     print(data_source.request)  # outputs the request being made
 
 The ``URI_TEMPLATE`` is the most basic way to declare how resources should be fetched.
-A more complete example is below. The example is using ``post``, but most attributes also work for ``get``::
+A more complete example is below. The example is using ``extract("post", ...)``,
+but most attributes also work for ``extract("get", ...)``::
 
     from datagrowth.resources import HttpResource
 
@@ -118,13 +120,14 @@ A more complete example is below. The example is using ``post``, but most attrib
     # The call below makes a POST request to https://example.com?defaults=1
     # It will add a JSON content header
     # and sends a dictionary with data containing the default_data and more_data keys.
-    data_source.post(more_data="Yassss")
+    data_source.extract("post", more_data="Yassss")
     print(data_source.request)  # outputs the request being made
 
 If you need more control over parameters, headers or data,
 then you can override the ``parameters``, ``headers`` and ``data`` methods.
 These methods by default return the ``PARAMETERS``, ``HEADERS`` and ``DATA`` attributes.
-The ``data`` method will also merge in any keyword arguments coming from the call to ``post`` if applicable.
+The ``data`` method will also merge in any keyword arguments coming from the call to ``extract("post", ...)``
+if applicable.
 
 
 Continuation requests
@@ -160,12 +163,12 @@ You'll have to override the ``next_parameters`` method to indicate which data to
 
     data_source = MyHTTPDataSource()
     # The call below will make a request to https://example.com?query=my-query-terms
-    data_source.get("my-query-terms")
+    data_source.extract("get", "my-query-terms")
     next_request = data_source.create_next_request()
     follow_up = MyHTTPDataSource(request=next_request)
     # The call below will make a request to https://example.com?query=my-query-terms&page=1
     # Provided that the response data contains a "next" key with value 1
-    follow_up.get()
+    follow_up.extract("get")
 
 
 Authenticating requests

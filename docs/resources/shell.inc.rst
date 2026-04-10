@@ -29,7 +29,7 @@ A resource that is capable of gathering such data would look like this::
 
 
     data_source = MyGrepDataSource()
-    data_source.run("test", ".")
+    data_source.extract("test", ".")
     # data_source now contains lines of text where "test" is found in files in current directory.
     # You can call the debug method to see which command was executed exactly.
     data_source.debug()  # out: grep "test" .
@@ -48,7 +48,7 @@ like ``grep's`` ``-R`` flag. Some other flags except values like ``grep's`` ``co
 These flags need to be specified in the ``FLAGS`` attribute.
 Furthermore you need to add the ``CMD_FLAGS`` element to your ``CMD_TEMPLATE``
 to indicate where these flags with values should get inserted in the command.
-Once this is done you can specify the values for the flags through the keyword arguments of ``run``. ::
+Once this is done you can specify the values for the flags through the keyword arguments of ``extract``. ::
 
     from datagrowth.resources import ShellResource
 
@@ -63,12 +63,12 @@ Once this is done you can specify the values for the flags through the keyword a
             "{}"
         ]
 
-        FLAGS = {  # keys correspond to the kwargs of run and values to command flags
+        FLAGS = {  # keys correspond to the kwargs of extract and values to command flags
             "context": "--context="
         }
 
     data_source = MyGrepDataSource()
-    data_source.run("test", ".", context=5)
+    data_source.extract("test", ".", context=5)
     data_source.debug()  # out: grep -R --context=5 test .
 
 
@@ -106,7 +106,7 @@ Using the earlier example cleaning the data could look like this ::
 
 
     data_source = MyGrepDataSource()
-    data_source.run("test", ".")
+    data_source.extract("test", ".")
     data_source.close()
     print(data_source.stdout)  # out: stdout without \r but with "test" in lowercase
     print(data_source.stderr)  # out: stderr without \r
@@ -122,12 +122,12 @@ However often you want to retrieve data from a command that is not system wide a
 Instead the binary of that command sits somewhere in a directory, where it got installed or compiled.
 To run such commands you could prefix the command with a full path,
 but that would make the ``ShellResource`` less portable.
-Alternatively you can specify the ``DIRECTORY_SETTING`` attribute.
-When specified the ``ShellResource`` will look for the Django setting by that name.
-It then changes the working directory to the value of that setting.
+Alternatively you can set ``DIRECTORY_SETTING`` to ``"shell_resource_bin_dir"``.
+When specified the ``ShellResource`` will resolve this through Datagrowth configuration and use it as working directory.
+Set the Django setting ``DATAGROWTH_SHELL_RESOURCE_BIN_DIR`` to configure that value.
 
-For example: setting ``DIRECTORY_SETTING`` to ``"BREW_BIN_DIRECTORY"`` and adding a setting ``BREW_BIN_DIRECTORY``
-with the value ``"/usr/local/bin"`` will run the command specified in the ``ShellResource`` from the Brew directory.
+For example: setting ``DATAGROWTH_SHELL_RESOURCE_BIN_DIR`` to ``"/usr/local/bin"``
+will run the command specified in the ``ShellResource`` from the Brew directory.
 On a Mac that would allow retrieving data from commands like ``wget`` or ``htop`` when installed through Brew.
 
 
@@ -136,7 +136,7 @@ Environment
 
 The exact behaviour of commands is often regulated through environment variables.
 You can specify these for a ``ShellResource`` by overriding the ``environment`` method.
-That method receives the input from the ``run`` method and should return a dictionary with key-value pairs
+That method receives the input from the ``extract`` method and should return a dictionary with key-value pairs
 that will be used as environment variables or ``None`` when no variables should get set.
 If you only use static variables it's possible to define those on the ``VARIABLES`` attribute.
 The default ``environment`` method returns ``VARIABLES``. ::
@@ -158,5 +158,5 @@ The default ``environment`` method returns ``VARIABLES``. ::
 
     data_source = MyShellDataSource()
     # The call below will execute whatever is in "command.sh" with a COMMAND_MODE set to "foo"
-    data_source.run("test", mode="foo")
+    data_source.extract("test", mode="foo")
     data_source.debug()  # out: command.sh test

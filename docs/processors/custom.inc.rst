@@ -5,12 +5,12 @@ Custom made
 It can be useful to create a ``Processor`` that others can use
 or it can be cleaner to use a ``Processor`` with Datagrowth where you could use other means.
 
-We'll illustrate how to create your own ``Processor`` and use it with an ``ExtractionProcessor``.
+We'll illustrate how to create your own ``Processor`` and use it with a ``TransformProcessor``.
 You'll see that when extracting HTML or XML it's a much cleaner method than using BeautifulSoup strings.
 
 First we'll show you how an extraction configuration could look when using a custom processor ::
 
-    config = create_config("extraction_processor", {
+    config = create_config("transform_processor", {
 
         # Objectives indicate what data you want to retrieve from a source
         "objective": {
@@ -28,7 +28,7 @@ First we'll show you how an extraction configuration could look when using a cus
 The big advantage of using a processor over embedding functions in your objective directly
 is that you'll be able to serialize the objective to for instance JSON and transfer it over the wire.
 
-To create the ``DataToolingExtractor`` that we can use with the ``ExtractionProcessor``.
+To create the ``DataToolingExtractor`` that we can use with the ``TransformProcessor``.
 You'll need to create a ``processors`` module and place it inside of an installed Django app.
 
 Inside that module you can create processors by inheriting from the ``Processor`` class ::
