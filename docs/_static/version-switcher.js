@@ -33,6 +33,10 @@
         if (!nav || !versions.length) {
             return;
         }
+        var switcherVersions = versions.slice();
+        if (switcherVersions.indexOf(info.version) === -1) {
+            switcherVersions.unshift(info.version);
+        }
 
         var container = document.createElement("div");
         container.className = "dg-version-switcher";
@@ -45,7 +49,7 @@
         var select = document.createElement("select");
         select.id = "dg-version-switcher-select";
 
-        versions.forEach(function (version) {
+        switcherVersions.forEach(function (version) {
             var option = document.createElement("option");
             option.value = version;
             option.textContent = version;
