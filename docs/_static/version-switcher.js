@@ -34,7 +34,10 @@
             return;
         }
         var switcherVersions = versions.slice();
-        if (switcherVersions.indexOf(info.version) === -1) {
+        var selectedVersion = info.version;
+        if (info.version === "latest") {
+            selectedVersion = switcherVersions[switcherVersions.length - 1];
+        } else if (switcherVersions.indexOf(info.version) === -1) {
             switcherVersions.unshift(info.version);
         }
 
@@ -53,7 +56,7 @@
             var option = document.createElement("option");
             option.value = version;
             option.textContent = version;
-            option.selected = (version === info.version);
+            option.selected = (version === selectedVersion);
             select.appendChild(option);
         });
 
