@@ -218,7 +218,7 @@ class HttpResource(Resource[HttpSignature]):
         )
 
     @property
-    def success(self) -> str:
+    def success(self) -> bool:
         """
         Returns True if status is within HTTP success range
         """
