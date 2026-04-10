@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Growth’s documentation &mdash; Data Growth 0.20.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/version-switcher.css?v=00ef59f7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=7ea5f1a0"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/version-switcher.js?v=af94ab41"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Resources" href="resources/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Data Growth
+          </a>
+              <div class="version">
+                0.20
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="resources/index.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration/index.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="processors/index.html">Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/index.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Data Growth</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data Growth’s documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-growth-s-documentation">
+<h1>Data Growth’s documentation<a class="headerlink" href="#data-growth-s-documentation" title="Link to this heading">¶</a></h1>
+<p>Data Growth is the bridge between gathered data and algorithms.
+The demand for data is increasing, because many algorithms and computer models need more of it than ever before.
+However as the data grows it becomes increasingly complex to handle it in a Pythonic way.
+Especially when it comes from many different sources.</p>
+<p>Data Growth is a Django application that helps to gather data in an organized way. With it you can declare pipelines
+for the data gathering and preprocessing as well as pipelines for filtering and redistribution.</p>
+<p>The package offers classes that help you load the data into your models.
+Or you can start the Django server to transfer data over a REST API to other devices or services.</p>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="resources/index.html">Resources</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resources/index.html#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources/index.html#http-resource">Http Resource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources/index.html#shell-resource">Shell Resource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resources/index.html#configuration">Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration/index.html">Configurations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration/index.html#getting-started">Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/index.html#django-fields">Django fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/index.html#updating">Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration/index.html#serializers">Serializers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="processors/index.html">Processors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="processors/index.html#input">Input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="processors/index.html#custom-made">Custom made</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils/index.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="resources/index.html" class="btn btn-neutral float-right" title="Resources" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Fako Berkers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

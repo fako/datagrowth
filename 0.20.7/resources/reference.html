@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resources &mdash; Data Growth 0.20.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/version-switcher.css?v=00ef59f7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/documentation_options.js?v=7ea5f1a0"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/version-switcher.js?v=af94ab41"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuration" href="../configuration/reference.html" />
+    <link rel="prev" title="Reference" href="../reference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Data Growth
+          </a>
+              <div class="version">
+                0.20
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/index.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processors/index.html">Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">Utils</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../reference.html">Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Resources</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-datagrowth.resources.base">Resource (base class)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.base.Resource"><code class="docutils literal notranslate"><span class="pre">Resource</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-datagrowth.resources.http">Http</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.http.HttpFileResource"><code class="docutils literal notranslate"><span class="pre">HttpFileResource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.http.HttpImageResource"><code class="docutils literal notranslate"><span class="pre">HttpImageResource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.http.HttpResource"><code class="docutils literal notranslate"><span class="pre">HttpResource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.http.URLResource"><code class="docutils literal notranslate"><span class="pre">URLResource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.http.file_resource_delete_handler"><code class="docutils literal notranslate"><span class="pre">file_resource_delete_handler()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-datagrowth.resources.shell">Shell</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#datagrowth.resources.shell.ShellResource"><code class="docutils literal notranslate"><span class="pre">ShellResource</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../configuration/reference.html">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../processors/reference.html">Processors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utils/reference.html">Utils</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Data Growth</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../reference.html">Reference</a></li>
+      <li class="breadcrumb-item active">Resources</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/resources/reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="resources">
+<h1>Resources<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h1>
+<section id="module-datagrowth.resources.base">
+<span id="resource-base-class"></span><h2>Resource (base class)<a class="headerlink" href="#module-datagrowth.resources.base" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">datagrowth.resources.base.</span></span><span class="sig-name descname"><span class="pre">Resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource" title="Link to this definition">¶</a></dt>
+<dd><p>This class defines the interface that all resources adhere to.
+You’ll rarely extend this class directly.
+The <code class="docutils literal notranslate"><span class="pre">HttpResource</span></code> and <code class="docutils literal notranslate"><span class="pre">ShellResource</span></code> are examples of classes that overextend this class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.close" title="Link to this definition">¶</a></dt>
+<dd><p>This convenience method handles both the clean and save step for saving models.
+To make use of the resource cache it’s necessary to clean before saving and close handles this directly.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#datagrowth.resources.base.Resource.content" title="Link to this definition">¶</a></dt>
+<dd><p>This method typically gets overwritten for different resource types.
+It should return the content_type and data from the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>content_type, data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.get_name">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.get_name" title="Link to this definition">¶</a></dt>
+<dd><p>Return the name of the resource. This is the model_name for almost all resources.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(str) lowercase model name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.get_queue_name">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_queue_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.get_queue_name" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the queue name that background tasks should dispatch to.
+By default it returns the default Django Celery queue name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(str) queue name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.handle_errors">
+<span class="sig-name descname"><span class="pre">handle_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.handle_errors" title="Link to this definition">¶</a></dt>
+<dd><p>Overwrite this method to handle resource specific error cases.
+Usually you’d raise a particular <code class="docutils literal notranslate"><span class="pre">DGResourceException</span></code> to indicate particular errors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.retain">
+<span class="sig-name descname"><span class="pre">retain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">retainer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.retain" title="Link to this definition">¶</a></dt>
+<dd><p>Links any Django model unto a <code class="docutils literal notranslate"><span class="pre">GenericRelation</span></code> upon a resource.
+Any resources retained this way will not get deleted from cache.
+This is convenient to save any context that can help during debugging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>retainer</strong> – (model) the model retaining the resource</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.success">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">success</span></span><a class="headerlink" href="#datagrowth.resources.base.Resource.success" title="Link to this definition">¶</a></dt>
+<dd><p>This method typically gets overwritten for different resource types.
+It should indicate the success of the data gathering.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(bool)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.base.Resource.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.base.Resource.variables" title="Link to this definition">¶</a></dt>
+<dd><p>Maps the input arguments from a resource to a dictionary.
+This makes it easy to access the positional input variables under names.
+Overwrite this method to create the mapping for your particular resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>args</strong> – (tuple) the positional arguments given as input to the resource</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(dict) a dictionary with the input variables as values</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-datagrowth.resources.http">
+<span id="http"></span><h2>Http<a class="headerlink" href="#module-datagrowth.resources.http" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpFileResource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">datagrowth.resources.http.</span></span><span class="sig-name descname"><span class="pre">HttpFileResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpFileResource" title="Link to this definition">¶</a></dt>
+<dd><p>Sometimes you want to download a file instead of storing the content in the database.
+For this use case the <code class="docutils literal notranslate"><span class="pre">HttpFileResource</span></code> is very suitable.
+Just pass the URL as a first argument to <code class="docutils literal notranslate"><span class="pre">get</span></code> and the URL will be downloaded as a file,
+storing it in your <code class="docutils literal notranslate"><span class="pre">MEDIA_ROOT</span></code>.</p>
+<p>The file path of the downloaded file will get stored in the <code class="docutils literal notranslate"><span class="pre">body</span></code> field.
+This path will be relative to the <code class="docutils literal notranslate"><span class="pre">MEDIA_ROOT</span></code>.
+The path will include a downloads folder and a subfolder that is the <code class="docutils literal notranslate"><span class="pre">app_name</span></code> of the concrete class.
+Under that directory there are many possible subdirectories in the form of “x/yz/”.
+Where x, y and z will be hexidecimal characters.
+Creating these subdirectories is necessary to prevent huge download directories, that would hamper performance.</p>
+<p>Only full URL’s with protocol will get downloaded.
+Any URL’s without a protocol will get stored as a failure with a 404 (Not Found) error code.
+Please note that with this class it is not possible to adjust the parameters through the <code class="docutils literal notranslate"><span class="pre">parameters</span></code> method,
+because it is assumed that all parameters are part of the URL given to <code class="docutils literal notranslate"><span class="pre">get</span></code>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpFileResource.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#datagrowth.resources.http.HttpFileResource.content" title="Link to this definition">¶</a></dt>
+<dd><p>Opens the file stored at the file path in <code class="docutils literal notranslate"><span class="pre">body</span></code> and returns that file together with the content type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>content_type, file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpFileResource.get_file_name">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_file_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">now</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpFileResource.get_file_name" title="Link to this definition">¶</a></dt>
+<dd><p>Override this method to change the file naming convention.
+By default it will take the filename from the URL
+and prefix it with a datetime string of the date and time at downloading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>original</strong> – (str) the URL file name</p></li>
+<li><p><strong>now</strong> – (datetime) a datetime object to use as prefix input</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpFileResource.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpFileResource.post" title="Link to this definition">¶</a></dt>
+<dd><p>This method calls <code class="docutils literal notranslate"><span class="pre">send</span></code> with “post” as a method. See the <code class="docutils literal notranslate"><span class="pre">send</span></code> method for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – arguments that will get merged into the URI_TEMPLATE</p></li>
+<li><p><strong>kwargs</strong> – keywords arguments that will get send as data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HttpResource</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpFileResource.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpFileResource.transform" title="Link to this definition">¶</a></dt>
+<dd><p>By default the <code class="docutils literal notranslate"><span class="pre">content</span></code> property will return the file wrapped in a Django <code class="docutils literal notranslate"><span class="pre">File</span></code> class.
+It may be convenient to wrap it in some other way.
+Override this method and return the file in a different format to change the content return value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> – (File) the file read from storage</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(any) file in correct format</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpImageResource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">datagrowth.resources.http.</span></span><span class="sig-name descname"><span class="pre">HttpImageResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpImageResource" title="Link to this definition">¶</a></dt>
+<dd><p>This class acts like the HttpFileResource with the only difference that it will return content as Pillow images.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpImageResource.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpImageResource.transform" title="Link to this definition">¶</a></dt>
+<dd><p>By default the <code class="docutils literal notranslate"><span class="pre">content</span></code> property will return the file wrapped in a Django <code class="docutils literal notranslate"><span class="pre">File</span></code> class.
+It may be convenient to wrap it in some other way.
+Override this method and return the file in a different format to change the content return value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file</strong> – (File) the file read from storage</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(any) file in correct format</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">datagrowth.resources.http.</span></span><span class="sig-name descname"><span class="pre">HttpResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource" title="Link to this definition">¶</a></dt>
+<dd><p>You can extend from this base class to declare a <code class="docutils literal notranslate"><span class="pre">Resource</span></code> that gathers data from a HTTP(S) source.
+For instance websites and (REST)API’s</p>
+<p>This class is a wrapper around the requests library and provides:</p>
+<ul class="simple">
+<li><p>easy follow up of continuation URL’s in responses</p></li>
+<li><p>cached responses when retrieving data a second time</p></li>
+<li><p>handle authentication through setting headers or GET parameters without storing credentials</p></li>
+<li><p>slowing down requests when servers give errors or warnings related to high-load</p></li>
+</ul>
+<p>Response headers, body and status get stored in the database as well as an abstraction of the request.
+Any authentication data gets stripped before storage in the database.
+Override handle_errors method to customize how errors in responses are detected.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.auth_headers">
+<span class="sig-name descname"><span class="pre">auth_headers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.auth_headers" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the dictionary that should be used as authentication headers for the request the resource will make.
+Override this method in your own class to add authentication.
+By default this method returns an empty dictionary meaning there are no authentication headers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) dictionary with headers to add to requests</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.auth_parameters">
+<span class="sig-name descname"><span class="pre">auth_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.auth_parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the dictionary that should be used as authentication parameters for the request the resource will make.
+Override this method in your own class to add authentication.
+By default this method returns an empty dictionary meaning there are no authentication parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) dictionary with parameters to add to requests</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.content" title="Link to this definition">¶</a></dt>
+<dd><p>After a successful <code class="docutils literal notranslate"><span class="pre">get</span></code> or <code class="docutils literal notranslate"><span class="pre">post</span></code> call this method reads the ContentType header from the HTTP response.
+Depending on the MIME type it will return the content type and the parsed data.</p>
+<ul class="simple">
+<li><p>For a ContentType of application/json data will be a python structure</p></li>
+<li><p>For a ContentType of text/html or text/xml data will be a BeautifulSoup instance</p></li>
+</ul>
+<p>Any other ContentType will result in None.
+You are encouraged to overextend <code class="docutils literal notranslate"><span class="pre">HttpResource</span></code> to handle your own data types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>content_type, data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.create_next_request">
+<span class="sig-name descname"><span class="pre">create_next_request</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.create_next_request" title="Link to this definition">¶</a></dt>
+<dd><p>Creates and returns a dictionary that represents a continuation request.
+Often a source will indicate how to continue gather more data.
+By overriding the <code class="docutils literal notranslate"><span class="pre">next_parameters</span></code> developers can indicate how continuation requests can be made.
+Calling this method will build a new request using these parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a dictionary representing a continuation request to be made</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.data" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the dictionary that will be used as HTTP body for the request the resource will make.
+By default this is the dictionary from the <code class="docutils literal notranslate"><span class="pre">DATA</span></code> attribute
+updated with the kwargs from the input from the <code class="docutils literal notranslate"><span class="pre">send</span></code> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – keyword arguments from the input</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.get" title="Link to this definition">¶</a></dt>
+<dd><p>This method calls <code class="docutils literal notranslate"><span class="pre">send</span></code> with “get” as a method. See the <code class="docutils literal notranslate"><span class="pre">send</span></code> method for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – arguments that will get merged into the URI_TEMPLATE</p></li>
+<li><p><strong>kwargs</strong> – keywords arguments that will get send as data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HttpResource</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.handle_errors">
+<span class="sig-name descname"><span class="pre">handle_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.handle_errors" title="Link to this definition">¶</a></dt>
+<dd><p>Raises exceptions upon error statuses
+Override this method to raise exceptions for your own error states.
+By default it raises the <code class="docutils literal notranslate"><span class="pre">DGHttpError40X</span></code> and <code class="docutils literal notranslate"><span class="pre">DGHttpError50X</span></code> exceptions for statuses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.hash_from_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hash_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.hash_from_data" title="Link to this definition">¶</a></dt>
+<dd><p>Given a dictionary will recursively sort and JSON dump the keys and values of that dictionary.
+The end result is given to SHA-1 to create a hash, that is unique for that data.
+This hash can be used for a database lookup to find earlier requests that send the same data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> – (dict) a dictionary of the data to be hashed</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the hash of the data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.headers">
+<span class="sig-name descname"><span class="pre">headers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.headers" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the dictionary that should be used as headers for the request the resource will make.
+By default this is the dictionary from the <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a dictionary representing HTTP headers</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.next_parameters">
+<span class="sig-name descname"><span class="pre">next_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.next_parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the dictionary that should be used as HTTP query parameters
+for the continuation request a resource can make.
+By default this is an empty dictionary.
+Override this method and return the correct parameters based on the <code class="docutils literal notranslate"><span class="pre">content</span></code> of the resource.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a dictionary representing HTTP continuation query parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.parameters" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the dictionary that should be used as HTTP query parameters for the request the resource will make.
+By default this is the dictionary from the <code class="docutils literal notranslate"><span class="pre">PARAMETERS</span></code> attribute.</p>
+<p>You may need to override this method. It will receive the return value of the variables method as kwargs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – variables returned by the variables method (ignored by default)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(dict) a dictionary representing HTTP query parameters</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.parse_content_type">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_content_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.parse_content_type" title="Link to this definition">¶</a></dt>
+<dd><p>Given a HTTP ContentType header will return the mime type and the encoding.
+If no encoding is found the default encoding gets returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content_type</strong> – (str) the HTTP ContentType header</p></li>
+<li><p><strong>default_encoding</strong> – (str) the default encoding when</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>mime_type, encoding</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.post">
+<span class="sig-name descname"><span class="pre">post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.post" title="Link to this definition">¶</a></dt>
+<dd><p>This method calls <code class="docutils literal notranslate"><span class="pre">send</span></code> with “post” as a method. See the <code class="docutils literal notranslate"><span class="pre">send</span></code> method for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – arguments that will get merged into the URI_TEMPLATE</p></li>
+<li><p><strong>kwargs</strong> – keywords arguments that will get send as data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HttpResource</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.put">
+<span class="sig-name descname"><span class="pre">put</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.put" title="Link to this definition">¶</a></dt>
+<dd><p>This method calls <code class="docutils literal notranslate"><span class="pre">send</span></code> with “put” as a method. See the <code class="docutils literal notranslate"><span class="pre">send</span></code> method for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – arguments that will get merged into the URI_TEMPLATE</p></li>
+<li><p><strong>kwargs</strong> – keywords arguments that will get send as data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HttpResource</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.request_with_auth">
+<span class="sig-name descname"><span class="pre">request_with_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.request_with_auth" title="Link to this definition">¶</a></dt>
+<dd><p>Get the <code class="docutils literal notranslate"><span class="pre">request</span></code> that this resource will make with authentication headers and parameters added.
+Override <code class="docutils literal notranslate"><span class="pre">auth_headers</span></code> and/or <code class="docutils literal notranslate"><span class="pre">auth_parameters</span></code> to provide the headers and/or parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a copy of the <code class="docutils literal notranslate"><span class="pre">request</span></code> dictionary with authentication added</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.request_without_auth">
+<span class="sig-name descname"><span class="pre">request_without_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.request_without_auth" title="Link to this definition">¶</a></dt>
+<dd><p>Get the <code class="docutils literal notranslate"><span class="pre">request</span></code> that this resource will make with authentication headers and parameters from
+<code class="docutils literal notranslate"><span class="pre">auth_headers</span></code> and <code class="docutils literal notranslate"><span class="pre">auth_parameters</span></code> removed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a copy of the <code class="docutils literal notranslate"><span class="pre">request</span></code> dictionary with authentication removed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.send" title="Link to this definition">¶</a></dt>
+<dd><p>This method handles the gathering of data and updating the model based on the resource configuration.
+If the data has been retrieved before it will load the data from cache instead.
+Specify <code class="docutils literal notranslate"><span class="pre">cache_only</span></code> in your config if you want to prevent any HTTP requests.
+The data might be missing in that case.</p>
+<p>You must specify the method that the resource will be using to get the data.
+Currently this can be the “get” and “post” HTTP verbs.</p>
+<p>Any arguments will be passed to <code class="docutils literal notranslate"><span class="pre">URI_TEMPLATE</span></code> to format it.
+Any keyword arguments will be passed as a data dict to the request.
+If a keyword is listed in the <code class="docutils literal notranslate"><span class="pre">FILE_DATA_KEYS</span></code> attribute on a HttpResource,
+then the value of that argument is expected to be a file path relative to the <code class="docutils literal notranslate"><span class="pre">DATAGROWTH_MEDIA_ROOT</span></code>.
+The value of that keyword will be replaced with the file before making the request.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>method</strong> – “get” or “post” depending on which request you want your resource to execute</p></li>
+<li><p><strong>args</strong> – arguments that will get merged into the <code class="docutils literal notranslate"><span class="pre">URI_TEMPLATE</span></code></p></li>
+<li><p><strong>kwargs</strong> – keywords arguments that will get send as data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HttpResource</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.set_error">
+<span class="sig-name descname"><span class="pre">set_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.set_error" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the given status on the HttpResource.
+When dealing with connection_errors it sets valid defaults.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>status</strong> – (int) the error status from the response</p></li>
+<li><p><strong>connection_error</strong> – (bool) whether the error occurred during a connection error</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.success">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">success</span></span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.success" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if status is within HTTP success range</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.uri_from_url">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uri_from_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.uri_from_url" title="Link to this definition">¶</a></dt>
+<dd><p>Given a URL this method will strip the protocol and sort the parameters.
+That way a database lookup for a URL will always return URL’s that logically match that URL.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>url</strong> – the URL to normalize to URI</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a normalized URI suitable for lookups</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.validate_request">
+<span class="sig-name descname"><span class="pre">validate_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.validate_request" title="Link to this definition">¶</a></dt>
+<dd><p>Validates a dictionary that represents a request that the resource will make.
+Currently it checks the method, which should be “get” or “post”
+and whether the current data (if any) is still valid or has expired.
+Apart from that it validates input which should adhere to
+the JSON schema defined in the <code class="docutils literal notranslate"><span class="pre">GET_SCHEMA</span></code> or <code class="docutils literal notranslate"><span class="pre">POST_SCHEMA</span></code> attributes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> – (dict) the request dictionary</p></li>
+<li><p><strong>validate_input</strong> – (bool) whether to validate input</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.http.HttpResource.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.HttpResource.variables" title="Link to this definition">¶</a></dt>
+<dd><p>Parsers the input variables and returns a dictionary with a “url” key.
+This key contains a list of variables that will be used to format the <code class="docutils literal notranslate"><span class="pre">URI_TEMPLATE</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a dictionary where the input variables are available under names</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="datagrowth.resources.http.URLResource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">datagrowth.resources.http.</span></span><span class="sig-name descname"><span class="pre">URLResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.URLResource" title="Link to this definition">¶</a></dt>
+<dd><p>Sometimes you don’t want to build a URI through the <code class="docutils literal notranslate"><span class="pre">URI_TEMPLATE</span></code>,
+because you have a URL, where data should be retrieved from immediately.
+For this use case the <code class="docutils literal notranslate"><span class="pre">URLResource</span></code> is very suitable.
+Just pass the URL as a first argument to either <code class="docutils literal notranslate"><span class="pre">get</span></code> or <code class="docutils literal notranslate"><span class="pre">post</span></code> and the request will be made.</p>
+<p>Only full URL’s with protocol are excepted as an argument.
+And note that it is not possible to adjust the parameters through the <code class="docutils literal notranslate"><span class="pre">parameters</span></code> method,
+because it is assumed that all parameters are part of the URL given to <code class="docutils literal notranslate"><span class="pre">get</span></code> or <code class="docutils literal notranslate"><span class="pre">post</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="datagrowth.resources.http.URLResource.PARAMETERS">
+<span class="sig-name descname"><span class="pre">PARAMETERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#datagrowth.resources.http.URLResource.PARAMETERS" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="datagrowth.resources.http.file_resource_delete_handler">
+<span class="sig-prename descclassname"><span class="pre">datagrowth.resources.http.</span></span><span class="sig-name descname"><span class="pre">file_resource_delete_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instance</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.http.file_resource_delete_handler" title="Link to this definition">¶</a></dt>
+<dd><p>A Django signal handler that can be bound to a <code class="docutils literal notranslate"><span class="pre">post_delete</span></code> signal
+to free disk space when file resources get deleted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sender</strong> – receives the class that is sending the signal</p></li>
+<li><p><strong>instance</strong> – the object under deletion</p></li>
+<li><p><strong>kwargs</strong> – ignored, for compatibility only</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-datagrowth.resources.shell">
+<span id="shell"></span><h2>Shell<a class="headerlink" href="#module-datagrowth.resources.shell" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">datagrowth.resources.shell.</span></span><span class="sig-name descname"><span class="pre">ShellResource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource" title="Link to this definition">¶</a></dt>
+<dd><p>You can extend from this base class to declare a <code class="docutils literal notranslate"><span class="pre">Resource</span></code> that gathers data from a any shell command.</p>
+<p>This class is a wrapper around the subprocess module and provides:</p>
+<ul class="simple">
+<li><p>cached responses when retrieving data a second time</p></li>
+</ul>
+<p>The resource stores the stdin, stdout and stderr from commands in the database
+as well as an abstraction of the command.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.clean">
+<span class="sig-name descname"><span class="pre">clean</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.clean" title="Link to this definition">¶</a></dt>
+<dd><p>Hook for doing any extra model-wide validation after clean() has been
+called on every field by self.clean_fields. Any ValidationError raised
+by this method will not be associated with a particular field; it will
+have a special-case association with the field defined by NON_FIELD_ERRORS.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.clean_stderr">
+<span class="sig-name descname"><span class="pre">clean_stderr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stderr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.clean_stderr" title="Link to this definition">¶</a></dt>
+<dd><p>This method decodes the stderr from the subprocess result to UTF-8.
+Override this method to do any further cleanup.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stderr</strong> – (bytes) stderr from the command</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(str) cleaned decoded output</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.clean_stdout">
+<span class="sig-name descname"><span class="pre">clean_stdout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stdout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.clean_stdout" title="Link to this definition">¶</a></dt>
+<dd><p>This method decodes the stdout from the subprocess result to UTF-8.
+Override this method to do any further cleanup.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stdout</strong> – (bytes) stdout from the command</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(str) cleaned decoded output</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.content">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">content</span></span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.content" title="Link to this definition">¶</a></dt>
+<dd><p>After a successful <code class="docutils literal notranslate"><span class="pre">run</span></code> call this method passes stdout from the command through the <code class="docutils literal notranslate"><span class="pre">transform</span></code> method.
+It then returns the value of the <code class="docutils literal notranslate"><span class="pre">CONTENT_TYPE</span></code> attribute as content type
+and whatever transform returns as data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>content_type, data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.debug" title="Link to this definition">¶</a></dt>
+<dd><p>A method that prints to stdout the command that will get executed by the <code class="docutils literal notranslate"><span class="pre">ShellResource</span></code>.
+This is mostly useful for debugging during development.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.environment">
+<span class="sig-name descname"><span class="pre">environment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.environment" title="Link to this definition">¶</a></dt>
+<dd><p>You can specify environment variables for the command based on the input to <code class="docutils literal notranslate"><span class="pre">run</span></code> by overriding this method.
+The input from <code class="docutils literal notranslate"><span class="pre">run</span></code> is passed down to this method,
+based on this a dictionary should get returned containing the environment variables
+or None if no environment should be set.</p>
+<p>By default this method returns the <code class="docutils literal notranslate"><span class="pre">VARIABLES</span></code> attribute without making changes to it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – arguments from the <code class="docutils literal notranslate"><span class="pre">run</span></code> command</p></li>
+<li><p><strong>kwargs</strong> – keyword arguments from the <code class="docutils literal notranslate"><span class="pre">run</span></code> command</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dictionary with environment variables or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.handle_errors">
+<span class="sig-name descname"><span class="pre">handle_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.handle_errors" title="Link to this definition">¶</a></dt>
+<dd><p>Raises exceptions upon error statuses
+Override this method to raise exceptions for your own error states.
+By default it raises the <code class="docutils literal notranslate"><span class="pre">DGShellError</span></code> for any status other than 0.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.run" title="Link to this definition">¶</a></dt>
+<dd><p>This method handles the gathering of data and updating the model based on the resource configuration.
+If the data has been retrieved before it will load the data from cache instead.
+Specify <code class="docutils literal notranslate"><span class="pre">cache_only</span></code> in your config if you want to prevent any execution of commands.
+The data might be missing in that case.</p>
+<p>Any arguments will be passed to <code class="docutils literal notranslate"><span class="pre">CMD_TEMPLATE</span></code> to format it.
+Any keyword arguments will be parsed into command flags by using the <code class="docutils literal notranslate"><span class="pre">FLAGS</span></code> attribute.
+The parsed flags will be inserted into <code class="docutils literal notranslate"><span class="pre">CMD_TEMPLATE</span></code> where ever the <code class="docutils literal notranslate"><span class="pre">CMD_FLAGS</span></code> value is present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – get passed on to the command</p></li>
+<li><p><strong>kwargs</strong> – get parsed into flags before being passed on to the command</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>self</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.success">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">success</span></span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.success" title="Link to this definition">¶</a></dt>
+<dd><p>Returns True if exit code is 0 and there is some stdout</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stdout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.transform" title="Link to this definition">¶</a></dt>
+<dd><p>Override this method for particular commands.
+It takes the stdout from the command and transforms it into useful output for other components.
+One use case could be to clean out log lines from the output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stdout</strong> – the stdout from the command</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>transformed stdout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.uri_from_cmd">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uri_from_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.uri_from_cmd" title="Link to this definition">¶</a></dt>
+<dd><p>Given a command list this method will sort that list, but keeps the first element as first element.
+That way a database lookup for a command will always return a command that logically match that command.
+Regardless of flag or argument order.
+At the same time similar commands will appear beneath each other in an overview.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>cmd</strong> – the command list as passed to subprocess.run to normalize to URI</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a normalized URI suitable for lookups</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.validate_command">
+<span class="sig-name descname"><span class="pre">validate_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.validate_command" title="Link to this definition">¶</a></dt>
+<dd><p>Validates a dictionary that represents a command that the resource will run.</p>
+<p>It currently checks whether the current data (if any) is still valid or has expired.
+Apart from that it validates input which should adhere to
+the JSON schema defined in the <code class="docutils literal notranslate"><span class="pre">SCHEMA</span></code> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> – (dict) the command dictionary</p></li>
+<li><p><strong>validate_input</strong> – (bool) whether to validate input</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="datagrowth.resources.shell.ShellResource.variables">
+<span class="sig-name descname"><span class="pre">variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#datagrowth.resources.shell.ShellResource.variables" title="Link to this definition">¶</a></dt>
+<dd><p>Parsers the input variables and returns a dictionary with an “input” key.
+This key contains a list of variables that will be used to format the <code class="docutils literal notranslate"><span class="pre">CMD_TEMPLATE</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(dict) a dictionary where the input variables are available under names</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../reference.html" class="btn btn-neutral float-left" title="Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../configuration/reference.html" class="btn btn-neutral float-right" title="Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Fako Berkers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

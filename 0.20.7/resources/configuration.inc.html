@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration &mdash; Data Growth 0.20.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/version-switcher.css?v=00ef59f7" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/documentation_options.js?v=7ea5f1a0"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/version-switcher.js?v=af94ab41"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Data Growth
+          </a>
+              <div class="version">
+                0.20
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/index.html">Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../processors/index.html">Processors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html">Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Data Growth</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/resources/configuration.inc.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h1>
+<p>You can adjust how a <code class="docutils literal notranslate"><span class="pre">Resource</span></code> retrieves data by using some configuration options.
+See the <a class="reference external" href="../configuration/index.html">configuration</a> section to learn more on how to set configuration defaults.
+Here we’ll be explaining the available configurations by setting them directly only.</p>
+<section id="caching-behaviour">
+<h2>Caching behaviour<a class="headerlink" href="#caching-behaviour" title="Link to this heading">¶</a></h2>
+<p>An important aspect about <code class="docutils literal notranslate"><span class="pre">Resource</span></code> is that it will act as a cache if retrieving data was successful.
+There are a few configuration options that modify the cache behaviour. All examples below use a namespace of “global”</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">example</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyResource</span>
+
+<span class="c1"># This configuration disables all cache.</span>
+<span class="c1"># It still stores the Resource, but it will never get used twice.</span>
+<span class="n">MyResource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;purge_immediately&quot;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">})</span>
+
+<span class="c1"># For more fine grained control the purge_after configuration can be used</span>
+<span class="n">MyResource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;purge_after&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="mi">30</span>
+    <span class="p">}</span>
+<span class="p">})</span>
+<span class="c1"># Such a configuration will indicate to Datagrowth that the Resource</span>
+<span class="c1"># should not be used as cache after 30 days.</span>
+<span class="c1"># The value of purge_after can be any dict that gets accepted as kwargs to Python&#39;s timedelta.</span>
+<span class="c1"># This makes it possible to be very flexible about when a Resource</span>
+<span class="c1"># should not get used anymore, but it won&#39;t delete any Resources.</span>
+<span class="c1"># Datagrowth just doesn&#39;t use them as cache after the specified time.</span>
+
+<span class="c1"># Sometimes getting data from a Resource is very computation intensive.</span>
+<span class="c1"># In such cases it might be a good idea to never actually retrieve data</span>
+<span class="c1"># unless it is cached by a background process.</span>
+<span class="c1"># By using the cache_only configuration you can force a Resource</span>
+<span class="c1"># to only return if there is a cached result and to never start real data retrieval.</span>
+<span class="n">resource</span> <span class="o">=</span> <span class="n">MyResource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;cache_only&quot;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">})</span>
+<span class="n">resource</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># this never makes a real request</span>
+</pre></div>
+</div>
+</section>
+<section id="user-agent-configuration">
+<h2>User Agent configuration<a class="headerlink" href="#user-agent-configuration" title="Link to this heading">¶</a></h2>
+<p>This configuration is only useful for <code class="docutils literal notranslate"><span class="pre">HttpResource</span></code> and child classes. It uses the “global” namespace</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">example</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyResource</span>
+
+<span class="c1"># This configuration sets the user agent for any request made by the Resource.</span>
+<span class="n">MyResource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;user_agent&quot;</span><span class="p">:</span> <span class="s2">&quot;My custom crawler User Agent&quot;</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="backoff-delays-configuration">
+<h2>Backoff Delays configuration<a class="headerlink" href="#backoff-delays-configuration" title="Link to this heading">¶</a></h2>
+<p>This configuration is only useful for <code class="docutils literal notranslate"><span class="pre">HttpResource</span></code> and child classes.
+A <code class="docutils literal notranslate"><span class="pre">HttpResource</span></code> will sleep for some seconds when a 420, 429, 502, 503 or 504 HTTP error occurred.
+By default these sleep intervals which give the responding server some rest last 2, 4, 8 and finally 16 seconds.
+After the final backoff delay interval the <code class="docutils literal notranslate"><span class="pre">HttpResource</span></code> will error
+and give up making the request if the server never responds.
+You can disable or modify this behaviour by setting the <code class="docutils literal notranslate"><span class="pre">backoff_delays</span></code> configuration
+It uses the “global” namespace</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">example</span><span class="w"> </span><span class="kn">import</span> <span class="n">MyResource</span>
+
+<span class="c1"># This configuration will let the HttpResource wait 1m and then 2m instead of the default amount of seconds.</span>
+<span class="n">minutes_backoff_delay</span> <span class="o">=</span> <span class="n">MyResource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;backoff_delays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">120</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="c1"># You can also disable the backoff delay procedure.</span>
+<span class="n">no_backoff_delays</span> <span class="o">=</span> <span class="n">MyResource</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span>
+    <span class="s2">&quot;backoff_delays&quot;</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2018, Fako Berkers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
