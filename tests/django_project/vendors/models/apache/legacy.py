@@ -8,7 +8,7 @@ from django.db import models
 from datagrowth.resources.http import MicroServiceResource
 
 
-class HttpTikaResource(MicroServiceResource):
+class LegacyTikaPdfResource(MicroServiceResource):
 
     pdf_id = models.UUIDField(null=True, blank=True, db_index=True)
 
@@ -22,7 +22,7 @@ class HttpTikaResource(MicroServiceResource):
         has_connection_args = len(resolved_args) >= 3
         return {
             "url": list(resolved_args[:3]) if has_connection_args else [],
-            "mode": resolved_args[3] if len(resolved_args) > 3 else (resolved_args[0] if resolved_args else "structure"),
+            "mode": resolved_args[3] if len(resolved_args) > 3 else (resolved_args[0] if resolved_args else "structure"),  # noqa: E501
         }
 
     def parameters(self, mode: Any = None, **kwargs: Any) -> dict[str, str]:
@@ -58,12 +58,14 @@ class HttpTikaResource(MicroServiceResource):
     def handle_errors(self) -> None:
         super().handle_errors()
         _, data = self.content
-        if not data:
+        if not isinstance(data, list) or not data:
             return None
         has_content = False
         has_exception = False
 
         for rsl in data:
+            if not isinstance(rsl, dict):
+                continue
             has_content = has_content or bool(rsl.get("X-TIKA:content", None))
             rsl_exceptions = dict(filter(lambda key: "X-TIKA:EXCEPTION:" in key, rsl.keys()))
             has_exception = has_exception or len(rsl_exceptions) > 0
@@ -143,6 +145,3 @@ class HttpTikaResource(MicroServiceResource):
         if self.request:
             return f"{self.__class__.__name__}(document={self.request["kwargs"]["document"]})"
         return f"{self.__class__.__name__}(document=None)"
-
-    class Meta(MicroServiceResource.Meta):
-        abstract = True

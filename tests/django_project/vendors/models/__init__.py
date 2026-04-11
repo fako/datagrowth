@@ -1,1 +1,1 @@
-from vendors.models.apache import MockTikaResource
+from vendors.models.apache.legacy import LegacyTikaPdfResource

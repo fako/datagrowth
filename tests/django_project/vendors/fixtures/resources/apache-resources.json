@@ -1,6 +1,6 @@
 [
 {
-    "model": "vendors.mocktikaresource",
+    "model": "vendors.legacytikapdfresource",
     "pk": 1,
     "fields": {
         "uri": "localhost:9998/rmeta/text",
@@ -48,7 +48,7 @@
     }
 },
 {
-    "model": "vendors.mocktikaresource",
+    "model": "vendors.legacytikapdfresource",
     "pk": 2,
     "fields": {
         "uri": "localhost:9998/rmeta/text?mode=semantic",

@@ -13,7 +13,7 @@ from resources.models import (
     ShellResourceMock,
     URLResourceMock,
 )
-from vendors.models import MockTikaResource
+from vendors.models import LegacyTikaPdfResource
 
 
 class TestDatagrowthResourceDjangoConfig(TestCase):
@@ -30,7 +30,7 @@ class TestDatagrowthResourceDjangoConfig(TestCase):
             "resources.entitylistresource": EntityListResource,
             "resources.entityidlistresource": EntityIdListResource,
             "resources.entitydetailresource": EntityDetailResource,
-            "vendors.mocktikaresource": MockTikaResource,
+            "vendors.legacytikapdfresource": LegacyTikaPdfResource,
         }
 
     def test_load_resources(self):
