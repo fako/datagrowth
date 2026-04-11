@@ -15,7 +15,6 @@
     "X-TIKA:content_handler": "ToTextContentHandler",
     "pdf:num3DAnnotations": "0",
     "dc:format": "application/pdf; version=1.4",
-    "pdf:overallPercentageUnmappedUnicodeChars": "0.0",
     "access_permission:fill_in_form": "true",
     "pdf:hasCollection": "false",
     "pdf:encrypted": "false",
@@ -33,9 +32,9 @@
     "xmpTPg:NPages": "3",
     "pdf:hasXMP": "false",
     "pdf:charsPerPage": [
-        "2286",
-        "2261",
-        "1739"
+        "0",
+        "0",
+        "0"
     ],
     "access_permission:extract_content": "true",
     "access_permission:can_print": "true",
@@ -43,7 +42,7 @@
         "org.apache.tika.parser.CompositeParser",
         "org.apache.tika.parser.pdf.PDFParser"
     ],
-    "X-TIKA:parse_time_millis": "31",
+    "X-TIKA:parse_time_millis": "25",
     "X-TIKA:embedded_depth": "0",
     "access_permission:can_modify": "true",
     "pdf:docinfo:producer": "Skia/PDF m144 Google Docs Renderer",

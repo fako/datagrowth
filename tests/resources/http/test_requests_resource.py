@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import base64
 from typing import ClassVar
 from unittest.mock import Mock
+from pathlib import Path
 
 import pytest
 import requests
@@ -44,6 +46,27 @@ class HttpResourceAuthMock(HttpResourceMock):
         return {"api_key": "super-secret-key"}
 
 
+class HttpResourceDataMock(HttpResource):
+
+    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_data_mock")
+    STORAGE: ClassVar[Tag] = Tag(category="storage", value="file_system")
+    URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
+    MODE: ClassVar[HttpMode] = HttpMode.DATA
+
+    def data(self, **kwargs: str) -> str:
+        return f"bin://file://{kwargs['file']}"
+
+
+class HttpResourceDataNoStorageMock(HttpResource):
+
+    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_data_no_storage_mock")
+    URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
+    MODE: ClassVar[HttpMode] = HttpMode.DATA
+
+    def data(self, **kwargs: str) -> str:
+        return f"bin://{base64.b64encode(b'payload-bytes').decode('ascii')}"
+
+
 def make_response(status_code: int, body: bytes | str, headers: dict[str, str] | None = None) -> Response:
     response = Response()
     response.status_code = status_code
@@ -72,6 +95,36 @@ def resource(mocked_session: Mock) -> HttpResourceMock:
         "allow_redirects": True,
         "timeout": 30,
         "user_agent": "DataGrowth (test)",
+    })
+    return resource
+
+
+@pytest.fixture
+def data_resource(mocked_session: Mock, tmp_path: Path) -> HttpResourceDataMock:
+    resource = HttpResourceDataMock()
+    assert isinstance(resource.extractor, RequestsExtractor)
+    resource.extractor.set_session(mocked_session)
+    resource.extractor.config.update({
+        "backoff_delays": [],
+        "requests_proxies": None,
+        "requests_verify": True,
+        "allow_redirects": True,
+        "timeout": 30,
+        "user_agent": "DataGrowth (test)",
+    })
+    assert resource.storage is not None
+    resource.storage.config.update({
+        "allow_read": True,
+        "allow_write": True,
+        "allow_save": False,
+        "allow_load": False,
+        "snapshots": False,
+        "directories": {
+            "project": None,
+            "data": str(tmp_path / "data"),
+            "snapshots": str(tmp_path / "snapshots"),
+            "tmp": str(tmp_path / "tmp"),
+        },
     })
     return resource
 
@@ -195,6 +248,34 @@ def test_resource_extract_post_sends_json_data(resource: HttpResourceMock, mocke
     assert prepared_request.method == "POST"
     assert prepared_request.url == "https://example.com/books/python?source=tests&page=1"
     assert json.loads(prepared_request.body.decode("utf-8")) == {"query": "django"}
+
+
+def test_resource_extract_data_mode_requires_open_signature(mocked_session: Mock) -> None:
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    resource = HttpResourceDataNoStorageMock()
+    assert isinstance(resource.extractor, RequestsExtractor)
+    resource.extractor.set_session(mocked_session)
+    resource.extractor.config.update({
+        "backoff_delays": [],
+        "requests_proxies": None,
+        "requests_verify": True,
+        "allow_redirects": True,
+        "timeout": 30,
+        "user_agent": "DataGrowth (test)",
+    })
+    with pytest.raises(RuntimeError, match="requires a signature to be open"):
+        resource.extract("post")
+
+
+def test_resource_extract_data_mode_uses_hydrated_signature_data(data_resource: HttpResourceDataMock,
+                                                                 mocked_session: Mock, tmp_path: Path) -> None:
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    payload_path = tmp_path / "payload.bin"
+    payload_path.write_bytes(b"payload-bytes")
+
+    _ = data_resource.extract("post", file=str(payload_path))
+    prepared_request = mocked_session.send.call_args.args[0]
+    assert prepared_request.body == b"payload-bytes"
 
 
 def test_resource_extract_retries_on_retryable_status(resource: HttpResourceMock, mocked_session: Mock) -> None:

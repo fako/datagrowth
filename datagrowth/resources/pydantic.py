@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Any, ClassVar, Self, Generic, cast
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
+import base64
+from pathlib import Path
 from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, field_validator, model_validator
 
 from datagrowth.configuration import ConfigurationType
@@ -84,6 +86,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
         # Attempt extracting data from the remote as prescribed by prepare_signature method
         self.signature = signature
+        self.open_signature(signature)
         extracted = self.extractor.extract(signature)
         if isinstance(extracted, self.__class__):
             extracted.handle_errors()
@@ -100,7 +103,22 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             self.storage.save(self)
             if self.storage.config.snapshots:
                 self.close_snapshot(self.storage)
+        if self.signature is not None:
+            self.signature.close()
         return self
+
+    def open_signature(self, signature: ResourceSignatureType) -> None:
+        if not isinstance(signature.data, str) or not signature.data.startswith("bin://"):
+            return
+        if self.storage is None:
+            return
+        payload = signature.data.removeprefix("bin://")
+        if payload.startswith("file://"):
+            file_path = Path(payload.removeprefix("file://"))
+            data_bytes = file_path.read_bytes()
+        else:
+            data_bytes = base64.b64decode(payload.encode("ascii"))
+        signature.set_data_bytes(data_bytes)
 
     def next(self) -> Self | None:
         return None

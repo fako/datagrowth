@@ -73,8 +73,8 @@ class RequestsExtractor:
         if signature.method.lower() != "get" and signature.mode != HttpMode.NONE:
             if signature.mode == HttpMode.JSON:
                 request_kwargs["json"] = signature.data
-            elif signature.mode in {HttpMode.DATA, HttpMode.BYTES}:
-                request_kwargs["data"] = signature.data
+            elif signature.mode == HttpMode.DATA:
+                request_kwargs["data"] = signature.get_data()
             elif signature.mode == HttpMode.MULTIPART:
                 multipart_body = signature.data or {}
                 request_kwargs["data"] = multipart_body.get("data")

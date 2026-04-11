@@ -108,6 +108,12 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
     def write(self, signature: Signature, filename: str, data: bytes | str) -> Path:
         ...
 
+    def read_tmp(self, filename: str) -> bytes | str:
+        ...
+
+    def write_tmp(self, filename: str, data: bytes | str) -> Path:
+        ...
+
 
 class ResourceExtractorProtocol(Protocol[ResourceSignatureType, ResourceType]):
 

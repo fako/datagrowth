@@ -1,9 +1,8 @@
 from typing import Any
-import base64
 import hashlib
 import json
 import re
-from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 
 SAFE_SIGNATURE_TYPE_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]*$")
@@ -16,11 +15,29 @@ class InputsValidator(BaseModel):
 
 class Signature(BaseModel):
     uri: str
-    data: dict[str, Any] | bytes | None = Field(default=None)
+    data: dict[str, Any] | str | None = Field(default=None)
     hash: int = Field(default=0)
     type: str | None = Field(default=None)
     args: tuple[Any, ...] = Field(default_factory=tuple)
     kwargs: dict[str, Any] = Field(default_factory=dict)
+    _data_bytes: bytes | None = PrivateAttr(default=None)
+
+    #####################
+    # Data lifecycle
+    #####################
+
+    def set_data_bytes(self, data: bytes | None) -> None:
+        self._data_bytes = data
+
+    def get_data(self) -> dict[str, Any] | str | bytes | None:
+        if not isinstance(self.data, str) or not self.data.startswith("bin://"):
+            return self.data
+        if self._data_bytes is None:
+            raise RuntimeError("Signature.get_data() requires a signature to be open before reading bin:// data.")
+        return self._data_bytes
+
+    def close(self) -> None:
+        self.set_data_bytes(None)
 
     #####################
     # Pydantic plumbing
@@ -32,62 +49,6 @@ class Signature(BaseModel):
 
     def __hash__(self) -> int:
         return self.hash
-
-    @staticmethod
-    def _encode_bytes_payload(value: Any) -> Any:
-        if isinstance(value, bytes):
-            return {
-                "__type__": "bytes",
-                "encoding": "base64",
-                "value": base64.b64encode(value).decode("ascii"),
-            }
-        if isinstance(value, dict):
-            return {key: Signature._encode_bytes_payload(item) for key, item in value.items()}
-        if isinstance(value, list):
-            return [Signature._encode_bytes_payload(item) for item in value]
-        if isinstance(value, tuple):
-            return [Signature._encode_bytes_payload(item) for item in value]
-        return value
-
-    @staticmethod
-    def _decode_bytes_payload(value: Any) -> Any:
-        if isinstance(value, dict):
-            if value.get("__type__") == "bytes":
-                encoded = value.get("value")
-                if not isinstance(encoded, str):
-                    raise TypeError("Serialized bytes payload should contain a base64 string value.")
-                return base64.b64decode(encoded.encode("ascii"))
-            return {key: Signature._decode_bytes_payload(item) for key, item in value.items()}
-        if isinstance(value, list):
-            return [Signature._decode_bytes_payload(item) for item in value]
-        return value
-
-    @field_serializer("data", when_used="json")
-    def serialize_data(self, data: dict[str, Any] | bytes | None) -> Any:
-        return self._encode_bytes_payload(data)
-
-    @field_serializer("kwargs", when_used="json")
-    def serialize_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
-        return self._encode_bytes_payload(kwargs)
-
-    @field_serializer("args", when_used="json")
-    def serialize_args(self, args: tuple[Any, ...]) -> list[Any]:
-        return self._encode_bytes_payload(args)
-
-    @field_validator("data", mode="before")
-    @classmethod
-    def deserialize_data(cls, data: Any) -> Any:
-        return cls._decode_bytes_payload(data)
-
-    @field_validator("kwargs", mode="before")
-    @classmethod
-    def deserialize_kwargs(cls, kwargs: Any) -> Any:
-        return cls._decode_bytes_payload(kwargs)
-
-    @field_validator("args", mode="before")
-    @classmethod
-    def deserialize_args(cls, args: Any) -> Any:
-        return cls._decode_bytes_payload(args)
 
     @field_validator("type")
     @classmethod
@@ -121,7 +82,7 @@ class Signature(BaseModel):
         return data
 
     @staticmethod
-    def _compute_hash(uri: str, data: dict[str, Any] | bytes) -> int:
+    def _compute_hash(uri: str, data: Any) -> int:
         canonical_data = Signature._canonicalize_data(data)
         canonical = json.dumps({"uri": uri, "data": canonical_data}, sort_keys=True, separators=(",", ":"),
                                ensure_ascii=False)

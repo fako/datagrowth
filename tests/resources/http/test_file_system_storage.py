@@ -88,6 +88,7 @@ def configure_storage(resource: HttpResourceMock, root: Path, snapshots: bool = 
             "project": None,
             "data": str(root / "data"),
             "snapshots": str(root / "snapshots"),
+            "tmp": str(root / "tmp"),
         },
     })
 
@@ -197,6 +198,21 @@ def test_storage_write_and_read_use_snapshots_directory(resource: HttpResourceMo
     assert file_path.exists() is True
     assert resource.storage.read(extracted.signature, "blob.bin") == b"\xff\xfe"
     assert (tmp_path / "data" / "httpresourcemock" / str(extracted.signature.hash) / "blob.bin").exists() is False
+
+
+def test_storage_write_and_read_use_tmp_directory(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    configure_storage(resource, root=tmp_path, snapshots=False)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    extracted = resource.extract("get", "books", slug="python", page="1")
+    assert extracted.signature is not None
+    file_path = resource.storage.write_tmp("tmp.bin", b"\xff\xfe")
+
+    assert file_path == tmp_path / "tmp" / "tmp.bin"
+    assert file_path.exists() is True
+    assert resource.storage.read_tmp("tmp.bin") == b"\xff\xfe"
+    assert (tmp_path / "data" / "httpresourcemock" / str(extracted.signature.hash) / "tmp.bin").exists() is False
 
 
 def test_storage_write_rejects_absolute_filename(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501

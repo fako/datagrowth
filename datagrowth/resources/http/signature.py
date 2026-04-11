@@ -16,7 +16,6 @@ class HttpMode(str, Enum):
     NONE = "none"
     JSON = "json"
     DATA = "data"
-    BYTES = "bytes"
     MULTIPART = "multipart"
 
 

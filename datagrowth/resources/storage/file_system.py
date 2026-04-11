@@ -47,10 +47,13 @@ class FileSystemStorage:
 
         return directory if directory.is_absolute() else (Path.cwd() / directory)
 
-    def _get_storage_directory(self, signature: Signature) -> Path:
-        base_dir = self._resolve_directory("data")
-        if self.config.snapshots:
+    def _get_storage_directory(self, signature: Signature, is_tmp: bool = False) -> Path:
+        if is_tmp:
+            base_dir = self._resolve_directory("tmp")
+        elif self.config.snapshots:
             base_dir = self._resolve_directory("snapshots")
+        else:
+            base_dir = self._resolve_directory("data")
         if signature.type:
             base_dir = base_dir / signature.type
         return base_dir / str(signature.hash)
@@ -108,6 +111,45 @@ class FileSystemStorage:
             raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
 
         path = self._get_storage_directory(signature) / filename_path.name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if isinstance(data, str):
+            path.write_text(data, encoding="utf-8")
+        else:
+            path.write_bytes(data)
+        return path
+
+    def read_tmp(self, filename: str) -> bytes | str:
+        if not self.config.allow_read:
+            raise PermissionError("Reading files is disabled by storage config (allow_read=false).")
+
+        filename_path = Path(filename)
+        if filename_path.is_absolute():
+            raise ValueError("Filename must be a relative path in the tmp directory.")
+        if filename_path.name != str(filename_path):
+            raise ValueError("Nested paths are not allowed in the tmp directory.")
+        if filename_path.name == "data.json":
+            raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
+
+        path = self._resolve_directory("tmp") / filename_path.name
+        data = path.read_bytes()
+        try:
+            return data.decode("utf-8")
+        except UnicodeDecodeError:
+            return data
+
+    def write_tmp(self, filename: str, data: bytes | str) -> Path:
+        if not self.config.allow_write:
+            raise PermissionError("Writing files is disabled by storage config (allow_write=false).")
+
+        filename_path = Path(filename)
+        if filename_path.is_absolute():
+            raise ValueError("Filename must be a relative path in the tmp directory.")
+        if filename_path.name != str(filename_path):
+            raise ValueError("Nested paths are not allowed in the tmp directory.")
+        if filename_path.name == "data.json":
+            raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
+
+        path = self._resolve_directory("tmp") / filename_path.name
         path.parent.mkdir(parents=True, exist_ok=True)
         if isinstance(data, str):
             path.write_text(data, encoding="utf-8")
