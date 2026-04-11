@@ -47,10 +47,13 @@ class FileSystemStorage:
 
         return directory if directory.is_absolute() else (Path.cwd() / directory)
 
-    def _get_storage_directory(self) -> Path:
+    def _get_storage_directory(self, signature: Signature) -> Path:
+        base_dir = self._resolve_directory("data")
         if self.config.snapshots:
-            return self._resolve_directory("snapshots")
-        return self._resolve_directory("data")
+            base_dir = self._resolve_directory("snapshots")
+        if signature.type:
+            base_dir = base_dir / signature.type
+        return base_dir / str(signature.hash)
 
     def save(self, resource: Resource[Signature]) -> Signature:
         if not self.config.allow_save:
@@ -58,7 +61,7 @@ class FileSystemStorage:
         if resource.signature is None:
             raise ValueError("Can't save resource without a signature.")
 
-        directory = self._get_storage_directory() / str(resource.signature.hash)
+        directory = self._get_storage_directory(resource.signature)
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / "data.json"
         path.write_text(resource.model_dump_json(indent=4), encoding="utf-8")
@@ -68,7 +71,7 @@ class FileSystemStorage:
         if not self.config.allow_load:
             raise PermissionError("Loading resources is disabled by storage config (allow_load=false).")
 
-        path = self._get_storage_directory() / str(signature.hash) / "data.json"
+        path = self._get_storage_directory(signature) / "data.json"
         if not path.exists():
             return None
         return Resource[Signature].model_validate_json(path.read_text(encoding="utf-8"))
@@ -85,7 +88,7 @@ class FileSystemStorage:
         if filename_path.name == "data.json":
             raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
 
-        target = self._get_storage_directory() / str(signature.hash) / filename_path.name
+        target = self._get_storage_directory(signature) / filename_path.name
         data = target.read_bytes()
         try:
             return data.decode("utf-8")
@@ -104,7 +107,7 @@ class FileSystemStorage:
         if filename_path.name == "data.json":
             raise ValueError("Filename 'data.json' is reserved for storage.save() and storage.load().")
 
-        path = self._get_storage_directory() / str(signature.hash) / filename_path.name
+        path = self._get_storage_directory(signature) / filename_path.name
         path.parent.mkdir(parents=True, exist_ok=True)
         if isinstance(data, str):
             path.write_text(data, encoding="utf-8")

@@ -100,10 +100,10 @@ def test_extract_close_saves_resource_in_data_directory(resource: HttpResourceMo
     extracted.close()
 
     assert extracted.signature is not None
-    save_path = tmp_path / "data" / str(extracted.signature.hash) / "data.json"
+    save_path = tmp_path / "data" / "httpresourcemock" / str(extracted.signature.hash) / "data.json"
     assert save_path.exists() is True
     assert save_path.read_text(encoding="utf-8") == extracted.model_dump_json(indent=4)
-    assert (tmp_path / "snapshots" / str(extracted.signature.hash) / "data.json").exists() is False
+    assert (tmp_path / "snapshots" / "httpresourcemock" / str(extracted.signature.hash) / "data.json").exists() is False
 
 
 def test_extract_close_saves_resource_in_snapshots_directory(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
@@ -115,10 +115,10 @@ def test_extract_close_saves_resource_in_snapshots_directory(resource: HttpResou
     extracted.close()
 
     assert extracted.signature is not None
-    save_path = tmp_path / "snapshots" / str(extracted.signature.hash) / "data.json"
+    save_path = tmp_path / "snapshots" / "httpresourcemock" / str(extracted.signature.hash) / "data.json"
     assert save_path.exists() is True
     assert save_path.read_text(encoding="utf-8") == extracted.model_dump_json(indent=4)
-    assert (tmp_path / "data" / str(extracted.signature.hash) / "data.json").exists() is False
+    assert (tmp_path / "data" / "httpresourcemock" / str(extracted.signature.hash) / "data.json").exists() is False
 
 
 def test_extract_close_skips_save_when_storage_disallows_it(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
@@ -177,10 +177,11 @@ def test_storage_write_and_read_use_data_directory(resource: HttpResourceMock, m
     assert extracted.signature is not None
     file_path = resource.storage.write(extracted.signature, "payload.txt", "hello world")
 
-    assert file_path == tmp_path / "data" / str(extracted.signature.hash) / "payload.txt"
+    assert file_path == tmp_path / "data" / "httpresourcemock" / str(extracted.signature.hash) / "payload.txt"
     assert file_path.exists() is True
     assert resource.storage.read(extracted.signature, "payload.txt") == "hello world"
-    assert (tmp_path / "snapshots" / str(extracted.signature.hash) / "payload.txt").exists() is False
+    snapshot_path = (tmp_path / "snapshots" / "httpresourcemock" / str(extracted.signature.hash) / "payload.txt")
+    assert snapshot_path.exists() is False
 
 
 def test_storage_write_and_read_use_snapshots_directory(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
@@ -192,10 +193,10 @@ def test_storage_write_and_read_use_snapshots_directory(resource: HttpResourceMo
     assert extracted.signature is not None
     file_path = resource.storage.write(extracted.signature, "blob.bin", b"\xff\xfe")
 
-    assert file_path == tmp_path / "snapshots" / str(extracted.signature.hash) / "blob.bin"
+    assert file_path == tmp_path / "snapshots" / "httpresourcemock" / str(extracted.signature.hash) / "blob.bin"
     assert file_path.exists() is True
     assert resource.storage.read(extracted.signature, "blob.bin") == b"\xff\xfe"
-    assert (tmp_path / "data" / str(extracted.signature.hash) / "blob.bin").exists() is False
+    assert (tmp_path / "data" / "httpresourcemock" / str(extracted.signature.hash) / "blob.bin").exists() is False
 
 
 def test_storage_write_rejects_absolute_filename(resource: HttpResourceMock, mocked_session: Mock, tmp_path: Path) -> None:  # noqa: E501
