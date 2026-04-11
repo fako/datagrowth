@@ -36,7 +36,7 @@ def resource() -> MockHttpTikaResource:
 
 def test_validate_inputs_accepts_explicit_document_bytes(resource: MockHttpTikaResource) -> None:
     inputs = resource.validate_inputs("semantic", document=b"pdf-bytes")
-    assert inputs.args == ("put", "semantic")
+    assert inputs.args == ("put", "semantic",)
     assert inputs.kwargs["mode"] == "semantic"
     assert inputs.kwargs["document"] == b"pdf-bytes"
 

@@ -63,35 +63,36 @@ class HttpTikaResource(MicroServiceResource):
             })
         return headers
 
-    def data(self, **kwargs: Any) -> str | None:
+    def data(self, **kwargs: Any) -> dict[str, str]:
         if document := kwargs.get("document"):
             if isinstance(document, bytes):
                 if self.storage is None:
                     raise RuntimeError("Can't process bytes inside HttpTikaResource when there is no storage.")
                 filename = f"{hashlib.sha256(document).hexdigest()}.bin"
                 tmp_path = self.storage.write_tmp(filename, document)
-                return f"bin://file://{tmp_path}"
+                return {"payload": f"bin://file://{tmp_path}"}
             raise TypeError("Expected document to be bytes when document input is used.")
         if file_path := kwargs.get("file"):
             if file_path.is_absolute() and file_path.is_relative_to(Path.cwd()):
                 file_path = file_path.relative_to(Path.cwd())
-            return f"bin://file://{file_path}"
+            return {"payload": f"bin://file://{file_path}"}
         if url := kwargs.get("url"):
             # Keep URL-mode signatures distinct by adding URL to the data. Tika will ignore this input.
-            return str(url)
-        return None
+            return {"payload": str(url)}
+        return {}
 
     def prepare_inputs(self, *args: Any, **kwargs: Any):
         signature = super().prepare_inputs(*args, **kwargs)
         kwargs = dict(signature.kwargs)
         data = signature.data
-        if isinstance(data, str) and data.startswith("bin://file://"):
+        payload = data.get("payload") if isinstance(data, dict) else data
+        if isinstance(payload, str) and payload.startswith("bin://file://"):
             if kwargs.get("document", None) is not None:
-                kwargs["document"] = data
+                kwargs["document"] = payload
             if kwargs.get("file", None) is not None:
-                kwargs["file"] = data.removeprefix("bin://file://")
+                kwargs["file"] = payload.removeprefix("bin://file://")
         return signature.model_copy(update={
-            "data": data,
+            "data": payload,
             "kwargs": kwargs,
         })
 

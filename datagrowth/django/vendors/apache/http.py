@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 from pathlib import Path
 import json
 
@@ -17,15 +17,17 @@ class HttpTikaResource(MicroServiceResource):
     FILE_DATA_KEYS = ["document"]
 
     def variables(self, *args: Any) -> dict[str, Any]:
-        args = args or (self.request.get("args") if self.request else tuple())
-        has_connection_args = len(args) >= 3
+        request_args = self.request.get("args", tuple()) if self.request else tuple()
+        resolved_args: tuple[Any, ...] = tuple(args) if args else tuple(request_args or tuple())
+        has_connection_args = len(resolved_args) >= 3
         return {
-            "url": list(args[:3]) if has_connection_args else [],
-            "mode": args[3] if len(args) > 3 else (args[0] if len(args) else "structure"),
+            "url": list(resolved_args[:3]) if has_connection_args else [],
+            "mode": resolved_args[3] if len(resolved_args) > 3 else (resolved_args[0] if resolved_args else "structure"),
         }
 
-    def parameters(self, mode: Any, **kwargs: Any) -> dict[str, str]:
-        parameters: dict[str, str] = super().parameters(**kwargs)
+    def parameters(self, mode: Any = None, **kwargs: Any) -> dict[str, str]:
+        base_parameters = cast(dict[str, str] | None, super().parameters(**kwargs))
+        parameters: dict[str, str] = base_parameters or {}
         if mode == "semantic":
             parameters["mode"] = mode
         return parameters
@@ -53,9 +55,11 @@ class HttpTikaResource(MicroServiceResource):
         # Encountered a document with the file protocol. Let HttpResource handle casting to bytes.
         return {"document": document.replace("file://", "")}
 
-    def handle_errors(self) -> bool:
+    def handle_errors(self) -> None:
         super().handle_errors()
         _, data = self.content
+        if not data:
+            return None
         has_content = False
         has_exception = False
 
@@ -70,8 +74,7 @@ class HttpTikaResource(MicroServiceResource):
             self.status = 204
         elif not has_content and has_exception:
             self.status = 1
-            return False
-        return True
+        return None
 
     def create_next_request(self) -> dict[str, Any] | None:
         main = self.get_main_content()
@@ -101,9 +104,13 @@ class HttpTikaResource(MicroServiceResource):
     def get_main_content(self) -> dict[str, Any] | None:
         if not self.success:
             return None
-        content_type, data = self.content
-        main: dict[str, Any] = data[0]
-        return main
+        _, data = self.content
+        if not isinstance(data, list) or not data:
+            return None
+        main = data[0]
+        if not isinstance(main, dict):
+            return None
+        return cast(dict[str, Any], main)
 
     def inject_alternative_content(self, key: str, content: str) -> None:
         main = self.get_main_content()
@@ -137,5 +144,5 @@ class HttpTikaResource(MicroServiceResource):
             return f"{self.__class__.__name__}(document={self.request["kwargs"]["document"]})"
         return f"{self.__class__.__name__}(document=None)"
 
-    class Meta:
+    class Meta(MicroServiceResource.Meta):
         abstract = True
