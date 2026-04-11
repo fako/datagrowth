@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from datagrowth.registry import Tag
 from datagrowth.signatures import Signature
@@ -9,7 +10,7 @@ from uuid import uuid4
 
 @pytest.fixture
 def resource_tag() -> Tag:
-    return Tag(category="test", value="x")
+    return Tag(category="resource", value="x")
 
 
 def test_signature_hash_no_data() -> None:
@@ -69,6 +70,17 @@ def test_signature_hash_bytes_payload() -> None:
     s3 = Signature(uri="example://resource", data=b"goodbye-world")
     assert s1.hash == s2.hash
     assert s1.hash != s3.hash
+
+
+def test_signature_type_allows_filesystem_safe_values() -> None:
+    signature = Signature(uri="example://resource", type="prompt-v1.json")
+    assert signature.type == "prompt-v1.json"
+
+
+@pytest.mark.parametrize("signature_type", ["", ".", "..", "folder/name", "folder\\name", "name with spaces"])
+def test_signature_type_rejects_filesystem_unsafe_values(signature_type: str) -> None:
+    with pytest.raises(ValidationError):
+        Signature(uri="example://resource", type=signature_type)
 
 
 def test_resource_eq_with_non_resource_returns_false(resource_tag: Tag) -> None:

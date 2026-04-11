@@ -2,7 +2,11 @@ from typing import Any
 import base64
 import hashlib
 import json
+import re
 from pydantic import BaseModel, Field, field_serializer, field_validator, model_validator
+
+
+SAFE_SIGNATURE_TYPE_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]*$")
 
 
 class InputsValidator(BaseModel):
@@ -14,6 +18,7 @@ class Signature(BaseModel):
     uri: str
     data: dict[str, Any] | bytes | None = Field(default=None)
     hash: int = Field(default=0)
+    type: str | None = Field(default=None)
     args: tuple[Any, ...] = Field(default_factory=tuple)
     kwargs: dict[str, Any] = Field(default_factory=dict)
 
@@ -83,6 +88,21 @@ class Signature(BaseModel):
     @classmethod
     def deserialize_args(cls, args: Any) -> Any:
         return cls._decode_bytes_payload(args)
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, signature_type: str | None) -> str | None:
+        if signature_type is None:
+            return None
+        if signature_type in {"", ".", ".."}:
+            raise ValueError("Signature type must not be empty or a directory navigation token.")
+        if "/" in signature_type or "\\" in signature_type:
+            raise ValueError("Signature type must not contain path separators.")
+        if not SAFE_SIGNATURE_TYPE_PATTERN.fullmatch(signature_type):
+            raise ValueError(
+                "Signature type contains unsupported characters. Allowed: letters, numbers, underscore, dash and dot."
+            )
+        return signature_type
 
     @staticmethod
     def _canonicalize_data(data: Any) -> Any:

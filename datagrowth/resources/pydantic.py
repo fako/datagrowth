@@ -37,7 +37,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     EXTRACTOR: ClassVar[Tag | None] = None
 
     id: UUID4 = Field(default_factory=uuid4)
-    type: Tag | None = Field(default=None)
+    type: Tag
     config: ConfigurationType | None = None
     signature: ResourceSignatureType | None = None
     result: Result | None = None
@@ -60,7 +60,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     @classmethod
     def get_name(cls) -> str:
-        return cls.__class__.__name__
+        return cls.__name__
 
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         # Validate the inputs to arrive at a Signature used for extraction
@@ -169,6 +169,20 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             raise TypeError(
                 f"Resource config expects a dict, ConfigurationType or None. Got {type(raw_config)}"
             )
+        return data
+
+    @model_validator(mode="before")
+    @classmethod
+    def prefill_type(cls, data: Any) -> Tag:
+        if not isinstance(data, dict):
+            return data
+
+        raw_type = data.get("type")
+        if isinstance(raw_type, Tag):
+            if raw_type.category != "resource":
+                raise ValueError(f"Resource type expects a Tag with the resource category not '{raw_type.category}'.")
+        else:
+            data["type"] = Tag(category="resource", value=cls.get_name().lower())
         return data
 
     @field_serializer("config")
