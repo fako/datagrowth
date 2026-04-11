@@ -1,0 +1,51 @@
+{
+    "pdf:unmappedUnicodeCharsPerPage": [
+        "0",
+        "0",
+        "0"
+    ],
+    "pdf:PDFVersion": "1.4",
+    "pdf:docinfo:title": "story",
+    "pdf:hasXFA": "false",
+    "access_permission:modify_annotations": "true",
+    "X-TIKA:Parsed-By-Full-Set": [
+        "org.apache.tika.parser.CompositeParser",
+        "org.apache.tika.parser.pdf.PDFParser"
+    ],
+    "X-TIKA:content_handler": "ToTextContentHandler",
+    "pdf:num3DAnnotations": "0",
+    "dc:format": "application/pdf; version=1.4",
+    "pdf:overallPercentageUnmappedUnicodeChars": "0.0",
+    "access_permission:fill_in_form": "true",
+    "pdf:hasCollection": "false",
+    "pdf:encrypted": "false",
+    "dc:title": "story",
+    "pdf:containsNonEmbeddedFont": "false",
+    "Content-Length": "76698",
+    "pdf:hasMarkedContent": "true",
+    "pdf:ocrPageCount": "0",
+    "Content-Type": "application/pdf",
+    "access_permission:can_print_faithful": "true",
+    "pdf:producer": "Skia/PDF m144 Google Docs Renderer",
+    "pdf:totalUnmappedUnicodeChars": "0",
+    "access_permission:extract_for_accessibility": "true",
+    "access_permission:assemble_document": "true",
+    "xmpTPg:NPages": "3",
+    "pdf:hasXMP": "false",
+    "pdf:charsPerPage": [
+        "2286",
+        "2261",
+        "1739"
+    ],
+    "access_permission:extract_content": "true",
+    "access_permission:can_print": "true",
+    "X-TIKA:Parsed-By": [
+        "org.apache.tika.parser.CompositeParser",
+        "org.apache.tika.parser.pdf.PDFParser"
+    ],
+    "X-TIKA:parse_time_millis": "31",
+    "X-TIKA:embedded_depth": "0",
+    "access_permission:can_modify": "true",
+    "pdf:docinfo:producer": "Skia/PDF m144 Google Docs Renderer",
+    "pdf:containsDamagedFont": "false"
+}

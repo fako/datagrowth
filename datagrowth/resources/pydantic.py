@@ -98,6 +98,8 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     def close(self) -> Self:
         if self.storage is not None and self.storage.config.allow_save:
             self.storage.save(self)
+            if self.storage.config.snapshots:
+                self.close_snapshot(self.storage)
         return self
 
     def next(self) -> Self | None:
@@ -121,6 +123,9 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         raise NotImplementedError
 
     def handle_errors(self) -> None:
+        return None
+
+    def close_snapshot(self, storage: ResourceStorageProtocol) -> None:
         return None
 
     #####################

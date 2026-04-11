@@ -75,6 +75,13 @@ class Resource(models.Model):
         self.clean()
         self.save()
 
+    def close_snapshot(storage):
+        """
+        This function is here to make Resource compliant with the ResourceProtocol.
+        However legacy Resources do not support custom snapshots storage, so this method is a noop.
+        """
+        return None
+
     @classmethod
     def get_name(cls):
         """

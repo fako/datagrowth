@@ -1,0 +1,29 @@
+{
+    "http-connection:target-ip-address": "45.135.58.129",
+    "http-header:status-code": "200",
+    "X-TIKA:Parsed-By-Full-Set": [
+        "org.apache.tika.parser.CompositeParser",
+        "org.apache.tika.parser.DefaultParser",
+        "org.apache.tika.parser.html.JSoupParser"
+    ],
+    "X-TIKA:content_handler": "ToTextContentHandler",
+    "resourceName": "apache-tika-10198098455131575977.tmp",
+    "X-TIKA:encodingDetector": "HtmlEncodingDetector",
+    "http-connection:num-redirects": "0",
+    "http-connection:target-url": "https://just-ask.data-scope.com/accounts/login/",
+    "viewport": "width=device-width, initial-scale=1.0",
+    "X-TIKA:Parsed-By": [
+        "org.apache.tika.parser.CompositeParser",
+        "org.apache.tika.parser.DefaultParser",
+        "org.apache.tika.parser.html.JSoupParser"
+    ],
+    "dc:title": "Log in | Just Ask",
+    "Content-Encoding": "UTF-8",
+    "X-TIKA:parse_time_millis": "18",
+    "X-TIKA:embedded_depth": "0",
+    "X-TIKA:detectedEncoding": "UTF-8",
+    "Content-Length": "47",
+    "http-header:content-type": "text/html; charset=utf-8",
+    "Content-Language": "en",
+    "Content-Type": "text/html; charset=UTF-8"
+}

@@ -1,9 +1,11 @@
 from typing import Any, Literal
+import json
 from pathlib import Path, PurePath
 from pydantic import Field, model_validator, HttpUrl, StrictBytes
 
 from datagrowth.registry import Tag
 from datagrowth.signatures import InputsValidator
+from datagrowth.resources.protocols import ResourceStorageProtocol
 from datagrowth.resources.http.pydantic import MicroServiceResource
 from datagrowth.resources.http.signature import HttpMode
 
@@ -90,6 +92,18 @@ class HttpTikaResource(MicroServiceResource):
             self.result = self.result.model_copy(update={
                 "errors": f"Tika returned exceptions without extracted content:\n\n {exception_summary}",
             })
+
+    def close_snapshot(self, storage: ResourceStorageProtocol) -> None:
+        _, data = self.content
+        if not data:
+            return
+        for ix, headers in enumerate(data):
+            content = headers.pop("X-TIKA:content", None)
+            if content is not None:
+                content_filename = f"x-tika-content-{ix}.html"
+                storage.write(self.signature, content_filename, content)
+            headers_filename = f"tika-headers-{ix}.json"
+            storage.write(self.signature, headers_filename, json.dumps(headers, indent=4))
 
     #####################
     # Helpers

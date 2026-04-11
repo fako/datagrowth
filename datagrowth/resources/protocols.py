@@ -82,6 +82,12 @@ class ResourceProtocol(Protocol):
         """
         ...
 
+    def close_snapshot(self, storage: "ResourceStorageProtocol") -> None:
+        """
+        Override this method to customize data storage when Resource is used in snapshot mode during tests.
+        """
+        ...
+
 
 ResourceType = TypeVar("ResourceType", bound=ResourceProtocol)
 
