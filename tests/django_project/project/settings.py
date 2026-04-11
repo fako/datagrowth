@@ -46,7 +46,6 @@ INSTALLED_APPS = [
 
     'project',
     'configuration',
-    'utils',
     'resources',
     'processors',
     'datatypes',
