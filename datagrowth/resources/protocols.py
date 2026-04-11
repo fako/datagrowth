@@ -57,7 +57,7 @@ class ResourceProtocol(Protocol):
         ...
 
     @property
-    def content(self) -> tuple[str, Any]:
+    def content(self) -> tuple[str | None, Any]:
         """
         This method returns the content_type and data from the resource.
         """
@@ -76,7 +76,7 @@ class ResourceProtocol(Protocol):
         """
         ...
 
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> Signature:
         """
         Override this method to turn inputs into a ResourceType specific signature to use for extraction.
         """
@@ -90,6 +90,8 @@ class ResourceProtocol(Protocol):
 
 
 ResourceType = TypeVar("ResourceType", bound=ResourceProtocol)
+ExtractorSignatureType = TypeVar("ExtractorSignatureType", bound=Signature, contravariant=True)
+ExtractorResourceType = TypeVar("ExtractorResourceType", bound=ResourceProtocol, covariant=True)
 
 
 class ResourceStorageProtocol(Protocol[ResourceType]):
@@ -115,9 +117,9 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
         ...
 
 
-class ResourceExtractorProtocol(Protocol[ResourceSignatureType, ResourceType]):
+class ResourceExtractorProtocol(Protocol[ExtractorSignatureType, ExtractorResourceType]):
 
     config: ConfigurationType
 
-    def extract(self, signature: ResourceSignatureType) -> ResourceType:
+    def extract(self, signature: ExtractorSignatureType) -> ExtractorResourceType:
         ...

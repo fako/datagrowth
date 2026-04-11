@@ -11,7 +11,7 @@ from datagrowth.vendors.apache.tika.resources import HttpTikaResource
 
 
 class MockHttpTikaResource(HttpTikaResource):
-    STORAGE: ClassVar[Tag] = Tag(category="storage", value="file_system")
+    STORAGE: ClassVar[Tag | None] = Tag(category="storage", value="file_system")
 
 
 class MockHttpTikaResourceAuth(MockHttpTikaResource):

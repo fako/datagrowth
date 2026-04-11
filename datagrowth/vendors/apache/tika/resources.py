@@ -5,13 +5,12 @@ from pathlib import Path, PurePath
 from pydantic import Field, model_validator, HttpUrl, StrictBytes
 
 from datagrowth.registry import Tag
-from datagrowth.signatures import InputsValidator
 from datagrowth.resources.protocols import ResourceStorageProtocol
-from datagrowth.resources.http.pydantic import MicroServiceResource
+from datagrowth.resources.http.pydantic import MicroServiceResource, HttpResourceInputsValidator
 from datagrowth.resources.http.signature import HttpMode
 
 
-class TikaInputsValidator(InputsValidator):
+class TikaInputsValidator(HttpResourceInputsValidator):
     args: list[Any] = Field(min_length=1, max_length=2)
     kwargs: dict[str, Any] = Field(default_factory=dict, min_length=0, max_length=0)
     mode: Literal["semantic", "structure"] = "structure"
@@ -98,6 +97,8 @@ class HttpTikaResource(MicroServiceResource):
 
     def handle_errors(self) -> None:
         super().handle_errors()
+        if self.result is None:
+            return None
         has_content, exception_messages = self._inspect_tika_content()
         if has_content and exception_messages:
             self.status = 207
@@ -115,9 +116,11 @@ class HttpTikaResource(MicroServiceResource):
             })
 
     def close_snapshot(self, storage: ResourceStorageProtocol) -> None:
+        assert self.signature is not None, "Expected signature to be set before closing snapshot."
         _, data = self.content
         if not data:
             return
+
         for ix, headers in enumerate(data):
             content = headers.pop("X-TIKA:content", None)
             if content is not None:

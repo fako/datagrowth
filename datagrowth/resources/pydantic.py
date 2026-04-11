@@ -39,8 +39,8 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     EXTRACTOR: ClassVar[Tag | None] = None
 
     id: UUID4 = Field(default_factory=uuid4)
-    type: Tag
-    config: ConfigurationType | None = None
+    type: Tag = Field(default_factory=lambda: Tag(category="resource", value="resource"))
+    config: ConfigurationType = Field(default_factory=lambda: ConfigurationType(namespace=["global"]))
     signature: ResourceSignatureType | None = None
     result: Result | None = None
 
@@ -196,7 +196,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     @model_validator(mode="before")
     @classmethod
-    def prefill_type(cls, data: Any) -> Tag:
+    def prefill_type(cls, data: Any) -> Any:
         if not isinstance(data, dict):
             return data
 
