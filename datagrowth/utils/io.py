@@ -25,7 +25,7 @@ def get_media_path(app_label, media_type="", absolute=True):
     """
     Returns a directory path for a particular app to store media in.
     Optionally this path can include a media type to further separate media files in subdirectories.
-    By default the path is absolute and inside the ``DATAGROWTH_MEDIA_ROOT``,
+    By default the path is absolute and inside the ``DATAGROWTH_WEB_MEDIA_ROOT``,
     but you can also return a path relative to the media root directory.
 
     :param app_label: (str) the app label that you're getting a media path for

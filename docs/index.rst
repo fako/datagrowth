@@ -6,16 +6,20 @@
 Data Growth's documentation
 ===========================
 
-Data Growth is the bridge between gathered data and algorithms.
-The demand for data is increasing, because many algorithms and computer models need more of it than ever before.
-However as the data grows it becomes increasingly complex to handle it in a Pythonic way.
-Especially when it comes from many different sources.
+Data Growth is a lightweight Extract, Transform and Load (ETL) library,
+that helps to connect your software to external data sources.
 
-Data Growth is a Django application that helps to gather data in an organized way. With it you can declare pipelines
-for the data gathering and preprocessing as well as pipelines for filtering and redistribution.
+These data sources can be API's, terminal commands or LLM's.
+Datagrowth is the bridge between all that data and your application logic.
+Because data sources and their outputs can be described uniformly in Python,
+using Datagrowth prevents vendor lock-in to specific data sources.
+It can also save costs, because it will re-use data sources like LLM responses whenever possible.
 
-The package offers classes that help you load the data into your models.
-Or you can start the Django server to transfer data over a REST API to other devices or services.
+Datagrowth is mainly used within Django projects, where the data can be stored inside Django models.
+Use the different processors to extract and transform data,
+before loading it into your models exactly how your project needs.
+When using Django Restframework you can also share the loaded data easily over a REST API to other devices or services.
+Datagrowth also provides classes to set this up quickly.
 
 Contents
 --------
@@ -28,11 +32,3 @@ Contents
    processors/index
    utils/index
    reference
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

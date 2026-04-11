@@ -6,7 +6,7 @@ Configurations
 
 Configurations can be serialized to JSON dicts for storage and transfer (to for instance task servers).
 They can also be passed on to other configuration instances in a parent/child like relationship.
-Configurations have defaults which can be set when Django loads.
+Configurations have defaults which can be set when Django loads, in Django settings or a YAML file.
 These defaults are namespaced to prevent name clashes across apps.
 
 Usually a request will set configurations during runtime to configure long running tasks.
@@ -17,6 +17,10 @@ This is useful for Django models that have a very wide configuration range.
 
 .. include:: fields.rst.inc
 
+.. include:: defaults.rst.inc
+
 .. include:: updating.rst.inc
 
 .. include:: serializers.rst.inc
+
+.. include:: defaults_legacy.rst.inc

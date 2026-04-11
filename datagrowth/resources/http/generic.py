@@ -94,7 +94,7 @@ class HttpResource(Resource):
         Any arguments will be passed to ``URI_TEMPLATE`` to format it.
         Any keyword arguments will be passed as a data dict to the request.
         If a keyword is listed in the ``FILE_DATA_KEYS`` attribute on a HttpResource,
-        then the value of that argument is expected to be a file path relative to the ``DATAGROWTH_MEDIA_ROOT``.
+        then the value of that argument is expected to be a file path relative to ``DATAGROWTH_WEB_MEDIA_ROOT``.
         The value of that keyword will be replaced with the file before making the request.
 
         :param method: "get" or "post" depending on which request you want your resource to execute
@@ -368,7 +368,7 @@ class HttpResource(Resource):
     def _format_data(self, data):
         """
         Will replace any keys that are present in data and the ``FILE_DATA_KEYS`` class attribute with file descriptors.
-        The values of any key is presumed to be a path to a file relative to the ``DATAGROWTH_MEDIA_ROOT``.
+        The values of any key is presumed to be a path to a file relative to ``DATAGROWTH_WEB_MEDIA_ROOT``.
 
         :param data: (dict) data where some file paths may need to be replaced with actual files
         :return: (dict) the formatted data

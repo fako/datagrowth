@@ -5,7 +5,7 @@ from datagrowth.configuration import DATAGROWTH_CONFIGURATION
 
 def parse_datetime_string(time_str):
     """
-    Parses a time string to a datetime using the ``DATAGROWTH_DATETIME_FORMAT``.
+    Parses a time string to a datetime using ``DATAGROWTH_DATETIME_FORMAT``.
     ``parse_datetime_string`` and ``format_datetime``
     consistently cast between strings and datetimes when used together.
 
@@ -20,7 +20,7 @@ def parse_datetime_string(time_str):
 
 def format_datetime(datetime):
     """
-    Formats a datetime into a string using the ``DATAGROWTH_DATETIME_FORMAT``
+    Formats a datetime into a string using ``DATAGROWTH_DATETIME_FORMAT``
     ``parse_datetime_string`` and ``format_datetime``
     consistently cast between strings and datetimes when used together.
 

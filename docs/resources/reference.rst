@@ -12,8 +12,11 @@ Resource (base class)
 Http
 ****
 
-.. automodule:: datagrowth.resources.http
-    :members: HttpResource, URLResource, HttpFileResource, HttpImageResource, file_resource_delete_handler
+.. automodule:: datagrowth.resources.http.generic
+    :members: HttpResource, URLResource
+
+.. automodule:: datagrowth.resources.http.files
+    :members: HttpFileResource, HttpImageResource, file_resource_delete_handler
 
 
 Shell
