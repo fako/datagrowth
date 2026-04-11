@@ -55,6 +55,6 @@ datagrowth = ["datagrowth.yml"]
 version = {attr = "datagrowth.version.VERSION"}
 
 [tool.basedpyright]
-typeCheckingMode = "off"
+typeCheckingMode = "standard"
 reportMissingImports = "none"
 reportMissingModuleSource = "none"
