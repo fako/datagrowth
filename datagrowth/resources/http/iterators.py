@@ -41,7 +41,6 @@ def send_iterator(config, *args, **kwargs):
         # Get payload
         link = get_resource_link(config, session)
         link.request = current_request
-        link.interval_duration = config.interval_duration
         try:
             link = link.send(method, *args, **kwargs)
             link.close()

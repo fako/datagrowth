@@ -29,6 +29,7 @@ Good for snapshot testing.
 * ``HttpResource`` now uses ``http_resource`` as its main namespace.
 * The configurations ``global_user_agent``, ``global_allow_redirects``, ``global_backoff_delays`` and ``global_force_data_file_to_payload`` all use ``http_resource`` as prefix instead of ``global``.
 * The ``DATAGROWTH_REQUESTS_PROXIES`` and ``DATAGROWTH_REQUESTS_VERIFY`` Django settings continue to work, but will be replaced with ``http_resource_requests_proxies`` and `` http_resource_requests_verify``.
+* The ``interval_duration`` value can no longer be given to ``Resource`` directly, but needs to be given as a ``http_resource`` or ``shell_resource`` configuration instead.
 * ``ShellResource`` now uses ``shell_resource`` as its main namespace.
 * The ``DATAGROWTH_BIN_DIR`` Django setting was replaced with ``shell_resource_bin_dir``, but gets set to ``DATAGROWTH_BIN_DIR`` for the foreseeable future.
 * Copies ``HttpResource.VARIABLES`` before returning it when creating a commaned. This makes the variables constant immutable and might have unexpected effects if other code depends on mutability.

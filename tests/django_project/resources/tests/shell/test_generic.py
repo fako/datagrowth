@@ -51,7 +51,9 @@ class TestShellResourceInterface(TestCase):
     @patch("datagrowth.resources.shell.generic.subprocess.run", return_value=SubprocessResult(0, b"out", b""))
     def test_run_command(self, subprocess_mock, sleep_mock):
         # Make a new request and store it.
-        instance = self.model(interval_duration=1000).run("test", ".", context=5)
+        instance = self.model()
+        instance.config.update({"interval_duration": 1000})
+        instance = instance.run("test", ".", context=5)
         self.assertIsNone(instance.id, "ShellResource used cache when it should have retrieved with requests")
         instance.save()
         self.assertEqual(subprocess_mock.call_count, 1)
@@ -80,7 +82,7 @@ class TestShellResourceInterface(TestCase):
     @patch("datagrowth.resources.shell.generic.subprocess.run", return_value=SubprocessResult(0, b"out", b""))
     def test_run_success(self, subprocess_mock, sleep_mock):
         # Load an existing command
-        instance = self.model(interval_duration=1000).run("success", ".", context=5)
+        instance = self.model().run("success", ".", context=5)
         self.assertFalse(subprocess_mock.called)
         self.assertEqual(instance.stdout, "out")
         self.assertEqual(instance.stderr, "")
@@ -104,7 +106,7 @@ class TestShellResourceInterface(TestCase):
     @patch("datagrowth.resources.shell.generic.subprocess.run", return_value=SubprocessResult(0, b"out", b""))
     def test_run_retry(self, subprocess_mock, sleep_mock):
         # Load and retry an existing command
-        instance = self.model(interval_duration=1000).run("fail", ".", context=5)
+        instance = self.model().run("fail", ".", context=5)
         self.assertEqual(subprocess_mock.call_count, 1)
         self.assert_call_args_run(subprocess_mock.call_args, self.fail_command)
         self.assertEqual(instance.stdout, "out")
@@ -123,7 +125,7 @@ class TestShellResourceInterface(TestCase):
         self.assertEqual(instance.stderr, "")
         self.assertEqual(instance.status, 0)
         self.assertTrue(instance.id)
-        self.assertEqual(sleep_mock.call_args_list, [], "When no interval_duration is specified sleep is not used")
+        self.assertEqual(sleep_mock.call_args_list, [call(1)], "Expected interval_duration to use sleep after the run")
 
     def test_run_invalid(self):
         # Invalid invoke of run
@@ -144,7 +146,7 @@ class TestShellResourceInterface(TestCase):
     @patch("datagrowth.resources.shell.generic.subprocess.run", return_value=SubprocessResult(0, b"out", b""))
     def test_run_cache_only(self, subprocess_mock, sleep_mock):
         # Load an existing resource from cache
-        instance = self.model(config={"cache_only": True}, interval_duration=1000).run("success", ".", context=5)
+        instance = self.model(config={"cache_only": True, "interval_duration": 1000}).run("success", ".", context=5)
         self.assertFalse(subprocess_mock.called)
         self.assertEqual(instance.status, 0)
         self.assertEqual(instance.stdout, "out")
@@ -154,7 +156,7 @@ class TestShellResourceInterface(TestCase):
                          "When using cache the interval_duration is never necessary and should be ignored")
         # Load an existing resource from cache by its request
         command = instance.command
-        instance = self.model(command=command, config={"cache_only": True}).run()
+        instance = self.model(command=command, config={"cache_only": True, "interval_duration": 1000}).run()
         self.assertFalse(subprocess_mock.called)
         self.assertEqual(instance.status, 0)
         self.assertEqual(instance.stdout, "out")

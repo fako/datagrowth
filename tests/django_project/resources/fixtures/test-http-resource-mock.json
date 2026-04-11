@@ -61,7 +61,7 @@
             },
             "uri": "localhost:8000/en/?meta=fail&param=1&q=fail",
             "data_hash": "",
-            "config": "{}",
+            "config": "{\"interval_duration\": 1000}",
             "purge_at": null
         },
         "model": "resources.httpresourcemock",

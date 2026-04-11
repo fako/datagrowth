@@ -110,8 +110,8 @@ class ShellResource(Resource):
 
         resource._run()
         resource.handle_errors()
-        if self.interval_duration:
-            sleep(self.interval_duration / 1000)
+        if resource.config.interval_duration:
+            sleep(resource.config.interval_duration / 1000)
         return resource
 
     @property
