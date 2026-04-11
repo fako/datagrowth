@@ -9,7 +9,7 @@ SAFE_SIGNATURE_TYPE_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]*$")
 
 
 class InputsValidator(BaseModel):
-    args: list[Any]
+    args: tuple[Any, ...]
     kwargs: dict[str, Any]
 
 

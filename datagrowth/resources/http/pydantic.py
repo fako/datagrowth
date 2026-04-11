@@ -15,11 +15,11 @@ from datagrowth.utils import is_json_mimetype
 
 
 class HttpResourceInputsValidator(InputsValidator):
-    args: list[Any] = Field(min_length=1)
+    args: tuple[Any, ...] = Field(min_length=1)
 
     @field_validator("args")
     @classmethod
-    def validate_method(cls, args: list[Any]) -> list[Any]:
+    def validate_method(cls, args: tuple[Any, ...]) -> tuple[Any, ...]:
         HttpMethod(args[0])
         return args
 
@@ -28,7 +28,7 @@ class HttpResource(Resource[HttpSignature]):
 
     # Resource constants
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="http_resource")
-    EXTRACTOR: ClassVar[Tag] = Tag(category="extractor", value="requests")
+    EXTRACTOR: ClassVar[Tag | None] = Tag(category="extractor", value="requests")
 
     # Http constants
     URI_TEMPLATE: ClassVar[str] = ""
@@ -197,11 +197,11 @@ class HttpResource(Resource[HttpSignature]):
     # Resource protocol
     #####################
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> HttpResourceInputsValidator:
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
         return HttpResourceInputsValidator(args=args, kwargs=kwargs)
 
     def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
-        method = args[0]
+        method = HttpMethod(args[0])
         url_arguments = args[1:] if len(args) > 1 else []
         url, data_arguments = self._create_url(*url_arguments, **kwargs)
         auth = HttpAuth(headers=self.auth_headers(), parameters=self.auth_parameters())
@@ -209,7 +209,7 @@ class HttpResource(Resource[HttpSignature]):
             uri=self.uri_from_url(url),
             args=args,
             kwargs=kwargs,
-            data=self.data(**data_arguments) if method != "get" or self.config.allow_get_body else None,
+            data=self.data(**data_arguments) if method != HttpMethod.GET or self.config.allow_get_body else None,
             type=self.type.value,
             method=method,
             url=url,
@@ -260,7 +260,7 @@ class HttpResource(Resource[HttpSignature]):
 
 
 class URLResourceValidator(InputsValidator):
-    args: list[HttpUrl] = Field(min_length=1, max_length=1)
+    args: tuple[HttpUrl] = Field(min_length=1, max_length=1)
     kwargs: dict[str, Any] = Field(default_factory=dict, min_length=0, max_length=0)
 
 
@@ -268,7 +268,7 @@ class URLResource(HttpResource):
 
     MODE = HttpMode.NONE
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
+    def validate_inputs(self, *args: Any, **kwargs: Any) -> URLResourceValidator:
         return URLResourceValidator(args=args, kwargs=kwargs)
 
     def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
