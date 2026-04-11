@@ -32,15 +32,12 @@ def send_iterator(config, *args, **kwargs):
     # Set vars
     session = kwargs.pop("session", None)
     method = kwargs.pop("method", None)
-    has_next_request = True
-    current_request = {}
+    link = get_resource_link(config, session)
     count = 0
     limit = config.continuation_limit or 1
     # Continue as long as there are subsequent requests
-    while has_next_request and count < limit:
+    while link and count < limit:
         # Get payload
-        link = get_resource_link(config, session)
-        link.request = current_request
         try:
             link = link.send(method, *args, **kwargs)
             link.close()
@@ -50,10 +47,9 @@ def send_iterator(config, *args, **kwargs):
             link.close()
             if config.resource_exception_reraise:
                 raise
-        # Prepare next request
-        has_next_request = current_request = link.create_next_request()
-        count += 1
         yield link
+        link = link.next()
+        count += 1
 
 
 @load_config()

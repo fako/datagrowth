@@ -41,6 +41,14 @@ class ResourceProtocol(Protocol):
         """
         ...
 
+    def next(self) -> Self | None:
+        """
+        Creates a new Resource that is the follow-up of the current Resource,
+        like the Resource for a next page in a Resource that supports pagination.
+        Or returns None if no such follow-up exists.
+        """
+        ...
+
     @property
     def success(self) -> bool:
         """

@@ -59,6 +59,14 @@ class Resource(models.Model):
     def extract(self, *args, **kwargs):
         raise NotImplementedError(f"Extract strategy not implemented for {self.__class__.__name__}.")
 
+    def next(self):
+        """
+        Creates a new Resource that is the follow-up of the current Resource,
+        like the Resource for a next page in a Resource that supports pagination.
+        Or returns None if no such follow-up exists (the default).
+        """
+        return None
+
     def close(self):
         """
         This convenience method handles both the clean and save step for saving models.

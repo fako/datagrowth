@@ -164,8 +164,7 @@ You'll have to override the ``next_parameters`` method to indicate which data to
     data_source = MyHTTPDataSource()
     # The call below will make a request to https://example.com?query=my-query-terms
     data_source.extract("get", "my-query-terms")
-    next_request = data_source.create_next_request()
-    follow_up = MyHTTPDataSource(request=next_request)
+    follow_up = data_source.next()
     # The call below will make a request to https://example.com?query=my-query-terms&page=1
     # Provided that the response data contains a "next" key with value 1
     follow_up.extract("get")

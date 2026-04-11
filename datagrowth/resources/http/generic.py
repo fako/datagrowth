@@ -1,3 +1,4 @@
+from typing import Self
 import re
 import hashlib
 import json
@@ -494,6 +495,13 @@ class HttpResource(Resource):
         request = deepcopy(self.request)
         request["url"] = str(url)
         return request
+
+    def next(self) -> Self | None:
+        request = self.create_next_request()
+        if not request:
+            return None
+        next_instance = self.__class__(request=request)
+        return next_instance
 
     #######################################################
     # PROTECTED METHODS

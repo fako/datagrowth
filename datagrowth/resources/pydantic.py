@@ -100,6 +100,9 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             self.storage.save(self)
         return self
 
+    def next(self) -> Self | None:
+        return None
+
     @property
     def success(self) -> bool:
         raise NotImplementedError
