@@ -1,9 +1,12 @@
 import importlib
 import inspect
 from pathlib import Path
+from typing import cast
 
 from django.apps import AppConfig, apps
 
+from datagrowth.protocols import ProcessorProtocol
+from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.registry import DATAGROWTH_REGISTRY
 from datagrowth.processors.base import Processor
 
@@ -25,8 +28,11 @@ class DatagrowthConfig(AppConfig):
         registered_names: set[str] = set()
         datagrowth_names: set[str] = set()
         for app_config in apps.get_app_configs():
+            module = app_config.module
+            if module is None:
+                continue
             try:
-                processor_module = importlib.import_module(app_config.module.__name__ + ".processors")
+                processor_module = importlib.import_module(f"{module.__name__}.processors")
                 module_items = dict(processor_module.__dict__)
                 for export_name in getattr(processor_module, "__all__", []):
                     if export_name in module_items:
@@ -39,7 +45,8 @@ class DatagrowthConfig(AppConfig):
                     if name in registered_names and name not in datagrowth_names:
                         raise RuntimeError("The {} Processor is being loaded twice".format(name))
                     if inspect.isclass(attr) and issubclass(attr, Processor):
-                        DATAGROWTH_REGISTRY.register_processor(f"processor:{name}", attr)
+                        processor_class = cast(type[ProcessorProtocol], attr)
+                        DATAGROWTH_REGISTRY.register_processor(f"processor:{name}", processor_class)
                         registered_names.add(name)
                     if app_config.name == "datagrowth":
                         datagrowth_names.add(name)
@@ -57,7 +64,8 @@ class DatagrowthConfig(AppConfig):
                 if model._meta.abstract:
                     continue
                 tag = f"resource:{model._meta.app_label}.{model._meta.model_name}"
-                DATAGROWTH_REGISTRY.register_resource(tag, model)
+                resource_class = cast(type[ResourceProtocol], model)
+                DATAGROWTH_REGISTRY.register_resource(tag, resource_class)
 
     def get_processor_class(self, name: str) -> type | None:
         try:
