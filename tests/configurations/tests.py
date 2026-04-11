@@ -1,8 +1,7 @@
+from unittest import TestCase
 from unittest.mock import patch
 from collections.abc import Iterator
 from copy import deepcopy
-
-from django.test import TestCase
 
 from datagrowth.configuration.defaults import DATAGROWTH_DEFAULT_CONFIGURATION
 from datagrowth.configuration import (ConfigurationType, ConfigurationNotFoundError, ConfigurationProperty, load_config,
