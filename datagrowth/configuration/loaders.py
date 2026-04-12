@@ -3,7 +3,7 @@ import logging
 import os
 from importlib import resources
 from pathlib import Path
-from typing import Any, Literal, Mapping
+from typing import Any, Literal, Mapping, cast
 
 from invoke.config import Config as InvokeConfig
 from invoke.config import merge_dicts
@@ -189,7 +189,6 @@ def create_invoke_configuration(project_location: Path | Literal["AUTODISCOVER"]
         resolved_project_location = project_location
     else:
         raise TypeError("project_location should be pathlib.Path, 'AUTODISCOVER', or None.")
-    project_location = str(resolved_project_location) if resolved_project_location is not None else None
     # Case 1: no explicit defaults were injected, so load package defaults through Invoke runtime first.
     if package_defaults is None:
         runtime_filename = "{}.yml".format(invoke_file_prefix)
@@ -197,24 +196,25 @@ def create_invoke_configuration(project_location: Path | Literal["AUTODISCOVER"]
         with resources.as_file(runtime_resource) as runtime_path:
             config = DatagrowthInvokeConfig(
                 lazy=True,
-                runtime_path=str(runtime_path),
-                project_location=project_location,
+                runtime_path=runtime_path,
+                project_location=resolved_project_location,
             )
             config.load_runtime(merge=False)
-            package_defaults = getattr(config, "_runtime", {})
-            config.load_defaults(dict(package_defaults), merge=False)
+            merged_defaults = cast(Mapping[str, Any], getattr(config, "_runtime", {}))
+            config.load_defaults(dict(merged_defaults), merge=False)
             config._set(_runtime={})
     # Case 2: defaults were injected (for example in tests), so use those directly as invoke defaults.
     else:
+        merged_defaults = package_defaults
         config = DatagrowthInvokeConfig(
             defaults=dict(package_defaults),
             lazy=True,
-            project_location=project_location,
+            project_location=resolved_project_location,
         )
     if resolved_project_location is not None:
         config.load_project(merge=True)
     config.load_shell_env()
-    return config, package_defaults
+    return config, merged_defaults
 
 
 def _get_django_settings(django_settings: Any | None = None) -> Any | None:
@@ -347,7 +347,9 @@ def build_default_configuration(project_location: Path | Literal["AUTODISCOVER"]
     merge_dicts(invoke_overrides, implicit_env)
 
     # Finish the invoke layer
-    merged_invoke = _normalize_namespaced(invoke_config, allowed_keys, "invoke")
+    merged_invoke = _normalize_namespaced(
+        cast(Mapping[str, Any], invoke_config), allowed_keys, "invoke"
+    )
     invoke_layer = {
         key: merged_invoke[key] if key in merged_invoke else value
         for key, value in invoke_overrides.items()
