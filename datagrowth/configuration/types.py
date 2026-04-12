@@ -1,5 +1,5 @@
 from copy import copy
-from typing import Any, Iterator, Mapping, Sequence
+from typing import Any, Iterator, Mapping, Sequence, overload
 
 from datagrowth.configuration.defaults import DATAGROWTH_DEFAULT_CONFIGURATION
 
@@ -309,6 +309,14 @@ class ConfigurationProperty:
                 "All namespace items should be strings."
         self._namespace = [namespace] if isinstance(namespace, str) else list(namespace)
         self._private = private or []
+
+    @overload
+    def __get__(self, obj: None, cls: type | None = None) -> "ConfigurationProperty":
+        ...
+
+    @overload
+    def __get__(self, obj: Any, cls: type | None = None) -> ConfigurationType:
+        ...
 
     def __get__(self, obj: Any, cls: type | None = None) -> "ConfigurationProperty | ConfigurationType":
         if obj is None:  # happens with system checks
