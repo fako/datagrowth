@@ -2,6 +2,7 @@
   "include": [
     "commands",
     "datagrowth/configuration",
+    "datagrowth/registry",
     "datagrowth/utils"
   ],
   "typeCheckingMode": "standard",

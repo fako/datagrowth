@@ -348,7 +348,7 @@ class ConfigurationProperty:
         obj.__dict__[self._storage_attribute].update(payload)
 
 
-def create_config(namespace: str, configuration: dict[str, Any]) -> ConfigurationType:
+def create_config(namespace: str | list[str], configuration: dict[str, Any]) -> ConfigurationType:
     """
     Use this function to quickly create a configuration.
     You need to specify under which namespace the configuration should search for defaults.
@@ -356,7 +356,7 @@ def create_config(namespace: str, configuration: dict[str, Any]) -> Configuratio
 
     Apart from that the configuration needs no setup and the most common use cases will be supported.
 
-    :param namespace: (str) the namespace under which missing configurations should be searched when defaulting
+    :param namespace: (str or list[str]) namespace prefix(es) for default lookup
     :param values: (dict) the configuration keys and values that should be set on the configuration instance
     :return: ConfigurationType
     """
