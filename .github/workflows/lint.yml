@@ -23,4 +23,4 @@ jobs:
                   pip install -r requirements/django.txt
             - name: Run flake8
               run: |
-                  flake8 .
+                  invoke test.syntax

@@ -1,0 +1,11 @@
+{
+  "include": [
+    "commands",
+    "datagrowth/configuration",
+    "datagrowth/utils"
+  ],
+  "typeCheckingMode": "standard",
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "pythonVersion": "3.12"
+}
