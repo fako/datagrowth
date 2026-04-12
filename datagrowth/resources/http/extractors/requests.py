@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from time import sleep
-from typing import Any
+from typing import Any, cast
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
@@ -19,7 +19,7 @@ class RequestsExtractor:
     config = ConfigurationProperty(namespace="http_resource")
 
     def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
-        self.config = config
+        self.config = cast(ConfigurationType, config)
         self._session: requests.Session = requests.Session()
 
     def set_session(self, session: requests.Session) -> None:
