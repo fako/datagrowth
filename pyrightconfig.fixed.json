@@ -3,7 +3,11 @@
     "commands",
     "datagrowth/configuration",
     "datagrowth/registry",
-    "datagrowth/utils"
+    "datagrowth/utils",
+
+    "tests/configuration",
+    "tests/registry",
+    "tests/utils"
   ],
   "typeCheckingMode": "standard",
   "reportMissingImports": "none",

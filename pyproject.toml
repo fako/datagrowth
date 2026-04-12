@@ -67,6 +67,9 @@ exclude = [
     "mvenv",
     ".tox",
     # Temporary excludes for sanity
-    "tests",
-    "datagrowth/datatypes"
+    "tests/django_project",
+    "datagrowth/datatypes",
+    "datagrowth/processors",
+    "datagrowth/management",
+    "datagrowth/apps.py"
 ]

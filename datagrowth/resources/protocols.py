@@ -2,7 +2,7 @@ from typing import Protocol, Any, Self, TypeVar
 from pathlib import Path
 
 from datagrowth.signatures import Signature, InputsValidator
-from datagrowth.configuration import ConfigurationType
+from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 
 
 ResourceSignatureType = TypeVar("ResourceSignatureType", bound=Signature)
@@ -15,9 +15,6 @@ class ResourceProtocol(Protocol):
     """
 
     config: ConfigurationType
-
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
-        ...
 
     def close(self) -> Self:
         """
@@ -99,10 +96,7 @@ ExtractorResourceType = TypeVar("ExtractorResourceType", bound=ResourceProtocol,
 
 class ResourceStorageProtocol(Protocol[ResourceType]):
 
-    config: ConfigurationType
-
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
-        ...
+    config: ConfigurationProperty
 
     def save(self, resource: ResourceType) -> Signature:
         ...
@@ -125,10 +119,7 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
 
 class ResourceExtractorProtocol(Protocol[ExtractorSignatureType, ExtractorResourceType]):
 
-    config: ConfigurationType
-
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
-        ...
+    config: ConfigurationProperty
 
     def extract(self, signature: ExtractorSignatureType) -> ExtractorResourceType:
         ...

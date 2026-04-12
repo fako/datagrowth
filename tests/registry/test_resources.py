@@ -3,38 +3,7 @@ import pytest
 from datagrowth.configuration import ConfigurationType, create_config
 from datagrowth.registry import Registry, Tag
 
-
-class MockResource:
-    NAMESPACE = "mock_resource"
-
-    def __init__(self, config: ConfigurationType | dict | None = None) -> None:
-        if config is None:
-            self.config = create_config("mock_resource", {})
-        elif isinstance(config, dict):
-            self.config = create_config("mock_resource", config)
-        else:
-            self.config = config
-
-    def close(self) -> "MockResource":
-        return self
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__.lower()
-
-    def extract(self, *args, **kwargs) -> "MockResource":
-        return self
-
-    @property
-    def success(self) -> bool:
-        return True
-
-    @property
-    def content(self) -> tuple[str, dict]:
-        return "application/json", {}
-
-    def handle_errors(self) -> None:
-        return None
+from registry.mock_resource import MockResource
 
 
 @pytest.fixture

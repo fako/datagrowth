@@ -1,3 +1,4 @@
+from typing import Any
 from unittest import TestCase
 
 from datagrowth.utils import reach, override_dict, is_json_mimetype
@@ -72,11 +73,11 @@ class TestPythonReach(TestCase):
 class TestOverrideDict(TestCase):
 
     def setUp(self):
-        self.parent = {
+        self.parent: dict[str, Any] = {
             "test": "test",
             "test1": "parent"
         }
-        self.child = {
+        self.child: dict[str, Any] = {
             "test1": "child",
             "test2": "child2"
         }

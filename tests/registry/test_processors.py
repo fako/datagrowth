@@ -1,20 +1,35 @@
+from typing import Any
+
 import pytest
 
-from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
+from datagrowth.configuration import ConfigurationType, ConfigurationProperty, create_config
+from datagrowth.protocols import ProcessorProtocol
 from datagrowth.registry import Registry, Tag
 
 
-class MockProcessor:
+class MockProcessor(ProcessorProtocol):
     """
     A minimal processor satisfying ProcessorProtocol for testing.
 
     Due to legacy reasons a Processor.config needs an empty dict to indicate there is no config.
     A value of None is not allowed.
     """
-    config = ConfigurationProperty(namespace="mock")
+    config: ConfigurationProperty = ConfigurationProperty(namespace="mock")
 
-    def __init__(self, config: ConfigurationType | dict) -> None:
+    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
         self.config = config
+
+    @staticmethod
+    def get_processor_components(processor_definition: str) -> tuple[str, str]:
+        return "", ""
+
+    @staticmethod
+    def create_processor(processor_name: str, config: ConfigurationType | dict[str, Any]) -> "MockProcessor":
+        return MockProcessor(config)
+
+    @staticmethod
+    def get_processor_class(processor_name: str) -> type["MockProcessor"] | None:
+        return MockProcessor
 
 
 @pytest.fixture

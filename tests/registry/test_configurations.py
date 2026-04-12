@@ -1,6 +1,6 @@
 import pytest
 
-from datagrowth.configuration import ConfigurationType, create_config
+from datagrowth.configuration import create_config
 from datagrowth.registry import Registry, Tag
 
 
@@ -31,7 +31,6 @@ def test_get_configuration_returns_base_when_no_overrides(registry: Registry) ->
     base = create_config("test", {"batch_size": 99})
     registry.configurations[tag] = base
     result = registry.get_configuration(tag)
-    assert isinstance(result, ConfigurationType)
     assert result.batch_size == 99
 
 
