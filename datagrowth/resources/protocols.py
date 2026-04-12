@@ -16,6 +16,9 @@ class ResourceProtocol(Protocol):
 
     config: ConfigurationType
 
+    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
+        ...
+
     def close(self) -> Self:
         """
         Stores extracted data to disk if any was retrieved and possibly stores empty Resource object.
@@ -98,6 +101,9 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
 
     config: ConfigurationType
 
+    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
+        ...
+
     def save(self, resource: ResourceType) -> Signature:
         ...
 
@@ -120,6 +126,9 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
 class ResourceExtractorProtocol(Protocol[ExtractorSignatureType, ExtractorResourceType]):
 
     config: ConfigurationType
+
+    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
+        ...
 
     def extract(self, signature: ExtractorSignatureType) -> ExtractorResourceType:
         ...

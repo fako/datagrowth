@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast
+from typing import Any, cast
 import importlib
 from dataclasses import dataclass, field
 from pydantic import BaseModel
@@ -124,13 +124,12 @@ class Registry:
             raise ValueError(f"Expected a tag with 'namespace' category but found '{namespace.category}'")
         self.unregister_tag(namespace)
         self.namespaces.remove(namespace)
-        return namespace
 
     def get_namespace(self, namespace: str) -> Tag:
-        namespace = Tag.from_string(namespace)
-        if namespace not in self.namespaces:
-            raise KeyError(f"{namespace} is not registered as a namespace")
-        return namespace
+        tag = Tag.from_string(namespace)
+        if tag not in self.namespaces:
+            raise KeyError(f"{tag} is not registered as a namespace")
+        return tag
 
     #####################
     # Classes
@@ -166,24 +165,27 @@ class Registry:
             return config
         return create_config(namespace, config)
 
-    def get_configuration(self, tag: str | Tag, overrides: ConfigurationType | None = None) -> ConfigurationType | dict:
+    def get_configuration(self, tag: str | Tag, overrides: ConfigurationType | dict[str, Any] | None = None) -> ConfigurationType | dict[str, Any]:  # noqa: E501
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
         base = self.configurations.get(tag)
-        if not base and overrides is None:
-            raise KeyError(f"{tag} does not have a registered configuration")
-        elif not base:
+        if not base:
+            if overrides is None:
+                raise KeyError(f"{tag} does not have a registered configuration")
             return overrides
         config = create_config(base._namespace, base.to_dict(private=True, protected=True))
         if overrides:
-            config.update(overrides.to_dict(protected=True))
+            if isinstance(overrides, ConfigurationType):
+                config.update(overrides.to_dict(protected=True))
+            else:
+                config.update(overrides)
         return config
 
     #####################
     # Processors
     #####################
 
-    def register_processor(self, tag: str | Tag, processor: ProcessorProtocol,
+    def register_processor(self, tag: str | Tag, processor: type[ProcessorProtocol],
                            config: ConfigurationType | dict | None = None) -> Tag:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
@@ -209,11 +211,11 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "processor":
             raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
-        processor = cast(ProcessorProtocol, _import_class(self.classes[tag]))
-        namespace = processor.config._namespace
-        overrides = self._normalize_config(namespace, overrides) or {}
-        config = self.get_configuration(tag, overrides)
-        return processor(config=config)
+        processor_cls = cast(type[ProcessorProtocol], _import_class(self.classes[tag]))
+        namespace = processor_cls.config._namespace
+        merged = self._normalize_config(namespace, overrides)
+        config = self.get_configuration(tag, merged if merged is not None else {})
+        return processor_cls(config=config)
 
     #####################
     # Resources
@@ -255,11 +257,11 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "resource":
             raise ValueError(f"Expected a tag with 'resource' category but found '{tag.category}'")
-        resource = cast(ResourceProtocol, _import_class(self.classes[tag]))
-        namespace = self._get_resource_namespace(resource)
-        overrides = self._normalize_config(namespace, overrides) or {}
-        config = self.get_configuration(tag, overrides)
-        return resource(config=config)
+        resource_cls = cast(type[ResourceProtocol], _import_class(self.classes[tag]))
+        namespace = self._get_resource_namespace(resource_cls)
+        merged = self._normalize_config(namespace, overrides)
+        config = self.get_configuration(tag, merged if merged is not None else {})
+        return resource_cls(config=config)
 
     #####################
     # Storages
@@ -291,11 +293,11 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "storage":
             raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
-        storage = cast(ResourceStorageProtocol, _import_class(self.classes[tag]))
-        namespace = storage.config._namespace
-        overrides = self._normalize_config(namespace, overrides) or {}
-        config = self.get_configuration(tag, overrides)
-        return storage(config=config)
+        storage_cls = cast(type[ResourceStorageProtocol[Any]], _import_class(self.classes[tag]))
+        namespace = storage_cls.config._namespace
+        merged = self._normalize_config(namespace, overrides)
+        config = self.get_configuration(tag, merged if merged is not None else {})
+        return storage_cls(config=config)
 
     #####################
     # Extractors
@@ -323,13 +325,13 @@ class Registry:
         self.configurations.pop(tag, None)
 
     def get_extractor(self, tag: str | Tag,
-                      overrides: ConfigurationType | dict | None = None) -> ResourceExtractorProtocol:
+                      overrides: ConfigurationType | dict | None = None) -> ResourceExtractorProtocol[Any, Any]:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
         if tag.category != "extractor":
             raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
-        extractor = cast(ResourceExtractorProtocol, _import_class(self.classes[tag]))
-        namespace = extractor.config._namespace
-        overrides = self._normalize_config(namespace, overrides) or {}
-        config = self.get_configuration(tag, overrides)
-        return extractor(config=config)
+        extractor_cls = cast(type[ResourceExtractorProtocol[Any, Any]], _import_class(self.classes[tag]))
+        namespace = extractor_cls.config._namespace
+        merged = self._normalize_config(namespace, overrides)
+        config = self.get_configuration(tag, merged if merged is not None else {})
+        return extractor_cls(config=config)
