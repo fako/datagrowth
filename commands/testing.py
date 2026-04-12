@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from invoke.tasks import task
-from invoke import Collection
+from invoke.collection import Collection
 
 
 @task(help={

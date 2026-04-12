@@ -102,6 +102,6 @@ class ConfigurationField(fields.TextField):
         if "form_class" not in kwargs:
             kwargs["form_class"] = self.form_class
         field = super(ConfigurationField, self).formfield(**kwargs)
-        if not field.help_text:
+        if field is not None and not field.help_text:
             field.help_text = "Enter valid JSON"
         return field

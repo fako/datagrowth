@@ -1,5 +1,5 @@
 import os
-from invoke import Exit
+from invoke.exceptions import Exit
 
 
 def assert_repo_root_directory():
