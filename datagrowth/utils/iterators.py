@@ -15,26 +15,25 @@ def ibatch(iterable, batch_size, progress_bar=False, total=None):
     :param total: (int) the size of the iterator (only used for the progress bar)
     :return: Iterator
     """
-    progress_bar = progress_bar or None
-
-    # Setup a progress bar if requested
-    if progress_bar and not total:
-        progress_bar = tqdm()
-    elif progress_bar and total:
-        batches = int(math.floor(total / batch_size))
-        rest = total % batch_size
-        if rest:
-            batches += 1
-        progress_bar = tqdm(total=batches)
+    pbar: tqdm | None = None
+    if progress_bar:
+        if not total:
+            pbar = tqdm()
+        else:
+            batches = int(math.floor(total / batch_size))
+            rest = total % batch_size
+            if rest:
+                batches += 1
+            pbar = tqdm(total=batches)
 
     # The actual batch iterator
     it = iter(iterable)
     while True:
         batch = list(islice(it, batch_size))
         if not batch:
-            if progress_bar is not None:
-                progress_bar.close()
+            if pbar is not None:
+                pbar.close()
             return
-        if progress_bar is not None:
-            progress_bar.update(1)
+        if pbar is not None:
+            pbar.update(1)
         yield batch

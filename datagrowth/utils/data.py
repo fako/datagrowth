@@ -1,4 +1,4 @@
-from typing import Any, Union, Callable
+from typing import Any, Callable
 
 import re
 import copy
@@ -7,8 +7,7 @@ import copy
 JSON_MIMETYPE_PATTERN = re.compile("application/(.*)json")
 
 
-def reach(path: Union[str, None], data: Any,
-          default: any = None, default_factory: Union[Callable[[], Any], None] = None) -> Any:
+def reach(path: str | None, data: Any, default: Any = None, default_factory: Callable[[], Any] | None = None) -> Any:
     """
     Reach takes a path and data structure. It will return the value from the data structure belonging to the path.
 
@@ -55,25 +54,26 @@ def reach(path: Union[str, None], data: Any,
         raise TypeError("Reach expects default_factory to be a Callable.")
 
     # We make a copy of the input for later reference
-    root = copy.deepcopy(data)
+    root: Any = copy.deepcopy(data)
 
     # We split the path and see how far we get with using it as key/index
     try:
+        current: Any = data
         for part in path.split('.'):
             if part.isdigit():
-                data = data[int(part)]
+                current = current[int(part)]
             else:
-                data = data[part]
+                current = current[part]
         else:
-            return data
+            return current
 
     except (IndexError, KeyError, TypeError):
         pass
 
     # We try the path as key/index or return the default.
-    path = int(path) if path.isdigit() else path
+    lookup_key: int | str = int(path) if path.isdigit() else path
     default_value = default_factory() if default_factory is not None else default
-    return root[path] if path in root else default_value
+    return root[lookup_key] if lookup_key in root else default_value
 
 
 def override_dict(parent, child):
