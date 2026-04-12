@@ -58,3 +58,15 @@ version = {attr = "datagrowth.version.VERSION"}
 typeCheckingMode = "standard"
 reportMissingImports = "none"
 reportMissingModuleSource = "none"
+exclude = [
+    # Python files that are not part of this library
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    "mvenv",
+    ".tox",
+    # Temporary excludes for sanity
+    "tests",
+    "datagrowth/datatypes"
+]
