@@ -4,7 +4,8 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey, ContentType
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.timezone import now
 
 from datagrowth import configuration
@@ -21,6 +22,7 @@ class Resource(models.Model):
     """
 
     # Identification
+    id: int
     uri = models.CharField(max_length=255, db_index=True, default=None)
     status = models.PositiveIntegerField(default=0, db_index=True)
 
@@ -75,7 +77,7 @@ class Resource(models.Model):
         self.clean()
         self.save()
 
-    def close_snapshot(storage):
+    def close_snapshot(self, storage):
         """
         This function is here to make Resource compliant with the ResourceProtocol.
         However legacy Resources do not support custom snapshots storage, so this method is a noop.

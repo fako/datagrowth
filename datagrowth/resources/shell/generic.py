@@ -382,5 +382,5 @@ class ShellResource(Resource):
         cmd.insert(0, main)
         return " ".join(cmd)
 
-    class Meta:
+    class Meta(Resource.Meta):
         abstract = True
