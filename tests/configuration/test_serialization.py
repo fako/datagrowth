@@ -16,8 +16,8 @@ class TestLoadConfigDecorator(TestCase):
 
     @staticmethod
     @load_config()
-    def decorated(config, *args, **kwargs):
-        return config, args, kwargs
+    def decorated(configuration, *args, **kwargs):
+        return configuration, args, kwargs
 
     def test_decorator(self):
         # Standard call

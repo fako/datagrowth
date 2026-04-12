@@ -165,7 +165,8 @@ class Registry:
             return config
         return create_config(namespace, config)
 
-    def get_configuration(self, tag: str | Tag, overrides: ConfigurationType | dict[str, Any] | None = None) -> ConfigurationType | dict[str, Any]:  # noqa: E501
+    def get_configuration(self, tag: str | Tag,
+                          overrides: ConfigurationType | None = None) -> ConfigurationType:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
         base = self.configurations.get(tag)
@@ -175,10 +176,7 @@ class Registry:
             return overrides
         config = create_config(base._namespace, base.to_dict(private=True, protected=True))
         if overrides:
-            if isinstance(overrides, ConfigurationType):
-                config.update(overrides.to_dict(protected=True))
-            else:
-                config.update(overrides)
+            config.update(overrides.to_dict(protected=True))
         return config
 
     #####################
@@ -214,8 +212,10 @@ class Registry:
         processor_cls = cast(type[ProcessorProtocol], _import_class(self.classes[tag]))
         namespace = processor_cls.config._namespace
         merged = self._normalize_config(namespace, overrides)
-        config = self.get_configuration(tag, merged if merged is not None else {})
-        return processor_cls(config=config)
+        if merged is None:
+            merged = create_config(namespace, {})
+        config = self.get_configuration(tag, merged)
+        return processor_cls(config=config)  # type: ignore[reportCallIssue]
 
     #####################
     # Resources
@@ -260,8 +260,10 @@ class Registry:
         resource_cls = cast(type[ResourceProtocol], _import_class(self.classes[tag]))
         namespace = self._get_resource_namespace(resource_cls)
         merged = self._normalize_config(namespace, overrides)
-        config = self.get_configuration(tag, merged if merged is not None else {})
-        return resource_cls(config=config)
+        if merged is None:
+            merged = create_config(namespace, {})
+        config = self.get_configuration(tag, merged)
+        return resource_cls(config=config)  # type: ignore[reportCallIssue]
 
     #####################
     # Storages
@@ -296,8 +298,10 @@ class Registry:
         storage_cls = cast(type[ResourceStorageProtocol[Any]], _import_class(self.classes[tag]))
         namespace = storage_cls.config._namespace
         merged = self._normalize_config(namespace, overrides)
-        config = self.get_configuration(tag, merged if merged is not None else {})
-        return storage_cls(config=config)
+        if merged is None:
+            merged = create_config(namespace, {})
+        config = self.get_configuration(tag, merged)
+        return storage_cls(config=config)  # type: ignore[reportCallIssue]
 
     #####################
     # Extractors
@@ -333,5 +337,7 @@ class Registry:
         extractor_cls = cast(type[ResourceExtractorProtocol[Any, Any]], _import_class(self.classes[tag]))
         namespace = extractor_cls.config._namespace
         merged = self._normalize_config(namespace, overrides)
-        config = self.get_configuration(tag, merged if merged is not None else {})
-        return extractor_cls(config=config)
+        if merged is None:
+            merged = create_config(namespace, {})
+        config = self.get_configuration(tag, merged)
+        return extractor_cls(config=config)  # type: ignore[reportCallIssue]

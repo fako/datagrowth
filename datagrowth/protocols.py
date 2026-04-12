@@ -2,15 +2,12 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
-from datagrowth.configuration import ConfigurationType
+from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 
 
 class ProcessorProtocol(Protocol):
 
-    config: ConfigurationType
-
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
-        ...
+    config: ConfigurationProperty
 
     @staticmethod
     def get_processor_components(processor_definition: str) -> tuple[str, str]:

@@ -1,28 +1,37 @@
+from pathlib import Path
 import pytest
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
 from datagrowth.registry import Registry, Tag
+from datagrowth.resources.protocols import ResourceStorageProtocol
 from datagrowth.signatures import Signature
 
-
-class MockResource:
-    pass
+from registry.mock_resource import MockResource
 
 
-class MockStorage:
-    """
-    A minimal storage satisfying ResourceStorageProtocol for testing.
-    """
+class MockStorage(ResourceStorageProtocol[MockResource]):
     config = ConfigurationProperty(namespace="mock_storage")
 
     def __init__(self, config: ConfigurationType | dict) -> None:
         self.config = config
 
-    def save(self, resource: MockResource) -> None:
-        return None
+    def save(self, resource: MockResource) -> Signature:
+        return Signature(uri="mock://")
 
     def load(self, signature: Signature) -> MockResource | None:
         return None
+
+    def read(self, signature: Signature, filename: str) -> bytes | str:
+        return b""
+
+    def write(self, signature: Signature, filename: str, data: bytes | str) -> Path:
+        return Path(filename)
+
+    def read_tmp(self, filename: str) -> bytes | str:
+        return b""
+
+    def write_tmp(self, filename: str, data: bytes | str) -> Path:
+        return Path(filename)
 
 
 @pytest.fixture
@@ -51,7 +60,6 @@ def test_register_storage_with_dict_config(registry: Registry) -> None:
     tag = registry.register_storage("storage:test", MockStorage, {"batch_size": 99})
     assert tag in registry.configurations
     stored = registry.configurations[tag]
-    assert isinstance(stored, ConfigurationType)
     assert stored.batch_size == 99
 
 

@@ -4,7 +4,7 @@ from datagrowth.configuration import ConfigurationType, ConfigurationProperty
 
 
 class ConfigurationPropertyHolder:
-    property = ConfigurationProperty(
+    property: ConfigurationProperty = ConfigurationProperty(
         namespace="name",
         private=["_test3"],
         storage_attribute="storage"
@@ -12,15 +12,11 @@ class ConfigurationPropertyHolder:
 
 
 class TestConfigurationProperty(TestCase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestConfigurationProperty, cls).setUpClass()
-        cls.property = ConfigurationProperty(
-            namespace="name",
-            private=["_test3"],
-            storage_attribute="storage"
-        )
+    property: ConfigurationProperty = ConfigurationProperty(
+        namespace="name",
+        private=["_test3"],
+        storage_attribute="storage"
+    )
 
     def setUp(self):
         super(TestConfigurationProperty, self).setUp()
