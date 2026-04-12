@@ -17,6 +17,8 @@ pydantic==2.12.5
 pytest==7.4.3
 pytest-xdist==3.5.0
 flake8==6.1.0
+django-stubs==6.0.2
+basedpyright==1.39.0
 
 # Database packages that might not always be used
 psycopg2-binary==2.9.10
