@@ -1,13 +1,15 @@
 {
   "include": [
-    "commands",
     "datagrowth/configuration",
     "datagrowth/registry",
+    "datagrowth/resources",
     "datagrowth/utils",
 
-    "tests/configuration",
-    "tests/registry",
-    "tests/utils"
+    "commands",
+    "tests"
+  ],
+  "exclude": [
+    "tests/django_project"
   ],
   "typeCheckingMode": "standard",
   "reportMissingImports": "none",

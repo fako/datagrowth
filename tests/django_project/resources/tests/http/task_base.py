@@ -118,9 +118,10 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
             session=MockRequests
         )
         send_serie.assert_called_with(
-            [["1|2|3"], ["4|5|5|6"], ["7"]], [{}, {}, {}],
-            method=self.method,
             config=self.config,
+            args_list=[["1|2|3"], ["4|5|5|6"], ["7"]],
+            kwargs_list=[{}, {}, {}],
+            method=self.method,
             session=MockRequests
         )
 
@@ -128,7 +129,9 @@ class TestSendMassTaskBase(TestHTTPTasksBase):
     def test_send_injected_session_provider(self, send_serie):
         send_mass([1], [{}], method=self.method, config=self.config, session="ProcessorMock")
         args, kwargs = send_serie.call_args
-        self.assertEqual(args, ([1], [{}],))
+        self.assertEqual(args, ())
+        self.assertEqual(kwargs["args_list"], [1])
+        self.assertEqual(kwargs["kwargs_list"], [{}])
         self.assertEqual(kwargs["method"], self.method)
         self.assertEqual(kwargs["config"], self.config)
         self.assertTrue(kwargs["session"].from_provider)

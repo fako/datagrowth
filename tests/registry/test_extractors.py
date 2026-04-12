@@ -2,19 +2,19 @@ import pytest
 
 from datagrowth.configuration import ConfigurationType, create_config, ConfigurationProperty
 from datagrowth.registry import Registry, Tag
-from datagrowth.resources.protocols import ResourceExtractorProtocol
+from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.signatures import Signature
 
 from registry.mock_resource import MockResource
 
 
-class MockExtractor(ResourceExtractorProtocol[Signature, MockResource]):
-    config: ConfigurationProperty = ConfigurationProperty(namespace="http_resource")
+class MockExtractor:
+    config = ConfigurationProperty(namespace="http_resource")
 
-    def __init__(self, config: ConfigurationType | dict) -> None:
+    def __init__(self, config: ConfigurationType) -> None:
         self.config = config
 
-    def extract(self, signature: Signature) -> MockResource:
+    def extract(self, signature: Signature) -> ResourceProtocol:
         return MockResource()
 
 

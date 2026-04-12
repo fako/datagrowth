@@ -61,7 +61,7 @@ class Resource(models.Model):
     def extract(self, *args, **kwargs):
         raise NotImplementedError(f"Extract strategy not implemented for {self.__class__.__name__}.")
 
-    def next(self):
+    def next(self) -> "Resource | None":
         """
         Creates a new Resource that is the follow-up of the current Resource,
         like the Resource for a next page in a Resource that supports pagination.

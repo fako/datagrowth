@@ -14,7 +14,7 @@ from datagrowth.resources.http.signature import HttpMode, HttpSignature
 
 class MockMicroTikaResource(MicroServiceResource):
 
-    MICRO_SERVICE: ClassVar[str] = "tika"
+    MICRO_SERVICE: ClassVar[str | None] = "tika"
     HEADERS: ClassVar[dict[str, str]] = {
         "Accept": "application/json",
     }
@@ -26,7 +26,7 @@ class MicroServiceUnknownName(MicroServiceResource):
 
 
 class MockMicroDoesNotExistServiceResource(MicroServiceResource):
-    MICRO_SERVICE: ClassVar[str] = "does_not_exist"
+    MICRO_SERVICE: ClassVar[str | None] = "does_not_exist"
 
 
 @pytest.fixture

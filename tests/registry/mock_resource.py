@@ -12,6 +12,7 @@ class MockResource(BaseModel):
     NAMESPACE: ClassVar[str] = "mock_resource"
 
     config: ConfigurationType = Field(default_factory=lambda: ConfigurationType(namespace=["global"]))
+    signature: Signature | None = None
 
     def close(self) -> "MockResource":
         return self
@@ -43,5 +44,5 @@ class MockResource(BaseModel):
     def prepare_inputs(self, *args: Any, **kwargs: Any) -> Signature:
         return Signature(uri="mock://")
 
-    def close_snapshot(self, storage: ResourceStorageProtocol[Any]) -> None:
+    def close_snapshot(self, storage: ResourceStorageProtocol) -> None:
         return None

@@ -16,6 +16,11 @@ class ResourceProtocol(Protocol):
 
     config: ConfigurationType
 
+    @property
+    def signature(self) -> Signature | None:
+        """Read-only Signature property to stay covariant — Signature subclasses (e.g. HttpSignature) must match."""
+        ...
+
     def close(self) -> Self:
         """
         Stores extracted data to disk if any was retrieved and possibly stores empty Resource object.
@@ -89,19 +94,17 @@ class ResourceProtocol(Protocol):
         ...
 
 
-ResourceType = TypeVar("ResourceType", bound=ResourceProtocol)
 ExtractorSignatureType = TypeVar("ExtractorSignatureType", bound=Signature, contravariant=True)
-ExtractorResourceType = TypeVar("ExtractorResourceType", bound=ResourceProtocol, covariant=True)
 
 
-class ResourceStorageProtocol(Protocol[ResourceType]):
+class ResourceStorageProtocol(Protocol):
 
-    config: ConfigurationProperty
+    config: ConfigurationProperty | ConfigurationType
 
-    def save(self, resource: ResourceType) -> Signature:
+    def save(self, resource: ResourceProtocol) -> Signature:
         ...
 
-    def load(self, signature: Signature) -> ResourceType | None:
+    def load(self, signature: Signature) -> ResourceProtocol | None:
         ...
 
     def read(self, signature: Signature, filename: str) -> bytes | str:
@@ -117,9 +120,9 @@ class ResourceStorageProtocol(Protocol[ResourceType]):
         ...
 
 
-class ResourceExtractorProtocol(Protocol[ExtractorSignatureType, ExtractorResourceType]):
+class ResourceExtractorProtocol(Protocol[ExtractorSignatureType]):
 
-    config: ConfigurationProperty
+    config: ConfigurationProperty | ConfigurationType
 
-    def extract(self, signature: ExtractorSignatureType) -> ExtractorResourceType:
+    def extract(self, signature: ExtractorSignatureType) -> ResourceProtocol:
         ...

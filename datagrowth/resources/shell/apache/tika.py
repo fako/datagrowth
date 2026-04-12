@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from datagrowth.resources.shell import ShellResource
 
@@ -45,16 +46,17 @@ class TikaResource(ShellResource):
     DIRECTORY_SETTING = "shell_resource_bin_dir"
 
     @property
-    def content(self):
+    def content(self) -> tuple[str | None, Any]:
         content_type, raw = super().content
         if not raw:
             return content_type, raw
         data = json.loads(raw)[0]  # TODO: allow multiple document input
         variables = self.variables()
-        data["resourcePath"] = variables["input"][0]
+        input_args = variables["input"]
+        data["resourcePath"] = input_args[0] if input_args else None
         return content_type, data
 
-    class Meta:
+    class Meta(ShellResource.Meta):
         abstract = True
 
     @staticmethod

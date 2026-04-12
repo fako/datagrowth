@@ -1,9 +1,9 @@
-from typing import List, Dict
+from typing import Any
 
 from datagrowth.resources.base import Resource
 
 
-def serialize_resources(resources: List[Resource] = None) -> Dict:
+def serialize_resources(resources: list[Resource] | None = None) -> dict[str, Any]:
     if not resources:
         return {
             "success": False,
@@ -21,7 +21,8 @@ def serialize_resources(resources: List[Resource] = None) -> Dict:
     }
 
 
-def update_serialized_resources(serialization: Dict[str, Dict], resources: List[Resource] = None):
+def update_serialized_resources(serialization: dict[str, dict[str, Any]],
+                                resources: list[Resource] | None = None) -> None:
     if not resources:
         return
     resource_info = serialize_resources(resources)

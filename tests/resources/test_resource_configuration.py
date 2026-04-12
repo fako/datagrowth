@@ -17,7 +17,7 @@ def mock_resource_class() -> type[Resource]:
 
 
 def test_resource_config_accepts_dict() -> None:
-    resource = Resource(config={"timeout": 10, "cache_only": True})
+    resource = Resource(config={"timeout": 10, "cache_only": True})  # type: ignore[reportArgumentType]
     assert isinstance(resource.config, ConfigurationType)
     assert resource.config.timeout == 10
     assert resource.config.cache_only is True
@@ -38,17 +38,19 @@ def test_resource_config_defaults_to_configuration_type() -> None:
 
 def test_resource_config_rejects_invalid_type() -> None:
     with pytest.raises(TypeError, match="Resource config expects a dict, ConfigurationType or None"):
-        Resource(config=123)
+        Resource(config=123)  # type: ignore[reportArgumentType]
 
 
 def test_resource_dump_serializes_public_config_only_by_default() -> None:
-    resource = Resource(config={"public": "value", "_secret": "hidden", "_private": ["_secret"]})
+    config = {"public": "value", "_secret": "hidden", "_private": ["_secret"]}
+    resource = Resource(config=config)  # type: ignore[reportArgumentType]
     dumped = resource.model_dump()
     assert dumped["config"] == {"public": "value"}
 
 
 def test_resource_dump_can_include_protected_and_private_config() -> None:
-    resource = Resource(config={"public": "value", "_secret": "hidden", "_private": ["_secret"]})
+    config = {"public": "value", "_secret": "hidden", "_private": ["_secret"]}
+    resource = Resource(config=config)  # type: ignore[reportArgumentType]
     dumped = resource.model_dump(context={"config_protected": True, "config_private": True})
     assert dumped["config"]["public"] == "value"
     assert dumped["config"]["_secret"] == "hidden"

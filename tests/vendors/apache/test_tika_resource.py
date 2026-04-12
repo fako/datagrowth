@@ -36,7 +36,7 @@ def resource() -> MockHttpTikaResource:
 
 def test_validate_inputs_accepts_explicit_document_bytes(resource: MockHttpTikaResource) -> None:
     inputs = resource.validate_inputs("semantic", document=b"pdf-bytes")
-    assert inputs.args == ["put", "semantic"]
+    assert inputs.args == ("put", "semantic")
     assert inputs.kwargs["mode"] == "semantic"
     assert inputs.kwargs["document"] == b"pdf-bytes"
 
@@ -71,6 +71,7 @@ def test_prepare_inputs_sets_bytes_payload_for_document(resource: MockHttpTikaRe
     assert isinstance(signature.data, str)
     assert signature.data.startswith("bin://file://")
     tmp_path = Path(signature.data.removeprefix("bin://file://"))
+    assert resource.storage is not None
     expected_tmp = Path(*resource.storage.config.directories["tmp"])
     assert tmp_path.parent == Path(expected_tmp)
     assert tmp_path.read_bytes() == b"pdf-bytes"

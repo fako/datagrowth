@@ -156,7 +156,8 @@ class HttpFileResource(URLResource):
         """
         if self.success:
             content_type = self.head.get("content-type", "unknown/unknown").split(';')[0]
-            file_path = os.path.join(default_storage.location, self.body)
+            storage_location: str = getattr(default_storage, "location", "")
+            file_path = os.path.join(storage_location, self.body)
             file = default_storage.open(file_path)
             try:
                 return content_type, self.transform(file)
@@ -171,7 +172,7 @@ class HttpFileResource(URLResource):
         super().__init__(*args, **kwargs)
         self.timeout = kwargs.get("timeout", 4)
 
-    class Meta:
+    class Meta(URLResource.Meta):
         abstract = True
 
 
@@ -186,7 +187,7 @@ class HttpImageResource(HttpFileResource):
     def transform(self, file):
         return Image.open(file)
 
-    class Meta:
+    class Meta(HttpFileResource.Meta):
         abstract = True
 
 

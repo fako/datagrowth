@@ -3,6 +3,7 @@ import string
 import json
 import jsonschema
 from copy import copy
+from typing import Any
 from jsonschema.validators import Draft4Validator
 from jsonschema.exceptions import ValidationError as SchemaValidationError
 from time import sleep
@@ -122,7 +123,7 @@ class ShellResource(Resource):
         return self.status == 0 and bool(self.stdout)
 
     @property
-    def content(self):
+    def content(self) -> tuple[str | None, Any]:
         """
         After a successful ``run`` call this method passes stdout from the command through the ``transform`` method.
         It then returns the value of the ``CONTENT_TYPE`` attribute as content type
@@ -313,12 +314,14 @@ class ShellResource(Resource):
             "Trying to run command before having a valid command dictionary."
 
         cmd = self.command.get("cmd")
+        assert cmd, "Cmd should be a list that can be passed on to subprocess.run"
         cwd = None
-        env = self.environment(*self.command.get("args"), **self.command.get("kwargs"))
+        env = self.environment(*self.command.get("args", ()), **self.command.get("kwargs", {}))
         if self.DIRECTORY_SETTING:
             directory_configuration = self.DIRECTORY_SETTING_COMPATIBILITY_KEYS.get(
                 self.DIRECTORY_SETTING, self.DIRECTORY_SETTING
             )
+            assert directory_configuration, "Could not resolve directory configuration setting."
             cwd = getattr(DATAGROWTH_CONFIGURATION, directory_configuration)
         results = subprocess.run(
             cmd,
