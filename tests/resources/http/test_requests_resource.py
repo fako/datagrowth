@@ -53,8 +53,8 @@ class HttpResourceDataMock(HttpResource):
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
     MODE: ClassVar[HttpMode] = HttpMode.DATA
 
-    def data(self, **kwargs: Any) -> str:
-        return f"bin://file://{kwargs['file']}"
+    def data(self, **kwargs: Any) -> dict[str, str]:
+        return {"payload": f"bin://file://{kwargs['file']}"}
 
 
 class HttpResourceDataNoStorageMock(HttpResource):
@@ -63,8 +63,8 @@ class HttpResourceDataNoStorageMock(HttpResource):
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
     MODE: ClassVar[HttpMode] = HttpMode.DATA
 
-    def data(self, **kwargs: Any) -> str:
-        return f"bin://{base64.b64encode(b'payload-bytes').decode('ascii')}"
+    def data(self, **kwargs: Any) -> dict[str, str]:
+        return {"payload": f"bin://{base64.b64encode(b'payload-bytes').decode('ascii')}"}
 
 
 def make_response(status_code: int, body: bytes | str, headers: dict[str, str] | None = None) -> Response:
@@ -160,7 +160,7 @@ def test_prepare_inputs_creates_http_signature_with_template_data(resource: Http
     assert signature.url == "https://example.com/books/python?source=tests&page=2"
     assert signature.uri == "example.com/books/python?page=2&source=tests"
     assert signature.mode == HttpMode.JSON
-    assert signature.data is None
+    assert signature.data == {}
     assert signature.headers == {"Accept": "application/json"}
 
 

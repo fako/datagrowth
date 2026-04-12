@@ -65,21 +65,21 @@ def test_signature_respects_explicit_hash() -> None:
 
 
 def test_signature_hash_bin_payload() -> None:
-    s1 = Signature(uri="example://resource", data="bin://hello-world")
-    s2 = Signature(uri="example://resource", data="bin://hello-world")
-    s3 = Signature(uri="example://resource", data="bin://goodbye-world")
+    s1 = Signature(uri="example://resource", data={"payload": "bin://hello-world"})
+    s2 = Signature(uri="example://resource", data={"payload": "bin://hello-world"})
+    s3 = Signature(uri="example://resource", data={"payload": "bin://goodbye-world"})
     assert s1.hash == s2.hash
     assert s1.hash != s3.hash
 
 
 def test_signature_get_data_requires_open_for_bin_data() -> None:
-    signature = Signature(uri="example://resource", data="bin://cGRmLWJ5dGVz")
+    signature = Signature(uri="example://resource", data={"payload": "bin://cGRmLWJ5dGVz"})
     with pytest.raises(RuntimeError, match="requires a signature to be open"):
         signature.get_data()
 
 
 def test_signature_set_data_and_close_lifecycle_for_bin_data() -> None:
-    signature = Signature(uri="example://resource", data="bin://cGRmLWJ5dGVz")
+    signature = Signature(uri="example://resource", data={"payload": "bin://cGRmLWJ5dGVz"})
 
     signature.set_data_bytes(b"pdf-bytes")
     assert signature.get_data() == b"pdf-bytes"

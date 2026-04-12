@@ -7,7 +7,7 @@
         "org.apache.tika.parser.html.JSoupParser"
     ],
     "X-TIKA:content_handler": "ToTextContentHandler",
-    "resourceName": "apache-tika-12029917480259849145.tmp",
+    "resourceName": "apache-tika-12783092394697918485.tmp",
     "X-TIKA:encodingDetector": "HtmlEncodingDetector",
     "http-connection:num-redirects": "0",
     "http-connection:target-url": "https://just-ask.data-scope.com/accounts/login/",
@@ -19,7 +19,7 @@
     ],
     "dc:title": "Log in | Just Ask",
     "Content-Encoding": "UTF-8",
-    "X-TIKA:parse_time_millis": "3",
+    "X-TIKA:parse_time_millis": "13",
     "X-TIKA:embedded_depth": "0",
     "X-TIKA:detectedEncoding": "UTF-8",
     "Content-Length": "47",

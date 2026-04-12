@@ -7,7 +7,7 @@ from pydantic import Field, model_validator, HttpUrl, StrictBytes
 from datagrowth.registry import Tag
 from datagrowth.resources.protocols import ResourceStorageProtocol
 from datagrowth.resources.http.pydantic import MicroServiceResource, HttpResourceInputsValidator
-from datagrowth.resources.http.signature import HttpMode
+from datagrowth.resources.http.signature import HttpMode, HttpSignature
 
 
 class TikaInputsValidator(HttpResourceInputsValidator):
@@ -77,24 +77,19 @@ class HttpTikaResource(MicroServiceResource):
                 file_path = file_path.relative_to(Path.cwd())
             return {"payload": f"bin://file://{file_path}"}
         if url := kwargs.get("url"):
-            # Keep URL-mode signatures distinct by adding URL to the data. Tika will ignore this input.
-            return {"payload": str(url)}
+            return {"payload": f"bin://{url}"}
         return {}
 
-    def prepare_inputs(self, *args: Any, **kwargs: Any):
+    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
         signature = super().prepare_inputs(*args, **kwargs)
-        kwargs = dict(signature.kwargs)
-        data = signature.data
-        payload = data.get("payload") if isinstance(data, dict) else data
+        updated_kwargs = dict(signature.kwargs)
+        payload = signature.data.get("payload", "")
         if isinstance(payload, str) and payload.startswith("bin://file://"):
-            if kwargs.get("document", None) is not None:
-                kwargs["document"] = payload
-            if kwargs.get("file", None) is not None:
-                kwargs["file"] = payload.removeprefix("bin://file://")
-        return signature.model_copy(update={
-            "data": payload,
-            "kwargs": kwargs,
-        })
+            if updated_kwargs.get("document", None) is not None:
+                updated_kwargs["document"] = payload
+            if updated_kwargs.get("file", None) is not None:
+                updated_kwargs["file"] = payload.removeprefix("bin://file://")
+        return signature.model_copy(update={"kwargs": updated_kwargs})
 
     def handle_errors(self) -> None:
         super().handle_errors()

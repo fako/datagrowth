@@ -15,7 +15,7 @@ class InputsValidator(BaseModel):
 
 class Signature(BaseModel):
     uri: str
-    data: dict[str, Any] | str | None = Field(default=None)
+    data: dict[str, Any] = Field(default_factory=dict)
     hash: int = Field(default=0)
     type: str | None = Field(default=None)
     args: tuple[Any, ...] = Field(default_factory=tuple)
@@ -29,8 +29,9 @@ class Signature(BaseModel):
     def set_data_bytes(self, data: bytes | None) -> None:
         self._data_bytes = data
 
-    def get_data(self) -> dict[str, Any] | str | bytes | None:
-        if not isinstance(self.data, str) or not self.data.startswith("bin://"):
+    def get_data(self) -> dict[str, Any] | bytes:
+        payload = self.data.get("payload")
+        if not isinstance(payload, str) or not payload.startswith("bin://"):
             return self.data
         if self._data_bytes is None:
             raise RuntimeError("Signature.get_data() requires a signature to be open before reading bin:// data.")

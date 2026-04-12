@@ -42,7 +42,7 @@
         "org.apache.tika.parser.CompositeParser",
         "org.apache.tika.parser.pdf.PDFParser"
     ],
-    "X-TIKA:parse_time_millis": "25",
+    "X-TIKA:parse_time_millis": "22",
     "X-TIKA:embedded_depth": "0",
     "access_permission:can_modify": "true",
     "pdf:docinfo:producer": "Skia/PDF m144 Google Docs Renderer",

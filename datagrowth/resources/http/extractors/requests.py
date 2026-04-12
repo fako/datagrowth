@@ -77,9 +77,8 @@ class RequestsExtractor:
             elif signature.mode == HttpMode.DATA:
                 request_kwargs["data"] = signature.get_data()
             elif signature.mode == HttpMode.MULTIPART:
-                multipart_body = signature.data if isinstance(signature.data, dict) else {}
-                request_kwargs["data"] = multipart_body.get("data")
-                request_kwargs["files"] = multipart_body.get("files")
+                request_kwargs["data"] = signature.data.get("data")
+                request_kwargs["files"] = signature.data.get("files")
             else:
                 raise ValueError(f"Unsupported request mode: {signature.mode}")
         return requests.Request(**request_kwargs)

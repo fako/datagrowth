@@ -80,7 +80,7 @@ def test_prepare_inputs_creates_http_signature_with_connection_template_data(res
     assert signature.url == "http://localhost:9998/rmeta/text"
     assert signature.uri == "localhost:9998/rmeta/text"
     assert signature.mode == HttpMode.JSON
-    assert signature.data is None
+    assert signature.data == {}
     assert signature.headers == {"Accept": "application/json"}
 
 

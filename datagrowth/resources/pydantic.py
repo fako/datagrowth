@@ -109,16 +109,19 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         return self
 
     def open_signature(self, signature: ResourceSignatureType) -> None:
-        if not isinstance(signature.data, str) or not signature.data.startswith("bin://"):
+        payload = signature.data.get("payload")
+        if not isinstance(payload, str) or not payload.startswith("bin://"):
             return
         if self.storage is None:
             return
-        payload = signature.data.removeprefix("bin://")
-        if payload.startswith("file://"):
-            file_path = Path(payload.removeprefix("file://"))
+        raw = payload.removeprefix("bin://")
+        if raw.startswith("file://"):
+            file_path = Path(raw.removeprefix("file://"))
             data_bytes = file_path.read_bytes()
+        elif raw.startswith("http://") or raw.startswith("https://"):
+            data_bytes = raw.encode("utf-8")
         else:
-            data_bytes = base64.b64decode(payload.encode("ascii"))
+            data_bytes = base64.b64decode(raw.encode("ascii"))
         signature.set_data_bytes(data_bytes)
 
     def next(self) -> Self | None:

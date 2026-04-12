@@ -57,7 +57,7 @@ class HttpResource(Resource[HttpSignature]):
             return {}
         return dict(self.PARAMETERS)
 
-    def data(self, **kwargs: Any) -> dict[str, Any] | str | None:
+    def data(self, **kwargs: Any) -> dict[str, Any]:
         """
         Returns the dictionary that will be used as HTTP body for the request the resource will make.
         By default this is the dictionary from the ``DATA`` attribute
@@ -209,7 +209,7 @@ class HttpResource(Resource[HttpSignature]):
             uri=self.uri_from_url(url),
             args=args,
             kwargs=kwargs,
-            data=self.data(**data_arguments) if method != HttpMethod.GET or self.config.allow_get_body else None,
+            data=self.data(**data_arguments) if method != HttpMethod.GET or self.config.allow_get_body else {},
             type=self.type.value,
             method=method,
             url=url,
@@ -278,7 +278,7 @@ class URLResource(HttpResource):
             uri=self.uri_from_url(url),
             args=args,
             kwargs=kwargs,
-            data=None,
+            data={},
             type=self.type.value,
             method=HttpMethod.GET,
             url=url,

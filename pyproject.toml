@@ -71,5 +71,6 @@ exclude = [
     "datagrowth/datatypes",
     "datagrowth/processors",
     "datagrowth/management",
-    "datagrowth/apps.py"
+    "datagrowth/apps.py",
+    "datagrowth/django",
 ]
