@@ -3,7 +3,7 @@ import re
 import shutil
 from pathlib import Path
 
-from invoke import Collection
+from invoke.collection import Collection
 from invoke.tasks import task
 
 from datagrowth.version import VERSION
