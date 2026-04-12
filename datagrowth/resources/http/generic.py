@@ -698,7 +698,7 @@ class HttpResource(Resource):
             self.body = ""
         self.status = status
 
-    class Meta:
+    class Meta(Resource.Meta):
         abstract = True
 
 
@@ -749,7 +749,7 @@ class URLResource(HttpResource):
         assert parameters is None, "Parameters got specified for the URLResource, but these get ignored"
         return args[0]
 
-    class Meta:
+    class Meta(HttpResource.Meta):
         abstract = True
 
 
@@ -780,7 +780,7 @@ class MicroServiceResource(HttpResource):
         args = (protocol, host, path) + args
         return super().send(method, *args, **kwargs)
 
-    class Meta:
+    class Meta(HttpResource.Meta):
         abstract = True
 
 
@@ -829,5 +829,5 @@ class TestClientResource(HttpResource):
         self.status = response.status_code
         self.body = response.content.decode("utf-8", "replace")
 
-    class Meta:
+    class Meta(HttpResource.Meta):
         abstract = True
