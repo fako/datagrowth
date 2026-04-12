@@ -21,7 +21,7 @@ def get_resource_link(config, session=None):
     assert link.session, "Http resources require a session object to get a link object."
     token = getattr(link.session, "token", None)
     if token:
-        link.token = session.token
+        link.token = token
     # FEATURE: update session to use proxy when configured
     return link
 
@@ -89,9 +89,9 @@ def send_mass(config, args_list, kwargs_list, session=None, method=None):
         prc_kwargs_list = kwargs_list
 
     return send_serie(
-        prc_args_list,
-        prc_kwargs_list,
         config=config,
+        args_list=prc_args_list,
+        kwargs_list=prc_kwargs_list,
         method=method,
         session=session
     )

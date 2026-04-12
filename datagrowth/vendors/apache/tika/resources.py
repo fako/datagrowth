@@ -11,7 +11,7 @@ from datagrowth.resources.http.signature import HttpMode
 
 
 class TikaInputsValidator(HttpResourceInputsValidator):
-    args: list[Any] = Field(min_length=1, max_length=2)
+    args: tuple[Any, ...] = Field(min_length=1, max_length=2)
     kwargs: dict[str, Any] = Field(default_factory=dict, min_length=0, max_length=0)
     mode: Literal["semantic", "structure"] = "structure"
     document: StrictBytes | None = None

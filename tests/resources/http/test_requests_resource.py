@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import base64
-from typing import ClassVar
+from typing import Any, ClassVar
 from unittest.mock import Mock
 from pathlib import Path
 
@@ -25,7 +25,7 @@ class HttpResourceMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_mock")
     URI_TEMPLATE: ClassVar[str] = "https://example.com/{}/{slug}"
-    PARAMETERS: ClassVar[dict[str, str]] = {
+    PARAMETERS: ClassVar[dict[str, str] | None] = {
         "source": "tests",
         "page": "{page}",
     }
@@ -49,11 +49,11 @@ class HttpResourceAuthMock(HttpResourceMock):
 class HttpResourceDataMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_data_mock")
-    STORAGE: ClassVar[Tag] = Tag(category="storage", value="file_system")
+    STORAGE: ClassVar[Tag | None] = Tag(category="storage", value="file_system")
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
     MODE: ClassVar[HttpMode] = HttpMode.DATA
 
-    def data(self, **kwargs: str) -> str:
+    def data(self, **kwargs: Any) -> str:
         return f"bin://file://{kwargs['file']}"
 
 
@@ -63,7 +63,7 @@ class HttpResourceDataNoStorageMock(HttpResource):
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
     MODE: ClassVar[HttpMode] = HttpMode.DATA
 
-    def data(self, **kwargs: str) -> str:
+    def data(self, **kwargs: Any) -> str:
         return f"bin://{base64.b64encode(b'payload-bytes').decode('ascii')}"
 
 

@@ -49,11 +49,11 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     purge_at: datetime | None = Field(default_factory=lambda: datetime.now() + timedelta(days=30))
 
     @property
-    def storage(self) -> ResourceStorageProtocol["Resource[ResourceSignatureType]"] | None:
+    def storage(self) -> ResourceStorageProtocol | None:
         return self._storage
 
     @property
-    def extractor(self) -> ResourceExtractorProtocol[ResourceSignatureType, "Resource[ResourceSignatureType]"] | None:
+    def extractor(self) -> ResourceExtractorProtocol[ResourceSignatureType] | None:
         return self._extractor
 
     #####################
@@ -87,7 +87,8 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         # Attempt extracting data from the remote as prescribed by prepare_signature method
         self.signature = signature
         self.open_signature(signature)
-        extracted = self.extractor.extract(signature)
+        raw_extracted = self.extractor.extract(signature)
+        extracted = cast("Resource[ResourceSignatureType]", raw_extracted)
         if isinstance(extracted, self.__class__):
             extracted.handle_errors()
             return cast(Self, extracted)
@@ -154,8 +155,8 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         "arbitrary_types_allowed": True
     }
 
-    _storage: ResourceStorageProtocol["Resource[ResourceSignatureType]"] | None = PrivateAttr(default=None)
-    _extractor: ResourceExtractorProtocol[ResourceSignatureType, "Resource[ResourceSignatureType]"] | None = PrivateAttr(default=None)  # noqa: E501
+    _storage: ResourceStorageProtocol | None = PrivateAttr(default=None)
+    _extractor: ResourceExtractorProtocol[ResourceSignatureType] | None = PrivateAttr(default=None)
 
     def model_post_init(self, __context: Any) -> None:
         cls = self.__class__

@@ -3,20 +3,19 @@ from typing import Any
 import pytest
 
 from datagrowth.configuration import ConfigurationType, ConfigurationProperty, create_config
-from datagrowth.protocols import ProcessorProtocol
 from datagrowth.registry import Registry, Tag
 
 
-class MockProcessor(ProcessorProtocol):
+class MockProcessor:
     """
     A minimal processor satisfying ProcessorProtocol for testing.
 
     Due to legacy reasons a Processor.config needs an empty dict to indicate there is no config.
     A value of None is not allowed.
     """
-    config: ConfigurationProperty = ConfigurationProperty(namespace="mock")
+    config = ConfigurationProperty(namespace="mock")
 
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
+    def __init__(self, config: ConfigurationType) -> None:
         self.config = config
 
     @staticmethod
@@ -25,6 +24,8 @@ class MockProcessor(ProcessorProtocol):
 
     @staticmethod
     def create_processor(processor_name: str, config: ConfigurationType | dict[str, Any]) -> "MockProcessor":
+        if isinstance(config, dict):
+            config = ConfigurationType(namespace="mock", defaults=config)
         return MockProcessor(config)
 
     @staticmethod

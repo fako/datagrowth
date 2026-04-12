@@ -247,7 +247,9 @@ class HttpResource(Resource):
         variables = self.variables(*args)
         url = URLObject(url_template.format(*variables["url"]))
         params = url.query.dict
-        params.update(self.parameters(**variables))
+        extra_params = self.parameters(**variables)
+        if extra_params:
+            params.update(extra_params)
         url = url.set_query_params(params)
         return str(url)
 
@@ -799,7 +801,7 @@ class TestClientResource(HttpResource):
     def _create_url(self, *args):
         variables = self.variables(*args)
         path = reverse(self.test_view_name, args=variables["url"])
-        params = self.parameters(**variables)
+        params = self.parameters(**variables) or {}
         return f"{path}?{urlencode(params, doseq=True)}"
 
     def _send(self):
@@ -807,6 +809,7 @@ class TestClientResource(HttpResource):
             "Trying to make request before having a valid request dictionary."
 
         method = self.request.get("method")
+        assert method, "Method should not be falsy."
         form_data = self.request.get("data") if not method == "get" else None
         json_data = self.request.get("json") if not method == "get" else None
         data = json_data or form_data or None

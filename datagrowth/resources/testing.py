@@ -20,7 +20,7 @@ class EnableGlobalCacheMixin:
 
     @classmethod
     def setUpClass(cls) -> None:
-        super().setUpClass()
+        super().setUpClass()  # type: ignore[reportAttributeAccessIssue]
         if not cls.noCache:
             register_defaults("global", {
                 "cache_only": True
@@ -32,7 +32,7 @@ class EnableGlobalCacheMixin:
             register_defaults("global", {
                 "cache_only": False
             })
-        super().tearDownClass()
+        super().tearDownClass()  # type: ignore[reportAttributeAccessIssue]
 
 
 class ResourceFixturesMixin(EnableGlobalCacheMixin):
@@ -56,13 +56,13 @@ class ResourceFixturesMixin(EnableGlobalCacheMixin):
     @classmethod
     def setUpTestData(cls):
         # Calling super just in case some extra data gets added
-        super().setUpTestData()
+        super().setUpTestData()  # type: ignore[reportAttributeAccessIssue]
         # Setting up the loaddata command in code to help with scanning for fixtures
         load_data = LoadDataCommand()
-        load_data.app_label = None
+        load_data.app_label = None  # type: ignore[reportAttributeAccessIssue]
         load_data.using = "default"
         load_data.compression_formats = {
-            None: (open, 'rb'),
+            None: (open, 'rb'),  # type: ignore[reportAttributeAccessIssue]
         }
         load_data.serialization_formats = serializers.get_public_serializer_formats()
         load_data.verbosity = 0
@@ -80,10 +80,11 @@ class ResourceFixturesMixin(EnableGlobalCacheMixin):
                 try:
                     for file_path, directory, file_name in load_data.find_fixtures(resource_fixture_label):
                         _, ser_fmt, cmp_fmt = load_data.parse_name(os.path.basename(file_path))
-                        open_method, mode = load_data.compression_formats[cmp_fmt]
+                        open_method, mode = load_data.compression_formats[cmp_fmt]  # type: ignore[reportArgumentType]
                         fixture = open_method(file_path, mode)
                         objects = serializers.deserialize(
-                            ser_fmt, fixture, using=load_data.using, ignorenonexistent=False,
+                            ser_fmt, fixture,  # type: ignore[reportArgumentType]
+                            using=load_data.using, ignorenonexistent=False,
                             handle_forward_references=True,
                         )
                         for obj in objects:

@@ -3,22 +3,20 @@ import pytest
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
 from datagrowth.registry import Registry, Tag
-from datagrowth.resources.protocols import ResourceStorageProtocol
+from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.signatures import Signature
 
-from registry.mock_resource import MockResource
 
-
-class MockStorage(ResourceStorageProtocol[MockResource]):
+class MockStorage:
     config = ConfigurationProperty(namespace="mock_storage")
 
-    def __init__(self, config: ConfigurationType | dict) -> None:
+    def __init__(self, config: ConfigurationType) -> None:
         self.config = config
 
-    def save(self, resource: MockResource) -> Signature:
+    def save(self, resource: ResourceProtocol) -> Signature:
         return Signature(uri="mock://")
 
-    def load(self, signature: Signature) -> MockResource | None:
+    def load(self, signature: Signature) -> ResourceProtocol | None:
         return None
 
     def read(self, signature: Signature, filename: str) -> bytes | str:

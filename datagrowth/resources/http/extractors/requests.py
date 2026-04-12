@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from time import sleep
-from typing import Any, cast
+from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import requests
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
+from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.resources.pydantic import Result
 from datagrowth.resources.pydantic import Resource
 from datagrowth.resources.http.signature import HttpMode, HttpSignature
@@ -18,8 +19,8 @@ class RequestsExtractor:
     tag = Tag(category="extractor", value="requests")
     config = ConfigurationProperty(namespace="http_resource")
 
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
-        self.config = cast(ConfigurationType, config)
+    def __init__(self, config: ConfigurationType) -> None:
+        self.config = config
         self._session: requests.Session = requests.Session()
 
     def set_session(self, session: requests.Session) -> None:
@@ -76,7 +77,7 @@ class RequestsExtractor:
             elif signature.mode == HttpMode.DATA:
                 request_kwargs["data"] = signature.get_data()
             elif signature.mode == HttpMode.MULTIPART:
-                multipart_body = signature.data or {}
+                multipart_body = signature.data if isinstance(signature.data, dict) else {}
                 request_kwargs["data"] = multipart_body.get("data")
                 request_kwargs["files"] = multipart_body.get("files")
             else:
@@ -96,9 +97,10 @@ class RequestsExtractor:
             ),
         )
 
-    def extract(self, signature: HttpSignature) -> Resource[HttpSignature]:
+    def extract(self, signature: HttpSignature) -> ResourceProtocol:
         request = self._to_request(signature)
         prepared_request = self._session.prepare_request(request)
+        resource = self._error_resource(signature, 0, "No extraction attempted")
 
         for backoff_delay in [0] + list(self.config.backoff_delays):
             sleep(backoff_delay)

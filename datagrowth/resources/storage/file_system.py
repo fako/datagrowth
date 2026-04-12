@@ -1,10 +1,12 @@
 import os
-from typing import Any
 from pathlib import Path
+
+from pydantic import BaseModel
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
 from datagrowth.signatures import Signature
+from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.resources.pydantic import Resource
 
 
@@ -13,7 +15,7 @@ class FileSystemStorage:
     tag = Tag(category="storage", value="file_system")
     config = ConfigurationProperty(namespace="storage")
 
-    def __init__(self, config: ConfigurationType | dict[str, Any]) -> None:
+    def __init__(self, config: ConfigurationType) -> None:
         self.config = config
 
     def _resolve_directory(self, key: str) -> Path:
@@ -58,7 +60,7 @@ class FileSystemStorage:
             base_dir = base_dir / signature.type
         return base_dir / str(signature.hash)
 
-    def save(self, resource: Resource[Signature]) -> Signature:
+    def save(self, resource: ResourceProtocol) -> Signature:
         if not self.config.allow_save:
             raise PermissionError("Saving resources is disabled by storage config (allow_save=false).")
         if resource.signature is None:
@@ -67,10 +69,11 @@ class FileSystemStorage:
         directory = self._get_storage_directory(resource.signature)
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / "data.json"
+        assert isinstance(resource, BaseModel), "FileSystemStorage only supports Pydantic-based resources."
         path.write_text(resource.model_dump_json(indent=4), encoding="utf-8")
         return resource.signature
 
-    def load(self, signature: Signature) -> Resource[Signature] | None:
+    def load(self, signature: Signature) -> ResourceProtocol | None:
         if not self.config.allow_load:
             raise PermissionError("Loading resources is disabled by storage config (allow_load=false).")
 

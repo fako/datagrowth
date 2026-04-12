@@ -7,7 +7,7 @@ from datagrowth.configuration import ConfigurationProperty, ConfigurationType
 
 class ProcessorProtocol(Protocol):
 
-    config: ConfigurationProperty
+    config: ConfigurationProperty | ConfigurationType
 
     @staticmethod
     def get_processor_components(processor_definition: str) -> tuple[str, str]:

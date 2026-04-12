@@ -27,7 +27,9 @@ def load_session():
             if not isinstance(session_injection, str):
                 return func(config, session=session_injection, *args, **kwargs)
             session_provider = Processor.get_processor_class(session_injection)
-            session = session_provider.get_session(config)
+            assert session_provider is not None, f"Session provider '{session_injection}' not found."
+            get_session = getattr(session_provider, "get_session")
+            session = get_session(config)
             return func(config, session=session, *args, **kwargs)
         return session_func
     return wrap

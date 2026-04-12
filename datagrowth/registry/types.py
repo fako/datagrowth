@@ -7,7 +7,12 @@ from pydantic import BaseModel
 
 from datagrowth.protocols import ProcessorProtocol
 from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceProtocol, ResourceStorageProtocol
-from datagrowth.configuration import ConfigurationType, create_config
+from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
+
+
+def _get_config_namespace(config: ConfigurationProperty | ConfigurationType) -> list[str]:
+    """Extract the namespace list from either a ConfigurationProperty descriptor or a ConfigurationType instance."""
+    return config._namespace
 
 
 def _import_class(path: str) -> type:
@@ -190,7 +195,7 @@ class Registry:
         if tag.category != "processor":
             raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
         self.register_class(tag, processor)
-        namespace = processor.config._namespace
+        namespace = _get_config_namespace(processor.config)
         config = self._normalize_config(namespace, config)
         if config:
             self.configurations[tag] = config
@@ -210,7 +215,7 @@ class Registry:
         if tag.category != "processor":
             raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
         processor_cls = cast(type[ProcessorProtocol], _import_class(self.classes[tag]))
-        namespace = processor_cls.config._namespace
+        namespace = _get_config_namespace(processor_cls.config)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
             merged = create_config(namespace, {})
@@ -276,7 +281,7 @@ class Registry:
         if tag.category != "storage":
             raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
         self.register_class(tag, storage)
-        namespace = storage.config._namespace
+        namespace = _get_config_namespace(storage.config)
         config = self._normalize_config(namespace, config)
         if config:
             self.configurations[tag] = config
@@ -295,8 +300,8 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "storage":
             raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
-        storage_cls = cast(type[ResourceStorageProtocol[Any]], _import_class(self.classes[tag]))
-        namespace = storage_cls.config._namespace
+        storage_cls = cast(type[ResourceStorageProtocol], _import_class(self.classes[tag]))
+        namespace = _get_config_namespace(storage_cls.config)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
             merged = create_config(namespace, {})
@@ -314,7 +319,7 @@ class Registry:
         if tag.category != "extractor":
             raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
         self.register_class(tag, extractor)
-        namespace = extractor.config._namespace
+        namespace = _get_config_namespace(extractor.config)
         config = self._normalize_config(namespace, config)
         if config:
             self.configurations[tag] = config
@@ -329,13 +334,13 @@ class Registry:
         self.configurations.pop(tag, None)
 
     def get_extractor(self, tag: str | Tag,
-                      overrides: ConfigurationType | dict | None = None) -> ResourceExtractorProtocol[Any, Any]:
+                      overrides: ConfigurationType | dict | None = None) -> ResourceExtractorProtocol[Any]:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
         if tag.category != "extractor":
             raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
-        extractor_cls = cast(type[ResourceExtractorProtocol[Any, Any]], _import_class(self.classes[tag]))
-        namespace = extractor_cls.config._namespace
+        extractor_cls = cast(type[ResourceExtractorProtocol[Any]], _import_class(self.classes[tag]))
+        namespace = _get_config_namespace(extractor_cls.config)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
             merged = create_config(namespace, {})
