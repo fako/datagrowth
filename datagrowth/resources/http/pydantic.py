@@ -8,8 +8,8 @@ from pydantic import Field, field_validator, HttpUrl
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.registry import Tag
-from datagrowth.signatures import InputsValidator
-from datagrowth.resources.http.signature import HttpAuth, HttpSignature, HttpMode, HttpMethod
+from datagrowth.signatures import DataBody, DataMode, DataPart, InputsValidator
+from datagrowth.resources.http.signature import HttpAuth, HttpSignature, HttpMethod
 from datagrowth.resources.pydantic import Resource
 from datagrowth.utils import is_json_mimetype
 
@@ -35,7 +35,7 @@ class HttpResource(Resource[HttpSignature]):
     PARAMETERS: ClassVar[dict[str, str] | None] = {}
     DATA: ClassVar[dict[str, Any] | None] = {}
     HEADERS: ClassVar[dict[str, str]] = {}
-    MODE: ClassVar[HttpMode] = HttpMode.NONE
+    MODE: ClassVar[DataMode] = DataMode.NONE
 
     #####################
     # Http implementation
@@ -57,11 +57,9 @@ class HttpResource(Resource[HttpSignature]):
             return {}
         return dict(self.PARAMETERS)
 
-    def data(self, **kwargs: Any) -> dict[str, Any]:
+    def data(self, **kwargs: Any) -> dict[str, Any] | list[Any] | DataBody | list[DataPart]:
         """
-        Returns the dictionary that will be used as HTTP body for the request the resource will make.
-        By default this is the dictionary from the ``DATA`` attribute
-        updated with the kwargs from the input from the ``send`` method.
+        Returns the body payload for the HTTP request. By default this merges the ``DATA`` class attribute with kwargs.
         """
         if self.DATA is None:  # some HttpResources like most GET centered resources disallow dynamic DATA
             return {}
@@ -266,7 +264,7 @@ class URLResourceValidator(InputsValidator):
 
 class URLResource(HttpResource):
 
-    MODE = HttpMode.NONE
+    MODE = DataMode.NONE
 
     def validate_inputs(self, *args: Any, **kwargs: Any) -> URLResourceValidator:
         return URLResourceValidator(args=args, kwargs=kwargs)

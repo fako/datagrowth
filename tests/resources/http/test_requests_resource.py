@@ -17,7 +17,8 @@ from datagrowth.registry import Tag
 from datagrowth.exceptions import DGHttpError40X, DGHttpError50X
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
 from datagrowth.resources.http.pydantic import HttpResource
-from datagrowth.resources.http.signature import HttpAuth, HttpMode, HttpSignature
+from datagrowth.signatures import DataBody, DataMode
+from datagrowth.resources.http.signature import HttpAuth, HttpSignature
 from datagrowth.resources.pydantic import Result
 
 
@@ -32,7 +33,7 @@ class HttpResourceMock(HttpResource):
     HEADERS: ClassVar[dict[str, str]] = {
         "Accept": "application/json"
     }
-    MODE: ClassVar[HttpMode] = HttpMode.JSON
+    MODE: ClassVar[DataMode] = DataMode.JSON
 
 
 class HttpResourceAuthMock(HttpResourceMock):
@@ -51,20 +52,20 @@ class HttpResourceDataMock(HttpResource):
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_data_mock")
     STORAGE: ClassVar[Tag | None] = Tag(category="storage", value="file_system")
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
-    MODE: ClassVar[HttpMode] = HttpMode.DATA
+    MODE: ClassVar[DataMode] = DataMode.DATA
 
-    def data(self, **kwargs: Any) -> dict[str, str]:
-        return {"payload": f"bin://file://{kwargs['file']}"}
+    def data(self, **kwargs: Any) -> DataBody:
+        return DataBody(content=f"file://{kwargs['file']}")
 
 
 class HttpResourceDataNoStorageMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_data_no_storage_mock")
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
-    MODE: ClassVar[HttpMode] = HttpMode.DATA
+    MODE: ClassVar[DataMode] = DataMode.DATA
 
-    def data(self, **kwargs: Any) -> dict[str, str]:
-        return {"payload": f"bin://{base64.b64encode(b'payload-bytes').decode('ascii')}"}
+    def data(self, **kwargs: Any) -> DataBody:
+        return DataBody(content=f"{base64.b64encode(b'payload-bytes').decode('ascii')}")
 
 
 def make_response(status_code: int, body: bytes | str, headers: dict[str, str] | None = None) -> Response:
@@ -159,7 +160,7 @@ def test_prepare_inputs_creates_http_signature_with_template_data(resource: Http
     assert isinstance(signature, HttpSignature)
     assert signature.url == "https://example.com/books/python?source=tests&page=2"
     assert signature.uri == "example.com/books/python?page=2&source=tests"
-    assert signature.mode == HttpMode.JSON
+    assert signature.mode == DataMode.JSON
     assert signature.data == {}
     assert signature.headers == {"Accept": "application/json"}
 
@@ -247,10 +248,12 @@ def test_resource_extract_post_sends_json_data(resource: HttpResourceMock, mocke
     prepared_request = mocked_session.send.call_args.args[0]
     assert prepared_request.method == "POST"
     assert prepared_request.url == "https://example.com/books/python?source=tests&page=1"
-    assert json.loads(prepared_request.body.decode("utf-8")) == {"query": "django"}
+    body = prepared_request.body
+    body_str = body if isinstance(body, str) else body.decode("utf-8")
+    assert json.loads(body_str) == {"query": "django"}
 
 
-def test_resource_extract_data_mode_requires_open_signature(mocked_session: Mock) -> None:
+def test_resource_extract_data_mode_sends_resolved_base64_payload(mocked_session: Mock) -> None:
     mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
     resource = HttpResourceDataNoStorageMock()
     assert isinstance(resource.extractor, RequestsExtractor)
@@ -263,8 +266,9 @@ def test_resource_extract_data_mode_requires_open_signature(mocked_session: Mock
         "timeout": 30,
         "user_agent": "DataGrowth (test)",
     })
-    with pytest.raises(RuntimeError, match="requires a signature to be open"):
-        resource.extract("post")
+    _ = resource.extract("post")
+    prepared_request = mocked_session.send.call_args.args[0]
+    assert prepared_request.body == b"payload-bytes"
 
 
 def test_resource_extract_data_mode_uses_hydrated_signature_data(data_resource: HttpResourceDataMock,

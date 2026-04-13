@@ -7,7 +7,8 @@ from pydantic import Field, model_validator, HttpUrl, StrictBytes
 from datagrowth.registry import Tag
 from datagrowth.resources.protocols import ResourceStorageProtocol
 from datagrowth.resources.http.pydantic import MicroServiceResource, HttpResourceInputsValidator
-from datagrowth.resources.http.signature import HttpMode, HttpSignature
+from datagrowth.signatures import DataBody, DataMode
+from datagrowth.resources.http.signature import HttpSignature
 
 
 class TikaInputsValidator(HttpResourceInputsValidator):
@@ -35,7 +36,7 @@ class HttpTikaResource(MicroServiceResource):
 
     NAMESPACE = Tag(category="namespace", value="tika_resource")
     MICRO_SERVICE = "tika"
-    MODE = HttpMode.DATA
+    MODE = DataMode.DATA
     PARAMETERS = {
         "mode": "{mode}"
     }
@@ -63,32 +64,33 @@ class HttpTikaResource(MicroServiceResource):
             })
         return headers
 
-    def data(self, **kwargs: Any) -> dict[str, str]:
-        if document := kwargs.get("document"):
+    def data(self, **kwargs: Any) -> DataBody:
+        if (document := kwargs.get("document")) is not None:
             if isinstance(document, bytes):
                 if self.storage is None:
                     raise RuntimeError("Can't process bytes inside HttpTikaResource when there is no storage.")
                 filename = f"{hashlib.sha256(document).hexdigest()}.bin"
                 tmp_path = self.storage.write_tmp(filename, document)
-                return {"payload": f"bin://file://{tmp_path}"}
+                return DataBody(content=f"file://{tmp_path}")
             raise TypeError("Expected document to be bytes when document input is used.")
         if file_path := kwargs.get("file"):
             if file_path.is_absolute() and file_path.is_relative_to(Path.cwd()):
                 file_path = file_path.relative_to(Path.cwd())
-            return {"payload": f"bin://file://{file_path}"}
+            return DataBody(content=f"file://{file_path}")
         if url := kwargs.get("url"):
-            return {"payload": f"bin://{url}"}
-        return {}
+            return DataBody(content=str(url))
+        raise RuntimeError("Unreachable: Tika inputs require document, file, or url.")
 
     def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
         signature = super().prepare_inputs(*args, **kwargs)
         updated_kwargs = dict(signature.kwargs)
-        payload = signature.data.get("payload", "")
-        if isinstance(payload, str) and payload.startswith("bin://file://"):
+        assert isinstance(signature.data, DataBody), "Tika DATA mode always produces a DataBody."
+        loc = signature.data.content
+        if loc.startswith("file://"):
             if updated_kwargs.get("document", None) is not None:
-                updated_kwargs["document"] = payload
+                updated_kwargs["document"] = loc
             if updated_kwargs.get("file", None) is not None:
-                updated_kwargs["file"] = payload.removeprefix("bin://file://")
+                updated_kwargs["file"] = loc.removeprefix("file://")
         return signature.model_copy(update={"kwargs": updated_kwargs})
 
     def handle_errors(self) -> None:

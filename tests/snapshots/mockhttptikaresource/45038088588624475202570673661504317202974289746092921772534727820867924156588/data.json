@@ -7,8 +7,12 @@
     "config": {},
     "signature": {
         "uri": "localhost:9998/rmeta/text?mode=semantic",
-        "data": {},
-        "hash": 98631498713764932451970162025236260496152591531108307026075966174262589078592,
+        "data": {
+            "content": "file:///tmp/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.bin",
+            "encoding": "utf-8"
+        },
+        "mode": "data",
+        "hash": 45038088588624475202570673661504317202974289746092921772534727820867924156588,
         "type": "mockhttptikaresource",
         "args": [
             "put"
@@ -18,7 +22,7 @@
             "host": "localhost:9998",
             "path": "/rmeta/text",
             "mode": "semantic",
-            "document": "",
+            "document": "file:///tmp/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.bin",
             "file": null,
             "url": null
         },
@@ -26,8 +30,7 @@
         "url": "http://localhost:9998/rmeta/text?mode=semantic",
         "headers": {
             "X-Tika-PDFextractMarkedContent": "true"
-        },
-        "mode": "data"
+        }
     },
     "result": {
         "content_type": "application/json",

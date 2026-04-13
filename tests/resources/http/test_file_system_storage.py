@@ -12,7 +12,7 @@ from requests.structures import CaseInsensitiveDict
 from datagrowth.registry import Tag
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
 from datagrowth.resources.http.pydantic import HttpResource
-from datagrowth.resources.http.signature import HttpMode
+from datagrowth.signatures import DataMode
 from datagrowth.resources.storage.file_system import FileSystemStorage
 
 
@@ -29,7 +29,7 @@ class HttpResourceMock(HttpResource):
     HEADERS: ClassVar[dict[str, str]] = {
         "Accept": "application/json"
     }
-    MODE: ClassVar[HttpMode] = HttpMode.JSON
+    MODE: ClassVar[DataMode] = DataMode.JSON
 
     def auth_headers(self) -> dict[str, str]:
         return {"Authorization": "Bearer super-secret-token"}

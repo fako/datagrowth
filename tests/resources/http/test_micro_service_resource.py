@@ -9,7 +9,8 @@ import requests
 from datagrowth.configuration import ConfigurationType
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
 from datagrowth.resources.http.pydantic import MicroServiceResource
-from datagrowth.resources.http.signature import HttpMode, HttpSignature
+from datagrowth.signatures import DataMode
+from datagrowth.resources.http.signature import HttpSignature
 
 
 class MockMicroTikaResource(MicroServiceResource):
@@ -18,7 +19,7 @@ class MockMicroTikaResource(MicroServiceResource):
     HEADERS: ClassVar[dict[str, str]] = {
         "Accept": "application/json",
     }
-    MODE: ClassVar[HttpMode] = HttpMode.JSON
+    MODE: ClassVar[DataMode] = DataMode.JSON
 
 
 class MicroServiceUnknownName(MicroServiceResource):
@@ -79,7 +80,7 @@ def test_prepare_inputs_creates_http_signature_with_connection_template_data(res
     assert isinstance(signature, HttpSignature)
     assert signature.url == "http://localhost:9998/rmeta/text"
     assert signature.uri == "localhost:9998/rmeta/text"
-    assert signature.mode == HttpMode.JSON
+    assert signature.mode == DataMode.JSON
     assert signature.data == {}
     assert signature.headers == {"Accept": "application/json"}
 

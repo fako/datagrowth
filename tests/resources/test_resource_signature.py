@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from datagrowth.registry import Tag
-from datagrowth.signatures import Signature
+from datagrowth.signatures import DataBody, DataMode, DataPart, Signature
 from datagrowth.resources.pydantic import Resource
 from copy import deepcopy
 from uuid import uuid4
@@ -64,29 +64,97 @@ def test_signature_respects_explicit_hash() -> None:
     assert s1.hash == explicit_hash
 
 
-def test_signature_hash_bin_payload() -> None:
-    s1 = Signature(uri="example://resource", data={"payload": "bin://hello-world"})
-    s2 = Signature(uri="example://resource", data={"payload": "bin://hello-world"})
-    s3 = Signature(uri="example://resource", data={"payload": "bin://goodbye-world"})
+def test_signature_hash_data_body() -> None:
+    s1 = Signature(uri="example://resource", data=DataBody(content="file:///tmp/hello"), mode=DataMode.DATA)
+    s2 = Signature(uri="example://resource", data={"content": "file:///tmp/hello"}, mode=DataMode.DATA)
+    s3 = Signature(uri="example://resource", data=DataBody(content="file:///tmp/goodbye"), mode=DataMode.DATA)
     assert s1.hash == s2.hash
     assert s1.hash != s3.hash
 
 
-def test_signature_get_data_requires_open_for_bin_data() -> None:
-    signature = Signature(uri="example://resource", data={"payload": "bin://cGRmLWJ5dGVz"})
-    with pytest.raises(RuntimeError, match="requires a signature to be open"):
+def test_signature_hash_includes_mode() -> None:
+    s_none = Signature(uri="example://resource", data={"a": 1})
+    s_json = Signature(uri="example://resource", data={"a": 1}, mode=DataMode.JSON)
+    assert s_none.hash != s_json.hash
+
+
+def test_signature_get_data_requires_open_for_data_mode() -> None:
+    signature = Signature(uri="example://resource", data=DataBody(content="cGRmLWJ5dGVz"), mode=DataMode.DATA)
+    with pytest.raises(RuntimeError, match="requires the signature to be opened"):
         signature.get_data()
 
 
-def test_signature_set_data_and_close_lifecycle_for_bin_data() -> None:
-    signature = Signature(uri="example://resource", data={"payload": "bin://cGRmLWJ5dGVz"})
+def test_signature_get_data_returns_json_string_for_json_mode() -> None:
+    signature = Signature(uri="example://resource", data={"a": 1, "b": [2, 3]}, mode=DataMode.JSON)
+    result = signature.get_data()
+    assert isinstance(result, str)
+    import json
+    assert json.loads(result) == {"a": 1, "b": [2, 3]}
+
+
+def test_signature_get_data_returns_dict_for_none_mode() -> None:
+    signature = Signature(uri="example://resource", data={"a": 1})
+    assert signature.get_data() == {"a": 1}
+
+
+def test_signature_set_data_and_close_lifecycle_for_data_mode() -> None:
+    signature = Signature(uri="example://resource", data=DataBody(content="cGRmLWJ5dGVz"), mode=DataMode.DATA)
 
     signature.set_data_bytes(b"pdf-bytes")
     assert signature.get_data() == b"pdf-bytes"
 
     signature.close()
-    with pytest.raises(RuntimeError, match="requires a signature to be open"):
+    with pytest.raises(RuntimeError, match="requires the signature to be opened"):
         signature.get_data()
+
+
+def test_signature_multipart_lifecycle() -> None:
+    """
+    WARNING: the MULTIPART mode is experimental and test coverage is flimsy.
+    """
+    parts = [
+        DataPart(name="title", content="doc"),
+        DataPart(name="file", content="file:///tmp/x.bin", content_type="application/octet-stream"),
+    ]
+    signature = Signature(uri="example://resource", data=parts, mode=DataMode.MULTIPART)
+
+    resolved = [
+        {"name": "title", "content": "doc"},
+        {"name": "file", "content": b"resolved", "content_type": "application/octet-stream"},
+    ]
+    signature.set_data_parts(resolved)
+    assert signature.get_data() == resolved
+
+    signature.close()
+    with pytest.raises(RuntimeError, match="requires the signature to be opened"):
+        signature.get_data()
+
+
+def test_signature_validation_data_mode_requires_data_body() -> None:
+    with pytest.raises(ValidationError):
+        Signature(uri="example://resource", data={"other": "value"}, mode=DataMode.DATA)
+
+
+def test_signature_validation_multipart_requires_list() -> None:
+    with pytest.raises(ValidationError, match="list"):
+        Signature(uri="example://resource", data={"not": "a list"}, mode=DataMode.MULTIPART)
+
+
+def test_signature_validation_multipart_requires_name_and_content() -> None:
+    with pytest.raises(ValidationError, match="name"):
+        Signature(uri="example://resource", data=[{"content": "x"}], mode=DataMode.MULTIPART)
+    with pytest.raises(ValidationError, match="content"):
+        Signature(uri="example://resource", data=[{"name": "x"}], mode=DataMode.MULTIPART)
+
+
+def test_signature_rejects_bytes_in_data() -> None:
+    with pytest.raises(ValidationError, match="bytes"):
+        Signature(uri="example://resource", data={"nested": [b"x"]}, mode=DataMode.JSON)
+
+
+def test_signature_json_mode_accepts_list_data() -> None:
+    signature = Signature(uri="example://resource", data=[{"a": 1}, {"b": 2}], mode=DataMode.JSON)
+    assert signature.data == [{"a": 1}, {"b": 2}]
 
 
 def test_signature_type_allows_filesystem_safe_values() -> None:

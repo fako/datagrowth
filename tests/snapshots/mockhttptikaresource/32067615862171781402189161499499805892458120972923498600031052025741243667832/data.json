@@ -8,9 +8,11 @@
     "signature": {
         "uri": "localhost:9998/rmeta/text?mode=semantic",
         "data": {
-            "payload": "bin://https://just-ask.data-scope.com/accounts/login/"
+            "content": "https://just-ask.data-scope.com/accounts/login/",
+            "encoding": "utf-8"
         },
-        "hash": 69090039950879431553191782779761229244241995481745106736592925163306461652941,
+        "mode": "data",
+        "hash": 32067615862171781402189161499499805892458120972923498600031052025741243667832,
         "type": "mockhttptikaresource",
         "args": [
             "put"
@@ -30,8 +32,7 @@
             "X-Tika-PDFextractMarkedContent": "true",
             "fetcherName": "http",
             "fetchKey": "https://just-ask.data-scope.com/accounts/login/"
-        },
-        "mode": "data"
+        }
     },
     "result": {
         "content_type": "application/json",

@@ -11,7 +11,8 @@ from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
 from datagrowth.resources.protocols import ResourceProtocol
 from datagrowth.resources.pydantic import Result
 from datagrowth.resources.pydantic import Resource
-from datagrowth.resources.http.signature import HttpMode, HttpSignature
+from datagrowth.signatures import DataMode
+from datagrowth.resources.http.signature import HttpSignature
 
 
 class RequestsExtractor:
@@ -71,14 +72,25 @@ class RequestsExtractor:
             "url": request_url,
             "headers": dict(headers),
         }
-        if signature.method.lower() != "get" and signature.mode != HttpMode.NONE:
-            if signature.mode == HttpMode.JSON:
-                request_kwargs["json"] = signature.data
-            elif signature.mode == HttpMode.DATA:
+        if signature.method.lower() != "get" and signature.mode != DataMode.NONE:
+            if signature.mode == DataMode.JSON:
                 request_kwargs["data"] = signature.get_data()
-            elif signature.mode == HttpMode.MULTIPART:
-                request_kwargs["data"] = signature.data.get("data")
-                request_kwargs["files"] = signature.data.get("files")
+                request_kwargs["headers"]["Content-Type"] = "application/json; charset=utf-8"
+            elif signature.mode == DataMode.DATA:
+                request_kwargs["data"] = signature.get_data()
+            elif signature.mode == DataMode.MULTIPART:
+                parts: list[dict[str, Any]] = signature.get_data()  # type: ignore[assignment]
+                form_data: dict[str, str] = {}
+                form_files: dict[str, tuple[str, bytes, str]] = {}
+                for part in parts:
+                    if "content_type" in part:
+                        form_files[part["name"]] = (
+                            part.get("filename", part["name"]), part["content"], part["content_type"]
+                        )
+                    else:
+                        form_data[part["name"]] = part["content"]
+                request_kwargs["data"] = form_data or None
+                request_kwargs["files"] = form_files or None
             else:
                 raise ValueError(f"Unsupported request mode: {signature.mode}")
         return requests.Request(**request_kwargs)

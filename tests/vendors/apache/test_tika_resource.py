@@ -6,7 +6,8 @@ from pathlib import Path
 import pytest
 
 from datagrowth.registry import Tag
-from datagrowth.resources.http.signature import HttpAuth, HttpMode
+from datagrowth.signatures import DataBody, DataMode
+from datagrowth.resources.http.signature import HttpAuth
 from datagrowth.vendors.apache.tika.resources import HttpTikaResource
 
 
@@ -58,8 +59,8 @@ def test_validate_inputs_rejects_document_string(resource: MockHttpTikaResource)
 
 def test_prepare_inputs_uses_fetch_headers_for_url(resource: MockHttpTikaResource) -> None:
     signature = resource.prepare_inputs("put", mode="semantic", url="https://example.com/input.pdf")
-    assert signature.mode == HttpMode.DATA
-    assert signature.data == {"payload": "bin://https://example.com/input.pdf"}
+    assert signature.mode == DataMode.DATA
+    assert signature.data == DataBody(content="https://example.com/input.pdf")
     assert signature.headers["X-Tika-PDFextractMarkedContent"] == "true"
     assert signature.headers["fetcherName"] == "http"
     assert signature.headers["fetchKey"] == "https://example.com/input.pdf"
@@ -67,16 +68,17 @@ def test_prepare_inputs_uses_fetch_headers_for_url(resource: MockHttpTikaResourc
 
 def test_prepare_inputs_sets_bytes_payload_for_document(resource: MockHttpTikaResource) -> None:
     signature = resource.prepare_inputs("put", mode="structure", document=b"pdf-bytes")
-    assert signature.mode == HttpMode.DATA
-    payload = signature.data.get("payload")
-    assert isinstance(payload, str)
-    assert payload.startswith("bin://file://")
-    tmp_path = Path(payload.removeprefix("bin://file://"))
+    assert signature.mode == DataMode.DATA
+    assert isinstance(signature.data, DataBody)
+    loc = signature.data.content
+    assert isinstance(loc, str)
+    assert loc.startswith("file://")
+    tmp_path = Path(loc.removeprefix("file://"))
     assert resource.storage is not None
     expected_tmp = Path(*resource.storage.config.directories["tmp"])
     assert tmp_path.parent == Path(expected_tmp)
     assert tmp_path.read_bytes() == b"pdf-bytes"
-    assert signature.kwargs["document"] == payload
+    assert signature.kwargs["document"] == loc
     assert "fetcherName" not in signature.headers
     assert signature.headers["X-Tika-PDFextractMarkedContent"] == "false"
 
@@ -85,8 +87,8 @@ def test_prepare_inputs_reads_bytes_payload_from_file(resource: MockHttpTikaReso
     file_path = tmp_path / "document.pdf"
     file_path.write_bytes(b"file-bytes")
     signature = resource.prepare_inputs("put", mode="structure", file=file_path)
-    assert signature.mode == HttpMode.DATA
-    assert signature.data == {"payload": f"bin://file://{file_path}"}
+    assert signature.mode == DataMode.DATA
+    assert signature.data == DataBody(content=f"file://{file_path}")
     assert signature.kwargs["file"] == str(file_path)
 
 
@@ -125,8 +127,9 @@ def test_extract_file_input(resource: MockHttpTikaResource) -> None:
 
     assert extracted.signature is not None
     normalized_file = str(extracted.signature.kwargs["file"]).removeprefix("file://")
-    payload = extracted.signature.data.get("payload", "")
-    normalized_data = str(payload).removeprefix("bin://file://")
+    assert isinstance(extracted.signature.data, DataBody)
+    loc = extracted.signature.data.content
+    normalized_data = str(loc).removeprefix("file://")
     assert normalized_file.endswith("vendors/apache/files/test.pdf")
     assert normalized_data.endswith("vendors/apache/files/test.pdf")
     assert extracted.result is not None

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, fie
 
 from datagrowth.configuration import ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
-from datagrowth.signatures import Signature, InputsValidator
+from datagrowth.signatures import DataBody, DataMode, DataPart, Signature, InputsValidator
 from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol
 
 
@@ -108,21 +108,35 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             self.signature.close()
         return self
 
+    @staticmethod
+    def _resolve_locator(locator: str, encoding: str = "utf-8") -> bytes:
+        if locator.startswith("file://"):
+            return Path(locator.removeprefix("file://")).read_bytes()
+        if locator.startswith("http://") or locator.startswith("https://"):
+            return locator.encode(encoding)
+        return base64.b64decode(locator.encode("ascii"))
+
     def open_signature(self, signature: ResourceSignatureType) -> None:
-        payload = signature.data.get("payload")
-        if not isinstance(payload, str) or not payload.startswith("bin://"):
-            return
-        if self.storage is None:
-            return
-        raw = payload.removeprefix("bin://")
-        if raw.startswith("file://"):
-            file_path = Path(raw.removeprefix("file://"))
-            data_bytes = file_path.read_bytes()
-        elif raw.startswith("http://") or raw.startswith("https://"):
-            data_bytes = raw.encode("utf-8")
-        else:
-            data_bytes = base64.b64decode(raw.encode("ascii"))
-        signature.set_data_bytes(data_bytes)
+        if signature.mode == DataMode.DATA:
+            data = signature.data
+            if not isinstance(data, DataBody):
+                raise TypeError("DATA mode signature.data must be a DataBody.")
+            signature.set_data_bytes(self._resolve_locator(data.content, data.encoding or "utf-8"))
+        elif signature.mode == DataMode.MULTIPART:
+            raw_parts = signature.data
+            if not isinstance(raw_parts, list):
+                raise TypeError("MULTIPART mode signature.data must be a list.")
+            resolved_parts: list[dict[str, Any]] = []
+            for part in raw_parts:
+                if not isinstance(part, DataPart):
+                    raise TypeError("Each MULTIPART part must be a DataPart.")
+                if part.content_type is not None:
+                    resolved = part.model_dump()
+                    resolved["content"] = self._resolve_locator(part.content, part.encoding or "utf-8")
+                    resolved_parts.append(resolved)
+                else:
+                    resolved_parts.append(part.model_dump())
+            signature.set_data_parts(resolved_parts)
 
     def next(self) -> Self | None:
         return None
