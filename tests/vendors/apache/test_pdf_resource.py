@@ -125,6 +125,7 @@ def test_extract_file_input(resource: MockPdfContentResource) -> None:
     if resource.storage is not None and resource.storage.config.snapshots:
         pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
 
+    assert isinstance(extracted, MockPdfContentResource)
     assert extracted.signature is not None
     normalized_file = str(extracted.signature.kwargs["file"]).removeprefix("file://")
     assert isinstance(extracted.signature.data, DataBody)
@@ -147,6 +148,7 @@ def test_extract_document_input(resource: MockPdfContentResource) -> None:
     if resource.storage is not None and resource.storage.config.snapshots:
         pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
 
+    assert isinstance(extracted, MockPdfContentResource)
     assert extracted.signature is not None
     assert extracted.result is not None
     assert extracted.result.created_at <= datetime.now(timezone.utc)
@@ -181,6 +183,7 @@ def test_extract_url_input(resource: MockPdfContentResource) -> None:
     if resource.storage is not None and resource.storage.config.snapshots:
         pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
 
+    assert isinstance(extracted, MockPdfContentResource)
     assert extracted.signature is not None
     assert extracted.result is not None
     assert extracted.result.created_at <= datetime.now(timezone.utc)
@@ -195,6 +198,7 @@ def test_extract_none_document_triggers_zero_byte_exception(resource: MockPdfCon
     if resource.storage is not None and resource.storage.config.snapshots:
         pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
 
+    assert isinstance(extracted, MockPdfContentResource)
     assert extracted.signature is not None
     assert extracted.result is not None
     assert extracted.status == 1

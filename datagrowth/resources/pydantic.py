@@ -88,7 +88,14 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
                 storage_signature = Signature(**signature.model_dump(mode="json"))
                 loaded_resource = self.storage.load(storage_signature)
                 if loaded_resource is not None:
-                    return cast(Self, loaded_resource)
+                    if isinstance(loaded_resource, self.__class__):
+                        return cast(Self, loaded_resource)
+                    if isinstance(loaded_resource, Resource):
+                        # Storage can deserialize to a generic Resource; here we cast back to the active subclass.
+                        loaded_data = loaded_resource.model_dump(mode="python")
+                        loaded_data["signature"] = signature
+                        subclass_resource = self.__class__.model_validate(loaded_data)
+                        return cast(Self, subclass_resource)
 
         # Validate that extraction is actually allowed/possible
         if self.extractor is None:
