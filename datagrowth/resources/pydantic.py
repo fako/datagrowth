@@ -76,7 +76,10 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         # Validate the inputs to arrive at a Signature used for extraction
-        signature = self.prepare_extract(*args, **kwargs)
+        if self.signature is None or args or kwargs:
+            signature = self.prepare_extract(*args, **kwargs)
+        else:
+            signature = self.signature
 
         # Try to look up the Signature in storage
         if self.storage is not None:

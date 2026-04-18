@@ -135,6 +135,9 @@ class Signature(BaseModel):
         self.set_data_bytes(None)
         self.set_data_parts(None)
 
+    def is_open(self) -> bool:
+        return bool(self._data_bytes) or bool(self._data_parts)
+
     #####################
     # Pydantic plumbing
     #####################

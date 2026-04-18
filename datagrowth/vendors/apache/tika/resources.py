@@ -1,4 +1,4 @@
-from typing import Any, Literal, ClassVar, Type
+from typing import Any, Literal, ClassVar, Type, Self
 import logging
 import hashlib
 import json
@@ -171,3 +171,26 @@ class PdfContentResource(HttpTikaResource):
         # Set special PDF headers based on the inputs.
         headers["X-Tika-PDFextractMarkedContent"] = "true" if kwargs.get("mode") == "semantic" else "false"
         return headers
+
+    def next(self) -> Self | None:
+        _, data = self.content
+        if data is None or not isinstance(data, dict) or self.signature is None:
+            return None
+
+        has_marked_content = data.get("pdf:hasMarkedContent", "false") == "true"
+        if not has_marked_content or self.signature.headers.get("X-Tika-PDFextractMarkedContent") == "true":
+            return None
+
+        # Use available document bytes if needed or open signature (typically after load).
+        if document := self.signature.kwargs.get("document"):
+            if not self.signature.is_open():
+                self.open_signature(self.signature)
+            document = self.signature.get_data()
+
+        # Prune kwargs to be able to set some new values for the next extraction.
+        next_kwargs = dict(self.signature.kwargs)
+        next_kwargs.pop("mode", None)
+        next_kwargs.pop("document", None)
+        next_signature = self.prepare_extract(mode="semantic", document=document, *self.signature.args, **next_kwargs)
+
+        return self.__class__(config=self.config, signature=next_signature)

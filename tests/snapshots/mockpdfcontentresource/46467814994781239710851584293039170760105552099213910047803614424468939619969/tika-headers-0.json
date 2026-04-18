@@ -13,12 +13,13 @@
         "org.apache.tika.parser.CompositeParser",
         "org.apache.tika.parser.pdf.PDFParser"
     ],
-    "X-TIKA:content_handler": "ToTextContentHandler",
+    "X-TIKA:content_handler": "ToXMLContentHandler",
     "pdf:num3DAnnotations": "0",
     "dcterms:created": "2026-04-18T20:47:17Z",
     "dc:format": "application/pdf; version=1.7",
     "xmpMM:DocumentID": "uuid:9ea7deeb-1a3f-4d94-a140-93da670e6172",
     "pdf:docinfo:creator_tool": "Writer",
+    "pdf:overallPercentageUnmappedUnicodeChars": "0.0",
     "access_permission:fill_in_form": "true",
     "pdf:hasCollection": "false",
     "pdf:encrypted": "false",
@@ -36,10 +37,10 @@
     "xmpTPg:NPages": "4",
     "pdf:hasXMP": "true",
     "pdf:charsPerPage": [
-        "0",
-        "0",
-        "0",
-        "0"
+        "2023",
+        "1811",
+        "2041",
+        "386"
     ],
     "access_permission:extract_content": "true",
     "access_permission:can_print": "true",

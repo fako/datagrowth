@@ -71,7 +71,7 @@ micro_service:
     tika:
       protocol: "http"
       host: "localhost:9998"
-      path: "/rmeta/text"
+      path: "/rmeta/xml"
 
 web:
   api_version: 1
