@@ -39,6 +39,8 @@ shell_resource:
 
 tika_resource:
   force_data_file_to_payload: true
+  multifile: false
+  multifile_exception_log_level: 30  # warning, see: https://docs.python.org/3/library/logging.html#logging-levels
 
 storage:
   allow_read: true

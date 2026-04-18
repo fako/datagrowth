@@ -132,6 +132,7 @@ def test_extract_file_input(resource: MockPdfContentResource) -> None:
     normalized_data = str(loc).removeprefix("file://")
     assert normalized_file.endswith("vendors/apache/files/test.pdf")
     assert normalized_data.endswith("vendors/apache/files/test.pdf")
+    assert extracted.metadata["pdf_id"] == "uuid:9ea7deeb-1a3f-4d94-a140-93da670e6172"
     assert extracted.result is not None
     assert extracted.result.created_at <= datetime.now(timezone.utc)
     assert extracted.status == 200

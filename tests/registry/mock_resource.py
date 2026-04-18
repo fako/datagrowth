@@ -2,7 +2,7 @@ from typing import Any, ClassVar, Type, Self
 from pydantic import BaseModel, Field
 
 from datagrowth.configuration import ConfigurationType
-from datagrowth.resources.protocols import ResourceStorageProtocol
+from datagrowth.resources.protocols import ResourceProtocol, ResourceStorageProtocol
 from datagrowth.signatures import InputsValidator, Signature
 
 
@@ -38,6 +38,9 @@ class MockResource(BaseModel):
 
     def handle_errors(self) -> None:
         return None
+
+    def update(self, other: ResourceProtocol) -> None:
+        self.signature = other.signature
 
     def next(self) -> Self | None:
         return None
