@@ -1,9 +1,9 @@
-from typing import Any
+from typing import Any, ClassVar, Self
 from enum import Enum
 import hashlib
 import json
 import re
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, ValidationInfo, field_validator, model_validator
 
 
 SAFE_SIGNATURE_TYPE_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]*$")
@@ -17,8 +17,47 @@ class DataMode(str, Enum):
 
 
 class InputsValidator(BaseModel):
-    args: tuple[Any, ...]
-    kwargs: dict[str, Any]
+
+    POSITIONAL_NAMES: ClassVar[tuple] = tuple()
+
+    args: tuple[Any, ...] = Field(default_factory=tuple)
+    kwargs: dict[str, Any] = Field(default_factory=dict)
+
+    def get_argument(self, name: str) -> Any:
+        """
+        Helper method to find prefered value from inputs for an input name.
+        """
+        if name in self.kwargs:
+            return self.kwargs[name]
+        try:
+            argument_ix = self.POSITIONAL_NAMES.index(name)
+        except ValueError:
+            return None
+        return self.args[argument_ix]
+
+    @classmethod
+    def from_inputs(cls, *args: Any, **kwargs: Any) -> Self:
+        values = {name: args[index] for index, name in enumerate(cls.POSITIONAL_NAMES) if index < len(args)}
+        values.update(kwargs)
+        values["args"] = tuple(args)
+        values["kwargs"] = dict(kwargs)
+        return cls.model_validate(values, context={"from_inputs": True})
+
+    #####################
+    # Pydantic plumbing
+    #####################
+
+    model_config = ConfigDict(extra="ignore")
+
+    @model_validator(mode="after")
+    def update_inputs(self, info: ValidationInfo) -> "InputsValidator":
+        if not isinstance(info.context, dict) or not info.context.get("from_inputs", False):
+            return self
+
+        fields = self.model_dump(mode="python", exclude={"args", "kwargs"})
+        self.args = tuple(fields[name] for name in self.POSITIONAL_NAMES if name in fields)
+        self.kwargs = {name: value for name, value in fields.items() if name in self.kwargs}
+        return self
 
 
 class DataBody(BaseModel):

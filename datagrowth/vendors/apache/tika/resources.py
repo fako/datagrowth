@@ -1,20 +1,18 @@
-from typing import Any, Literal
+from typing import Any, Literal, ClassVar, Type
 import hashlib
 import json
 from pathlib import Path, PurePath
-from pydantic import Field, model_validator, HttpUrl, StrictBytes
+from pydantic import model_validator, HttpUrl, StrictBytes
 
 from datagrowth.registry import Tag
 from datagrowth.resources.protocols import ResourceStorageProtocol
-from datagrowth.resources.http.pydantic import MicroServiceResource, HttpResourceInputsValidator
-from datagrowth.signatures import DataBody, DataMode
-from datagrowth.resources.http.signature import HttpSignature
+from datagrowth.resources.http.pydantic import MicroServiceResource, MicroServiceInputsValidator
+from datagrowth.signatures import InputsValidator, DataBody, DataMode
+from datagrowth.resources.http.signature import HttpMethod, HttpSignature
 
 
-class TikaInputsValidator(HttpResourceInputsValidator):
-    args: tuple[Any, ...] = Field(min_length=1, max_length=2)
-    kwargs: dict[str, Any] = Field(default_factory=dict, min_length=0, max_length=0)
-    mode: Literal["semantic", "structure"] = "structure"
+class TikaInputsValidator(MicroServiceInputsValidator):
+
     document: StrictBytes | None = None
     file: PurePath | None = None
     url: HttpUrl | None = None
@@ -27,35 +25,19 @@ class TikaInputsValidator(HttpResourceInputsValidator):
             raise ValueError(
                 "Exactly one of 'document', 'file', or 'url' must be set (got: {}).".format(", ".join(set_fields))
             )
-        # Dump inputs into the kwargs for further processing by HttpSignature
-        self.kwargs = self.model_dump(exclude={"args", "kwargs"})
         return self
 
 
 class HttpTikaResource(MicroServiceResource):
 
     NAMESPACE = Tag(category="namespace", value="tika_resource")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = TikaInputsValidator
     MICRO_SERVICE = "tika"
     MODE = DataMode.DATA
-    PARAMETERS = {
-        "mode": "{mode}"
-    }
-
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> TikaInputsValidator:
-        """
-        Takes the extraction mode from the (optional) first argument and validates Tika can handle the other inputs.
-        Sets the method to PUT, because Tika doesn't except other methods.
-        """
-        if len(args):
-            kwargs["mode"] = args[0]
-        kwargs["args"] = ("put",) + args
-        kwargs["kwargs"] = {}
-        return TikaInputsValidator(**kwargs)
+    METHOD = HttpMethod.PUT
 
     def headers(self, *args: Any, **kwargs: Any) -> dict[str, str]:
         headers = super().headers(*args, **kwargs)
-        # Set special Tika headers based on the inputs.
-        headers["X-Tika-PDFextractMarkedContent"] = "true" if kwargs.get("mode") == "semantic" else "false"
         # Deside on using HTTP fetcher or not based on given input.
         if url := kwargs.get("url"):
             headers.update({
@@ -147,3 +129,22 @@ class HttpTikaResource(MicroServiceResource):
                 if isinstance(value, str) and value:
                     exception_messages.append(f"{key}: {value.splitlines()[0]}")
         return has_content, exception_messages
+
+
+class PdfInputsValidator(TikaInputsValidator):
+    POSITIONAL_NAMES = ("mode",)
+    mode: Literal["semantic", "structure"] = "structure"
+
+
+class PdfContentResource(HttpTikaResource):
+
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = PdfInputsValidator
+    PARAMETERS = {
+        "mode": "{mode}"
+    }
+
+    def headers(self, *args: Any, **kwargs: Any) -> dict[str, str]:
+        headers = super().headers(*args, **kwargs)
+        # Set special PDF headers based on the inputs.
+        headers["X-Tika-PDFextractMarkedContent"] = "true" if kwargs.get("mode") == "semantic" else "false"
+        return headers

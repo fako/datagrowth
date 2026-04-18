@@ -1,10 +1,10 @@
 import json
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Type
 
 from string import Formatter
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from bs4 import BeautifulSoup
-from pydantic import Field, field_validator, HttpUrl
+from pydantic import Field, HttpUrl
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.registry import Tag
@@ -14,14 +14,9 @@ from datagrowth.resources.pydantic import Resource
 from datagrowth.utils import is_json_mimetype
 
 
-class HttpResourceInputsValidator(InputsValidator):
-    args: tuple[Any, ...] = Field(min_length=1)
-
-    @field_validator("args")
-    @classmethod
-    def validate_method(cls, args: tuple[Any, ...]) -> tuple[Any, ...]:
-        HttpMethod(args[0])
-        return args
+class HttpInputsValidator(InputsValidator):
+    POSITIONAL_NAMES = ("method",)
+    method: HttpMethod | None = Field(default=None)
 
 
 class HttpResource(Resource[HttpSignature]):
@@ -29,9 +24,11 @@ class HttpResource(Resource[HttpSignature]):
     # Resource constants
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="http_resource")
     EXTRACTOR: ClassVar[Tag | None] = Tag(category="extractor", value="requests")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = HttpInputsValidator
 
     # Http constants
     URI_TEMPLATE: ClassVar[str] = ""
+    METHOD: ClassVar[HttpMethod] = HttpMethod.GET
     PARAMETERS: ClassVar[dict[str, str] | None] = {}
     DATA: ClassVar[dict[str, Any] | None] = {}
     HEADERS: ClassVar[dict[str, str]] = {}
@@ -195,23 +192,21 @@ class HttpResource(Resource[HttpSignature]):
     # Resource protocol
     #####################
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
-        return HttpResourceInputsValidator(args=args, kwargs=kwargs)
+    def prepare_inputs(self, inputs: InputsValidator) -> HttpSignature:
+        method = HttpMethod(inputs.get_argument("method") or self.config.method or self.METHOD)
 
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
-        method = HttpMethod(args[0])
-        url_arguments = args[1:] if len(args) > 1 else []
-        url, data_arguments = self._create_url(*url_arguments, **kwargs)
+        url_arguments = inputs.args[1:] if len(inputs.args) > 1 else []
+        url, data_arguments = self._create_url(*url_arguments, **inputs.kwargs)
         auth = HttpAuth(headers=self.auth_headers(), parameters=self.auth_parameters())
         return HttpSignature(
             uri=self.uri_from_url(url),
-            args=args,
-            kwargs=kwargs,
+            args=inputs.args,
+            kwargs=inputs.kwargs,
             data=self.data(**data_arguments) if method != HttpMethod.GET or self.config.allow_get_body else {},
             type=self.type.value,
             method=method,
             url=url,
-            headers=self.headers(*args, **kwargs),
+            headers=self.headers(*inputs.args, **inputs.kwargs),
             auth=auth if auth.headers or auth.parameters else None,
             mode=self.MODE,
         )
@@ -257,42 +252,47 @@ class HttpResource(Resource[HttpSignature]):
             return None
 
 
-class URLResourceValidator(InputsValidator):
-    args: tuple[HttpUrl] = Field(min_length=1, max_length=1)
-    kwargs: dict[str, Any] = Field(default_factory=dict, min_length=0, max_length=0)
+class URLInputsValidator(InputsValidator):
+    POSITIONAL_NAMES = ("url",)
+    url: HttpUrl
 
 
 class URLResource(HttpResource):
 
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = URLInputsValidator
     MODE = DataMode.NONE
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> URLResourceValidator:
-        return URLResourceValidator(args=args, kwargs=kwargs)
-
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
-        url = str(args[0])
+    def prepare_inputs(self, inputs: InputsValidator) -> HttpSignature:
+        url = str(inputs.get_argument("url"))
         auth = HttpAuth(headers=self.auth_headers(), parameters={})
         return HttpSignature(
             uri=self.uri_from_url(url),
-            args=args,
-            kwargs=kwargs,
+            args=inputs.args,
+            kwargs=inputs.kwargs,
             data={},
             type=self.type.value,
             method=HttpMethod.GET,
             url=url,
-            headers=self.headers(*args, **kwargs),
+            headers=self.headers(*inputs.args, **inputs.kwargs),
             auth=auth if auth.headers else None,
             mode=self.MODE,
         )
 
 
+class MicroServiceInputsValidator(HttpInputsValidator):
+    protocol: str | None = None
+    host: str | None = None
+    path: str | None = None
+
+
 class MicroServiceResource(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="micro_service")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = MicroServiceInputsValidator
     MICRO_SERVICE: ClassVar[str | None] = None
     URI_TEMPLATE: ClassVar[str] = "{protocol}://{host}{path}"
 
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> HttpSignature:
+    def prepare_inputs(self, inputs: InputsValidator) -> HttpSignature:
         # Try to load micro service configuration and assert correctness
         assert self.MICRO_SERVICE is not None, \
             "You should specify a micro service name under the MICRO_SERVICE attribute"
@@ -312,5 +312,6 @@ class MicroServiceResource(HttpResource):
             "host": host,
             "path": path,
         }
-        micro_service_kwargs.update(**kwargs)
-        return super().prepare_inputs(*args, **micro_service_kwargs)
+        micro_service_kwargs.update(**inputs.kwargs)
+        micro_service_inputs = self.INPUTS_VALIDATOR.from_inputs(*inputs.args, **micro_service_kwargs)
+        return super().prepare_inputs(micro_service_inputs)

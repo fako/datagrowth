@@ -31,6 +31,7 @@ http_resource:
   allow_get_body: false
   backoff_delays: [2, 4, 8, 16]
   force_data_file_to_payload: false
+  method: null
 
 shell_resource:
   interval_duration: 0

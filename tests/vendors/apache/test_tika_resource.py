@@ -6,16 +6,16 @@ from pathlib import Path
 import pytest
 
 from datagrowth.registry import Tag
-from datagrowth.signatures import DataBody, DataMode
+from datagrowth.signatures import DataMode, DataBody
 from datagrowth.resources.http.signature import HttpAuth
-from datagrowth.vendors.apache.tika.resources import HttpTikaResource
+from datagrowth.vendors.apache.tika.resources import PdfContentResource, PdfInputsValidator
 
 
-class MockHttpTikaResource(HttpTikaResource):
+class MockPdfContentResource(PdfContentResource):
     STORAGE: ClassVar[Tag | None] = Tag(category="storage", value="file_system")
 
 
-class MockHttpTikaResourceAuth(MockHttpTikaResource):
+class MockPdfContentResourceAuth(MockPdfContentResource):
 
     def auth_headers(self) -> dict[str, str]:
         return {"Authorization": "Bearer micro-service-token"}
@@ -25,8 +25,8 @@ class MockHttpTikaResourceAuth(MockHttpTikaResource):
 
 
 @pytest.fixture
-def resource() -> MockHttpTikaResource:
-    resource = MockHttpTikaResource()
+def resource() -> MockPdfContentResource:
+    resource = MockPdfContentResource()
     return resource
 
 
@@ -35,30 +35,30 @@ def resource() -> MockHttpTikaResource:
 # ==============================
 
 
-def test_validate_inputs_accepts_explicit_document_bytes(resource: MockHttpTikaResource) -> None:
-    inputs = resource.validate_inputs("semantic", document=b"pdf-bytes")
-    assert inputs.args == ("put", "semantic",)
-    assert inputs.kwargs["mode"] == "semantic"
+def test_validate_inputs_accepts_explicit_document_bytes() -> None:
+    inputs = PdfInputsValidator.from_inputs("semantic", document=b"pdf-bytes")
+    assert inputs.args == ("semantic",)
+    assert inputs.get_argument("mode") == "semantic"
     assert inputs.kwargs["document"] == b"pdf-bytes"
 
 
-def test_validate_inputs_rejects_multiple_sources(resource: MockHttpTikaResource) -> None:
+def test_validate_inputs_rejects_multiple_sources() -> None:
     with pytest.raises(ValueError, match="Exactly one of 'document', 'file', or 'url' must be set"):
-        resource.validate_inputs(document=b"pdf-bytes", url="https://example.com/input.pdf")
+        PdfInputsValidator.from_inputs(document=b"pdf-bytes", url="https://example.com/input.pdf")
 
 
-def test_validate_inputs_rejects_document_string(resource: MockHttpTikaResource) -> None:
+def test_validate_inputs_rejects_document_string() -> None:
     with pytest.raises(ValueError, match="document"):
-        resource.validate_inputs(document="https://example.com/input.pdf")
+        PdfInputsValidator.from_inputs(document="https://example.com/input.pdf")
 
 
 # ==============================
-# prepare_inputs
+# prepare_extract
 # ==============================
 
 
-def test_prepare_inputs_uses_fetch_headers_for_url(resource: MockHttpTikaResource) -> None:
-    signature = resource.prepare_inputs("put", mode="semantic", url="https://example.com/input.pdf")
+def test_prepare_inputs_uses_fetch_headers_for_url(resource: MockPdfContentResource) -> None:
+    signature = resource.prepare_extract(mode="semantic", url="https://example.com/input.pdf")
     assert signature.mode == DataMode.DATA
     assert signature.data == DataBody(content="https://example.com/input.pdf")
     assert signature.headers["X-Tika-PDFextractMarkedContent"] == "true"
@@ -66,8 +66,8 @@ def test_prepare_inputs_uses_fetch_headers_for_url(resource: MockHttpTikaResourc
     assert signature.headers["fetchKey"] == "https://example.com/input.pdf"
 
 
-def test_prepare_inputs_sets_bytes_payload_for_document(resource: MockHttpTikaResource) -> None:
-    signature = resource.prepare_inputs("put", mode="structure", document=b"pdf-bytes")
+def test_prepare_inputs_sets_bytes_payload_for_document(resource: MockPdfContentResource) -> None:
+    signature = resource.prepare_extract(mode="structure", document=b"pdf-bytes")
     assert signature.mode == DataMode.DATA
     assert isinstance(signature.data, DataBody)
     loc = signature.data.content
@@ -83,23 +83,23 @@ def test_prepare_inputs_sets_bytes_payload_for_document(resource: MockHttpTikaRe
     assert signature.headers["X-Tika-PDFextractMarkedContent"] == "false"
 
 
-def test_prepare_inputs_reads_bytes_payload_from_file(resource: MockHttpTikaResource, tmp_path: Path) -> None:
+def test_prepare_inputs_reads_bytes_payload_from_file(resource: MockPdfContentResource, tmp_path: Path) -> None:
     file_path = tmp_path / "document.pdf"
     file_path.write_bytes(b"file-bytes")
-    signature = resource.prepare_inputs("put", mode="structure", file=file_path)
+    signature = resource.prepare_extract(mode="structure", file=file_path)
     assert signature.mode == DataMode.DATA
     assert signature.data == DataBody(content=f"file://{file_path}")
     assert signature.kwargs["file"] == str(file_path)
 
 
 # ==============================
-# prepare_inputs (auth)
+# prepare_extract (auth)
 # ==============================
 
 
 def test_prepare_inputs_includes_auth_but_excludes_it_from_dump() -> None:
-    resource = MockHttpTikaResourceAuth()
-    signature = resource.prepare_inputs("put", mode="semantic", document=b"x")
+    resource = MockPdfContentResourceAuth()
+    signature = resource.prepare_extract(mode="semantic", document=b"x")
 
     assert signature.auth == HttpAuth(
         headers={"Authorization": "Bearer micro-service-token"},
@@ -117,7 +117,7 @@ def test_prepare_inputs_includes_auth_but_excludes_it_from_dump() -> None:
 
 
 @pytest.mark.snapshots
-def test_extract_file_input(resource: MockHttpTikaResource) -> None:
+def test_extract_file_input(resource: MockPdfContentResource) -> None:
     pdf_path = Path(__file__).parent / "files" / "test.pdf"
     extracted = resource.extract(mode="semantic", file=pdf_path)
     extracted.close()
@@ -138,7 +138,7 @@ def test_extract_file_input(resource: MockHttpTikaResource) -> None:
 
 
 @pytest.mark.snapshots
-def test_extract_document_input(resource: MockHttpTikaResource) -> None:
+def test_extract_document_input(resource: MockPdfContentResource) -> None:
     pdf_path = Path(__file__).parent / "files" / "test.pdf"
     extracted = resource.extract(mode="structure", document=pdf_path.read_bytes())
     extracted.close()
@@ -153,7 +153,7 @@ def test_extract_document_input(resource: MockHttpTikaResource) -> None:
 
 
 @pytest.mark.snapshots
-def test_extract_url_input(resource: MockHttpTikaResource) -> None:
+def test_extract_url_input(resource: MockPdfContentResource) -> None:
     extracted = resource.extract(mode="semantic", url="https://just-ask.data-scope.com/accounts/login/")
     extracted.close()
 
@@ -167,7 +167,7 @@ def test_extract_url_input(resource: MockHttpTikaResource) -> None:
 
 
 @pytest.mark.snapshots
-def test_extract_none_document_triggers_zero_byte_exception(resource: MockHttpTikaResource) -> None:
+def test_extract_none_document_triggers_zero_byte_exception(resource: MockPdfContentResource) -> None:
     extracted = resource.extract(mode="semantic", document=b"")
     extracted.close()
 

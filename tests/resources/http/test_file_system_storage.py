@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, Type
 from unittest.mock import Mock
 from pathlib import Path
 
@@ -11,14 +11,23 @@ from requests.structures import CaseInsensitiveDict
 
 from datagrowth.registry import Tag
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
-from datagrowth.resources.http.pydantic import HttpResource
-from datagrowth.signatures import DataMode
+from datagrowth.resources.http.pydantic import HttpResource, HttpInputsValidator
+from datagrowth.signatures import DataMode, InputsValidator
 from datagrowth.resources.storage.file_system import FileSystemStorage
+
+
+class HttpResourceMockInputsValidator(HttpInputsValidator):
+    POSITIONAL_NAMES: ClassVar[tuple[str, ...]] = ("method", "resource_type")
+
+    resource_type: str
+    slug: str
+    page: str
 
 
 class HttpResourceMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_mock")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = HttpResourceMockInputsValidator
     STORAGE: ClassVar[Tag | None] = Tag(category="storage", value="file_system")
 
     URI_TEMPLATE: ClassVar[str] = "https://example.com/{}/{slug}"
