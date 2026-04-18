@@ -1,14 +1,18 @@
 from typing import Any, Literal, ClassVar, Type
+import logging
 import hashlib
 import json
 from pathlib import Path, PurePath
 from pydantic import model_validator, HttpUrl, StrictBytes
 
 from datagrowth.registry import Tag
-from datagrowth.resources.protocols import ResourceStorageProtocol
+from datagrowth.resources.protocols import ResourceProtocol, ResourceStorageProtocol
 from datagrowth.resources.http.pydantic import MicroServiceResource, MicroServiceInputsValidator
 from datagrowth.signatures import InputsValidator, DataBody, DataMode
 from datagrowth.resources.http.signature import HttpMethod, HttpSignature
+
+
+log = logging.getLogger("datagrowth")
 
 
 class TikaInputsValidator(MicroServiceInputsValidator):
@@ -75,11 +79,18 @@ class HttpTikaResource(MicroServiceResource):
                 updated_kwargs["file"] = loc.removeprefix("file://")
         return signature.model_copy(update={"kwargs": updated_kwargs})
 
+    def update(self, other: ResourceProtocol) -> None:
+        super().update(other)
+        _, data = self.content
+        self.metadata["pdf_id"] = data.get("xmpMM:DocumentID")
+
     def handle_errors(self) -> None:
         super().handle_errors()
         if self.result is None:
             return None
-        has_content, exception_messages = self._inspect_tika_content()
+        has_content, exception_messages, is_multifile = self._inspect_tika_content()
+        if is_multifile and not self.config.multifile:
+            log.log(self.config.multifile_exception_log_level, f"Tika returned unexpectedly multiple files for: {self.signature.hash if self.signature else 'unknown'}")  # noqa: E501
         if has_content and exception_messages:
             self.status = 207
             exception_summary = ";\n".join(exception_messages)
@@ -95,11 +106,22 @@ class HttpTikaResource(MicroServiceResource):
                 "errors": f"Tika returned exceptions without extracted content:\n\n {exception_summary}",
             })
 
+    @property
+    def content(self) -> tuple[str | None, Any]:
+        content_type, data = super().content
+        if not isinstance(data, list):
+            return content_type, data
+        if len(data) > 1 and not self.config.multifile:
+            return content_type, data[0]
+        return content_type, data[0]
+
     def close_snapshot(self, storage: ResourceStorageProtocol) -> None:
         assert self.signature is not None, "Expected signature to be set before closing snapshot."
-        _, data = self.content
+        _, data = super().content
         if not data:
             return
+        if not isinstance(data, list) and not self.config.multifile:
+            data = [data]
 
         for ix, headers in enumerate(data):
             content = headers.pop("X-TIKA:content", None)
@@ -113,12 +135,13 @@ class HttpTikaResource(MicroServiceResource):
     # Helpers
     #####################
 
-    def _inspect_tika_content(self) -> tuple[bool, list[str]]:
-        _, data = self.content
+    def _inspect_tika_content(self) -> tuple[bool, list[str], bool]:
+        _, data = super().content
         if not isinstance(data, list):
-            return False, []
+            return False, [], False
 
         has_content = False
+        is_multifile = len(data) > 1
         exception_messages: list[str] = []
         for result in data:
             if not isinstance(result, dict):
@@ -128,7 +151,7 @@ class HttpTikaResource(MicroServiceResource):
             for key, value in result_exceptions.items():
                 if isinstance(value, str) and value:
                     exception_messages.append(f"{key}: {value.splitlines()[0]}")
-        return has_content, exception_messages
+        return has_content, exception_messages, is_multifile
 
 
 class PdfInputsValidator(TikaInputsValidator):

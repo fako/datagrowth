@@ -1,5 +1,5 @@
 {
-    "id": "302d4bb3-9384-4973-9b4e-48645e4dde0f",
+    "id": "7812d1c4-5609-4930-99b3-85fb115490a8",
     "type": {
         "category": "resource",
         "value": "mockpdfcontentresource"
@@ -35,18 +35,20 @@
     "result": {
         "content_type": "application/json",
         "head": {
-            "date": "Sat, 18 Apr 2026 17:33:00 GMT",
+            "date": "Sat, 18 Apr 2026 19:38:27 GMT",
             "content-type": "application/json",
             "content-encoding": "gzip",
             "vary": "Accept-Encoding",
             "transfer-encoding": "chunked",
             "server": "Jetty(11.0.26)"
         },
-        "body": "[{\"http-connection:target-ip-address\":\"45.135.58.129\",\"http-header:status-code\":\"200\",\"X-TIKA:Parsed-By-Full-Set\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.DefaultParser\",\"org.apache.tika.parser.html.JSoupParser\"],\"X-TIKA:content_handler\":\"ToTextContentHandler\",\"resourceName\":\"apache-tika-2944799035948833958.tmp\",\"X-TIKA:encodingDetector\":\"HtmlEncodingDetector\",\"http-connection:num-redirects\":\"0\",\"http-connection:target-url\":\"https://just-ask.data-scope.com/accounts/login/\",\"viewport\":\"width=device-width, initial-scale=1.0\",\"X-TIKA:Parsed-By\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.DefaultParser\",\"org.apache.tika.parser.html.JSoupParser\"],\"dc:title\":\"Log in | Just Ask\",\"Content-Encoding\":\"UTF-8\",\"X-TIKA:parse_time_millis\":\"11\",\"X-TIKA:embedded_depth\":\"0\",\"X-TIKA:content\":\"\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nLog in | Just Ask\\n\\n\\n    \\n\\n    \\n        \\n        \\n            Log in\\n\\n        \\n\\n\\n        \\n        \\n            \\n\\n            \\n                \\n\\n                \\n                \\n                    \\n                        Username\\n                    \\n                    \\n                    \\n                \\n\\n\\n                \\n                \\n                    \\n                        Password\\n                    \\n                    \\n                    \\n                \\n\\n\\n                \\n                \\n                \\n                    \\n                        \\n                        Remember Me\\n                    \\n                \\n\\n                \\n\\n                \\n                \\n\\n                \\n                \\n                    Log in\\n                \\n            \\n\\n\\n            \\n            \\n                \\n                    Forgot your password?\\n                \\n            \\n\\n        \\n\\n    \\n\\n\\n\\n\\n\",\"X-TIKA:detectedEncoding\":\"UTF-8\",\"Content-Length\":\"47\",\"http-header:content-type\":\"text/html; charset=utf-8\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html; charset=UTF-8\"}]",
+        "body": "[{\"http-connection:target-ip-address\":\"45.135.58.129\",\"http-header:status-code\":\"200\",\"X-TIKA:Parsed-By-Full-Set\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.DefaultParser\",\"org.apache.tika.parser.html.JSoupParser\"],\"X-TIKA:content_handler\":\"ToTextContentHandler\",\"resourceName\":\"apache-tika-13033368824180987896.tmp\",\"X-TIKA:encodingDetector\":\"HtmlEncodingDetector\",\"http-connection:num-redirects\":\"0\",\"http-connection:target-url\":\"https://just-ask.data-scope.com/accounts/login/\",\"viewport\":\"width=device-width, initial-scale=1.0\",\"X-TIKA:Parsed-By\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.DefaultParser\",\"org.apache.tika.parser.html.JSoupParser\"],\"dc:title\":\"Log in | Just Ask\",\"Content-Encoding\":\"UTF-8\",\"X-TIKA:parse_time_millis\":\"4\",\"X-TIKA:embedded_depth\":\"0\",\"X-TIKA:content\":\"\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nLog in | Just Ask\\n\\n\\n    \\n\\n    \\n        \\n        \\n            Log in\\n\\n        \\n\\n\\n        \\n        \\n            \\n\\n            \\n                \\n\\n                \\n                \\n                    \\n                        Username\\n                    \\n                    \\n                    \\n                \\n\\n\\n                \\n                \\n                    \\n                        Password\\n                    \\n                    \\n                    \\n                \\n\\n\\n                \\n                \\n                \\n                    \\n                        \\n                        Remember Me\\n                    \\n                \\n\\n                \\n\\n                \\n                \\n\\n                \\n                \\n                    Log in\\n                \\n            \\n\\n\\n            \\n            \\n                \\n                    Forgot your password?\\n                \\n            \\n\\n        \\n\\n    \\n\\n\\n\\n\\n\",\"X-TIKA:detectedEncoding\":\"UTF-8\",\"Content-Length\":\"47\",\"http-header:content-type\":\"text/html; charset=utf-8\",\"Content-Language\":\"en\",\"Content-Type\":\"text/html; charset=UTF-8\"}]",
         "errors": null,
-        "created_at": "2026-04-18T17:33:00.463056Z"
+        "created_at": "2026-04-18T19:38:27.237065Z"
     },
     "status": 200,
-    "metadata": {},
-    "purge_at": "2026-05-18T19:33:00.352795"
+    "metadata": {
+        "pdf_id": null
+    },
+    "purge_at": "2026-05-18T21:38:27.157179"
 }

@@ -75,6 +75,13 @@ class ResourceProtocol(Protocol):
         """
         ...
 
+    def update(self, other: "ResourceProtocol") -> None:
+        """
+        This method updates the Resource with Resources created by other sources like the extractors.
+        Override to customize how data gets passed on.
+        """
+        ...
+
     def handle_errors(self) -> None:
         """
         Override this method to handle resource specific error cases.
