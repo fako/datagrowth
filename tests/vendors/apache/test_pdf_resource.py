@@ -119,7 +119,7 @@ def test_prepare_inputs_includes_auth_but_excludes_it_from_dump() -> None:
 @pytest.mark.snapshots
 def test_extract_file_input(resource: MockPdfContentResource) -> None:
     pdf_path = Path(__file__).parent / "files" / "test.pdf"
-    extracted = resource.extract(mode="semantic", file=pdf_path)
+    extracted = resource.extract(mode="semantic", file=pdf_path, path="/rmeta/text")
     extracted.close()
 
     if resource.storage is not None and resource.storage.config.snapshots:
@@ -154,8 +154,28 @@ def test_extract_document_input(resource: MockPdfContentResource) -> None:
 
 
 @pytest.mark.snapshots
+def test_extract_next_document_input(resource: MockPdfContentResource) -> None:
+    pdf_path = Path(__file__).parent / "files" / "test.pdf"
+    extracted = resource.extract(mode="structure", document=pdf_path.read_bytes())
+
+    next_resource = extracted.next()
+    assert next_resource is not None
+    next_extracted = next_resource.extract()
+    next_extracted.close()
+
+    if resource.storage is not None and resource.storage.config.snapshots:
+        pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
+
+    assert next_extracted.signature is not None
+    assert next_extracted.result is not None
+    assert next_extracted.result.created_at <= datetime.now(timezone.utc)
+    assert next_extracted.status == 200
+
+
+@pytest.mark.snapshots
 def test_extract_url_input(resource: MockPdfContentResource) -> None:
-    extracted = resource.extract(mode="semantic", url="https://just-ask.data-scope.com/accounts/login/")
+    test_url = "https://just-ask.data-scope.com/accounts/login/"
+    extracted = resource.extract(mode="semantic", url=test_url, path="/rmeta/text")
     extracted.close()
 
     if resource.storage is not None and resource.storage.config.snapshots:
