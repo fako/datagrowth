@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import ClassVar
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -25,3 +26,5 @@ class HttpSignature(Signature):
     url: str
     headers: dict[str, str] = Field(default_factory=dict)
     auth: HttpAuth | None = Field(default=None, exclude=True, repr=False)
+
+    HASH_FIELDS: ClassVar[list[str]] = ["uri", "data", "mode", "method"]
