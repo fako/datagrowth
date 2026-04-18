@@ -102,6 +102,8 @@ class Signature(BaseModel):
     _data_bytes: bytes | None = PrivateAttr(default=None)
     _data_parts: list[dict[str, Any]] | None = PrivateAttr(default=None)
 
+    HASH_FIELDS: ClassVar[list[str]] = ["uri", "data", "mode"]
+
     #####################
     # Data lifecycle
     #####################
@@ -202,7 +204,12 @@ class Signature(BaseModel):
         uri = out.get("uri")
         hash_ = out.get("hash")
         if uri is not None and hash_ is None:
-            out["hash"] = cls._compute_hash(uri, data, mode)
+            normalized_values = {"data": data, "mode": mode}
+            hash_values = {
+                field: normalized_values.get(field, out.get(field))
+                for field in cls.HASH_FIELDS
+            }
+            out["hash"] = cls._compute_hash(hash_values)
         return out
 
     @model_validator(mode="after")
@@ -249,9 +256,11 @@ class Signature(BaseModel):
             return [Signature._canonicalize_data(value) for value in data]
         return data
 
-    @staticmethod
-    def _compute_hash(uri: str, data: Any, mode: str) -> int:
-        canonical_data = Signature._canonicalize_data(data)
-        canonical = json.dumps({"uri": uri, "data": canonical_data, "mode": mode}, sort_keys=True,
-                               separators=(",", ":"), ensure_ascii=False)
+    @classmethod
+    def _compute_hash(cls, values: dict[str, Any]) -> int:
+        canonical_values = {
+            field: cls._canonicalize_data(values.get(field))
+            for field in cls.HASH_FIELDS
+        }
+        canonical = json.dumps(canonical_values, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         return int(hashlib.sha256(canonical.encode("utf-8")).hexdigest(), 16)
