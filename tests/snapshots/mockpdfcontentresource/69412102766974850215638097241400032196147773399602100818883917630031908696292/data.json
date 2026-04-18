@@ -1,0 +1,50 @@
+{
+    "id": "b906cfbe-aacb-46af-ae12-8ab611d66445",
+    "type": {
+        "category": "resource",
+        "value": "mockpdfcontentresource"
+    },
+    "config": {},
+    "signature": {
+        "uri": "localhost:9998/rmeta/text?mode=semantic",
+        "data": {
+            "content": "file://vendors/apache/files/test.pdf",
+            "encoding": "utf-8"
+        },
+        "mode": "data",
+        "hash": 69412102766974850215638097241400032196147773399602100818883917630031908696292,
+        "type": "mockpdfcontentresource",
+        "args": [
+            "semantic"
+        ],
+        "kwargs": {
+            "protocol": "http",
+            "host": "localhost:9998",
+            "path": "/rmeta/text",
+            "file": "vendors/apache/files/test.pdf",
+            "mode": "semantic"
+        },
+        "method": "put",
+        "url": "http://localhost:9998/rmeta/text?mode=semantic",
+        "headers": {
+            "X-Tika-PDFextractMarkedContent": "true"
+        }
+    },
+    "result": {
+        "content_type": "application/json",
+        "head": {
+            "date": "Sat, 18 Apr 2026 17:18:18 GMT",
+            "content-type": "application/json",
+            "content-encoding": "gzip",
+            "vary": "Accept-Encoding",
+            "transfer-encoding": "chunked",
+            "server": "Jetty(11.0.26)"
+        },
+        "body": "[{\"pdf:unmappedUnicodeCharsPerPage\":[\"0\",\"0\",\"0\"],\"pdf:PDFVersion\":\"1.4\",\"pdf:docinfo:title\":\"story\",\"pdf:hasXFA\":\"false\",\"access_permission:modify_annotations\":\"true\",\"X-TIKA:Parsed-By-Full-Set\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.pdf.PDFParser\"],\"X-TIKA:content_handler\":\"ToTextContentHandler\",\"pdf:num3DAnnotations\":\"0\",\"dc:format\":\"application/pdf; version=1.4\",\"access_permission:fill_in_form\":\"true\",\"pdf:hasCollection\":\"false\",\"pdf:encrypted\":\"false\",\"dc:title\":\"story\",\"pdf:containsNonEmbeddedFont\":\"false\",\"Content-Length\":\"76698\",\"pdf:hasMarkedContent\":\"true\",\"pdf:ocrPageCount\":\"0\",\"Content-Type\":\"application/pdf\",\"access_permission:can_print_faithful\":\"true\",\"pdf:producer\":\"Skia/PDF m144 Google Docs Renderer\",\"pdf:totalUnmappedUnicodeChars\":\"0\",\"access_permission:extract_for_accessibility\":\"true\",\"access_permission:assemble_document\":\"true\",\"xmpTPg:NPages\":\"3\",\"pdf:hasXMP\":\"false\",\"pdf:charsPerPage\":[\"0\",\"0\",\"0\"],\"access_permission:extract_content\":\"true\",\"access_permission:can_print\":\"true\",\"X-TIKA:Parsed-By\":[\"org.apache.tika.parser.CompositeParser\",\"org.apache.tika.parser.pdf.PDFParser\"],\"X-TIKA:parse_time_millis\":\"20\",\"X-TIKA:embedded_depth\":\"0\",\"X-TIKA:content\":\"\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n\\nstory\\n\\nHet Spoor Verwarmt \\n\\nJullie staan op scherp. In de stad voelen jullie de ogen van de Aspis op jullie gericht,, wat jullie sociale manoeuvres bemoeilijkt. Terwijl jullie je volgende zetten plannen—het saboteren van de expeditie, het contacteren van de mysterieuze Novaria, en het onderzoeken van de Azland Ridge—wordt de puzzel alleen maar complexer. Jullie weten nu dat de expeditie een leugen is; hun water-aangedreven boor is nutteloos in het watervrije gebied waar ze zogenaamd heen gaan. Iemand probeert jullie op een dwaalspoor te zetten.\\nAlsof dat niet genoeg is, voelt Penny een knagende, onverklaarbare honger... een emotie die niet van haar is, maar van haar metgezel Archibald, die faalde in zijn jacht afgelopen nacht.\\n\\nKelders en Kaken \\n\\nOp zoek naar bondgenoten (en geld) belanden jullie in de winkel van de nerveuze Senzer. Een onschuldige aanraking van Musafarat verandert in een knetterende schok—een onvrijwillige demonstratie van zijn Suli achtergrond. Gelukkig weet hij de doodsbange man te kalmeren met een vroom verhaal over \\\"door de goden vervloekt\\\" zijn.\\nSenzer heeft hulp nodig. Zijn kelder krioelt van ongedierte. De beloning: 465 goud. Terwijl Penny een (ietwat belerende) lezing geeft over de anthus giganthus (reuzenmieren), bereidt de groep zich voor op de afdaling.\\nHet gevecht begint direct. Penny’s Dancing Lights onthullen de krioelende verschrikkingen beneden. Sargon stapt voorzichtig op de gestapelde voorraden en wordt belaagd door de grote mieren. Musafarat, die geen seconde twijfelt, stort zich met een \\\"LOOK OUT BELOW!\\\" door het kelderluik, zijn zwaard diep in de eerste mier begravend. Van bovenaf creëert Penny een dodelijk valstrik van Burning Sands, waardoor de vloer in een schroeiend, verraderlijk terrein verandert.\\nDe mieren zijn taai. Sargon, die zijn kans schoon ziet, haalt uit met zijn bijl en...mist jammerlijk. De bijl ketst knullig af. Het is een moment van frustratie dat snel omslaat in woede, wanneer hij merkt dat de mieren het ook op zijn broertje gemunt hebben. Een van de mieren-soldaten ontwijkt Sargon's beet, maar plant zijn angel diep in de barbaar, wat hem niet alleen verwondt maar ook zijn spieren vergiftigt.\\nDat was de trigger.\\n\\\"Sargon is boos!\\\" De barbaar explodeert in een rage, groeit in omvang, en gebruikt zijn nieuwe\\nDe rust is van korte duur. Terwijl Sargon, nog steeds kokend van woede (\\\"Waar? Waar? Godverdomme, waar?\\\"), afgaat op een geluid dat Musafarat hoorde, barst de grond open.\\nDe Koningin verschijnt.\\nIn een verrassingsaanval slaat ze Sargon hard tegen de grond. De strijd is nu een desperate overlevingsslag. De koningin, een kolos van chitine, focust al haar woede op de grootste bedreiging. Sargon deelt nog een klap uit, maar wordt dan gegrepen. De beet mist, maar de grab slaagt. De angel volgt automatisch en Sargon bezwijkt onder het geweld.\\nDe paniek slaat toe. Musafarat is te ver weg terwijl Sargon langzaam weg zakt in zijn bewusteloosheid. Penny, wanhopig, gooit alles in de strijd. Haar opgeroepen Sturge wordt in één klap uit de lucht geslagen door de koningin. Als laatste redmiddel ontketent ze een Flurry of Snowballs. De ijzige kegel mist Musafarat op een haar na en velt de machtige mieren koningin.\\nMusafarat's rent naar Sargon's levenloze lichaam, en schreeuwt zijn naam terwijl hij Cure Light Wounds cast. Sargon's ogen schieten open. De barbaar leeft, zij het ternauwernood. De strijd is gewonnen.\\n\\nEen Nieuw Spoor \\n\\nUitgeput maar zegevierend ontvangen jullie je beloning. Senzer is jullie eeuwig dankbaar en geneest jullie vergiftiging met Lesser Restoration potions. Maar de echte overwinning volgt kort daarna.\\nDe groep buigt zich opnieuw over de brief van de spionne Malika. Met de kennis van de nutteloze boor, valt het kwartje. De brief noemt Pathfinders voordat Malika's dekmantel geblazen was. Sargon's kennis van piraten-intriges bevestigt hun vermoeden: de brief is een leugen. Amersanus wilde dat Malika de brief vond. Hij speelde haar, in de hoop jullie naar de Azland Ridge te lokken.\\nJullie moeten nu kiezen hoe jullie verder gaan:\\n\\t●Meespelen met de snode plannen en met open ogen en oren de Azland Ridge \\n\\t●Terug naar Nantambu om alle voorvallen en ontwikkelingen te rapporteren \\n\\t●Achterhalen waar de Deeptreasure Mining Company een watermolen gaat installeren. \\n\\n\\nBondgenoten en Dilemma's \\n\\nOp weg naar jullie volgende doelwit, Novaria, wordt Musafarat's ex-geliefde gespot. Een moment springt er een vonk over tussen de twee en Musafarat’s dekmantel dreigt te vallen. Maar Sargon werpt haar een blik toe die ijs doet breken, en ze druipt af. Musafarat deelt even later lachend: \\\"Hij heeft mijn ex vriendin in elkaar geslagen omdat ik schreeuwde tijdens de seks.\\\" \\\"Ja, dat leek alsof je heel veel pijn had!\\\" reageert Sargon nors.\\nBij de Gold Crown Company, het kantoor van Novaria, wordt Penny prompt versierd door een gnoom (\\\"Hé, lekker ding!\\\"). Penny reageert koeltjes en spreekt de gnoom in zijn eigen taal aan: \\\"Ik ga met die grote jongen naar huis... aan mijn fiancé.\\\"\\nDe ontmoeting met Novaria zelf is gespannen. Ze is een keiharde zakenvrouw. Musafarat's vleierij levert een glimlach op en wekt interesse, maar Sargon's opvolging met een zakelijk voorstel wordt koel ontvangen. Ze is niet onder de indruk van de Pathfinders en hun verre beloftes.\\nZe biedt echter een opening. Een test. Als jullie een \\\"pirate\\\" genaamd Ungala kunnen stoppen, die haar karavanen berooft, wilt ze de handelsposten van de Gold Crown Company wel openstellen voor Pathfinders. Een mooie kans voor de society om meer richting Bloodcove te bewegen. Novaria's karavaan vertrekt over een paar uur.\\nJullie kennis van de stad vertelt jullie dat Ungala geen simpele piraat is, maar een lokale verzetsstrijder die opkomt voor de onderdrukte bevolking—dezelfde mensen die jullie concurrenten zo genadeloos uitbuiten. Is zij echt de vijand?\\n.\\nmassa om een mier de kelder door te bullrushen, puur om ruimte te maken. Ondertussen deelt Musafarat de ene verwoestende critical hit na de andere uit, terwijl Penny, nog steeds op de ladder, de ene na de andere Produce Flame gooit, waarmee ze een zwaargewonde mier in de fik steekt. De twee overgebleven werkmieren proberen te vluchten, maar worden meedogenloos neergehaald door de attacks of opportunity van Penny en Musafarat.\\nbenaderen om de boel te dwarsbomen \\n\\n\\n\\n\\n\\n\\n\\tHet Spoor Verwarmt \\n\\tKelders en Kaken \\n\\tEen Nieuw Spoor \\n\\tBondgenoten en Dilemma's \\n\\n\",\"access_permission:can_modify\":\"true\",\"pdf:docinfo:producer\":\"Skia/PDF m144 Google Docs Renderer\",\"pdf:containsDamagedFont\":\"false\"}]",
+        "errors": null,
+        "created_at": "2026-04-18T17:18:18.601615Z"
+    },
+    "status": 200,
+    "metadata": {},
+    "purge_at": "2026-05-18T19:18:18.575641"
+}
