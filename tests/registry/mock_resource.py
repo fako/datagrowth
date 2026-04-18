@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Self
+from typing import Any, ClassVar, Type, Self
 from pydantic import BaseModel, Field
 
 from datagrowth.configuration import ConfigurationType
@@ -10,6 +10,7 @@ class MockResource(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
 
     NAMESPACE: ClassVar[str] = "mock_resource"
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = InputsValidator
 
     config: ConfigurationType = Field(default_factory=lambda: ConfigurationType(namespace=["global"]))
     signature: Signature | None = None
@@ -20,6 +21,9 @@ class MockResource(BaseModel):
     @classmethod
     def get_name(cls) -> str:
         return cls.__name__.lower()
+
+    def prepare_extract(self, *args: Any, **kwargs: Any) -> Signature:
+        return Signature(uri="mock://")
 
     def extract(self, *args: Any, **kwargs: Any) -> "MockResource":
         return self
@@ -38,10 +42,7 @@ class MockResource(BaseModel):
     def next(self) -> Self | None:
         return None
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
-        return InputsValidator(args=args, kwargs=kwargs)
-
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> Signature:
+    def prepare_inputs(self, inputs: InputsValidator) -> Signature:
         return Signature(uri="mock://")
 
     def close_snapshot(self, storage: ResourceStorageProtocol) -> None:

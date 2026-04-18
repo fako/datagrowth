@@ -11,7 +11,7 @@ from requests.structures import CaseInsensitiveDict
 
 from datagrowth.registry import Tag
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
-from datagrowth.resources.http.pydantic import URLResource
+from datagrowth.resources.http.pydantic import URLResource, URLInputsValidator
 from datagrowth.resources.http.signature import HttpMethod, HttpSignature
 
 
@@ -52,34 +52,34 @@ def resource(mocked_session: Mock) -> URLResourceMock:
 
 
 # ==============================
-# validate_inputs
+# validator
 # ==============================
 
 
-def test_validate_inputs_accepts_valid_url(resource: URLResourceMock) -> None:
-    inputs = resource.validate_inputs("https://example.com/api")
+def test_validate_inputs_accepts_valid_url() -> None:
+    inputs = URLInputsValidator.from_inputs("https://example.com/api")
     assert len(inputs.args) == 1
     assert inputs.kwargs == {}
 
 
-def test_validate_inputs_rejects_bare_string(resource: URLResourceMock) -> None:
+def test_validate_inputs_rejects_bare_string() -> None:
     with pytest.raises(ValidationError):
-        resource.validate_inputs("not-a-url")
+        URLInputsValidator.from_inputs("not-a-url")
 
 
-def test_validate_inputs_rejects_empty_call(resource: URLResourceMock) -> None:
+def test_validate_inputs_rejects_empty_call() -> None:
     with pytest.raises(ValidationError):
-        resource.validate_inputs()
+        URLInputsValidator.from_inputs()
 
 
-def test_validate_inputs_rejects_kwargs(resource: URLResourceMock) -> None:
-    with pytest.raises(ValidationError):
-        resource.validate_inputs("https://example.com", extra="bad")
+def test_validate_inputs_ignores_extra_kwargs() -> None:
+    inputs = URLInputsValidator.from_inputs("https://example.com", extra="bad")
+    assert "extra" not in inputs.kwargs
 
 
-def test_validate_inputs_rejects_multiple_args(resource: URLResourceMock) -> None:
-    with pytest.raises(ValidationError):
-        resource.validate_inputs("https://a.com", "https://b.com")
+def test_validate_inputs_ignores_extra_args() -> None:
+    inputs = URLInputsValidator.from_inputs("https://a.com", "https://b.com")
+    assert "https://b.com" not in inputs.args
 
 
 # ==============================
@@ -126,6 +126,9 @@ def test_extract_rejects_non_url(resource: URLResourceMock) -> None:
         resource.extract("not-a-url")
 
 
-def test_extract_rejects_extra_kwargs(resource: URLResourceMock) -> None:
-    with pytest.raises(ValidationError):
-        resource.extract("https://example.com", query="nope")
+def test_extract_ignores_extra_kwargs(resource: URLResourceMock, mocked_session: Mock) -> None:
+    mocked_session.send.return_value = make_response(200, '{"results": []}')
+
+    extracted = resource.extract("https://example.com", query="nope")
+    assert extracted.signature
+    assert extracted.signature.data == {}

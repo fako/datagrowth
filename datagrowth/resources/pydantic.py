@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Self, Generic, cast
+from typing import Any, ClassVar, Type, Self, Generic, cast
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 import base64
@@ -37,6 +37,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource")
     STORAGE: ClassVar[Tag | None] = None
     EXTRACTOR: ClassVar[Tag | None] = None
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = InputsValidator
 
     id: UUID4 = Field(default_factory=uuid4)
     type: Tag = Field(default_factory=lambda: Tag(category="resource", value="resource"))
@@ -57,17 +58,24 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         return self._extractor
 
     #####################
-    # Publib interface
+    # Public interface
     #####################
 
     @classmethod
     def get_name(cls) -> str:
         return cls.__name__
 
+    def prepare_extract(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+        """
+        Do not override. This method is here for abstract Resources to test against different inputs,
+        without invoking concrete extraction logic.
+        """
+        inputs = self.INPUTS_VALIDATOR.from_inputs(*args, **kwargs)
+        return self.prepare_inputs(inputs)
+
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         # Validate the inputs to arrive at a Signature used for extraction
-        inputs = self.validate_inputs(*args, **kwargs)
-        signature = self.prepare_inputs(*inputs.args, **inputs.kwargs)
+        signature = self.prepare_extract(*args, **kwargs)
 
         # Try to look up the Signature in storage
         if self.storage is not None:
@@ -152,10 +160,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         data = self.result.body if self.success else self.result.errors
         return self.result.content_type, data
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
-        return InputsValidator(args=args, kwargs=kwargs)
-
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+    def prepare_inputs(self, inputs: InputsValidator) -> ResourceSignatureType:
         raise NotImplementedError
 
     def handle_errors(self) -> None:

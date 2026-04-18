@@ -2,29 +2,40 @@ from __future__ import annotations
 
 import json
 import base64
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Type
 from unittest.mock import Mock
 from pathlib import Path
-
 import pytest
 import requests
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
-
 from pydantic import ValidationError
 
 from datagrowth.registry import Tag
 from datagrowth.exceptions import DGHttpError40X, DGHttpError50X
-from datagrowth.resources.http.extractors.requests import RequestsExtractor
-from datagrowth.resources.http.pydantic import HttpResource
-from datagrowth.signatures import DataBody, DataMode
-from datagrowth.resources.http.signature import HttpAuth, HttpSignature
+from datagrowth.signatures import DataBody, DataMode, InputsValidator
 from datagrowth.resources.pydantic import Result
+from datagrowth.resources.http.signature import HttpSignature, HttpMethod, HttpAuth
+from datagrowth.resources.http.pydantic import HttpResource, HttpInputsValidator
+from datagrowth.resources.http.extractors.requests import RequestsExtractor
+
+
+class ExampleHttpInputsValidator(HttpInputsValidator):
+    POSITIONAL_NAMES: ClassVar[tuple[str, ...]] = ("method", "resource_type")
+    resource_type: str
+    slug: str
+    page: int
+    query: str | None = None
+
+
+class ExampleDataInputsValidator(HttpInputsValidator):
+    file: str | None = None
 
 
 class HttpResourceMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_mock")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = ExampleHttpInputsValidator
     URI_TEMPLATE: ClassVar[str] = "https://example.com/{}/{slug}"
     PARAMETERS: ClassVar[dict[str, str] | None] = {
         "source": "tests",
@@ -50,6 +61,7 @@ class HttpResourceAuthMock(HttpResourceMock):
 class HttpResourceDataMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_data_mock")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = ExampleDataInputsValidator
     STORAGE: ClassVar[Tag | None] = Tag(category="storage", value="file_system")
     URI_TEMPLATE: ClassVar[str] = "https://example.com/upload"
     MODE: ClassVar[DataMode] = DataMode.DATA
@@ -136,26 +148,33 @@ def data_resource(mocked_session: Mock, tmp_path: Path) -> HttpResourceDataMock:
 
 def test_validate_inputs_accepts_supported_http_methods(resource: HttpResourceMock) -> None:
     for method in ("get", "post", "put", "head", "patch"):
-        inputs = resource.validate_inputs(method, "books", slug="python", page="1")
+        inputs = ExampleHttpInputsValidator.from_inputs(method, "books", slug="python", page="1")
         assert inputs.args[0] == method
 
 
 def test_validate_inputs_rejects_unsupported_method(resource: HttpResourceMock) -> None:
-    with pytest.raises(ValidationError, match="args"):
-        resource.validate_inputs("delete", "books", slug="python", page="1")
+    with pytest.raises(ValidationError, match="type=enum, input_value='delete'"):
+        ExampleHttpInputsValidator.from_inputs("delete", "books", slug="python", page="1")
 
 
 def test_validate_inputs_rejects_empty_call(resource: HttpResourceMock) -> None:
-    with pytest.raises(ValidationError, match="too_short"):
-        resource.validate_inputs()
+    with pytest.raises(ValidationError, match="type=missing"):
+        ExampleHttpInputsValidator.from_inputs()
+
+
+def test_validate_inputs_accepts_positional_args_as_kwargs(resource: HttpResourceMock) -> None:
+    inputs = ExampleHttpInputsValidator.from_inputs(resource_type="books", slug="python", page="1", method="post")
+    assert inputs.args == ("post", "books",)
+    assert inputs.kwargs == {"page": 1, "slug": "python", "method": HttpMethod.POST, "resource_type": "books"}
 
 
 # ==============================
-# prepare_inputs
+# prepare_extract
 # ==============================
+
 
 def test_prepare_inputs_creates_http_signature_with_template_data(resource: HttpResourceMock) -> None:
-    signature = resource.prepare_inputs("get", "books", slug="python", page="2")
+    signature = resource.prepare_extract("get", "books", slug="python", page="2")
 
     assert isinstance(signature, HttpSignature)
     assert signature.url == "https://example.com/books/python?source=tests&page=2"
@@ -165,19 +184,19 @@ def test_prepare_inputs_creates_http_signature_with_template_data(resource: Http
     assert signature.headers == {"Accept": "application/json"}
 
 
-def test_prepare_inputs_rejects_invalid_url_placeholders(resource: HttpResourceMock) -> None:
-    with pytest.raises(ValueError, match="expects exactly 1 positional args"):
-        resource.prepare_inputs("get")
+def test_prepare_inputs_rejects_missing_url_placeholders(resource: HttpResourceMock) -> None:
+    with pytest.raises(ValidationError, match="type=missing"):
+        resource.prepare_extract("get")  # missing args
 
-    with pytest.raises(KeyError, match="Missing URI_TEMPLATE variables: page, slug"):
-        resource.prepare_inputs("get", "books")
+    with pytest.raises(ValidationError, match="type=missing"):
+        resource.prepare_extract("get", "books")  # missing kwargs
 
 
 def test_prepare_inputs_includes_auth_but_excludes_it_from_dump(mocked_session: Mock) -> None:
     resource = HttpResourceAuthMock()
     assert isinstance(resource.extractor, RequestsExtractor)
     resource.extractor.set_session(mocked_session)
-    signature = resource.prepare_inputs("get", "books", slug="python", page="2")
+    signature = resource.prepare_extract("get", "books", slug="python", page="2")
 
     assert signature.auth == HttpAuth(
         headers={"Authorization": "Bearer super-secret-token"},

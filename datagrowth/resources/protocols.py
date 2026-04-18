@@ -1,4 +1,4 @@
-from typing import Protocol, Any, Self, TypeVar
+from typing import Protocol, Any, Self, TypeVar, ClassVar, Type
 from pathlib import Path
 
 from datagrowth.signatures import Signature, InputsValidator
@@ -13,6 +13,7 @@ class ResourceProtocol(Protocol):
     A set of methods and properties shared by Resources.
     This protocol gets used throughout Datagrowth to allow generic data ETL.
     """
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]]
 
     config: ConfigurationType
 
@@ -39,6 +40,12 @@ class ResourceProtocol(Protocol):
     #######################################################
     # A set of methods and properties shared by resources
     # and meant to override to adjust functionality.
+
+    def prepare_extract(self, *args: Any, **kwargs: Any) -> Signature:
+        """
+        Takes arbitrary input data and performs the validation and transformation necessary to execute data extraction.
+        """
+        ...
 
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         """
@@ -75,15 +82,9 @@ class ResourceProtocol(Protocol):
         """
         ...
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
+    def prepare_inputs(self, inputs: InputsValidator) -> Signature:
         """
-        Override this method to run a (Pydantic) validator against the inputs before they get processed.
-        """
-        ...
-
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> Signature:
-        """
-        Override this method to turn inputs into a ResourceType specific signature to use for extraction.
+        Override this method to turn validated inputs into a ResourceType specific signature to use for extraction.
         """
         ...
 
