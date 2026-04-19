@@ -14,7 +14,7 @@ invoke==2.2.0
 pydantic==2.12.5
 
 # Running tests and quality tools
-pytest==7.4.3
+pytest==9.0.3
 pytest-xdist==3.5.0
 flake8==6.1.0
 django-stubs==6.0.2
