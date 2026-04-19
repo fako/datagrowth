@@ -20,6 +20,7 @@ flake8==6.1.0
 django-stubs==6.0.2
 celery-types==0.22.0
 basedpyright==1.39.0
+PyYAML==6.0.2
 
 # Database packages that might not always be used
 psycopg2-binary==2.9.10
