@@ -71,3 +71,15 @@ class DGPendingDocuments(DGPendingDataStorage):
 
 class DGPendingCollections(DGPendingDataStorage):
     pass
+
+
+class DGStorageException(Exception):
+    pass
+
+
+class DGTemplateNotFound(DGStorageException):
+    pass
+
+
+class DGTemplateRenderError(DGStorageException):
+    pass

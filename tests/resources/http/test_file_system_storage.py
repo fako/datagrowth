@@ -3,13 +3,16 @@ from __future__ import annotations
 from typing import ClassVar, Type
 from unittest.mock import Mock
 from pathlib import Path
+from uuid import uuid4
 
+from jinja2 import Environment, StrictUndefined
 import pytest
 import requests
 from requests.models import Response
 from requests.structures import CaseInsensitiveDict
 
-from datagrowth.registry import Tag
+from datagrowth.exceptions import DGTemplateNotFound, DGTemplateRenderError
+from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
 from datagrowth.resources.http.extractors.requests import RequestsExtractor
 from datagrowth.resources.http.pydantic import HttpResource, HttpInputsValidator
 from datagrowth.signatures import DataMode, InputsValidator
@@ -98,6 +101,7 @@ def configure_storage(resource: HttpResourceMock, root: Path, snapshots: bool = 
             "data": str(root / "data"),
             "snapshots": str(root / "snapshots"),
             "tmp": str(root / "tmp"),
+            "templates": str(root / "templates"),
         },
     })
 
@@ -289,3 +293,56 @@ def test_storage_read_rejects_reserved_data_json(resource: HttpResourceMock, moc
     assert extracted.signature is not None
     with pytest.raises(ValueError, match="reserved"):
         resource.storage.read(extracted.signature, "data.json")
+
+
+def test_storage_render_template_uses_config_template_directory(resource: HttpResourceMock, tmp_path: Path) -> None:
+    configure_storage(resource, root=tmp_path)
+    assert isinstance(resource.storage, FileSystemStorage)
+    template_directory = tmp_path / "templates"
+    template_directory.mkdir(parents=True, exist_ok=True)
+    (template_directory / "greeting.txt").write_text("Hello {{ name }}", encoding="utf-8")
+
+    rendered = resource.storage.render_template("greeting.txt", {"name": "DataGrowth"})
+
+    assert rendered == "Hello DataGrowth"
+
+
+def test_storage_render_template_uses_registry_template_directories_lazily(
+        resource: HttpResourceMock, tmp_path: Path) -> None:
+    configure_storage(resource, root=tmp_path)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    template_directory = tmp_path / "package_templates"
+    template_directory.mkdir(parents=True, exist_ok=True)
+    (template_directory / "registry.txt").write_text("From registry {{ value }}", encoding="utf-8")
+
+    directory_tag = Tag(category="templates", value=f"templates_{uuid4().hex}")
+    DATAGROWTH_REGISTRY.register_directory(directory_tag, template_directory)
+    try:
+        rendered = resource.storage.render_template("registry.txt", {"value": "works"})
+    finally:
+        DATAGROWTH_REGISTRY.unregister_directory(directory_tag)
+
+    assert rendered == "From registry works"
+
+
+def test_storage_render_template_respects_custom_jinja_environment(resource: HttpResourceMock, tmp_path: Path) -> None:
+    configure_storage(resource, root=tmp_path)
+    assert isinstance(resource.storage, FileSystemStorage)
+    custom_environment = Environment(undefined=StrictUndefined)
+    storage = FileSystemStorage(config=resource.storage.config, jinja_environment=custom_environment)
+
+    template_directory = tmp_path / "templates"
+    template_directory.mkdir(parents=True, exist_ok=True)
+    (template_directory / "strict.txt").write_text("{{ missing_variable }}", encoding="utf-8")
+
+    with pytest.raises(DGTemplateRenderError):
+        storage.render_template("strict.txt", {})
+
+
+def test_storage_render_template_raises_prompt_template_not_found(resource: HttpResourceMock, tmp_path: Path) -> None:
+    configure_storage(resource, root=tmp_path)
+    assert isinstance(resource.storage, FileSystemStorage)
+
+    with pytest.raises(DGTemplateNotFound, match="missing.txt"):
+        resource.storage.render_template("missing.txt", {})

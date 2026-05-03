@@ -127,6 +127,9 @@ class ResourceStorageProtocol(Protocol):
     def write_tmp(self, filename: str, data: bytes | str) -> Path:
         ...
 
+    def render_template(self, template: str, context: dict[str, Any]) -> str:
+        ...
+
 
 class ResourceExtractorProtocol(Protocol[ExtractorSignatureType]):
 

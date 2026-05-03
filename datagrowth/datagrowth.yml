@@ -53,6 +53,7 @@ storage:
     project: null
     data: ["/", "tmp", "data"]
     snapshots: ["/", "tmp", "snapshots"]
+    templates: ["/", "tmp", "templates"]
 
 growth_processor:
   extractor: "ExtractProcessor.extract_from_resource"

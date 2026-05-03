@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "Django>=5.2",
+    "Jinja2",
     "celery",
     "jsonschema>=4.20.0",
     "lxml",
