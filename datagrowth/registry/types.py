@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 import importlib
+from pathlib import Path
 from dataclasses import dataclass, field
 from pydantic import BaseModel
 
@@ -73,6 +74,7 @@ class Tag(BaseModel):
 class Registry:
     tags: dict[str, Tag] = field(default_factory=dict)
     namespaces: set[Tag] = field(default_factory=set)
+    directories: dict[Tag, Path] = field(default_factory=dict)
     classes: dict[Tag, str] = field(default_factory=dict)
     configurations: dict[Tag, ConfigurationType] = field(default_factory=dict)
 
@@ -105,6 +107,7 @@ class Registry:
 
     def clear_category(self, category: str) -> None:
         for tag in self.tags_by_category(category):
+            self.directories.pop(tag, None)
             self.classes.pop(tag, None)
             self.configurations.pop(tag, None)
             del self.tags[str(tag)]
@@ -135,6 +138,30 @@ class Registry:
         if tag not in self.namespaces:
             raise KeyError(f"{tag} is not registered as a namespace")
         return tag
+
+    #####################
+    # Directories
+    #####################
+
+    def register_directory(self, tag: str | Tag, directory: str | Path) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if isinstance(directory, str):
+            directory = Path(directory)
+        self.register_tag(tag)
+        self.directories[tag] = directory
+        return tag
+
+    def unregister_directory(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        self.unregister_tag(tag)
+        del self.directories[tag]
+
+    def get_directory(self, tag: str | Tag) -> Path:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        return self.directories[tag]
 
     #####################
     # Classes
