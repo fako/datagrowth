@@ -104,7 +104,7 @@ class PromptResource(HttpResource):
 
     # Prompt specific control attributes
     ErrorCodes: ClassVar[type[PromptErrorCodes]] = PromptErrorCodes
-    DEFAULT_MODEL: Tag | None = Field(default=None)
+    DEFAULT_MODEL: ClassVar[Tag | None] = None
     # Prompt specific data attributes
     llm: Tag
 

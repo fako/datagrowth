@@ -17,7 +17,7 @@ class MockStorage:
     def save(self, resource: ResourceProtocol) -> Signature:
         return Signature(uri="mock://")
 
-    def load(self, signature: Signature) -> ResourceProtocol | None:
+    def load(self, signature: Signature, load_as: type[ResourceProtocol] | None = None) -> ResourceProtocol | None:
         return None
 
     def read(self, signature: Signature, filename: str) -> bytes | str:

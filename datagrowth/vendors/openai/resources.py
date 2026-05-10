@@ -1,7 +1,5 @@
 from typing import Any, ClassVar
 
-from pydantic import BaseModel
-
 from datagrowth.exceptions import DGHttpNoAuthentication
 from datagrowth.llm import LLMModel, LLMVendors
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
@@ -21,7 +19,7 @@ class OpenaiPromptResource(PromptResource):
 
     URI_TEMPLATE = "https://api.openai.com/v1/chat/completions"
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="openai")
-    DEFAULT_MODEL: Tag | None = OPENAI_DEFAULT_TAG
+    DEFAULT_MODEL: ClassVar[Tag | None] = OPENAI_DEFAULT_TAG
 
     def auth_headers(self) -> dict:
         api_key = self.config.api_key

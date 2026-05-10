@@ -112,7 +112,7 @@ class ResourceStorageProtocol(Protocol):
     def save(self, resource: ResourceProtocol) -> Signature:
         ...
 
-    def load(self, signature: Signature) -> ResourceProtocol | None:
+    def load(self, signature: Signature, load_as: type[ResourceProtocol] | None = None) -> ResourceProtocol | None:
         ...
 
     def read(self, signature: Signature, filename: str) -> bytes | str:

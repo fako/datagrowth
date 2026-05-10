@@ -1,6 +1,7 @@
 import pytest
 
 from pathlib import Path
+from datetime import datetime, timezone
 from typing import ClassVar
 from uuid import uuid4
 from pydantic import BaseModel
@@ -13,6 +14,10 @@ from datagrowth.resources.http.signature import HttpMethod
 from datagrowth.resources.prompt.pydantic import PromptInputsValidator
 from datagrowth.resources.storage.file_system import FileSystemStorage
 from datagrowth.vendors.openai.resources import OPENAI_DEFAULT_MODEL, OPENAI_DEFAULT_TAG, OpenaiPromptResource
+
+
+class JsonOutput(BaseModel):
+    answer: str
 
 
 class MockOpenaiPromptResource(OpenaiPromptResource):
@@ -33,8 +38,8 @@ def configure_storage(resource: MockOpenaiPromptResource) -> None:
     resource.storage.config.update({
         "directories": {
             "project": None,
-            "data": str(Path("/tmp/data")),
-            "snapshots": str(Path("/tmp/snapshots")),
+            "data": "snapshots",
+            "snapshots": "snapshots",
             "tmp": str(Path("/tmp")),
             "templates": str(PROMPTS_DIRECTORY),
         },
@@ -93,9 +98,6 @@ def test_validate_inputs_rejects_json_template_without_output() -> None:
 
 
 def test_validate_inputs_sets_json_schema_for_json_template() -> None:
-    class JsonOutput(BaseModel):
-        answer: str
-
     inputs = PromptInputsValidator.from_llm(
         OPENAI_DEFAULT_MODEL,
         "chat.json.tpl",
@@ -124,13 +126,11 @@ def test_prepare_extract_renders_template_and_builds_signature(resource: MockOpe
     assert signature.data["n"] == 1
     assert signature.data["model"] == OPENAI_DEFAULT_MODEL.identifier
     assert signature.data["messages"][0]["role"] == "user"
-    assert signature.data["messages"][0]["content"].strip() == "Hello DataGrowth!"
+    assert signature.data["messages"][0]["content"].strip() == \
+        "Hello, I'm DataGrowth! Please repeat only my name, thank you!"
 
 
 def test_prepare_extract_builds_json_response_format_for_json_template(resource: MockOpenaiPromptResource) -> None:
-    class JsonOutput(BaseModel):
-        answer: str
-
     configure_storage(resource)
     schema = JsonOutput.model_json_schema()
     signature = resource.prepare_extract(
@@ -211,3 +211,44 @@ def test_extract_returns_max_tokens_estimate_exceeded_error_resource() -> None:
         assert "too many tokens" in extracted.result.errors
     finally:
         DATAGROWTH_REGISTRY.unregister_llm(token_limited_tag)
+
+
+@pytest.mark.snapshots
+def test_extract_hello_world_template(resource: MockOpenaiPromptResource) -> None:
+    configure_storage(resource)
+    if resource.storage is not None and resource.storage.config.snapshots:
+        resource.config = create_config("openai", {})
+    extracted = resource.extract("hello_world.tpl", context={"name": "DataGrowth"}, options={"n": 1})
+    extracted.close()
+
+    if resource.storage is not None and resource.storage.config.snapshots:
+        pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
+
+    assert isinstance(extracted, MockOpenaiPromptResource)
+    assert extracted.signature is not None
+    assert extracted.result is not None
+    assert extracted.result.created_at <= datetime.now(timezone.utc)
+    assert extracted.status == 200
+
+
+@pytest.mark.snapshots
+def test_extract_json_response_template(resource: MockOpenaiPromptResource) -> None:
+    configure_storage(resource)
+    if resource.storage is not None and resource.storage.config.snapshots:
+        resource.config = create_config("openai", {})
+    extracted = resource.extract(
+        "json_response.json.tpl",
+        output=JsonOutput,
+        context={"name": "DataGrowth"},
+        options={"n": 1},
+    )
+    extracted.close()
+
+    if resource.storage is not None and resource.storage.config.snapshots:
+        pytest.skip("Snapshots mode enabled: assertions disabled for snapshot recording.")
+
+    assert isinstance(extracted, MockOpenaiPromptResource)
+    assert extracted.signature is not None
+    assert extracted.result is not None
+    assert extracted.result.created_at <= datetime.now(timezone.utc)
+    assert extracted.status == 200

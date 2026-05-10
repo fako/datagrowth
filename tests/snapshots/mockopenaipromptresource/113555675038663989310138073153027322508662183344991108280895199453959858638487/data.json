@@ -1,0 +1,112 @@
+{
+    "id": "74ee08ae-842c-4e61-89fd-88d9e07b118b",
+    "type": {
+        "category": "resource",
+        "value": "mockopenaipromptresource"
+    },
+    "config": {},
+    "signature": {
+        "uri": "api.openai.com/v1/chat/completions",
+        "data": {
+            "n": 1,
+            "model": "gpt-4.1-2025-04-14",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Return a JSON object for DataGrowth. Use the JSON schema below. The answer is: \"Hi!\"\n\n{'properties': {'answer': {'title': 'Answer', 'type': 'string'}}, 'required': ['answer'], 'title': 'JsonOutput', 'type': 'object'}"
+                }
+            ],
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "JsonOutput",
+                    "schema": {
+                        "properties": {
+                            "answer": {
+                                "title": "Answer",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "answer"
+                        ],
+                        "title": "JsonOutput",
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "mode": "json",
+        "hash": 113555675038663989310138073153027322508662183344991108280895199453959858638487,
+        "type": "mockopenaipromptresource",
+        "args": [
+            "json_response.json.tpl",
+            "basemodel:vendors.openai.test_prompt_resource.JsonOutput"
+        ],
+        "kwargs": {
+            "output": "basemodel:vendors.openai.test_prompt_resource.JsonOutput",
+            "context": {
+                "name": "DataGrowth",
+                "json_schema": {
+                    "properties": {
+                        "answer": {
+                            "title": "Answer",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "answer"
+                    ],
+                    "title": "JsonOutput",
+                    "type": "object"
+                }
+            },
+            "options": {
+                "n": 1
+            }
+        },
+        "method": "post",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "headers": {}
+    },
+    "result": {
+        "content_type": "application/json",
+        "head": {
+            "date": "Sun, 10 May 2026 18:42:06 GMT",
+            "content-type": "application/json",
+            "transfer-encoding": "chunked",
+            "connection": "keep-alive",
+            "cf-ray": "9f9b14f129ec66e1-AMS",
+            "cf-cache-status": "DYNAMIC",
+            "server": "cloudflare",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "access-control-expose-headers": "X-Request-ID",
+            "openai-organization": "datascope-search",
+            "openai-processing-ms": "298",
+            "openai-project": "proj_3J0LOaMaEqw9vcnvaLrGaBjQ",
+            "openai-version": "2020-10-01",
+            "x-openai-proxy-wasm": "v0.1",
+            "x-ratelimit-limit-requests": "10000",
+            "x-ratelimit-limit-tokens": "2000000",
+            "x-ratelimit-remaining-requests": "9999",
+            "x-ratelimit-remaining-tokens": "1999944",
+            "x-ratelimit-reset-requests": "6ms",
+            "x-ratelimit-reset-tokens": "1ms",
+            "x-request-id": "req_75d1862fe2da404cb04bedda74020da4",
+            "set-cookie": "__cf_bm=VB4J_eKOLtj8Drn0xt_qC12ySz5Ge983S1UDmRW4ikE-1778438525.6214316-1.0.1.1-Z4genfNlHENh6.faxm4dGndhK__Zd5tfk3A6Mazgg7RhyUwPZyLUeBRLxYkkEa5U2p4x_dKhijdBIeYhV5UXJe6Goa.JUUyqz9rZuylJA1CELmLObL2HRLIgxHN9n9B7; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Sun, 10 May 2026 19:12:06 GMT",
+            "content-encoding": "gzip",
+            "alt-svc": "h3=\":443\"; ma=86400"
+        },
+        "body": "{\n  \"id\": \"chatcmpl-De3OH3kUHeYe0tMYqB9Vl1b816qA0\",\n  \"object\": \"chat.completion\",\n  \"created\": 1778438525,\n  \"model\": \"gpt-4.1-2025-04-14\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"{\\\"answer\\\":\\\"Hi!\\\"}\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 105,\n    \"completion_tokens\": 6,\n    \"total_tokens\": 111,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_e474b5e306\"\n}\n",
+        "errors": null,
+        "created_at": "2026-05-10T18:42:06.149981Z"
+    },
+    "status": 200,
+    "metadata": {},
+    "purge_at": "2026-06-09T20:42:05.541617",
+    "llm": {
+        "category": "llm",
+        "value": "openai/default"
+    }
+}

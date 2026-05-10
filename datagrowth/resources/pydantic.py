@@ -86,7 +86,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             # Downgrade Signature to basic format and check against storage if extraction has taken place already
             if self.storage.config.allow_load:
                 storage_signature = Signature(**signature.model_dump(mode="json"))
-                loaded_resource = self.storage.load(storage_signature)
+                loaded_resource = self.storage.load(storage_signature, load_as=self.__class__)
                 if loaded_resource is not None:
                     if isinstance(loaded_resource, self.__class__):
                         return cast(Self, loaded_resource)
