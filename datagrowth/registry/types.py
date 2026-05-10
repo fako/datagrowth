@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel
 
 from datagrowth.protocols import ProcessorProtocol
+from datagrowth.llm import LLMModel
 from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceProtocol, ResourceStorageProtocol
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
 
@@ -77,6 +78,7 @@ class Registry:
     directories: dict[Tag, Path] = field(default_factory=dict)
     classes: dict[Tag, str] = field(default_factory=dict)
     configurations: dict[Tag, ConfigurationType] = field(default_factory=dict)
+    llms: dict[Tag, LLMModel] = field(default_factory=dict)
 
     #####################
     # Tags
@@ -110,6 +112,7 @@ class Registry:
             self.directories.pop(tag, None)
             self.classes.pop(tag, None)
             self.configurations.pop(tag, None)
+            self.llms.pop(tag, None)
             del self.tags[str(tag)]
 
     #####################
@@ -296,6 +299,33 @@ class Registry:
             merged = create_config(namespace, {})
         config = self.get_configuration(tag, merged)
         return resource_cls(config=config)  # type: ignore[reportCallIssue]
+
+    #####################
+    # LLMs
+    #####################
+
+    def register_llm(self, tag: str | Tag, llm: LLMModel) -> Tag:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "llm":
+            raise ValueError(f"Expected a tag with 'llm' category but found '{tag.category}'")
+        self.register_tag(tag)
+        self.llms[tag] = llm
+        return tag
+
+    def unregister_llm(self, tag: str | Tag) -> None:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "llm":
+            raise ValueError(f"Expected a tag with 'llm' category but found '{tag.category}'")
+        del self.llms[tag]
+
+    def get_llm(self, tag: str | Tag) -> LLMModel:
+        if isinstance(tag, str):
+            tag = Tag.from_string(tag)
+        if tag.category != "llm":
+            raise ValueError(f"Expected a tag with 'llm' category but found '{tag.category}'")
+        return self.llms[tag]
 
     #####################
     # Storages
