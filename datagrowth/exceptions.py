@@ -33,6 +33,10 @@ class DGInvalidResource(DGResourceException):
     pass
 
 
+class DGHttpNoAuthentication(DGResourceException):
+    pass
+
+
 class DGHttpError400NoToken(DGResourceException):
     pass
 
@@ -42,6 +46,14 @@ class DGHttpWarning300(DGResourceException):
 
 
 class DGResourceDoesNotExist(DGResourceException):
+    pass
+
+
+class DGPromptError(DGResourceException):
+    pass
+
+
+class DGPromptMaxTokensExceeded(DGPromptError):
     pass
 
 

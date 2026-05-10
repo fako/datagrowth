@@ -77,3 +77,6 @@ micro_service:
 web:
   api_version: 1
   media_root: null
+
+openai:
+  api_key: null
