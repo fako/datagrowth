@@ -3,10 +3,14 @@ from enum import Enum
 import hashlib
 import json
 import re
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, ValidationInfo, field_validator, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, PrivateAttr, ValidationInfo, field_serializer, field_validator,
+                      model_validator)
+
+from datagrowth.utils.classes import serialize_class_reference, deserialize_class_reference
 
 
 SAFE_SIGNATURE_TYPE_PATTERN = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9._-]*$")
+BASEMODEL_CLASS_PREFIX = "basemodel"
 
 
 class DataMode(str, Enum):
@@ -148,6 +152,40 @@ class Signature(BaseModel):
 
     def __hash__(self) -> int:
         return self.hash
+
+    @field_validator("args", mode="before")
+    @classmethod
+    def deserialize_args(cls, args: Any) -> tuple[Any, ...]:
+        value = deserialize_class_reference(args, prefix=BASEMODEL_CLASS_PREFIX)
+        if isinstance(value, tuple):
+            return value
+        if isinstance(value, list):
+            return tuple(value)
+        raise TypeError(f"Signature args expected tuple or list, got {type(value)}")
+
+    @field_validator("kwargs", mode="before")
+    @classmethod
+    def deserialize_kwargs(cls, kwargs: Any) -> dict[str, Any]:
+        value = deserialize_class_reference(kwargs, prefix=BASEMODEL_CLASS_PREFIX)
+        if isinstance(value, dict):
+            return value
+        raise TypeError(f"Signature kwargs expected dict, got {type(value)}")
+
+    @field_serializer("args")
+    def serialize_args(self, args: tuple[Any, ...]) -> tuple[Any, ...]:
+        value = serialize_class_reference(args, prefix=BASEMODEL_CLASS_PREFIX)
+        if isinstance(value, tuple):
+            return value
+        if isinstance(value, list):
+            return tuple(value)
+        raise TypeError(f"Signature args serializer expected tuple/list result, got {type(value)}")
+
+    @field_serializer("kwargs")
+    def serialize_kwargs(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        value = serialize_class_reference(kwargs, prefix=BASEMODEL_CLASS_PREFIX)
+        if isinstance(value, dict):
+            return value
+        raise TypeError(f"Signature kwargs serializer expected dict result, got {type(value)}")
 
     @field_validator("type")
     @classmethod

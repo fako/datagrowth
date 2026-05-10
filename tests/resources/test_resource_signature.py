@@ -1,11 +1,12 @@
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from datagrowth.registry import Tag
 from datagrowth.signatures import DataBody, DataMode, DataPart, Signature
 from datagrowth.resources.pydantic import Resource
 from copy import deepcopy
 from uuid import uuid4
+import json
 
 
 @pytest.fixture
@@ -213,3 +214,36 @@ def test_resource_inequality_by_id_when_no_signatures(resource_tag: Tag) -> None
     r1 = Resource(type=resource_tag)
     r2 = Resource(type=resource_tag)
     assert r1 != r2
+
+
+class SignatureOutputModel(BaseModel):
+    answer: str
+
+
+def test_signature_serializes_basemodel_class_references_in_args_and_kwargs() -> None:
+    signature = Signature(
+        uri="example://resource",
+        args=(SignatureOutputModel,),
+        kwargs={"output": SignatureOutputModel, "nested": {"items": [SignatureOutputModel]}},
+    )
+
+    dumped = json.loads(signature.model_dump_json())
+    path = f"basemodel:{SignatureOutputModel.__module__}.{SignatureOutputModel.__qualname__}"
+    assert dumped["args"] == [path]
+    assert dumped["kwargs"]["output"] == path
+    assert dumped["kwargs"]["nested"]["items"] == [path]
+
+
+def test_signature_deserializes_prefixed_basemodel_class_references_in_args_and_kwargs() -> None:
+    path = f"basemodel:{SignatureOutputModel.__module__}.{SignatureOutputModel.__qualname__}"
+    signature = Signature.model_validate(
+        {
+            "uri": "example://resource",
+            "args": [path],
+            "kwargs": {"output": path, "nested": {"items": [path]}},
+        }
+    )
+
+    assert signature.args == (SignatureOutputModel,)
+    assert signature.kwargs["output"] is SignatureOutputModel
+    assert signature.kwargs["nested"]["items"] == [SignatureOutputModel]

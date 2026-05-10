@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Any, cast
-import importlib
 from pathlib import Path
 from dataclasses import dataclass, field
 from pydantic import BaseModel
@@ -10,35 +9,12 @@ from datagrowth.protocols import ProcessorProtocol
 from datagrowth.llm import LLMModel
 from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceProtocol, ResourceStorageProtocol
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
+from datagrowth.utils.classes import deserialize_class_reference
 
 
 def _get_config_namespace(config: ConfigurationProperty | ConfigurationType) -> list[str]:
     """Extract the namespace list from either a ConfigurationProperty descriptor or a ConfigurationType instance."""
     return config._namespace
-
-
-def _import_class(path: str) -> type:
-    """
-    Helper function that takes a qualname of a class and imports it.
-    Will indicate where the import path breaks when errors occur.
-    """
-    parts = path.split(".")
-    for index in range(len(parts) - 1, 0, -1):
-        module_name = ".".join(parts[:index])
-        attr_path = parts[index:]
-        try:
-            module = importlib.import_module(module_name)
-        except ModuleNotFoundError as error:
-            if error.name == module_name:
-                continue
-            raise
-        clazz = module
-        for attribute in attr_path:
-            clazz = getattr(clazz, attribute)
-        if not isinstance(clazz, type):
-            raise TypeError(f"Expected class import from path '{path}', got {type(clazz)}")
-        return clazz
-    raise ImportError(f"Could not import class path '{path}'")
 
 
 class Tag(BaseModel):
@@ -185,7 +161,7 @@ class Registry:
     def get_class(self, tag: str | Tag) -> type:
         if isinstance(tag, str):
             tag = Tag.from_string(tag)
-        return _import_class(self.classes[tag])
+        return cast(type, deserialize_class_reference(self.classes[tag]))
 
     #####################
     # Configurations
@@ -244,7 +220,7 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "processor":
             raise ValueError(f"Expected a tag with 'processor' category but found '{tag.category}'")
-        processor_cls = cast(type[ProcessorProtocol], _import_class(self.classes[tag]))
+        processor_cls = cast(type[ProcessorProtocol], deserialize_class_reference(self.classes[tag]))
         namespace = _get_config_namespace(processor_cls.config)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
@@ -292,7 +268,7 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "resource":
             raise ValueError(f"Expected a tag with 'resource' category but found '{tag.category}'")
-        resource_cls = cast(type[ResourceProtocol], _import_class(self.classes[tag]))
+        resource_cls = cast(type[ResourceProtocol], deserialize_class_reference(self.classes[tag]))
         namespace = self._get_resource_namespace(resource_cls)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
@@ -357,7 +333,7 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "storage":
             raise ValueError(f"Expected a tag with 'storage' category but found '{tag.category}'")
-        storage_cls = cast(type[ResourceStorageProtocol], _import_class(self.classes[tag]))
+        storage_cls = cast(type[ResourceStorageProtocol], deserialize_class_reference(self.classes[tag]))
         namespace = _get_config_namespace(storage_cls.config)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
@@ -396,7 +372,7 @@ class Registry:
             tag = Tag.from_string(tag)
         if tag.category != "extractor":
             raise ValueError(f"Expected a tag with 'extractor' category but found '{tag.category}'")
-        extractor_cls = cast(type[ResourceExtractorProtocol[Any]], _import_class(self.classes[tag]))
+        extractor_cls = cast(type[ResourceExtractorProtocol[Any]], deserialize_class_reference(self.classes[tag]))
         namespace = _get_config_namespace(extractor_cls.config)
         merged = self._normalize_config(namespace, overrides)
         if merged is None:
