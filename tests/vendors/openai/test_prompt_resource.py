@@ -10,8 +10,9 @@ from datagrowth.exceptions import DGHttpNoAuthentication
 from datagrowth.configuration import create_config
 from datagrowth.llm import LLMModel, LLMVendors
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
+from datagrowth.resources.pydantic import Result
 from datagrowth.resources.http.signature import HttpMethod
-from datagrowth.resources.prompt.pydantic import PromptInputsValidator
+from datagrowth.resources.prompt.pydantic import PromptInputsValidator, PromptResource
 from datagrowth.resources.storage.file_system import FileSystemStorage
 from datagrowth.vendors.openai.resources import OPENAI_DEFAULT_MODEL, OPENAI_DEFAULT_TAG, OpenaiPromptResource
 
@@ -31,6 +32,14 @@ PROMPTS_DIRECTORY = Path(__file__).parent / "prompts"
 def resource() -> MockOpenaiPromptResource:
     config = create_config("openai", {"api_key": "openai-test-key"})
     return MockOpenaiPromptResource(config=config, llm=OPENAI_DEFAULT_TAG)
+
+
+@pytest.fixture
+def mock_openai_content(monkeypatch: pytest.MonkeyPatch):
+    def mock_content(data: dict | None) -> None:
+        monkeypatch.setattr(PromptResource, "content", property(lambda _self: ("application/json", data)))
+
+    return mock_content
 
 
 def configure_storage(resource: MockOpenaiPromptResource) -> None:
@@ -165,6 +174,68 @@ def test_prepare_extract_raises_without_openai_api_key() -> None:
 
 
 # ==============================
+# handle_errors
+# ==============================
+
+
+def test_handle_errors_sets_max_tokens_exceeded_status(resource: MockOpenaiPromptResource, mock_openai_content) -> None:
+    mock_openai_content({
+        "choices": [
+            {
+                "finish_reason": "length",
+                "message": {"content": "truncated output"},
+            }
+        ]
+    })
+    resource.status = 200
+    resource.result = Result(content_type="application/json", body="{}", errors=None)
+
+    resource.handle_errors()
+
+    assert resource.status == resource.ErrorCodes.MAX_TOKENS_EXCEEDED.value
+    assert resource.result is not None
+    assert resource.result.errors == "OpenAI response exceeded maximum output tokens."
+
+
+def test_handle_errors_sets_content_filter_status(resource: MockOpenaiPromptResource, mock_openai_content) -> None:
+    mock_openai_content({
+        "choices": [
+            {
+                "finish_reason": "content_filter",
+                "message": {"content": "blocked output"},
+            }
+        ]
+    })
+    resource.status = 200
+    resource.result = Result(content_type="application/json", body="{}", errors=None)
+
+    resource.handle_errors()
+
+    assert resource.status == resource.ErrorCodes.CONTENT_FILTER.value
+    assert resource.result is not None
+    assert resource.result.errors == "OpenAI response was blocked by content filtering."
+
+
+def test_handle_errors_keeps_successful_response(resource: MockOpenaiPromptResource, mock_openai_content) -> None:
+    mock_openai_content({
+        "choices": [
+            {
+                "finish_reason": "stop",
+                "message": {"content": "DataGrowth"},
+            }
+        ]
+    })
+    resource.status = 200
+    resource.result = Result(content_type="application/json", body="{}", errors=None)
+
+    resource.handle_errors()
+
+    assert resource.status == 200
+    assert resource.result is not None
+    assert resource.result.errors is None
+
+
+# ==============================
 # extract
 # ==============================
 
@@ -229,6 +300,9 @@ def test_extract_hello_world_template(resource: MockOpenaiPromptResource) -> Non
     assert extracted.result is not None
     assert extracted.result.created_at <= datetime.now(timezone.utc)
     assert extracted.status == 200
+    content_type, data = extracted.content
+    assert content_type == "text/plain"
+    assert data == "DataGrowth"
 
 
 @pytest.mark.snapshots
@@ -252,3 +326,6 @@ def test_extract_json_response_template(resource: MockOpenaiPromptResource) -> N
     assert extracted.result is not None
     assert extracted.result.created_at <= datetime.now(timezone.utc)
     assert extracted.status == 200
+    content_type, data = extracted.content
+    assert content_type == "application/json"
+    assert data == JsonOutput(answer="Hi!")
