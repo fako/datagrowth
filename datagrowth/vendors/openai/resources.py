@@ -120,3 +120,20 @@ class OpenaiPromptResource(PromptResource):
         else:
             content_type = "text/plain"
         return (content_type, messages[0]) if len(messages) == 1 else (content_type, messages)
+
+    ########################
+    # Prompt helpers
+    ########################
+
+    def get_token_usage(self) -> dict[str, int]:
+        if not self.success:
+            raise RuntimeError("Can't calculate token usage for failed Resource")
+        _, data = super().content
+        assert isinstance(data, dict), f"OpenaiPromptResource has unexpected content of type: {type(data)}"
+        usage = data["usage"]
+        return {
+            "prompt": usage["prompt_tokens"],
+            "completion": usage["completion_tokens"],
+            "reasoning": usage["completion_tokens_details"]["reasoning_tokens"],
+            "total": usage["total_tokens"],
+        }
