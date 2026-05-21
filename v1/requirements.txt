@@ -1,0 +1,10 @@
+# This file intends to pin down dependencies to their minimal version
+# Lower dependencies may work, but is not actively tested against
+
+# Core dependencies
+Jinja2==3.1.6
+requests==2.33.0
+invoke==3.0.3
+
+# LLM dependencies (optional until further notice)
+pydantic==2.12.5
