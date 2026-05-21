@@ -13,6 +13,9 @@ v0.22
 
 This update introduces LLM tools to the Datagrowth package and separates the package from its Django dependency. Being able to use the package outside of Django helps re-use in Jupyter for instance. It also makes it easier to implement snapshot testing, where snapshots no longer have to go through the Django fixture mechanisms.
 
+As a transition method to a v1 Datagrowth this repo now includes bundled versions as part of the release. You can download and unzip these bundles directly in your project as a ``datagrowth`` directory to access a subset of Datagrowth v1 functionality today. Include the ``datagrowth/requirements.txt`` in your prefered package management environment to make sure that a minimum of dependencies for the bundle are included in your project dependencies. After that you can access Datagrowth as any normal toplevel module. Once a v1 release is official that version can replace bundles by installing it and throwing the bundles away.
+
+* Minimal version for Invoke is now 3.0.0.
 * To install Datagrowth you need to add ``datagrowth.django.apps.DatagrowthConfig`` to ``INSTALLED_APPS`` instead of ``datagrowth``.
 * ``ConfigurationFormField`` is no longer exposed as a form to be used outside of the admin for ``ConfigurationField``.
 * The ``datagrowth.admin`` module has been moved to ``datagrowth.django.admin``.
