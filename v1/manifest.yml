@@ -18,6 +18,10 @@ renames:
   resources/http/pydantic.py: resources/http/base.py
   resources/pydantic.py: resources/base.py
 
+version:
+  file: version.py
+  bundle_version: "0.0.0"
+
 requirements:
   copy_from: requirements/dependencies.txt
   dest: requirements.txt
