@@ -1,28 +1,10 @@
 # This file intends to pin down dependencies to their minimal version
 # Lower dependencies may work, but is not actively tested against
-jsonschema==4.20.0
+
+# Core dependencies
 Jinja2==3.1.6
-lxml==6.0.2
-beautifulsoup4==4.8.0
-urlobject==2.4.3
 requests==2.33.0
-Pillow==12.1.1
-tqdm==4.66.3
-celery==5.3.6
 invoke==2.2.0
 
 # LLM dependencies (optional until further notice)
 pydantic==2.12.5
-
-# Running tests and quality tools
-pytest==7.4.3
-pytest-xdist==3.5.0
-flake8==6.1.0
-django-stubs==6.0.2
-celery-types==0.22.0
-basedpyright==1.39.0
-PyYAML==6.0.2
-
-# Database packages that might not always be used
-psycopg2-binary==2.9.10
-mysqlclient==2.2.8

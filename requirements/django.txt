@@ -1,5 +1,21 @@
+# This file intends to pin down dependencies to their minimal version
+# Lower dependencies may work, but is not actively tested against
+
+# Minimal dependencies for v1 functionality
 -r dependencies.txt
 
+# Django requirements
 Django==5.2.13
 djangorestframework==3.15.2
 pytest-django==4.7.0
+
+# Extra requirements
+lxml==6.0.2
+beautifulsoup4==4.8.0
+Pillow==12.1.1
+tqdm==4.66.3
+celery==5.3.6
+
+# Legacy requirements
+jsonschema==4.20.0
+urlobject==2.4.3
