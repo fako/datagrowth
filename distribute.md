@@ -16,3 +16,9 @@ Now upload the generated artefacts with
 ```bash
 twine upload dist/*
 ```
+
+To create a `tar.gz` from the `v1` bundle that can be uploaded as additional assets:
+
+```bash
+tar -czf datagrowth.tar.gz --transform='s,^v1,datagrowth,' v1
+```
