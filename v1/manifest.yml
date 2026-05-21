@@ -6,6 +6,7 @@ includes:
   - "datagrowth.yml"
   - "configuration/*"
   - "registry/*"
+  - "utils/classes.py"
   - "utils/data.py"
   - "utils/datetime.py"
   - "utils/iterators.py"
@@ -13,10 +14,17 @@ includes:
   - "resources/http/signature.py"
   - "resources/storage/*"
   - "resources/protocols.py"
+  - "vendors/apache/tika/*"
+  - "vendors/openai/*"
 
 renames:
   resources/http/pydantic.py: resources/http/base.py
+  resources/prompt/pydantic.py: resources/prompt/base.py
   resources/pydantic.py: resources/base.py
+
+version:
+  file: version.py
+  bundle_version: "0.0.0"
 
 requirements:
   copy_from: requirements/dependencies.txt

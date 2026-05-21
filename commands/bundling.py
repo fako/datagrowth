@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import shutil
 import warnings
 from pathlib import Path
@@ -11,6 +12,10 @@ from invoke.tasks import task
 
 MANIFEST_NAME = "manifest.yml"
 DEFAULT_TARGET = "v1"
+VERSION_PATTERN = re.compile(
+    r"^(?P<prefix>[^\S\r\n]*VERSION[^\S\r\n]*=[^\S\r\n]*)(?P<quote>['\"]).*?(?P=quote)(?P<suffix>[^\S\r\n]*)$",
+    re.MULTILINE,
+)
 
 
 def _collect_includes(datagrowth: Path, patterns: list[str]) -> set[Path]:
@@ -30,6 +35,30 @@ def _collect_includes(datagrowth: Path, patterns: list[str]) -> set[Path]:
 def _copy_file(src: Path, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dest)
+
+
+def _set_bundle_version(repo: Path, bundle_root: Path, version_data: dict[str, str]) -> None:
+    version_file = version_data.get("file")
+    bundle_version = version_data.get("bundle_version")
+    if not version_file or not isinstance(version_file, str):
+        raise ValueError("version.file must be a non-empty string")
+    if not bundle_version or not isinstance(bundle_version, str):
+        raise ValueError("version.bundle_version must be a non-empty string")
+
+    target = bundle_root / version_file
+    if not target.is_file():
+        raise FileNotFoundError(f"Version source missing in bundle: {target}")
+
+    def _replace(match: re.Match[str]) -> str:
+        return f"{match.group('prefix')}\"{bundle_version}\"{match.group('suffix')}"
+
+    content = target.read_text(encoding="utf-8")
+    updated, count = VERSION_PATTERN.subn(_replace, content, count=1)
+    if count == 0:
+        raise ValueError(f"Could not find VERSION assignment in: {target}")
+    target.write_text(updated, encoding="utf-8")
+    print("Version:")
+    print(f"  {target.relative_to(repo)} -> VERSION={bundle_version}")
 
 
 def build_bundle(repo: Path, bundle_root: Path) -> None:
@@ -84,6 +113,13 @@ def build_bundle(repo: Path, bundle_root: Path) -> None:
         dest = bundle_root / dest_rel
         _copy_file(src, dest)
         print(f"  datagrowth/{src_rel} -> {dest.relative_to(repo)}")
+
+    # --- Optional version replacement in copied files ---
+    version = data.get("version")
+    if version is not None:
+        if not isinstance(version, dict):
+            raise TypeError("version must be a mapping with file and bundle_version")
+        _set_bundle_version(repo, bundle_root, version)
 
     # --- Optional requirements file into the bundle ---
     req = data.get("requirements")

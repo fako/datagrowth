@@ -1,0 +1,82 @@
+global:  # treat all settings below global as-if they are defined at root level
+  datetime_format: "%Y%m%d%H%M%S%f"
+  asynchronous: true
+  batch_size: 100
+  max_batch_size: 100
+  sample_size: 0
+  datatypes_app_label: null
+  datatype_models:
+    document: "Document"
+    collection: "Collection"
+    dataset_version: "DatasetVersion"
+    process_result: "ProcessResult"
+    batch: "Batch"
+  data_dir: null
+  purge_after: {}
+  purge_immediately: false
+  cache_only: false
+  resource_exception_log_level: 10  # debug, see: https://docs.python.org/3/library/logging.html#logging-levels
+  resource_exception_reraise: false
+
+http_resource:
+  requests_proxies: null
+  requests_verify: true
+  timeout: 30
+  user_agent: null
+  continuation_limit: 1
+  interval_duration: 0
+  concat_args_size: 0
+  concat_args_symbol: "|"
+  allow_redirects: true
+  allow_get_body: false
+  backoff_delays: [2, 4, 8, 16]
+  force_data_file_to_payload: false
+  method: null
+
+shell_resource:
+  interval_duration: 0
+  bin_dir: null
+
+tika_resource:
+  force_data_file_to_payload: true
+  multifile: false
+  multifile_exception_log_level: 30  # warning, see: https://docs.python.org/3/library/logging.html#logging-levels
+
+storage:
+  allow_read: true
+  allow_write: true
+  allow_save: true
+  allow_load: true
+  snapshots: false
+  directories:
+    tmp: ["/", "tmp"]
+    project: null
+    data: ["/", "tmp", "data"]
+    snapshots: ["/", "tmp", "snapshots"]
+    templates: ["/", "tmp", "templates"]
+
+growth_processor:
+  extractor: "ExtractProcessor.extract_from_resource"
+  depends_on: null
+  to_property: null
+  apply_resource_to: []
+
+extract_processor:
+  extract_from_object_values: false
+
+transform_processor:
+  extract_from_object_values: false
+
+micro_service:
+  connections:
+    tika:
+      protocol: "http"
+      host: "localhost:9998"
+      path: "/rmeta/xml"
+
+web:
+  api_version: 1
+  media_root: null
+
+openai:
+  api_key: null

@@ -13,9 +13,21 @@ v0.22
 
 This update introduces LLM tools to the Datagrowth package and separates the package from its Django dependency. Being able to use the package outside of Django helps re-use in Jupyter for instance. It also makes it easier to implement snapshot testing, where snapshots no longer have to go through the Django fixture mechanisms.
 
-* To install Datagrowth you need to add to ``datagrowth.django.apps.DatagrowthConfig`` to ``INSTALLED_APPS``.
+As a transition method to a v1 Datagrowth this repo now includes bundled versions as part of the release. You can download and unzip these bundles directly in your project as a ``datagrowth`` directory to access a subset of Datagrowth v1 functionality today. Include the ``datagrowth/requirements.txt`` in your prefered package management environment to make sure that a minimum of dependencies for the bundle are included in your project dependencies. After that you can access Datagrowth as any normal toplevel module. Once a v1 release is official that version can replace bundles by installing it and throwing the bundles away.
+
+* Minimal version for Invoke is now 3.0.0.
+* To install Datagrowth you need to add ``datagrowth.django.apps.DatagrowthConfig`` to ``INSTALLED_APPS`` instead of ``datagrowth``.
 * ``ConfigurationFormField`` is no longer exposed as a form to be used outside of the admin for ``ConfigurationField``.
 * The ``datagrowth.admin`` module has been moved to ``datagrowth.django.admin``.
+* ``PromptResource`` now estimates token usage by default. This version does not support precise tokenization counts.
+* Error codes for legacy ``PromptResource`` versions do not map well to new ``PromptResource`` error codes. Consider removing all resources with errors.
+* The ``set_content_validation_error`` method and ``options`` attribute have been removed from ``PromptResource``.
+* The ``MaxTokensExceeded`` exception has been replaced by the ``DGPromptMaxTokensExceeded`` exception.
+* Invalid model options will raise Pydantic ``ValidationError`` instead of the custom ``InvalidChatGPTOption``
+* The ``MODEL``, ``MODEL_MAX_TOKENS``, ``MODEL_MAX_OUTPUT_TOKENS``, ``MODEL_OPTIONS`` and ``OPENAI_MODEL_ENCODING`` class constants for ``PromptResource`` have been consolidated into a single ``LLMModel`` instance. These instances are registered as LLM's in the global registry under "llm" ``Tags``. Set ``DEFAULT_MODEL`` to the "llm" ``Tag`` you want to use for correct LLM configuration or pass a custom ``LLMModel`` to the ``PromptResource`` directly.
+* Authentication of vendors like OpenAI can be set using ``DATAGROWTH_OPENAI_API_KEY`` variables and no longer require method overrides.
+* It's no longer possible to set prompt messages directly.
+* When using ``PromptResource`` to extract structured data specify a Pydantic model as ``output`` parameter to ``PromptResource.extract``. This will set the correct JSON schema in the prompt and ``PromptResource.content`` will output Pydantic model instances instead of native Python.
 
 
 v0.21
