@@ -7,8 +7,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.timezone import now
-
-from datagrowth import configuration
+from datagrowth.django.fields import ConfigurationField
 
 
 log = logging.getLogger("datagrowth")
@@ -27,7 +26,7 @@ class Resource(models.Model):
     status = models.PositiveIntegerField(default=0, db_index=True)
 
     # Configuration
-    config = configuration.ConfigurationField()
+    config = ConfigurationField()
 
     # Archiving fields
     created_at = models.DateTimeField(auto_now_add=True)

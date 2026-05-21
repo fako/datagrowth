@@ -1,0 +1,1 @@
+from datagrowth.vendors.openai.resources import OpenaiPromptResource

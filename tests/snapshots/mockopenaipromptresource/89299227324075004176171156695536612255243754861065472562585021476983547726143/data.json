@@ -1,0 +1,79 @@
+{
+    "id": "ce42cc3e-9089-44a0-b26f-8e243b9bf270",
+    "type": {
+        "category": "resource",
+        "value": "mockopenaipromptresource"
+    },
+    "config": {},
+    "signature": {
+        "uri": "api.openai.com/v1/chat/completions",
+        "data": {
+            "n": 1,
+            "model": "gpt-4.1-2025-04-14",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, I'm DataGrowth! Please repeat only my name, thank you!"
+                }
+            ]
+        },
+        "mode": "json",
+        "hash": 89299227324075004176171156695536612255243754861065472562585021476983547726143,
+        "type": "mockopenaipromptresource",
+        "args": [
+            "hello_world.tpl",
+            null
+        ],
+        "kwargs": {
+            "context": {
+                "name": "DataGrowth"
+            },
+            "options": {
+                "n": 1
+            }
+        },
+        "method": "post",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "headers": {}
+    },
+    "result": {
+        "content_type": "application/json",
+        "head": {
+            "date": "Sun, 10 May 2026 18:42:05 GMT",
+            "content-type": "application/json",
+            "transfer-encoding": "chunked",
+            "connection": "keep-alive",
+            "cf-ray": "9f9b14edcf8466f6-AMS",
+            "cf-cache-status": "DYNAMIC",
+            "server": "cloudflare",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "access-control-expose-headers": "X-Request-ID",
+            "openai-organization": "datascope-search",
+            "openai-processing-ms": "263",
+            "openai-project": "proj_3J0LOaMaEqw9vcnvaLrGaBjQ",
+            "openai-version": "2020-10-01",
+            "x-openai-proxy-wasm": "v0.1",
+            "x-ratelimit-limit-requests": "10000",
+            "x-ratelimit-limit-tokens": "2000000",
+            "x-ratelimit-remaining-requests": "9999",
+            "x-ratelimit-remaining-tokens": "1999982",
+            "x-ratelimit-reset-requests": "6ms",
+            "x-ratelimit-reset-tokens": "0s",
+            "x-request-id": "req_5cfba66ddf2d4f84b0fb5195df69c03c",
+            "set-cookie": "__cf_bm=oyhJe7vBTss8jmqJWjxXk7Z5ra8M.nVmnYNLqEXe3SA-1778438525.0857916-1.0.1.1-ShG2botGNJ1qBuKg.63V9Jhw2N5ety6k456ASfkPCECBB.JNelimxEeZDSEwrL0CfqX1flfFso9.6slcaDPXQOQeuNalK5O4nOt37PmEyTOsyiFDYxTZJlURTmp_H6Vz; HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Sun, 10 May 2026 19:12:05 GMT",
+            "content-encoding": "gzip",
+            "alt-svc": "h3=\":443\"; ma=86400"
+        },
+        "body": "{\n  \"id\": \"chatcmpl-De3OHIw9PyNAX3OL5cRjAsXte2OCO\",\n  \"object\": \"chat.completion\",\n  \"created\": 1778438525,\n  \"model\": \"gpt-4.1-2025-04-14\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"DataGrowth\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 22,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 24,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_72aa6c5c90\"\n}\n",
+        "errors": null,
+        "created_at": "2026-05-10T18:42:05.538796Z"
+    },
+    "status": 200,
+    "metadata": {},
+    "purge_at": "2026-06-09T20:42:04.989981",
+    "llm": {
+        "category": "llm",
+        "value": "openai/default"
+    }
+}

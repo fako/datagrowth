@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 import pytest
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType, create_config
@@ -16,7 +17,7 @@ class MockStorage:
     def save(self, resource: ResourceProtocol) -> Signature:
         return Signature(uri="mock://")
 
-    def load(self, signature: Signature) -> ResourceProtocol | None:
+    def load(self, signature: Signature, load_as: type[ResourceProtocol] | None = None) -> ResourceProtocol | None:
         return None
 
     def read(self, signature: Signature, filename: str) -> bytes | str:
@@ -30,6 +31,9 @@ class MockStorage:
 
     def write_tmp(self, filename: str, data: bytes | str) -> Path:
         return Path(filename)
+
+    def render_template(self, template: str, context: dict[str, Any]) -> str:
+        return template
 
 
 @pytest.fixture

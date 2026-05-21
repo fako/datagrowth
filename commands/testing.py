@@ -4,6 +4,32 @@ from invoke.tasks import task
 from invoke.collection import Collection
 
 
+def _load_dotenv(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+
+    loaded: dict[str, str] = {}
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line.removeprefix("export ").strip()
+        if "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if (
+                (value.startswith('"') and value.endswith('"'))
+                or (value.startswith("'") and value.endswith("'"))
+        ):
+            value = value[1:-1]
+        loaded[key] = value
+    return loaded
+
+
 @task(help={
     "test_file": "A path to a file containing a subset of tests to run",
     "test_method": "An expression of which test methods to run",
@@ -29,6 +55,7 @@ def library(ctx, test_file=None, test_method=None, warnings=False, fail_fast=Fal
 
     # Some special flags and setup to use when only testing the library
     test_env = dict(os.environ)
+    test_env.update(_load_dotenv(Path(".env")))
     if snapshots:
         test_env["DATAGROWTH_STORAGE_SNAPSHOTS"] = "1"
         test_env["DATAGROWTH_STORAGE_ALLOW_LOAD"] = "0"

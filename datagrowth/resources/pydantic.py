@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Self, Generic, cast
+from typing import Any, ClassVar, Type, Self, Generic, cast
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 import base64
@@ -9,8 +9,9 @@ from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, fie
 
 from datagrowth.configuration import ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
-from datagrowth.signatures import Signature, InputsValidator
-from datagrowth.resources.protocols import ResourceExtractorProtocol, ResourceSignatureType, ResourceStorageProtocol
+from datagrowth.signatures import DataBody, DataMode, DataPart, Signature, InputsValidator
+from datagrowth.resources.protocols import (ResourceExtractorProtocol, ResourceProtocol, ResourceSignatureType,
+                                            ResourceStorageProtocol)
 
 
 class Result(BaseModel):
@@ -37,6 +38,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource")
     STORAGE: ClassVar[Tag | None] = None
     EXTRACTOR: ClassVar[Tag | None] = None
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = InputsValidator
 
     id: UUID4 = Field(default_factory=uuid4)
     type: Tag = Field(default_factory=lambda: Tag(category="resource", value="resource"))
@@ -57,26 +59,43 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         return self._extractor
 
     #####################
-    # Publib interface
+    # Public interface
     #####################
 
     @classmethod
     def get_name(cls) -> str:
         return cls.__name__
 
+    def prepare_extract(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+        """
+        Takes arbitrary input data and performs the validation and transformation necessary to execute data extraction.
+        By default uses INPUTS_VALIDATOR of type InputsValidator, which delegates validation to Pydantic.
+        """
+        inputs = self.INPUTS_VALIDATOR.from_inputs(*args, **kwargs)
+        return self.prepare_inputs(inputs)
+
     def extract(self, *args: Any, **kwargs: Any) -> Self:
         # Validate the inputs to arrive at a Signature used for extraction
-        inputs = self.validate_inputs(*args, **kwargs)
-        signature = self.prepare_inputs(*inputs.args, **inputs.kwargs)
+        if self.signature is None or args or kwargs:
+            signature = self.prepare_extract(*args, **kwargs)
+        else:
+            signature = self.signature
 
         # Try to look up the Signature in storage
         if self.storage is not None:
             # Downgrade Signature to basic format and check against storage if extraction has taken place already
             if self.storage.config.allow_load:
                 storage_signature = Signature(**signature.model_dump(mode="json"))
-                loaded_resource = self.storage.load(storage_signature)
+                loaded_resource = self.storage.load(storage_signature, load_as=self.__class__)
                 if loaded_resource is not None:
-                    return cast(Self, loaded_resource)
+                    if isinstance(loaded_resource, self.__class__):
+                        return cast(Self, loaded_resource)
+                    if isinstance(loaded_resource, Resource):
+                        # Storage can deserialize to a generic Resource; here we cast back to the active subclass.
+                        loaded_data = loaded_resource.model_dump(mode="python")
+                        loaded_data["signature"] = signature
+                        subclass_resource = self.__class__.model_validate(loaded_data)
+                        return cast(Self, subclass_resource)
 
         # Validate that extraction is actually allowed/possible
         if self.extractor is None:
@@ -92,12 +111,17 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         if isinstance(extracted, self.__class__):
             extracted.handle_errors()
             return cast(Self, extracted)
-        self.signature = extracted.signature
-        self.result = extracted.result
-        self.status = extracted.status
-        self.metadata = dict(extracted.metadata)
+        self.update(extracted)
         self.handle_errors()
         return self
+
+    def update(self, other: ResourceProtocol) -> None:
+        if not isinstance(other, Resource):
+            raise TypeError(f"Expected a Resource as input to update with, got {other.__class__.__name__}.")
+        self.signature = cast(ResourceSignatureType | None, other.signature)
+        self.result = other.result
+        self.status = other.status
+        self.metadata = dict(other.metadata)
 
     def close(self) -> Self:
         if self.storage is not None and self.storage.config.allow_save:
@@ -108,18 +132,35 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
             self.signature.close()
         return self
 
+    @staticmethod
+    def _resolve_locator(locator: str, encoding: str = "utf-8") -> bytes:
+        if locator.startswith("file://"):
+            return Path(locator.removeprefix("file://")).read_bytes()
+        if locator.startswith("http://") or locator.startswith("https://"):
+            return locator.encode(encoding)
+        return base64.b64decode(locator.encode("ascii"))
+
     def open_signature(self, signature: ResourceSignatureType) -> None:
-        if not isinstance(signature.data, str) or not signature.data.startswith("bin://"):
-            return
-        if self.storage is None:
-            return
-        payload = signature.data.removeprefix("bin://")
-        if payload.startswith("file://"):
-            file_path = Path(payload.removeprefix("file://"))
-            data_bytes = file_path.read_bytes()
-        else:
-            data_bytes = base64.b64decode(payload.encode("ascii"))
-        signature.set_data_bytes(data_bytes)
+        if signature.mode == DataMode.DATA:
+            data = signature.data
+            if not isinstance(data, DataBody):
+                raise TypeError("DATA mode signature.data must be a DataBody.")
+            signature.set_data_bytes(self._resolve_locator(data.content, data.encoding or "utf-8"))
+        elif signature.mode == DataMode.MULTIPART:
+            raw_parts = signature.data
+            if not isinstance(raw_parts, list):
+                raise TypeError("MULTIPART mode signature.data must be a list.")
+            resolved_parts: list[dict[str, Any]] = []
+            for part in raw_parts:
+                if not isinstance(part, DataPart):
+                    raise TypeError("Each MULTIPART part must be a DataPart.")
+                if part.content_type is not None:
+                    resolved = part.model_dump()
+                    resolved["content"] = self._resolve_locator(part.content, part.encoding or "utf-8")
+                    resolved_parts.append(resolved)
+                else:
+                    resolved_parts.append(part.model_dump())
+            signature.set_data_parts(resolved_parts)
 
     def next(self) -> Self | None:
         return None
@@ -135,10 +176,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         data = self.result.body if self.success else self.result.errors
         return self.result.content_type, data
 
-    def validate_inputs(self, *args: Any, **kwargs: Any) -> InputsValidator:
-        return InputsValidator(args=args, kwargs=kwargs)
-
-    def prepare_inputs(self, *args: Any, **kwargs: Any) -> ResourceSignatureType:
+    def prepare_inputs(self, inputs: InputsValidator) -> ResourceSignatureType:
         raise NotImplementedError
 
     def handle_errors(self) -> None:

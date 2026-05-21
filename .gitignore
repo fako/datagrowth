@@ -14,6 +14,7 @@ dist
 venv/
 mvenv/
 .tox
+.env
 
 docs/_build
 tests/test.json

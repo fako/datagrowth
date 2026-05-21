@@ -31,6 +31,7 @@ http_resource:
   allow_get_body: false
   backoff_delays: [2, 4, 8, 16]
   force_data_file_to_payload: false
+  method: null
 
 shell_resource:
   interval_duration: 0
@@ -38,6 +39,8 @@ shell_resource:
 
 tika_resource:
   force_data_file_to_payload: true
+  multifile: false
+  multifile_exception_log_level: 30  # warning, see: https://docs.python.org/3/library/logging.html#logging-levels
 
 storage:
   allow_read: true
@@ -50,6 +53,7 @@ storage:
     project: null
     data: ["/", "tmp", "data"]
     snapshots: ["/", "tmp", "snapshots"]
+    templates: ["/", "tmp", "templates"]
 
 growth_processor:
   extractor: "ExtractProcessor.extract_from_resource"
@@ -68,8 +72,11 @@ micro_service:
     tika:
       protocol: "http"
       host: "localhost:9998"
-      path: "/rmeta/text"
+      path: "/rmeta/xml"
 
 web:
   api_version: 1
   media_root: null
+
+openai:
+  api_key: null

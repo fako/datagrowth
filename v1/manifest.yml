@@ -1,0 +1,23 @@
+# Bundle layout: paths under `includes` are relative to ../datagrowth/; output is this directory (v1/).
+# Renames: keys are source paths under datagrowth/; values are destinations under v1/.
+
+includes:
+  - "*.py"
+  - "datagrowth.yml"
+  - "configuration/*"
+  - "registry/*"
+  - "utils/data.py"
+  - "utils/datetime.py"
+  - "utils/iterators.py"
+  - "resources/http/extractors/*"
+  - "resources/http/signature.py"
+  - "resources/storage/*"
+  - "resources/protocols.py"
+
+renames:
+  resources/http/pydantic.py: resources/http/base.py
+  resources/pydantic.py: resources/base.py
+
+requirements:
+  copy_from: requirements/dependencies.txt
+  dest: requirements.txt

@@ -1,9 +1,12 @@
+from typing import Any, cast
 import os
 from pathlib import Path
 
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound, TemplateError
 from pydantic import BaseModel
 
 from datagrowth.configuration import ConfigurationProperty, ConfigurationType
+from datagrowth.exceptions import DGTemplateNotFound, DGTemplateRenderError
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
 from datagrowth.signatures import Signature
 from datagrowth.resources.protocols import ResourceProtocol
@@ -15,8 +18,9 @@ class FileSystemStorage:
     tag = Tag(category="storage", value="file_system")
     config = ConfigurationProperty(namespace="storage")
 
-    def __init__(self, config: ConfigurationType) -> None:
+    def __init__(self, config: ConfigurationType, jinja_environment: Environment | None = None) -> None:
         self.config = config
+        self.jinja_environment = jinja_environment or Environment()
 
     def _resolve_directory(self, key: str) -> Path:
         raw_directories = self.config.get("directories", {})
@@ -73,14 +77,17 @@ class FileSystemStorage:
         path.write_text(resource.model_dump_json(indent=4), encoding="utf-8")
         return resource.signature
 
-    def load(self, signature: Signature) -> ResourceProtocol | None:
+    def load(self, signature: Signature, load_as: type[ResourceProtocol] | None = None) -> ResourceProtocol | None:
         if not self.config.allow_load:
             raise PermissionError("Loading resources is disabled by storage config (allow_load=false).")
 
         path = self._get_storage_directory(signature) / "data.json"
         if not path.exists():
             return None
-        return Resource[Signature].model_validate_json(path.read_text(encoding="utf-8"))
+        load_cls = load_as or Resource[Signature]
+        assert issubclass(load_cls, BaseModel), "FileSystemStorage only supports Pydantic-based resources."
+        loaded = load_cls.model_validate_json(path.read_text(encoding="utf-8"))
+        return cast(ResourceProtocol, loaded)
 
     def read(self, signature: Signature, filename: str) -> bytes | str:
         if not self.config.allow_read:
@@ -159,6 +166,41 @@ class FileSystemStorage:
         else:
             path.write_bytes(data)
         return path
+
+    def render_template(self, template: str, context: dict[str, Any]) -> str:
+        directories: list[str] = []
+
+        for tag in DATAGROWTH_REGISTRY.tags_by_category("templates"):
+            directory = DATAGROWTH_REGISTRY.directories.get(tag)
+            if directory is None:
+                continue
+            resolved_directory = directory if directory.is_absolute() else (Path.cwd() / directory)
+            directory_path = str(resolved_directory)
+            if directory_path not in directories:
+                directories.append(directory_path)
+
+        templates_directory = self._resolve_directory("templates")
+        resolved_templates_directory = (
+            templates_directory if templates_directory.is_absolute() else (Path.cwd() / templates_directory)
+        )
+        templates_path = str(resolved_templates_directory)
+        if templates_path not in directories:
+            directories.append(templates_path)
+
+        loader = FileSystemLoader(directories)
+        environment = self.jinja_environment.overlay(loader=loader)
+        try:
+            return environment.get_template(template).render(context)
+        except TemplateNotFound as error:
+            raise DGTemplateNotFound(
+                f"Template '{template}' was not found in configured template directories.",
+                template
+            ) from error
+        except TemplateError as error:
+            raise DGTemplateRenderError(
+                f"Error rendering template '{template}': {error}",
+                template
+            ) from error
 
 
 DATAGROWTH_REGISTRY.register_storage(FileSystemStorage.tag, FileSystemStorage)

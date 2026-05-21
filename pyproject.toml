@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "Django>=5.2",
+    "Jinja2",
     "celery",
     "jsonschema>=4.20.0",
     "lxml",
@@ -71,5 +72,6 @@ exclude = [
     "datagrowth/datatypes",
     "datagrowth/processors",
     "datagrowth/management",
-    "datagrowth/apps.py"
+    "datagrowth/apps.py",
+    "datagrowth/django",
 ]

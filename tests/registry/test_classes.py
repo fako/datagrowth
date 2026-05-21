@@ -44,7 +44,7 @@ def test_get_class_reports_completely_invalid_path(registry: Registry) -> None:
 
 def test_get_class_reports_type_mismatch(registry: Registry) -> None:
     tag = registry.register_class("test:class", TestClass)
-    faulty_path = "datagrowth.registry.types._import_class"
+    faulty_path = "datagrowth.registry.types._get_config_namespace"
     registry.classes[tag] = faulty_path
 
     with pytest.raises(TypeError, match="Expected class import from path"):

@@ -8,6 +8,16 @@ Under each version number you'll find a section,
 which indicates breakages that you may expect when upgrading from lower versions.
 
 
+v0.22
+-----
+
+This update introduces LLM tools to the Datagrowth package and separates the package from its Django dependency. Being able to use the package outside of Django helps re-use in Jupyter for instance. It also makes it easier to implement snapshot testing, where snapshots no longer have to go through the Django fixture mechanisms.
+
+* To install Datagrowth you need to add to ``datagrowth.django.apps.DatagrowthConfig`` to ``INSTALLED_APPS``.
+* ``ConfigurationFormField`` is no longer exposed as a form to be used outside of the admin for ``ConfigurationField``.
+* The ``datagrowth.admin`` module has been moved to ``datagrowth.django.admin``.
+
+
 v0.21
 -----
 
