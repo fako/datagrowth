@@ -194,8 +194,11 @@ class HttpResource(Resource[HttpSignature]):
 
     def prepare_inputs(self, inputs: InputsValidator) -> HttpSignature:
         method = HttpMethod(inputs.get_argument("method") or self.config.method or self.METHOD)
-
-        url_arguments = inputs.args[1:] if len(inputs.args) > 1 else []
+        positional_names = self.INPUTS_VALIDATOR.POSITIONAL_NAMES
+        if positional_names and positional_names[0] == "method":
+            url_arguments = inputs.args[1:]
+        else:
+            url_arguments = inputs.args[len(positional_names):]
         url, data_arguments = self._create_url(*url_arguments, **inputs.kwargs)
         auth = HttpAuth(headers=self.auth_headers(), parameters=self.auth_parameters())
         return HttpSignature(
