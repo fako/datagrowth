@@ -45,7 +45,7 @@ class HttpResource(Resource[HttpSignature]):
         """
         return dict(self.HEADERS)
 
-    def parameters(self):
+    def parameters(self) -> dict[str, str]:
         """
         Returns the dictionary that should be added as HTTP query parameters for the request the resource will make.
         Add f-string syntax to the parameter keys or values to make them dynamic.
