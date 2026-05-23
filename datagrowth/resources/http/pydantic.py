@@ -244,12 +244,12 @@ class HttpResource(Resource[HttpSignature]):
         By default it raises the ``DGHttpError40X`` and ``DGHttpError50X`` exceptions for statuses.
         """
         class_name = self.__class__.__name__
-        body = self.result.body if self.result and self.result.body is not None else ""
+        errors = self.result.errors if self.result and self.result.errors is not None else ""
         if self.status >= 500:
-            message = f"{class_name} > {self.status} \n\n {body}"
+            message = f"{class_name} > {self.status} \n\n {errors}"
             raise DGHttpError50X(message, resource=self)
         elif self.status >= 400:
-            message = f"{class_name} > {self.status} \n\n {body}"
+            message = f"{class_name} > {self.status} \n\n {errors}"
             raise DGHttpError40X(message, resource=self)
         else:
             return None
