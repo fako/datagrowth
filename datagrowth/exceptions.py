@@ -5,6 +5,10 @@ class DGResourceException(Exception):
         self.resource = resource
 
 
+class DGExtractionDisabled(DGResourceException):
+    pass
+
+
 class DGShellError(DGResourceException):
     pass
 
