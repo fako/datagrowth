@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 from datagrowth.configuration import register_defaults
+from datagrowth.django.resources.extractors import DjangoClientExtractor  # noqa: F401
 
 
 class ResourcesConfig(AppConfig):

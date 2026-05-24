@@ -61,6 +61,22 @@ class DGPromptMaxTokensExceeded(DGPromptError):
     pass
 
 
+class DGSessionError(DGResourceException):
+    pass
+
+
+class DGSessionNotReady(DGSessionError):
+    pass
+
+
+class DGSessionNotCompleted(DGSessionError):
+    pass
+
+
+class DGSessionInputRequired(DGSessionError):
+    pass
+
+
 class DGGrowthException(Exception):
     pass
 

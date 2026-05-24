@@ -1,0 +1,85 @@
+{
+    "id": "95af3afe-dcaf-4b34-9d2c-527f183ba76d",
+    "type": {
+        "category": "resource",
+        "value": "adminsessionresource"
+    },
+    "config": {},
+    "signature": {
+        "uri": "/admin/?page=1&page_type=complete",
+        "data": {},
+        "mode": "none",
+        "hash": 19948438157940798048579525540459646578721971303428367263606804228375511449758,
+        "type": "adminpageresource",
+        "args": [],
+        "kwargs": {
+            "page_type": "complete",
+            "page": 1
+        }
+    },
+    "result": null,
+    "status": 200,
+    "metadata": {},
+    "purge_at": "2026-06-24T15:37:28.895089Z",
+    "session": {
+        "parameters": {},
+        "headers": {
+            "Cookie": "csrftoken=sQX5TJ5BYTgMa7HKE0qYjHXReyvsrozF; sessionid=ip2qmmd2q8f300mbhqf8mg37757ffo5w"
+        },
+        "is_ready": true,
+        "expire_at": null
+    },
+    "session_steps_completed": {
+        "login": {
+            "step": "login",
+            "hash": 29779259288851546772859446567993248490572416591286105205827492332065572219574,
+            "status": 200,
+            "is_success": true,
+            "expire_at": "2026-06-24T15:37:28.895590Z"
+        }
+    },
+    "main": {
+        "id": "2f868dc6-82c2-4567-b4a3-3ba2783d5388",
+        "type": {
+            "category": "resource",
+            "value": "adminpageresource"
+        },
+        "config": {},
+        "signature": {
+            "uri": "/admin/?page=1&page_type=complete",
+            "data": {},
+            "mode": "none",
+            "hash": 19948438157940798048579525540459646578721971303428367263606804228375511449758,
+            "type": "adminpageresource",
+            "args": [],
+            "kwargs": {
+                "page_type": "complete",
+                "page": 1
+            },
+            "method": "get",
+            "url": "/admin/?page_type=complete&page=1",
+            "headers": {}
+        },
+        "result": {
+            "content_type": "text/html; charset=utf-8",
+            "head": {
+                "content-type": "text/html; charset=utf-8",
+                "expires": "Mon, 25 May 2026 15:37:29 GMT",
+                "cache-control": "max-age=0, no-cache, no-store, must-revalidate, private",
+                "vary": "Cookie",
+                "x-frame-options": "DENY",
+                "content-length": "9689",
+                "x-content-type-options": "nosniff",
+                "referrer-policy": "same-origin",
+                "cross-origin-opener-policy": "same-origin",
+                "set-cookie": "csrftoken=sQX5TJ5BYTgMa7HKE0qYjHXReyvsrozF; sessionid=ip2qmmd2q8f300mbhqf8mg37757ffo5w"
+            },
+            "body": "<!DOCTYPE html>\n\n<html lang=\"en-us\" dir=\"ltr\">\n<head>\n<title>Site administration | Django site admin</title>\n<link rel=\"stylesheet\" href=\"/static/admin/css/base.css\">\n\n  <link rel=\"stylesheet\" href=\"/static/admin/css/dark_mode.css\">\n  <script src=\"/static/admin/js/theme.js\"></script>\n\n\n  <link rel=\"stylesheet\" href=\"/static/admin/css/nav_sidebar.css\">\n  <script src=\"/static/admin/js/nav_sidebar.js\" defer></script>\n\n<link rel=\"stylesheet\" href=\"/static/admin/css/dashboard.css\">\n\n\n\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <link rel=\"stylesheet\" href=\"/static/admin/css/responsive.css\">\n    \n\n<meta name=\"robots\" content=\"NONE,NOARCHIVE\">\n</head>\n\n<body class=\" dashboard\"\n  data-admin-utc-offset=\"0\">\n<a href=\"#content-start\" class=\"skip-to-content-link\">Skip to main content</a>\n<!-- Container -->\n<div id=\"container\">\n\n    \n    <!-- Header -->\n    \n      <header id=\"header\">\n        <div id=\"branding\">\n        \n<div id=\"site-name\"><a href=\"/admin/\">Django administration</a></div>\n\n\n        </div>\n        \n        \n        <div id=\"user-tools\">\n            \n                Welcome,\n                <strong>admin</strong>.\n            \n            \n                \n                    <a href=\"/\">View site</a> /\n                \n                \n                    \n                    \n                \n                \n                <a href=\"/admin/password_change/\">Change password</a> /\n                \n                <form id=\"logout-form\" method=\"post\" action=\"/admin/logout/\">\n                    <input type=\"hidden\" name=\"csrfmiddlewaretoken\" value=\"iWSLGS7JMtTyFxi0KZAvo2iB78269VW3ACFGpr2aAcZaFuPAePQjxz5ibwnoq9ly\">\n                    <button type=\"submit\">Log out</button>\n                </form>\n                \n<button class=\"theme-toggle\">\n  <span class=\"visually-hidden theme-label-when-auto\">Toggle theme (current theme: auto)</span>\n  <span class=\"visually-hidden theme-label-when-light\">Toggle theme (current theme: light)</span>\n  <span class=\"visually-hidden theme-label-when-dark\">Toggle theme (current theme: dark)</span>\n  <svg aria-hidden=\"true\" class=\"theme-icon-when-auto\">\n    <use xlink:href=\"#icon-auto\" />\n  </svg>\n  <svg aria-hidden=\"true\" class=\"theme-icon-when-dark\">\n    <use xlink:href=\"#icon-moon\" />\n  </svg>\n  <svg aria-hidden=\"true\" class=\"theme-icon-when-light\">\n    <use xlink:href=\"#icon-sun\" />\n  </svg>\n</button>\n\n            \n        </div>\n        \n        \n        \n      </header>\n    \n    <!-- END Header -->\n    \n    \n\n    <div class=\"main\" id=\"main\">\n      \n        \n      \n      <main id=\"content-start\" class=\"content\" tabindex=\"-1\">\n        \n          \n        \n        <!-- Content -->\n        <div id=\"content\" class=\"colMS\">\n          \n          <h1>Site administration</h1>\n          \n          \n<div id=\"content-main\">\n  \n\n\n  \n    <div class=\"app-auth module\">\n      <table>\n        <caption>\n          <a href=\"/admin/auth/\" class=\"section\" title=\"Models in the Authentication and Authorization application\">Authentication and Authorization</a>\n        </caption>\n        <thead class=\"visually-hidden\">\n          <tr>\n            <th scope=\"col\">Model name</th>\n            <th scope=\"col\">Add link</th>\n            <th scope=\"col\">Change or view list link</th>\n          </tr>\n        </thead>\n        \n          \n            <tr class=\"model-group\">\n              <th scope=\"row\" id=\"auth-group\">\n                \n                  <a href=\"/admin/auth/group/\">Groups</a>\n                \n              </th>\n\n              \n                <td><a href=\"/admin/auth/group/add/\" class=\"addlink\" aria-describedby=\"auth-group\">Add</a></td>\n              \n\n              \n                \n                  <td><a href=\"/admin/auth/group/\" class=\"changelink\" aria-describedby=\"auth-group\">Change</a></td>\n                \n              \n            </tr>\n          \n        \n          \n            <tr class=\"model-user\">\n              <th scope=\"row\" id=\"auth-user\">\n                \n                  <a href=\"/admin/auth/user/\">Users</a>\n                \n              </th>\n\n              \n                <td><a href=\"/admin/auth/user/add/\" class=\"addlink\" aria-describedby=\"auth-user\">Add</a></td>\n              \n\n              \n                \n                  <td><a href=\"/admin/auth/user/\" class=\"changelink\" aria-describedby=\"auth-user\">Change</a></td>\n                \n              \n            </tr>\n          \n        \n      </table>\n    </div>\n  \n    <div class=\"app-datatypes module\">\n      <table>\n        <caption>\n          <a href=\"/admin/datatypes/\" class=\"section\" title=\"Models in the Datatypes application\">Datatypes</a>\n        </caption>\n        <thead class=\"visually-hidden\">\n          <tr>\n            <th scope=\"col\">Model name</th>\n            <th scope=\"col\">Add link</th>\n            <th scope=\"col\">Change or view list link</th>\n          </tr>\n        </thead>\n        \n          \n            <tr class=\"model-collection\">\n              <th scope=\"row\" id=\"datatypes-collection\">\n                \n                  <a href=\"/admin/datatypes/collection/\">Collections</a>\n                \n              </th>\n\n              \n                <td><a href=\"/admin/datatypes/collection/add/\" class=\"addlink\" aria-describedby=\"datatypes-collection\">Add</a></td>\n              \n\n              \n                \n                  <td><a href=\"/admin/datatypes/collection/\" class=\"changelink\" aria-describedby=\"datatypes-collection\">Change</a></td>\n                \n              \n            </tr>\n          \n        \n          \n            <tr class=\"model-document\">\n              <th scope=\"row\" id=\"datatypes-document\">\n                \n                  <a href=\"/admin/datatypes/document/\">Documents</a>\n                \n              </th>\n\n              \n                <td><a href=\"/admin/datatypes/document/add/\" class=\"addlink\" aria-describedby=\"datatypes-document\">Add</a></td>\n              \n\n              \n                \n                  <td><a href=\"/admin/datatypes/document/\" class=\"changelink\" aria-describedby=\"datatypes-document\">Change</a></td>\n                \n              \n            </tr>\n          \n        \n      </table>\n    </div>\n  \n    <div class=\"app-resources module\">\n      <table>\n        <caption>\n          <a href=\"/admin/resources/\" class=\"section\" title=\"Models in the Resources application\">Resources</a>\n        </caption>\n        <thead class=\"visually-hidden\">\n          <tr>\n            <th scope=\"col\">Model name</th>\n            <th scope=\"col\">Add link</th>\n            <th scope=\"col\">Change or view list link</th>\n          </tr>\n        </thead>\n        \n          \n            <tr class=\"model-httpresourcemock\">\n              <th scope=\"row\" id=\"resources-httpresourcemock\">\n                \n                  <a href=\"/admin/resources/httpresourcemock/\">Http resource mocks</a>\n                \n              </th>\n\n              \n                <td><a href=\"/admin/resources/httpresourcemock/add/\" class=\"addlink\" aria-describedby=\"resources-httpresourcemock\">Add</a></td>\n              \n\n              \n                \n                  <td><a href=\"/admin/resources/httpresourcemock/\" class=\"changelink\" aria-describedby=\"resources-httpresourcemock\">Change</a></td>\n                \n              \n            </tr>\n          \n        \n          \n            <tr class=\"model-shellresourcemock\">\n              <th scope=\"row\" id=\"resources-shellresourcemock\">\n                \n                  <a href=\"/admin/resources/shellresourcemock/\">Shell resource mocks</a>\n                \n              </th>\n\n              \n                <td><a href=\"/admin/resources/shellresourcemock/add/\" class=\"addlink\" aria-describedby=\"resources-shellresourcemock\">Add</a></td>\n              \n\n              \n                \n                  <td><a href=\"/admin/resources/shellresourcemock/\" class=\"changelink\" aria-describedby=\"resources-shellresourcemock\">Change</a></td>\n                \n              \n            </tr>\n          \n        \n      </table>\n    </div>\n  \n\n\n</div>\n\n          \n<div id=\"content-related\">\n    <div class=\"module\" id=\"recent-actions-module\">\n        <h2>Recent actions</h2>\n        <h3>My actions</h3>\n            \n            \n            \n            <p>None available</p>\n            \n    </div>\n</div>\n\n          <br class=\"clear\">\n        </div>\n        <!-- END Content -->\n      </main>\n    </div>\n    <footer id=\"footer\"></footer>\n</div>\n<!-- END Container -->\n\n<!-- SVGs -->\n<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"base-svgs\">\n  <symbol viewBox=\"0 0 24 24\" width=\"1.5rem\" height=\"1.5rem\" id=\"icon-auto\"><path d=\"M0 0h24v24H0z\" fill=\"currentColor\"/><path d=\"M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2V4a8 8 0 1 0 0 16z\"/></symbol>\n  <symbol viewBox=\"0 0 24 24\" width=\"1.5rem\" height=\"1.5rem\" id=\"icon-moon\"><path d=\"M0 0h24v24H0z\" fill=\"currentColor\"/><path d=\"M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z\"/></symbol>\n  <symbol viewBox=\"0 0 24 24\" width=\"1.5rem\" height=\"1.5rem\" id=\"icon-sun\"><path d=\"M0 0h24v24H0z\" fill=\"currentColor\"/><path d=\"M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z\"/></symbol>\n</svg>\n<!-- END SVGs -->\n\n</body>\n</html>\n",
+            "errors": null,
+            "created_at": "2026-05-25T15:37:29.480509Z"
+        },
+        "status": 200,
+        "metadata": {},
+        "purge_at": "2026-06-24T15:37:28.894945Z"
+    }
+}
