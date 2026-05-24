@@ -49,7 +49,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     status: int = 0
     metadata: dict[str, Any] = Field(default_factory=dict)
-    purge_at: datetime | None = Field(default_factory=lambda: datetime.now() + timedelta(days=30))
+    purge_at: datetime | None = Field(default_factory=lambda: datetime.now(timezone.utc) + timedelta(days=30))
 
     @property
     def storage(self) -> ResourceStorageProtocol | None:
