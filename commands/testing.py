@@ -36,6 +36,7 @@ def _load_dotenv(path: Path) -> dict[str, str]:
     "warnings": "Whether to print warnings in the test report",
     "fail_fast": "Fails at first failing test when enabled",
     "debug": "Whether to output stdout regardless of test outcomes",
+    "snapshots": "Record snapshots and run only tests marked with @pytest.mark.snapshots",
 })
 def library(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, debug: bool = False,
             snapshots: bool = False) -> None:
@@ -49,6 +50,7 @@ def library(ctx, test_file=None, test_method=None, warnings=False, fail_fast=Fal
     warnings_flag = "--disable-warnings" if not warnings else ""
     fail_fast_flag = "" if not fail_fast else "-x"
     debug_flag = "" if not debug else "-s"
+    snapshots_flag = "-m snapshots" if snapshots else ""
 
     # Assert that inputs make sense
     assert not test_method or test_file, "Can't specify a test method without specifying the test file"
@@ -65,7 +67,8 @@ def library(ctx, test_file=None, test_method=None, warnings=False, fail_fast=Fal
     # Run pytest command for generic library functionality
     with ctx.cd(Path("tests")):
         ctx.run(
-            f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag} {debug_flag} {disable_django}",
+            f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag} {debug_flag} {snapshots_flag} "
+            f"{disable_django}",
             env=test_env, echo=True, pty=True
         )
 
@@ -76,8 +79,10 @@ def library(ctx, test_file=None, test_method=None, warnings=False, fail_fast=Fal
     "warnings": "Whether to print warnings in the test report",
     "fail_fast": "Fails at first failing test when enabled",
     "debug": "Whether to output stdout regardless of test outcomes",
+    "snapshots": "Record snapshots and run only tests marked with @pytest.mark.snapshots",
 })
-def django(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, debug: bool = False) -> None:
+def django(ctx, test_file=None, test_method=None, warnings=False, fail_fast=False, debug: bool = False,
+           snapshots: bool = False) -> None:
     """
     Runs the tests for Django integration
     """
@@ -88,15 +93,23 @@ def django(ctx, test_file=None, test_method=None, warnings=False, fail_fast=Fals
     warnings_flag = "--disable-warnings" if not warnings else ""
     fail_fast_flag = "" if not fail_fast else "-x"
     debug_flag = "" if not debug else "-s"
+    snapshots_flag = "-m snapshots" if snapshots else ""
 
     # Assert that inputs make sense
     assert not test_method or test_file, "Can't specify a test method without specifying the test file"
 
+    test_env = dict(os.environ)
+    test_env.update(_load_dotenv(Path(".env")))
+    if snapshots:
+        test_env["DATAGROWTH_STORAGE_SNAPSHOTS"] = "1"
+        test_env["DATAGROWTH_STORAGE_ALLOW_LOAD"] = "0"
+        test_env["DATAGROWTH_STORAGE_ALLOW_SAVE"] = "1"
+
     # Run pytest command for Django functionality
     with ctx.cd(Path("tests", "django_project")):
         ctx.run(
-            f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag} {debug_flag}",
-            echo=True, pty=True
+            f"pytest {test_file} {test_method_flag} {warnings_flag} {fail_fast_flag} {debug_flag} {snapshots_flag}",
+            env=test_env, echo=True, pty=True
         )
 
 

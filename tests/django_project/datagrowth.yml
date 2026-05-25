@@ -1,6 +1,12 @@
 # Please note that tests/django_project/resources/apps.py will override any configurations here.
 # Individual tests may also call register_defaults to override settings.
 
+storage:
+  allow_save: false
+  directories:
+    data: "data/snapshots"
+    snapshots: "data/snapshots"
+
 mock_processor:
   include_odd: false
   include_even: false
