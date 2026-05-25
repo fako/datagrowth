@@ -43,7 +43,7 @@ class InputsValidator(BaseModel):
     def from_inputs(cls, *args: Any, **kwargs: Any) -> Self:
         values = {name: args[index] for index, name in enumerate(cls.POSITIONAL_NAMES) if index < len(args)}
         values.update(kwargs)
-        values["args"] = tuple(args)
+        values["args"] = tuple(args[:len(cls.POSITIONAL_NAMES)])
         values["kwargs"] = dict(kwargs)
         return cls.model_validate(values, context={"from_inputs": True})
 

@@ -13,6 +13,7 @@ includes:
   - "resources/http/extractors/*"
   - "resources/http/signature.py"
   - "resources/storage/*"
+  - "resources/session/*"
   - "resources/protocols.py"
   - "vendors/apache/tika/*"
   - "vendors/openai/*"
@@ -24,7 +25,7 @@ renames:
 
 version:
   file: version.py
-  bundle_version: "1.0.0"
+  bundle_version: "1.0.1"
 
 requirements:
   copy_from: requirements/dependencies.txt

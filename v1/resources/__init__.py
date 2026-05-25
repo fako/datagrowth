@@ -11,6 +11,7 @@ from .http.extractors.requests import RequestsExtractor
 from .http.signature import HttpAuth, HttpMethod, HttpSignature
 from .prompt.base import PromptErrorCodes, PromptInputsValidator, PromptResource
 from .storage.file_system import FileSystemStorage
+from .session.pydantic import SessionResource
 
 
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "PromptInputsValidator",
     "PromptResource",
     "FileSystemStorage",
+    "SessionResource",
 ]

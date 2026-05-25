@@ -7,6 +7,7 @@ import base64
 from pathlib import Path
 from pydantic import BaseModel, Field, PrivateAttr, UUID4, field_serializer, field_validator, model_validator
 
+from datagrowth.exceptions import DGExtractionDisabled
 from datagrowth.configuration import ConfigurationType
 from datagrowth.registry import DATAGROWTH_REGISTRY, Tag
 from datagrowth.signatures import DataBody, DataMode, DataPart, Signature, InputsValidator
@@ -48,7 +49,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     status: int = 0
     metadata: dict[str, Any] = Field(default_factory=dict)
-    purge_at: datetime | None = Field(default_factory=lambda: datetime.now() + timedelta(days=30))
+    purge_at: datetime | None = Field(default_factory=lambda: datetime.now(timezone.utc) + timedelta(days=30))
 
     @property
     def storage(self) -> ResourceStorageProtocol | None:
@@ -97,14 +98,17 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
                         subclass_resource = self.__class__.model_validate(loaded_data)
                         return cast(Self, subclass_resource)
 
+        # Save extraction progress on the Resource
+        self.signature = signature
+
         # Validate that extraction is actually allowed/possible
         if self.extractor is None:
-            raise NotImplementedError(
-                f"{self.__class__.__name__} does not specify an extractor or implement the extract method."
+            raise DGExtractionDisabled(
+                f"{self.__class__.__name__} does not specify an extractor or implement the extract method.",
+                resource=self
             )
 
         # Attempt extracting data from the remote as prescribed by prepare_signature method
-        self.signature = signature
         self.open_signature(signature)
         raw_extracted = self.extractor.extract(signature)
         extracted = cast("Resource[ResourceSignatureType]", raw_extracted)
@@ -124,7 +128,7 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
         self.metadata = dict(other.metadata)
 
     def close(self) -> Self:
-        if self.storage is not None and self.storage.config.allow_save:
+        if self.storage is not None and self.storage.config.allow_save and self.signature is not None:
             self.storage.save(self)
             if self.storage.config.snapshots:
                 self.close_snapshot(self.storage)

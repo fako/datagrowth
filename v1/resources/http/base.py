@@ -45,7 +45,7 @@ class HttpResource(Resource[HttpSignature]):
         """
         return dict(self.HEADERS)
 
-    def parameters(self):
+    def parameters(self) -> dict[str, str]:
         """
         Returns the dictionary that should be added as HTTP query parameters for the request the resource will make.
         Add f-string syntax to the parameter keys or values to make them dynamic.
@@ -194,8 +194,11 @@ class HttpResource(Resource[HttpSignature]):
 
     def prepare_inputs(self, inputs: InputsValidator) -> HttpSignature:
         method = HttpMethod(inputs.get_argument("method") or self.config.method or self.METHOD)
-
-        url_arguments = inputs.args[1:] if len(inputs.args) > 1 else []
+        positional_names = self.INPUTS_VALIDATOR.POSITIONAL_NAMES
+        if positional_names and positional_names[0] == "method":
+            url_arguments = inputs.args[1:]
+        else:
+            url_arguments = inputs.args[len(positional_names):]
         url, data_arguments = self._create_url(*url_arguments, **inputs.kwargs)
         auth = HttpAuth(headers=self.auth_headers(), parameters=self.auth_parameters())
         return HttpSignature(
@@ -241,12 +244,12 @@ class HttpResource(Resource[HttpSignature]):
         By default it raises the ``DGHttpError40X`` and ``DGHttpError50X`` exceptions for statuses.
         """
         class_name = self.__class__.__name__
-        body = self.result.body if self.result and self.result.body is not None else ""
+        errors = self.result.errors if self.result and self.result.errors is not None else ""
         if self.status >= 500:
-            message = f"{class_name} > {self.status} \n\n {body}"
+            message = f"{class_name} > {self.status} \n\n {errors}"
             raise DGHttpError50X(message, resource=self)
         elif self.status >= 400:
-            message = f"{class_name} > {self.status} \n\n {body}"
+            message = f"{class_name} > {self.status} \n\n {errors}"
             raise DGHttpError40X(message, resource=self)
         else:
             return None
