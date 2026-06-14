@@ -318,3 +318,13 @@ class MicroServiceResource(HttpResource):
         micro_service_kwargs.update(**inputs.kwargs)
         micro_service_inputs = self.INPUTS_VALIDATOR.from_inputs(*inputs.args, **micro_service_kwargs)
         return super().prepare_inputs(micro_service_inputs)
+
+
+__all__ = [
+    "HttpInputsValidator",
+    "HttpResource",
+    "URLInputsValidator",
+    "URLResource",
+    "MicroServiceInputsValidator",
+    "MicroServiceResource",
+]

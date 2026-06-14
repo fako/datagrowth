@@ -273,3 +273,9 @@ class Resource(BaseModel, Generic[ResourceSignatureType]):
 
     def __hash__(self) -> int:
         return hash(self._equality_key())
+
+
+__all__ = [
+    "Result",
+    "Resource",
+]

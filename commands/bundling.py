@@ -147,6 +147,8 @@ def clean_bundle(bundle_root: Path) -> None:
             continue
         if path.name == "__init__.py":
             continue
+        if path.name == "pydantic.py":  # transition packages and real module renames to base.py
+            continue
         if path.suffix.lower() == ".md":
             continue
         if path.name == MANIFEST_NAME:

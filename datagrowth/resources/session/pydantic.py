@@ -366,3 +366,13 @@ class SessionResource(Resource[MainResourceSignatureType], Generic[MainResourceT
         if data is None:
             return ""
         return str(data)
+
+
+__all__ = [
+    "MainResourceSignatureType",
+    "MainResourceType",
+    "Session",
+    "ResourceStep",
+    "ResourceStepCompleted",
+    "SessionResource",
+]
