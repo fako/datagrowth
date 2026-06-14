@@ -13,7 +13,6 @@ includes:
   - "resources/http/extractors/*"
   - "resources/http/signature.py"
   - "resources/storage/*"
-  - "resources/session/*"
   - "resources/protocols.py"
   - "vendors/apache/tika/*"
   - "vendors/openai/*"
@@ -21,6 +20,7 @@ includes:
 renames:
   resources/http/pydantic.py: resources/http/base.py
   resources/prompt/pydantic.py: resources/prompt/base.py
+  resources/session/pydantic.py: resources/session/base.py
   resources/pydantic.py: resources/base.py
 
 version:
