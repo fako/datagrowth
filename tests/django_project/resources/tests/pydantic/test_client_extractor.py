@@ -18,6 +18,8 @@ from datagrowth.django.resources.extractors import DjangoClientExtractor
 
 
 class AdminLoginInputsValidator(InputsValidator):
+    SENSITIVE_NAMES = ("password",)
+
     username: str
     password: str
 

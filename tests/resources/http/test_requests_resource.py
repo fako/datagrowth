@@ -32,6 +32,13 @@ class ExampleDataInputsValidator(HttpInputsValidator):
     file: str | None = None
 
 
+class LoginInputsValidator(HttpInputsValidator):
+    SENSITIVE_NAMES = ("password",)
+
+    username: str
+    password: str
+
+
 class HttpResourceMock(HttpResource):
 
     NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_mock")
@@ -78,6 +85,17 @@ class HttpResourceDataNoStorageMock(HttpResource):
 
     def data(self, **kwargs: Any) -> DataBody:
         return DataBody(content=f"{base64.b64encode(b'payload-bytes').decode('ascii')}")
+
+
+class HttpLoginResourceMock(HttpResource):
+    NAMESPACE: ClassVar[Tag] = Tag(category="namespace", value="resource_http_login_mock")
+    INPUTS_VALIDATOR: ClassVar[Type[InputsValidator]] = LoginInputsValidator
+    URI_TEMPLATE: ClassVar[str] = "https://example.com/login"
+    METHOD: ClassVar[HttpMethod] = HttpMethod.POST
+    MODE: ClassVar[DataMode] = DataMode.NONE
+
+    def data(self, **kwargs: Any) -> dict[str, Any]:
+        return {"username": kwargs.get("username"), "password": kwargs.get("password"), "next": "/admin/"}
 
 
 def make_response(status_code: int, body: bytes | str, headers: dict[str, str] | None = None) -> Response:
@@ -270,6 +288,39 @@ def test_resource_extract_post_sends_json_data(resource: HttpResourceMock, mocke
     body = prepared_request.body
     body_str = body if isinstance(body, str) else body.decode("utf-8")
     assert json.loads(body_str) == {"query": "django"}
+
+
+def test_resource_extract_sends_sensitive_form_data_without_persisting_it(mocked_session: Mock) -> None:
+    mocked_session.send.return_value = make_response(200, "{\"ok\": true}")
+    resource = HttpLoginResourceMock()
+    assert isinstance(resource.extractor, RequestsExtractor)
+    resource.extractor.set_session(mocked_session)
+    resource.extractor.config.update({
+        "backoff_delays": [],
+        "requests_proxies": None,
+        "requests_verify": True,
+        "allow_redirects": True,
+        "timeout": 30,
+        "user_agent": "DataGrowth (test)",
+    })
+
+    extracted = resource.extract(username="admin", password="adminpass")
+
+    prepared_request = mocked_session.send.call_args.args[0]
+    assert prepared_request.body == "username=admin&password=adminpass&next=%2Fadmin%2F"
+    assert extracted.signature is not None
+    dumped = extracted.model_dump_json()
+    assert "adminpass" not in dumped
+    assert extracted.signature.kwargs == {"username": "admin"}
+
+
+def test_sensitive_auth_data_does_not_change_signature_hash() -> None:
+    resource = HttpLoginResourceMock()
+
+    first = resource.prepare_extract(username="admin", password="first-password")
+    second = resource.prepare_extract(username="admin", password="second-password")
+
+    assert first.hash == second.hash
 
 
 def test_resource_extract_data_mode_sends_resolved_base64_payload(mocked_session: Mock) -> None:

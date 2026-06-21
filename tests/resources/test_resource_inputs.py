@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 from typing import Literal
 
-from datagrowth.signatures import InputsValidator
+from datagrowth.signatures import InputsSecurityLevel, InputsValidator
 
 
 class ExampleInputsValidator(InputsValidator):
@@ -11,6 +11,13 @@ class ExampleInputsValidator(InputsValidator):
     method: Literal["get", "post"] = "get"
     resource_id: int
     page: int = 1
+
+
+class SecureInputsValidator(InputsValidator):
+    SENSITIVE_NAMES = ("password",)
+
+    username: str
+    password: str
 
 
 def test_inputs_validator_from_inputs_prefers_kwargs_over_args() -> None:
@@ -48,3 +55,50 @@ def test_inputs_validator_from_inputs_uses_validated_values_for_args_and_kwargs(
 
     assert validator.args == ("post", 8)
     assert validator.kwargs == {"page": 4}
+
+
+def test_inputs_validator_dump_is_secure_by_default() -> None:
+    validator = SecureInputsValidator.from_inputs(username="admin", password="adminpass")
+
+    assert validator.model_dump() == {
+        "args": (),
+        "kwargs": {"username": "admin"},
+        "username": "admin",
+    }
+    assert "adminpass" not in validator.model_dump_json()
+
+
+def test_inputs_validator_can_dump_only_sensitive_inputs() -> None:
+    validator = SecureInputsValidator.from_inputs(username="admin", password="adminpass")
+
+    assert validator.model_dump(context={"security_level": InputsSecurityLevel.SENSITIVE}) == {
+        "args": (),
+        "kwargs": {"password": "adminpass"},
+        "password": "adminpass",
+    }
+
+
+def test_inputs_validator_can_dump_insecure_inputs() -> None:
+    validator = SecureInputsValidator.from_inputs(username="admin", password="adminpass")
+
+    assert validator.model_dump(context={"security_level": InputsSecurityLevel.INSECURE}) == {
+        "args": (),
+        "kwargs": {"username": "admin", "password": "adminpass"},
+        "username": "admin",
+        "password": "adminpass",
+    }
+
+
+def test_inputs_validator_rejects_unknown_sensitive_names() -> None:
+    with pytest.raises(TypeError, match="unknown input fields: token"):
+        class UnknownSensitiveInputsValidator(InputsValidator):
+            SENSITIVE_NAMES = ("token",)
+
+
+def test_inputs_validator_rejects_sensitive_positional_names() -> None:
+    with pytest.raises(TypeError, match="Sensitive input fields cannot be positional: password"):
+        class PositionalSensitiveInputsValidator(InputsValidator):
+            POSITIONAL_NAMES = ("password",)
+            SENSITIVE_NAMES = ("password",)
+
+            password: str

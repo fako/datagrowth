@@ -16,6 +16,8 @@ from datagrowth.resources.session.pydantic import SessionResource, Session, Reso
 
 
 class AdminLoginInputsValidator(InputsValidator):
+    SENSITIVE_NAMES = ("password",)
+
     username: str
     password: str
 

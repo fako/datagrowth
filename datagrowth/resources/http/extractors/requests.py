@@ -72,8 +72,12 @@ class RequestsExtractor:
             "url": request_url,
             "headers": dict(headers),
         }
-        if signature.method.lower() != "get" and signature.mode != DataMode.NONE:
-            if signature.mode == DataMode.JSON:
+        if signature.method.lower() != "get":
+            if signature.mode == DataMode.NONE:
+                data = signature.get_data()
+                if data:
+                    request_kwargs["data"] = data
+            elif signature.mode == DataMode.JSON:
                 request_kwargs["data"] = signature.get_data()
                 request_kwargs["headers"]["Content-Type"] = "application/json; charset=utf-8"
             elif signature.mode == DataMode.DATA:

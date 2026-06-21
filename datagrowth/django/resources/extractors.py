@@ -91,8 +91,9 @@ class DjangoClientExtractor:
 
         if signature.method.lower() != "get":
             if signature.mode == DataMode.NONE:
-                if isinstance(signature.data, dict) and signature.data:
-                    request_kwargs["data"] = signature.data
+                data = signature.get_data()
+                if data:
+                    request_kwargs["data"] = data
             elif signature.mode == DataMode.JSON:
                 request_kwargs["data"] = signature.get_data()
                 request_kwargs["content_type"] = "application/json; charset=utf-8"

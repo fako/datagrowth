@@ -8,7 +8,7 @@ from pydantic import Field, HttpUrl
 
 from datagrowth.exceptions import DGHttpError50X, DGHttpError40X
 from datagrowth.registry import Tag
-from datagrowth.signatures import DataBody, DataMode, DataPart, InputsValidator
+from datagrowth.signatures import DataBody, DataMode, DataPart, InputsSecurityLevel, InputsValidator
 from datagrowth.resources.http.signature import HttpAuth, HttpSignature, HttpMethod
 from datagrowth.resources.pydantic import Resource
 from datagrowth.utils import is_json_mimetype
@@ -193,24 +193,36 @@ class HttpResource(Resource[HttpSignature]):
     #####################
 
     def prepare_inputs(self, inputs: InputsValidator) -> HttpSignature:
+        secure_inputs = inputs.model_dump(mode="python")
+        sensitive_inputs = inputs.model_dump(
+            mode="python",
+            context={"security_level": InputsSecurityLevel.SENSITIVE},
+        )
+        secure_args = tuple(secure_inputs["args"])
+        secure_kwargs = dict(secure_inputs["kwargs"])
+        sensitive_kwargs = dict(sensitive_inputs["kwargs"])
         method = HttpMethod(inputs.get_argument("method") or self.config.method or self.METHOD)
         positional_names = self.INPUTS_VALIDATOR.POSITIONAL_NAMES
         if positional_names and positional_names[0] == "method":
-            url_arguments = inputs.args[1:]
+            url_arguments = secure_args[1:]
         else:
-            url_arguments = inputs.args[len(positional_names):]
-        url, data_arguments = self._create_url(*url_arguments, **inputs.kwargs)
-        auth = HttpAuth(headers=self.auth_headers(), parameters=self.auth_parameters())
+            url_arguments = secure_args[len(positional_names):]
+        url, data_arguments = self._create_url(*url_arguments, **secure_kwargs)
+        auth = HttpAuth(
+            headers=self.auth_headers(),
+            parameters=self.auth_parameters(),
+            data=sensitive_kwargs,
+        )
         return HttpSignature(
             uri=self.uri_from_url(url),
-            args=inputs.args,
-            kwargs=inputs.kwargs,
+            args=secure_args,
+            kwargs=secure_kwargs,
             data=self.data(**data_arguments) if method != HttpMethod.GET or self.config.allow_get_body else {},
             type=self.type.value,
             method=method,
             url=url,
-            headers=self.headers(*inputs.args, **inputs.kwargs),
-            auth=auth if auth.headers or auth.parameters else None,
+            headers=self.headers(*secure_args, **secure_kwargs),
+            auth=auth if auth.headers or auth.parameters or auth.data else None,
             mode=self.MODE,
         )
 

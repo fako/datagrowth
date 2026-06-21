@@ -3,8 +3,8 @@ from enum import Enum
 import hashlib
 import json
 import re
-from pydantic import (BaseModel, ConfigDict, Field, PrivateAttr, ValidationInfo, field_serializer, field_validator,
-                      model_validator)
+from pydantic import (BaseModel, ConfigDict, Field, PrivateAttr, SerializationInfo, SerializerFunctionWrapHandler,
+                      ValidationInfo, field_serializer, field_validator, model_serializer, model_validator)
 
 from datagrowth.utils.classes import serialize_class_reference, deserialize_class_reference
 
@@ -20,9 +20,16 @@ class DataMode(str, Enum):
     MULTIPART = "multipart"
 
 
+class InputsSecurityLevel(str, Enum):
+    SECURE = "secure"
+    SENSITIVE = "sensitive"
+    INSECURE = "insecure"
+
+
 class InputsValidator(BaseModel):
 
     POSITIONAL_NAMES: ClassVar[tuple] = tuple()
+    SENSITIVE_NAMES: ClassVar[tuple[str, ...]] = tuple()
 
     args: tuple[Any, ...] = Field(default_factory=tuple)
     kwargs: dict[str, Any] = Field(default_factory=dict)
@@ -53,12 +60,66 @@ class InputsValidator(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
+        unknown_names = set(cls.SENSITIVE_NAMES) - set(cls.model_fields)
+        if unknown_names:
+            names = ", ".join(sorted(unknown_names))
+            raise TypeError(f"InputsValidator.SENSITIVE_NAMES contains unknown input fields: {names}.")
+        positional_names = set(cls.SENSITIVE_NAMES) & set(cls.POSITIONAL_NAMES)
+        if positional_names:
+            names = ", ".join(sorted(positional_names))
+            raise TypeError(f"Sensitive input fields cannot be positional: {names}.")
+
+    @model_serializer(mode="wrap")
+    def serialize_inputs(self, handler: SerializerFunctionWrapHandler, info: SerializationInfo) -> dict[str, Any]:
+        data = handler(self)
+        context = info.context if isinstance(info.context, dict) else {}
+        raw_security_level = context.get("security_level", InputsSecurityLevel.SECURE)
+        try:
+            security_level = InputsSecurityLevel(raw_security_level)
+        except ValueError as exc:
+            raise ValueError(f"Unknown InputsValidator security level: {raw_security_level!r}.") from exc
+
+        # Return model as-is when security level is insecure.
+        if security_level == InputsSecurityLevel.INSECURE:
+            return data
+
+        # Filter out all non-sensitive values when dumping with security level sensitive
+        # and sensitive fields when dumping with level secure..
+        sensitive_names = set(self.SENSITIVE_NAMES)
+        include_sensitive = security_level == InputsSecurityLevel.SENSITIVE
+        # Main model keys get popped except args, kwargs and sensitive keys.
+        for name in set(self.__class__.model_fields) - {"args", "kwargs"}:
+            if (name in sensitive_names) != include_sensitive:
+                data.pop(name, None)
+        # Likewise kwargs keys get filtered to only sensitive data when level is sensitive,
+        # while sensitive keys get filtered when level is secure.
+        raw_kwargs = data.get("kwargs")
+        if isinstance(raw_kwargs, dict):
+            data["kwargs"] = {
+                name: value
+                for name, value in raw_kwargs.items()
+                if (name in sensitive_names) == include_sensitive
+            }
+        # We empty args when dumping at sensitive security level, because positional sensitive data is not supported.
+        if include_sensitive and "args" in data:
+            raw_args = data["args"]
+            data["args"] = raw_args[:0]
+
+        return data
+
     @model_validator(mode="after")
     def update_inputs(self, info: ValidationInfo) -> "InputsValidator":
         if not isinstance(info.context, dict) or not info.context.get("from_inputs", False):
             return self
 
-        fields = self.model_dump(mode="python", exclude={"args", "kwargs"})
+        fields = self.model_dump(
+            mode="python",
+            exclude={"args", "kwargs"},
+            context={"security_level": InputsSecurityLevel.INSECURE},
+        )
         self.args = tuple(fields[name] for name in self.POSITIONAL_NAMES if name in fields)
         self.kwargs = {name: value for name, value in fields.items() if name in self.kwargs}
         return self
