@@ -238,9 +238,12 @@ class Registry:
         namespace = getattr(resource, "NAMESPACE", legacy_namespace)
         if namespace is None:
             raise ValueError("Can't register Resources that do not specify either NAMESPACE or CONFIG_NAMESPACE")
-        elif isinstance(namespace, str):
+        if isinstance(namespace, (str, Tag)):
             namespace = [namespace]
-        return namespace
+        return [
+            item.value if isinstance(item, Tag) else item
+            for item in namespace
+        ]
 
     def register_resource(self, tag: str | Tag, resource: type[ResourceProtocol],
                           config: ConfigurationType | dict | None = None) -> Tag:

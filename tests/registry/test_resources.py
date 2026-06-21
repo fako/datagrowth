@@ -2,6 +2,7 @@ import pytest
 
 from datagrowth.configuration import ConfigurationType, create_config
 from datagrowth.registry import Registry, Tag
+from datagrowth.resources.pydantic import Resource
 
 from registry.mock_resource import MockResource
 
@@ -34,6 +35,12 @@ def test_register_resource_with_dict_config(registry: Registry) -> None:
     stored = registry.configurations[tag]
     assert isinstance(stored, ConfigurationType)
     assert stored.batch_size == 99
+
+
+def test_register_resource_normalizes_tag_namespace(registry: Registry) -> None:
+    tag = registry.register_resource("resource:tag-test", Resource, {"batch_size": 99})
+
+    assert registry.configurations[tag]._namespace == ["resource"]
 
 
 def test_register_resource_with_configuration_type(registry: Registry) -> None:
