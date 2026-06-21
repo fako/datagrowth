@@ -233,6 +233,8 @@ class TestExtractSession:
         with pytest.raises(DGSessionInputRequired, match="Missing or invalid inputs") as exc_info:
             admin_session.extract_session(key="some_value")  # wrong input name
 
+        assert isinstance(exc_info.value.__cause__, ValidationError)
+
         # Verify the exception contains the resource
         assert exc_info.value.resource is not None
         step_resource = exc_info.value.resource

@@ -287,8 +287,11 @@ class SessionResource(Resource[MainResourceSignatureType], Generic[MainResourceT
             try:
                 step_resource = step_resource.extract(*args, **kwargs)
                 step_resource.close()
-            except ValidationError:
-                raise DGSessionInputRequired(f"Missing or invalid inputs for step: {step.name}", resource=step_resource)
+            except ValidationError as error:
+                raise DGSessionInputRequired(
+                    f"Missing or invalid inputs for step: {step.name}",
+                    resource=step_resource,
+                ) from error
             except DGResourceException:
                 self.status = (ix + 1) * -1
                 self._set_step_completed(step, step_resource, is_success=False)
