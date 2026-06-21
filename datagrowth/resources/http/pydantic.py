@@ -11,7 +11,7 @@ from datagrowth.registry import Tag
 from datagrowth.signatures import DataBody, DataMode, DataPart, InputsSecurityLevel, InputsValidator
 from datagrowth.resources.http.signature import HttpAuth, HttpSignature, HttpMethod
 from datagrowth.resources.pydantic import Resource
-from datagrowth.utils import is_json_mimetype
+from datagrowth.utils.data import is_json_mimetype
 
 
 class HttpInputsValidator(InputsValidator):
