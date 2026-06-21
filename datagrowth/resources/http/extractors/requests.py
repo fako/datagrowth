@@ -87,7 +87,7 @@ class RequestsExtractor:
                 form_data: dict[str, str] = {}
                 form_files: dict[str, tuple[str, bytes, str]] = {}
                 for part in parts:
-                    if "content_type" in part:
+                    if part.get("content_type") is not None:
                         form_files[part["name"]] = (
                             part.get("filename", part["name"]), part["content"], part["content_type"]
                         )

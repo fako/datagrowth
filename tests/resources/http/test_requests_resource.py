@@ -13,7 +13,7 @@ from pydantic import ValidationError
 
 from datagrowth.registry import Tag
 from datagrowth.exceptions import DGHttpError40X, DGHttpError50X
-from datagrowth.signatures import DataBody, DataMode, InputsValidator
+from datagrowth.signatures import DataBody, DataMode, DataPart, InputsValidator
 from datagrowth.resources.pydantic import Result
 from datagrowth.resources.http.signature import HttpSignature, HttpMethod, HttpAuth
 from datagrowth.resources.http.pydantic import HttpResource, HttpInputsValidator
@@ -288,6 +288,28 @@ def test_resource_extract_post_sends_json_data(resource: HttpResourceMock, mocke
     body = prepared_request.body
     body_str = body if isinstance(body, str) else body.decode("utf-8")
     assert json.loads(body_str) == {"query": "django"}
+
+
+def test_requests_extractor_treats_multipart_part_without_content_type_as_form_data(resource: HttpResourceMock) -> None:
+    assert isinstance(resource.extractor, RequestsExtractor)
+    signature = HttpSignature(
+        uri="https://example.com/upload",
+        method=HttpMethod.POST,
+        url="https://example.com/upload",
+        mode=DataMode.MULTIPART,
+        data=[DataPart(name="description", content="plain text")],
+    )
+    signature.set_data_parts([{
+        "name": "description",
+        "content": "plain text",
+        "content_type": None,
+        "filename": None,
+    }])
+
+    request = resource.extractor._to_request(signature)
+
+    assert request.data == {"description": "plain text"}
+    assert not request.files
 
 
 def test_resource_extract_sends_sensitive_form_data_without_persisting_it(mocked_session: Mock) -> None:
