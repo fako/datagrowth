@@ -5,7 +5,7 @@
 -r dependencies.txt
 
 # Django requirements
-Django==5.2.14
+Django==5.2.15
 djangorestframework==3.15.2
 pytest-django==4.7.0
 
