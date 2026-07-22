@@ -11,7 +11,7 @@ tox==4.6.4
 # Releases
 twine==6.1.0
 build==1.4.3
-setuptools==78.1.1
+setuptools==83.0.0
 wheel==0.46.2
 
 # Development tooling
